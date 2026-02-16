@@ -1,0 +1,29 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/ADLaMDisplay.ttf",
+      "sha1": "58d2e6ceb2fffb6468891592754d3db422587985"
+    },
+    {
+      "path": "assets/fonts/AnekKannada.ttf",
+      "sha1": "4e58bc49f3faeeae270d773250d9a1ad7fe9e4e6"
+    },
+    {
+      "path": "assets/fonts/Inter.ttf",
+      "sha1": "6177ac91c6fb7df9b09beda7802ea15699a88703"
+    },
+    {
+      "path": "assets/fonts/Khula.ttf",
+      "sha1": "a27637da252cf1ca71f0d21a71c414854bdc0127"
+    },
+    {
+      "path": "assets/fonts/MavenPro.ttf",
+      "sha1": "d185a8406f7aef3d942bb25c0ac4592013d2d276"
+    },
+    {
+      "path": "assets/fonts/MedievalSharp.ttf",
+      "sha1": "2aa66be87b648c3e4ca7983c440e1f009b092ee6"
+    }
+  ]
+}

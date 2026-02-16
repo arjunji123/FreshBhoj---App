@@ -11,6 +11,12 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		EA1AB8391D5A4D9796B96ECA /* ADLaMDisplay.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FA6AC78577374BFA9DFF736C /* ADLaMDisplay.ttf */; };
+		2526499CB1E24B1886EC2F8A /* AnekKannada.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 436DC05797ED4D559B24272C /* AnekKannada.ttf */; };
+		08FC13E5B79345C9A71FDF73 /* Inter.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 216EA231F23644A1999A3ADA /* Inter.ttf */; };
+		73A49A6C2A074ADF88A43EC1 /* Khula.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 6CF7C03C2B7B4015AA613614 /* Khula.ttf */; };
+		8215D3AFDB434F76A6BEDF90 /* MavenPro.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 17F0DD891F194DA28D3A83C2 /* MavenPro.ttf */; };
+		DE98E82466784D68BC2BE72E /* MedievalSharp.ttf in Resources */ = {isa = PBXBuildFile; fileRef = ADBF3FD326B1434A8600B642 /* MedievalSharp.ttf */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +30,12 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = FreshBhoj/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = FreshBhoj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		FA6AC78577374BFA9DFF736C /* ADLaMDisplay.ttf */ = {isa = PBXFileReference; name = "ADLaMDisplay.ttf"; path = "../assets/fonts/ADLaMDisplay.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		436DC05797ED4D559B24272C /* AnekKannada.ttf */ = {isa = PBXFileReference; name = "AnekKannada.ttf"; path = "../assets/fonts/AnekKannada.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		216EA231F23644A1999A3ADA /* Inter.ttf */ = {isa = PBXFileReference; name = "Inter.ttf"; path = "../assets/fonts/Inter.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		6CF7C03C2B7B4015AA613614 /* Khula.ttf */ = {isa = PBXFileReference; name = "Khula.ttf"; path = "../assets/fonts/Khula.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		17F0DD891F194DA28D3A83C2 /* MavenPro.ttf */ = {isa = PBXFileReference; name = "MavenPro.ttf"; path = "../assets/fonts/MavenPro.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		ADBF3FD326B1434A8600B642 /* MedievalSharp.ttf */ = {isa = PBXFileReference; name = "MedievalSharp.ttf"; path = "../assets/fonts/MedievalSharp.ttf"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +86,7 @@
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				BBD78D7AC51CEA395F1C20DB /* Pods */,
+				41C67998D0F94B57819F6423 /* Resources */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -96,6 +109,20 @@
 			);
 			path = Pods;
 			sourceTree = "<group>";
+		};
+		41C67998D0F94B57819F6423 /* Resources */ = {
+			isa = "PBXGroup";
+			children = (
+				FA6AC78577374BFA9DFF736C /* ADLaMDisplay.ttf */,
+				436DC05797ED4D559B24272C /* AnekKannada.ttf */,
+				216EA231F23644A1999A3ADA /* Inter.ttf */,
+				6CF7C03C2B7B4015AA613614 /* Khula.ttf */,
+				17F0DD891F194DA28D3A83C2 /* MavenPro.ttf */,
+				ADBF3FD326B1434A8600B642 /* MedievalSharp.ttf */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+			path = "";
 		};
 /* End PBXGroup section */
 
@@ -159,6 +186,12 @@
 			files = (
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
+				EA1AB8391D5A4D9796B96ECA /* ADLaMDisplay.ttf in Resources */,
+				2526499CB1E24B1886EC2F8A /* AnekKannada.ttf in Resources */,
+				08FC13E5B79345C9A71FDF73 /* Inter.ttf in Resources */,
+				73A49A6C2A074ADF88A43EC1 /* Khula.ttf in Resources */,
+				8215D3AFDB434F76A6BEDF90 /* MavenPro.ttf in Resources */,
+				DE98E82466784D68BC2BE72E /* MedievalSharp.ttf in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

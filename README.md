@@ -1,5 +1,8 @@
+# FreshBhoj
+
 ## App Structure
 
+```
 src/
 ├── app/                  # App-wide configuration (routes, providers)
 │   ├── App.tsx           # Entry point
@@ -25,10 +28,29 @@ src/
 │   └── storage.ts        # Wrappers for MMKV/Keychain
 ├── utils/                # Helper functions (date formatting, validation)
 └── assets/               # Images, fonts, SVGs
+```
 
+## Getting Started
+
+### Prerequisites
+- Node.js and npm installed
+- Android SDK (for Android development)
+- Xcode (for iOS development)
+
+### Installation
+
+```bash
+npm install
+```
 
 ## Run the App
 
-```cpp
-npx react-native run-android # for android
+### Android
+```bash
+npx react-native run-android
+```
+
+### iOS
+```bash
+npx react-native run-ios
 ```

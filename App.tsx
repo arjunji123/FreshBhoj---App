@@ -1,12 +1,6 @@
-import { View, Text } from 'react-native'
-import React from 'react'
-
+import MainApp from './src/app/MainApp'
 const App = () => {
-  return (
-    <View>
-      <Text>App</Text>
-    </View>
-  )
+  return <MainApp/>;
 }
 
 export default App

@@ -43,6 +43,19 @@ src/
 npm install
 ```
 
+### Connect Your Device or Emulator
+```bash
+adb devices # shows all connected devices
+```
+```bash
+adb pair IP:PORT # connect own device
+```
+
+```bash
+adb reverse tcp:8081 tcp:8081 # reverse port for metro server fast refresh | for personal device only
+```
+
+
 ## Run the App
 
 ### Android

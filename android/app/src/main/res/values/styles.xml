@@ -4,5 +4,5 @@
         <item name="android:windowSplashScreenBackground">@color/splash_red</item>
     </style>
 
-     <color name="splash_red">#CF3A3A</color>
+     <color name="splash_red">#FF6B6B</color>
 </resources>

@@ -57,10 +57,22 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>ADLaMDisplay.ttf</string>
-		<string>AnekKannada.ttf</string>
+		<string>anekkannada_bold.ttf</string>
+		<string>anekkannada_medium.ttf</string>
+		<string>anekkannada_regular.ttf</string>
+		<string>anekkannada_semibold.ttf</string>
 		<string>Inter.ttf</string>
-		<string>Khula.ttf</string>
-		<string>MavenPro.ttf</string>
+		<string>khula_bold.ttf</string>
+		<string>khula_extrabold.ttf</string>
+		<string>khula_light.ttf</string>
+		<string>khula_regular.ttf</string>
+		<string>khula_semibold.ttf</string>
+		<string>mavenpro_black.ttf</string>
+		<string>mavenpro_bold.ttf</string>
+		<string>mavenpro_extrabold.ttf</string>
+		<string>mavenpro_medium.ttf</string>
+		<string>mavenpro_regular.ttf</string>
+		<string>mavenpro_semibold.ttf</string>
 		<string>MedievalSharp.ttf</string>
 	</array>
 </dict>

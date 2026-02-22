@@ -6,20 +6,68 @@
       "sha1": "58d2e6ceb2fffb6468891592754d3db422587985"
     },
     {
-      "path": "assets/fonts/AnekKannada.ttf",
+      "path": "assets/fonts/anekkannada_bold.ttf",
+      "sha1": "bb067bc1f537c7f1340e4b2ea361710dec41f07f"
+    },
+    {
+      "path": "assets/fonts/anekkannada_medium.ttf",
+      "sha1": "8d2959ea0f604f6f680db5f5675e7d54296a3a81"
+    },
+    {
+      "path": "assets/fonts/anekkannada_regular.ttf",
       "sha1": "4e58bc49f3faeeae270d773250d9a1ad7fe9e4e6"
+    },
+    {
+      "path": "assets/fonts/anekkannada_semibold.ttf",
+      "sha1": "c02265a50cd8082ffdf500e134adaf7381bd54a4"
     },
     {
       "path": "assets/fonts/Inter.ttf",
       "sha1": "6177ac91c6fb7df9b09beda7802ea15699a88703"
     },
     {
-      "path": "assets/fonts/Khula.ttf",
+      "path": "assets/fonts/khula_bold.ttf",
+      "sha1": "12f557f3a914b80613b50e9aaf84705a04f2f189"
+    },
+    {
+      "path": "assets/fonts/khula_extrabold.ttf",
+      "sha1": "af8e7cfc59ff646f958a39c721b93fa9409a73c9"
+    },
+    {
+      "path": "assets/fonts/khula_light.ttf",
+      "sha1": "cb8360a0eff785de29e43d31446293daaa20fef7"
+    },
+    {
+      "path": "assets/fonts/khula_regular.ttf",
       "sha1": "a27637da252cf1ca71f0d21a71c414854bdc0127"
     },
     {
-      "path": "assets/fonts/MavenPro.ttf",
+      "path": "assets/fonts/khula_semibold.ttf",
+      "sha1": "7aeb6a19530a022e9fe6f572650ba8ac322eeaa3"
+    },
+    {
+      "path": "assets/fonts/mavenpro_black.ttf",
+      "sha1": "0b8b7f30e5df74284b316d0586233f5762151f58"
+    },
+    {
+      "path": "assets/fonts/mavenpro_bold.ttf",
+      "sha1": "a56e93ddf9a20a00af91334a3982141a9587281a"
+    },
+    {
+      "path": "assets/fonts/mavenpro_extrabold.ttf",
+      "sha1": "d44d83df7b341ac5477981c61c026c8a37221030"
+    },
+    {
+      "path": "assets/fonts/mavenpro_medium.ttf",
+      "sha1": "91d1152325d79bfb6e45535b07effb999c654b56"
+    },
+    {
+      "path": "assets/fonts/mavenpro_regular.ttf",
       "sha1": "d185a8406f7aef3d942bb25c0ac4592013d2d276"
+    },
+    {
+      "path": "assets/fonts/mavenpro_semibold.ttf",
+      "sha1": "91c03afeddaa1065da011c2dd5f8a3280a385511"
     },
     {
       "path": "assets/fonts/MedievalSharp.ttf",

@@ -1,11 +1,28 @@
 export const fontFamilies = {
-    mavenPro: 'MavenPro', // Replace with your font
-    medievalSharp: 'MedievalSharp', // Replace with your font
-    anekKannada: 'AnekKannada', // Replace with your font
-    inter: 'Inter', // Replace with your font
-    khula: 'Khula', // Replace with your font
-    adlamDisplay: 'ADLaMDisplay', // Replace with your font
-    // Add custom fonts here e.g. 'MavenPro-Regular'
+    mavenPro: {
+        regular: 'mavenpro_regular',
+        medium: 'mavenpro_medium',
+        semibold: 'mavenpro_semibold',
+        bold: 'mavenpro_bold',
+        extrabold: 'mavenpro_extrabold',
+        black: 'mavenpro_black',
+    },
+    medievalSharp: 'MedievalSharp',
+    anekKannada: {
+        regular: 'anekkannada_regular',
+        medium: 'anekkannada_nedium',
+        semibold: 'anekkannada_semibold',
+        bold: 'anekkannada_bold',
+    },
+    inter: 'Inter',
+    khula: {
+        light: 'khula_light',
+        regular: 'khula_regular',
+        semibold: 'khula_semibold',
+        bold: 'khula_bold',
+        extrabold: 'khula_extrabold',
+    },
+    adlamDisplay: 'ADLaMDisplay',
 };
 
 export const fontWeights = {
@@ -13,9 +30,9 @@ export const fontWeights = {
     light: '300',
     regular: '400',
     medium: '500',
-    semiBold: '600',
+    semibold: '600',
     bold: '700',
-    extraBold: '800',
+    extrabold: '800',
     black: '900',
 } as const;
 
@@ -29,6 +46,13 @@ export const fontSizes = {
     display1: 24,
     display2: 32,
     display3: 40,
+    display4: 48,
+    display5: 56,
+    display6: 64,
+    display7: 72,
+    display8: 80,
+    display9: 88,
+    display10: 96,
 };
 
 export const lineHeights = {

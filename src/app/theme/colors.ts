@@ -20,6 +20,9 @@ export const palette = {
 
     // Grays
     gray1: '#777777',
+    gray2: '#DBDBDB',
+    gray3: '#C2C2C2',
+    gray4: '#656565',
 
     // Semantic
     success: '#4CAF50',

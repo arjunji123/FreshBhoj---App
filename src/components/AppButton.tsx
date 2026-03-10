@@ -56,8 +56,6 @@ const styles = StyleSheet.create({
     button: {
         backgroundColor: theme.colors.primary,
         borderRadius: theme.spacing.borderRadius.xl,
-        paddingVertical: theme.spacing.paddings.lg,
-        paddingHorizontal: theme.spacing.paddings.xl,
         justifyContent: 'center',
         alignItems: 'center',
         overflow: 'hidden',
@@ -66,8 +64,7 @@ const styles = StyleSheet.create({
     title: {
         color: theme.colors.background,
         fontSize: theme.typography.fontSizes.lg,
-        fontFamily: theme.typography.fontFamilies.mavenPro,
-        fontWeight: '600',
+        fontFamily: theme.typography.fontFamilies.mavenPro.semibold,
         zIndex: 1,
     },
     disabled: {

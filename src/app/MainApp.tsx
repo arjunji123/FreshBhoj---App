@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AppNavigator } from './navigation/AppNavigator';
 import SplashScreen from '@components/SplashScreen';
-
+import { KeyboardProvider } from "react-native-keyboard-controller";
+import { StatusBar } from 'react-native';
 const MainApp = () => {
   const [isShowSplash, setIsShowSplash] = useState(true);
 
@@ -18,7 +19,12 @@ const MainApp = () => {
     return <SplashScreen />;
   }
 
-  return <AppNavigator />;
+  return (
+    <KeyboardProvider>
+      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+      <AppNavigator />
+    </KeyboardProvider>
+  );
 };
 
 export default MainApp;

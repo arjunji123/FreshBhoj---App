@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import AppGradient from '@components/AppGradient';
 import { theme } from '@app/theme/index';
+import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 
 const { width, height } = Dimensions.get('window');
 
@@ -18,7 +19,7 @@ const LoginTopSection = () => {
                     style={styles.plateImage}
                     resizeMode="cover"
                 />
-                <Text style={styles.brandTitle}>FreshBhoj</Text>
+                <Text style={styles.brandTitle}>{AUTH_COPY.brandTitle}</Text>
             </View>
         </AppGradient>
     );
@@ -26,7 +27,7 @@ const LoginTopSection = () => {
 
 const styles = StyleSheet.create({
     topSection: {
-        height: height * 0.4,
+        height: height * AUTH_VALUES.loginTopSectionHeightRatio,
         width: '100%',
         position: 'relative',
         overflow: 'hidden',
@@ -37,16 +38,16 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
     },
     plateImage: {
-        width: width * 1.15,
-        height: width * 1.15,
-        marginTop: -100,
+        width: width * AUTH_VALUES.loginPlateImageWidthRatio,
+        height: width * AUTH_VALUES.loginPlateImageWidthRatio,
+        marginTop: AUTH_VALUES.loginPlateImageTopOffset,
         zIndex: 1,
     },
     brandTitle: {
         fontFamily: theme.typography.fontFamilies.medievalSharp,
         fontSize: theme.typography.fontSizes.display6,
         color: theme.colors.palette.white,
-        marginTop: -120,
+        marginTop: AUTH_VALUES.loginBrandTitleTopOffset,
         zIndex: 10,
     },
 });

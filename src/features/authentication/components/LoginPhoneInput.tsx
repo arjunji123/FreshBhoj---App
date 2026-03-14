@@ -1,11 +1,8 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet, Image } from 'react-native';
 import { theme } from '@app/theme/index';
-
-interface LoginPhoneInputProps {
-    value: string;
-    onChangeText: (text: string) => void;
-}
+import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
+import { LoginPhoneInputProps } from '../auth.types';
 
 const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }) => {
     return (
@@ -15,18 +12,18 @@ const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }
                     source={require('../../../../assets/images/indiaicon.png')}
                     style={styles.flagIcon}
                 />
-                <Text style={styles.countryCodeText}>+91</Text>
+                <Text style={styles.countryCodeText}>{AUTH_COPY.countryCode}</Text>
             </View>
             <View style={styles.inputDivider} />
             <TextInput
                 style={styles.textInput}
-                placeholder="Enter Phone Number"
+                placeholder={AUTH_COPY.phonePlaceholder}
                 placeholderTextColor={theme.colors.textGray1}
                 keyboardType="phone-pad"
                 value={value}
                 cursorColor={theme.colors.primary}
                 onChangeText={onChangeText}
-                maxLength={10}
+                maxLength={AUTH_VALUES.phoneMaxLength}
             />
         </View>
     );
@@ -56,7 +53,7 @@ const styles = StyleSheet.create({
     },
     countryCodeText: {
         fontSize: theme.typography.fontSizes.lg,
-        fontFamily: theme.typography.fontFamilies.mavenPro.semibold,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
         color: theme.colors.palette.black,
     },
     inputDivider: {
@@ -68,7 +65,7 @@ const styles = StyleSheet.create({
     textInput: {
         flex: 1,
         fontSize: theme.typography.fontSizes.lg,
-        fontFamily: theme.typography.fontFamilies.inter,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
         color: theme.colors.palette.black,
         paddingVertical: 0,
         includeFontPadding: false,

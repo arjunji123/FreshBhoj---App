@@ -2,23 +2,24 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import GradientText from '@components/GradientText';
 import { theme } from '@app/theme/index';
+import { AUTH_COPY } from '../auth.constants';
 
 const LoginTitle = () => {
     return (
         <>
             <View style={styles.titleContainer}>
                 <GradientText
-                    colors={[theme.colors.textGradient1, theme.colors.textGradient2]}
+                    colors={theme.colors.defaultColor}
                     direction="diagonal"
                     style={styles.titleText}
                 >
-                    A better way to experience food.
+                    {AUTH_COPY.loginTitle}
                 </GradientText>
             </View>
 
             <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>Log in or sign up</Text>
+                <Text style={styles.dividerText}>{AUTH_COPY.loginDivider}</Text>
                 <View style={styles.dividerLine} />
             </View>
         </>
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     },
     titleText: {
         fontSize: theme.typography.fontSizes.display2,
-        fontFamily: theme.typography.fontFamilies.adlamDisplay,
+        fontFamily: theme.typography.fontFamilies.aBeeZee.regular,
         textAlign: 'center',
         lineHeight: theme.typography.lineHeights.display1,
     },
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
     dividerText: {
         marginHorizontal: theme.spacing.paddings.sm,
         color: theme.colors.palette.gray4,
-        fontFamily: theme.typography.fontFamilies.khula.semibold,
+        fontFamily: theme.typography.fontFamilies.aBeeZee.regular,
         fontSize: theme.typography.fontSizes.md,
     },
 });

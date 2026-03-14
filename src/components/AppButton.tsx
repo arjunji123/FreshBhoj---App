@@ -3,6 +3,7 @@ import {
     TouchableOpacity,
     Text,
     StyleSheet,
+    View,
     ViewStyle,
     TextStyle,
     TouchableOpacityProps,
@@ -18,6 +19,7 @@ export interface AppButtonProps extends TouchableOpacityProps {
     textStyle?: StyleProp<TextStyle>;
     imageStyle?: StyleProp<ImageStyle>;
     showOverlay?: boolean;
+    rightElement?: React.ReactNode;
 }
 
 const AppButton: React.FC<AppButtonProps> = ({
@@ -26,6 +28,7 @@ const AppButton: React.FC<AppButtonProps> = ({
     textStyle,
     imageStyle,
     showOverlay = true,
+    rightElement,
     disabled,
     ...rest
 }) => {
@@ -47,7 +50,10 @@ const AppButton: React.FC<AppButtonProps> = ({
                     resizeMode="cover"
                 />
             )}
-            <Text style={[styles.title, textStyle]}>{title}</Text>
+            <View style={styles.contentRow}>
+                <Text style={[styles.title, textStyle]}>{title}</Text>
+                {rightElement ? <View style={styles.rightElement}>{rightElement}</View> : null}
+            </View>
         </TouchableOpacity>
     );
 };
@@ -64,8 +70,17 @@ const styles = StyleSheet.create({
     title: {
         color: theme.colors.background,
         fontSize: theme.typography.fontSizes.lg,
-        fontFamily: theme.typography.fontFamilies.mavenPro.semibold,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
         zIndex: 1,
+    },
+    contentRow: {
+        zIndex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    rightElement: {
+        marginLeft: theme.spacing.sm,
     },
     disabled: {
         opacity: 0.6,

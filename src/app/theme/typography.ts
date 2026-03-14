@@ -1,28 +1,25 @@
 export const fontFamilies = {
-    mavenPro: {
-        regular: 'mavenpro_regular',
-        medium: 'mavenpro_medium',
-        semibold: 'mavenpro_semibold',
-        bold: 'mavenpro_bold',
-        extrabold: 'mavenpro_extrabold',
-        black: 'mavenpro_black',
-    },
     medievalSharp: 'MedievalSharp',
-    anekKannada: {
-        regular: 'anekkannada_regular',
-        medium: 'anekkannada_nedium',
-        semibold: 'anekkannada_semibold',
-        bold: 'anekkannada_bold',
+    aBeeZee: {
+        regular: 'ABeeZee-Regular',
+        italic: 'ABeeZee-Italic',
     },
-    inter: 'Inter',
-    khula: {
-        light: 'khula_light',
-        regular: 'khula_regular',
-        semibold: 'khula_semibold',
-        bold: 'khula_bold',
-        extrabold: 'khula_extrabold',
+    plusJakartaSans: {
+        regular: 'PlusJakartaSans-Regular',
+        medium: 'PlusJakartaSans-Medium',
+        mediumItalic: 'PlusJakartaSans-MediumItalic',
+        semibold: 'PlusJakartaSans-SemiBold',
+        semiboldItalic: 'PlusJakartaSans-SemiBoldItalic',
+        bold: 'PlusJakartaSans-Bold',
+        boldItalic: 'PlusJakartaSans-BoldItalic',
+        extrabold: 'PlusJakartaSans-ExtraBold',
+        extraBoldItalic: 'PlusJakartaSans-ExtraBoldItalic',
+        italic: 'PlusJakartaSans-Italic',
+        light: 'PlusJakartaSans-Light',
+        extraLight: 'PlusJakartaSans-ExtraLight',
+        extraLightItalic: 'PlusJakartaSans-ExtraLightItalic',
+        lightItalic: 'PlusJakartaSans-LightItalic',
     },
-    adlamDisplay: 'ADLaMDisplay',
 };
 
 export const fontWeights = {
@@ -67,8 +64,19 @@ export const lineHeights = {
     display3: 52,
 };
 
+export const fontRoles = {
+    appName: fontFamilies.medievalSharp,
+    heading: fontFamilies.aBeeZee.regular,
+    headingItalic: fontFamilies.aBeeZee.italic,
+    body: fontFamilies.plusJakartaSans.regular,
+    bodyMedium: fontFamilies.plusJakartaSans.medium,
+    bodySemibold: fontFamilies.plusJakartaSans.semibold,
+    bodyBold: fontFamilies.plusJakartaSans.bold,
+} as const;
+
 export const typography = {
     fontFamilies,
+    fontRoles,
     fontWeights,
     fontSizes,
     lineHeights,

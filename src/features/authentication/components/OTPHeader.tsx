@@ -1,22 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import GradientText from '@components/GradientText';
 import { theme } from '@app/theme/index';
-
-interface OTPHeaderProps {
-    phoneNumber: string;
-}
+import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
+import { OTPHeaderProps } from '../auth.types';
 
 const OTPHeader: React.FC<OTPHeaderProps> = ({ phoneNumber }) => {
     const navigation = useNavigation();
-
+    const insets = useSafeAreaInsets();
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { paddingTop: insets.top + theme.spacing.lg }]}>
             {/* Back Button */}
             <TouchableOpacity
-                style={styles.backButton}
+                style={[styles.backButton, { top: insets.top + theme.spacing.lg }]}
                 onPress={() => navigation.goBack()}
                 activeOpacity={0.8}
             >
@@ -25,16 +24,17 @@ const OTPHeader: React.FC<OTPHeaderProps> = ({ phoneNumber }) => {
 
             <View style={styles.titleContainer}>
                 <GradientText
-                    colors={[theme.colors.textGradient1, theme.colors.textGradient2]}
-                    direction="horizontal"
+                    colors={[theme.colors.palette.gradient7, theme.colors.palette.gradient8]}
+                    direction="diagonal"
+                    location={AUTH_VALUES.otpHeaderGradientLocations}
                     style={styles.titleText}
                 >
-                    OTP Verification
+                    {AUTH_COPY.otpTitle}
                 </GradientText>
             </View>
 
             <Text style={styles.subtitleText}>
-                We have sent a verification code to{'\n'}+91 {phoneNumber}
+                {AUTH_COPY.otpSubtitlePrefix}{'\n'}{AUTH_COPY.countryCode} {phoneNumber}
             </Text>
         </View>
     );
@@ -44,11 +44,10 @@ const styles = StyleSheet.create({
     container: {
         paddingHorizontal: theme.spacing.screenPadding,
         alignItems: 'center',
-        paddingTop: Platform.OS === 'ios' ? 70 : 50,
     },
     backButton: {
         position: 'absolute',
-        top: Platform.OS === 'ios' ? 70 : 50,
+        top: 0, // overridden inline with insets
         left: theme.spacing.screenPadding,
         width: 40,
         height: 40,
@@ -75,12 +74,12 @@ const styles = StyleSheet.create({
     },
     titleText: {
         fontSize: theme.typography.fontSizes.display1,
-        fontFamily: theme.typography.fontFamilies.adlamDisplay,
+        fontFamily: theme.typography.fontFamilies.aBeeZee.regular,
         textAlign: 'center',
     },
     subtitleText: {
         fontSize: theme.typography.fontSizes.md,
-        fontFamily: theme.typography.fontFamilies.mavenPro.medium,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
         color: theme.colors.textGray1,
         textAlign: 'center',
         lineHeight: 24,

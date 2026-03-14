@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { OtpInput } from "react-native-otp-entry";
-import AppButton from '@components/AppButton';
 import { theme } from '@app/theme/index';
-
-interface OTPInputSectionProps {
-    onSubmit: (otp: string) => void;
-    onResend: () => void;
-}
+import GradientButton from '@components/GradientButton';
+import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
+import { OTPInputSectionProps } from '../auth.types';
 
 const OTPInputSection: React.FC<OTPInputSectionProps> = ({ onSubmit, onResend }) => {
     const [otpValue, setOtpValue] = useState('');
@@ -19,7 +16,7 @@ const OTPInputSection: React.FC<OTPInputSectionProps> = ({ onSubmit, onResend })
     return (
         <View style={styles.container}>
             <OtpInput
-                numberOfDigits={6}
+                numberOfDigits={AUTH_VALUES.otpDigits}
                 onTextChange={setOtpValue}
                 focusColor={theme.colors.primary}
                 theme={{
@@ -31,18 +28,19 @@ const OTPInputSection: React.FC<OTPInputSectionProps> = ({ onSubmit, onResend })
             />
 
             <View style={styles.resendContainer}>
-                <Text style={styles.resendText}>Didn't receive the code? </Text>
+                <Text style={styles.resendText}>{AUTH_COPY.otpResendPrefix}</Text>
                 <TouchableOpacity onPress={onResend} activeOpacity={0.7}>
-                    <Text style={styles.resendLink}>Resend OTP</Text>
+                    <Text style={styles.resendLink}>{AUTH_COPY.otpResendAction}</Text>
                     <View style={styles.resendLine} />
                 </TouchableOpacity>
             </View>
 
-            <AppButton
-                title="Submit"
+            <GradientButton
+                title={AUTH_COPY.otpSubmit}
                 onPress={handleSubmit}
                 style={styles.submitButton}
-                disabled={otpValue.length < 6}
+                textStyle={styles.submiteButtonText}
+                disabled={otpValue.length < AUTH_VALUES.otpDigits}
             />
         </View>
     );
@@ -73,7 +71,7 @@ const styles = StyleSheet.create({
     },
     pinCodeText: {
         fontSize: theme.typography.fontSizes.xl,
-        fontFamily: theme.typography.fontFamilies.mavenPro.semibold,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
         color: theme.colors.palette.black,
     },
     resendContainer: {
@@ -83,12 +81,12 @@ const styles = StyleSheet.create({
     },
     resendText: {
         fontSize: theme.typography.fontSizes.sm,
-        fontFamily: theme.typography.fontFamilies.mavenPro.medium,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
         color: theme.colors.textGray1,
     },
     resendLink: {
         fontSize: theme.typography.fontSizes.sm,
-        fontFamily: theme.typography.fontFamilies.mavenPro.bold,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
         color: theme.colors.primary,
     },
     resendLine: {
@@ -99,8 +97,11 @@ const styles = StyleSheet.create({
     },
     submitButton: {
         width: '100%',
-        height: 56,
     },
+    submiteButtonText:{
+        fontSize: theme.typography.fontSizes.xxl,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
+    }
 });
 
 export default OTPInputSection;

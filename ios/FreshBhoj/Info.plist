@@ -56,6 +56,8 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
+		<string>ABeeZee-Italic.ttf</string>
+		<string>ABeeZee-Regular.ttf</string>
 		<string>ADLaMDisplay.ttf</string>
 		<string>anekkannada_bold.ttf</string>
 		<string>anekkannada_medium.ttf</string>
@@ -74,6 +76,20 @@
 		<string>mavenpro_regular.ttf</string>
 		<string>mavenpro_semibold.ttf</string>
 		<string>MedievalSharp.ttf</string>
+		<string>PlusJakartaSans-Bold.ttf</string>
+		<string>PlusJakartaSans-BoldItalic.ttf</string>
+		<string>PlusJakartaSans-ExtraBold.ttf</string>
+		<string>PlusJakartaSans-ExtraBoldItalic.ttf</string>
+		<string>PlusJakartaSans-ExtraLight.ttf</string>
+		<string>PlusJakartaSans-ExtraLightItalic.ttf</string>
+		<string>PlusJakartaSans-Italic.ttf</string>
+		<string>PlusJakartaSans-Light.ttf</string>
+		<string>PlusJakartaSans-LightItalic.ttf</string>
+		<string>PlusJakartaSans-Medium.ttf</string>
+		<string>PlusJakartaSans-MediumItalic.ttf</string>
+		<string>PlusJakartaSans-Regular.ttf</string>
+		<string>PlusJakartaSans-SemiBold.ttf</string>
+		<string>PlusJakartaSans-SemiBoldItalic.ttf</string>
 	</array>
 </dict>
 </plist>

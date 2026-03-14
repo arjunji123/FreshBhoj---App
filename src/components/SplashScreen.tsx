@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import { theme } from '@app/theme/index';
 
 // components
 import AppGradient from './AppGradient';
@@ -84,17 +85,16 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   title: {
-    fontFamily: 'MedievalSharp',
-    fontSize: 64,
-    color: '#FFFFFF',
+    fontFamily: theme.typography.fontFamilies.medievalSharp,
+    fontSize: theme.typography.fontSizes.display6,
+    color: theme.colors.palette.white,
     textAlign: 'center',
   },
   tagline: {
-    color: '#F0F0F0',
-    fontSize: 16,
-    fontWeight: '500',
+    color: theme.colors.palette.gray1,
+    fontSize: theme.typography.fontSizes.lg,
     letterSpacing: 0.5,
-    fontFamily: 'AnekKannada',
+    fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
   },
 
   dividerContainer: {
@@ -106,13 +106,13 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: theme.colors.palette.white,
   },
   symbol: {
-    color: '#FFFFFF',
+    color: theme.colors.palette.white,
     marginHorizontal: 10,
-    fontSize: 18,
-    fontFamily: 'MedievalSharp',
+    fontSize: theme.typography.fontSizes.xl,
+    fontFamily: theme.typography.fontFamilies.medievalSharp,
   },
 });
 

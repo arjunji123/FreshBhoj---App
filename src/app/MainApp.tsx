@@ -3,6 +3,7 @@ import { AppNavigator } from './navigation/AppNavigator';
 import SplashScreen from '@components/SplashScreen';
 import { KeyboardProvider } from "react-native-keyboard-controller";
 import { StatusBar } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 const MainApp = () => {
   const [isShowSplash, setIsShowSplash] = useState(true);
 
@@ -20,10 +21,12 @@ const MainApp = () => {
   }
 
   return (
-    <KeyboardProvider>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
-      <AppNavigator />
-    </KeyboardProvider>
+    <SafeAreaProvider>
+      <KeyboardProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+        <AppNavigator />
+      </KeyboardProvider>
+    </SafeAreaProvider>
   );
 };
 

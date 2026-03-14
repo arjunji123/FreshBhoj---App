@@ -66,7 +66,37 @@ adb reverse tcp:8081 tcp:8081 # reverse port for metro server fast refresh | for
 ### Android
 
 ```bash
-npx react-native run-android
+npm run android:dev
+```
+
+### Android Flavors
+
+FreshBhoj now uses `react-native-config` with three Android product flavors:
+
+- `dev` -> `.env.dev`
+- `stage` -> `.env.stage`
+- `prod` -> `.env.prod`
+
+Available commands:
+
+```bash
+npm run android:dev
+npm run android:stage
+npm run android:prod
+npm run android:dev:release
+npm run android:stage:release
+npm run android:prod:release
+```
+
+Update the `.env.*` files in the project root with your actual values before building.
+
+Example JS usage:
+
+```ts
+import Config from 'react-native-config';
+
+console.log(Config.APP_ENV);
+console.log(Config.API_BASE_URL);
 ```
 
 ### iOS

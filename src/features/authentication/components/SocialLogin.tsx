@@ -1,13 +1,14 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { theme } from '@app/theme/index';
+import { AUTH_COPY } from '../auth.constants';
 
 const SocialLogin = () => {
     return (
         <>
             <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>Or</Text>
+                <Text style={styles.dividerText}>{AUTH_COPY.socialDivider}</Text>
                 <View style={styles.dividerLine} />
             </View>
 
@@ -45,7 +46,7 @@ const styles = StyleSheet.create({
     dividerText: {
         marginHorizontal: theme.spacing.paddings.sm,
         color: theme.colors.palette.gray4,
-        fontFamily: theme.typography.fontFamilies.khula.semibold,
+        fontFamily: theme.typography.fontFamilies.aBeeZee.regular,
         fontSize: theme.typography.fontSizes.md,
     },
     socialContainer: {

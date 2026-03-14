@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   StyleSheet,
-  KeyboardAvoidingView,
   Platform,
-  ScrollView,
   Text,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import GlassButton from '@components/GlassButton';
-import AppButton from '@components/AppButton';
 import { theme } from '@app/theme/index';
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import LoginTopSection from '../components/LoginTopSection';
@@ -19,11 +16,27 @@ import SocialLogin from '../components/SocialLogin';
 import LoginFooter from '../components/LoginFooter';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { PublicStackParamList } from '@app/navigation/public/PublicStack';
+import GradientButton from '@components/GradientButton';
+import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
+import { phoneNumberSchema } from '../auth.types';
+import { useAuthStore } from '../store/authStore';
 
 const Login = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const phoneNumber = useAuthStore((state) => state.phoneNumber);
+  const rememberMe = useAuthStore((state) => state.rememberMe);
+  const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
+  const setRememberMe = useAuthStore((state) => state.setRememberMe);
   const navigation = useNavigation<NavigationProp<PublicStackParamList>>();
+
+  const isPhoneValid = useMemo(() => phoneNumberSchema.safeParse(phoneNumber).success, [phoneNumber]);
+
+  const handlePhoneChange = (text: string) => {
+    const sanitizedValue = text
+      .replace(AUTH_VALUES.phoneNonDigitRegex, '')
+      .slice(0, AUTH_VALUES.phoneMaxLength);
+
+    setPhoneNumber(sanitizedValue);
+  };
 
   return (
     <KeyboardAwareScrollView
@@ -31,10 +44,8 @@ const Login = () => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.headerRow}>
-        <GlassButton style={{}} title="Skip" onPress={() => { }} />
+        <GlassButton style={{}} title={AUTH_COPY.loginSkip} onPress={() => { }} />
       </View>
-
-      {/* <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent} bounces={false}> */}
 
       {/* Top Section */}
       <LoginTopSection />
@@ -43,7 +54,7 @@ const Login = () => {
       <View style={styles.bottomSection}>
         <LoginTitle />
 
-        <LoginPhoneInput value={phoneNumber} onChangeText={setPhoneNumber} />
+        <LoginPhoneInput value={phoneNumber} onChangeText={handlePhoneChange} />
 
         <View style={styles.checkboxContainer}>
           <CheckBox
@@ -56,10 +67,19 @@ const Login = () => {
             onTintColor={theme.colors.primary}
             style={Platform.OS === 'ios' ? styles.checkboxIOS : styles.checkboxAndroid}
           />
-          <Text onPress={() => { setRememberMe(!rememberMe) }} style={styles.checkboxText}>Remember my login for faster Sign-in</Text>
+          <Text onPress={() => { setRememberMe(!rememberMe) }} style={styles.checkboxText}>{AUTH_COPY.loginRememberMe}</Text>
         </View>
 
-        <AppButton title="Continue" onPress={() => { navigation.navigate('OTP', { phoneNumber: phoneNumber }) }} style={styles.continueButton} />
+        <GradientButton
+          title={AUTH_COPY.loginContinue}
+          onPress={() => { navigation.navigate('OTP', { phoneNumber: phoneNumber }) }}
+          disabled={!isPhoneValid}
+          style={styles.continueButton}
+          textStyle={styles.continueButtonText}
+          gradientColors={theme.colors.defaultColor}
+          direction="diagonal"
+          locations={theme.colors.defaultLocations}
+        />
 
         <SocialLogin />
 
@@ -82,7 +102,7 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     position: 'absolute',
-    top: Platform.OS === 'ios' ? 70 : 50, // Adjust this based on your Safe Area
+    top: Platform.OS === 'ios' ? AUTH_VALUES.loginHeaderTopIos : AUTH_VALUES.loginHeaderTopAndroid,
     right: 20,
     zIndex: 20, // Ensures the Skip button stays clickable and above the food
   },
@@ -113,12 +133,17 @@ const styles = StyleSheet.create({
   },
   checkboxText: {
     fontSize: theme.typography.fontSizes.md,
-    fontFamily: theme.typography.fontFamilies.inter,
+    fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
     color: theme.colors.palette.black,
   },
   continueButton: {
     marginBottom: theme.spacing.paddings.md,
-    height: 56,
+    alignContent: 'center',
+    alignItems: 'center',
+  },
+  continueButtonText: {
+    fontSize: theme.typography.fontSizes.xxl,
+    fontFamily: theme.typography.fontRoles.bodyBold,
   },
   flexSpacer: {
     flex: 1,

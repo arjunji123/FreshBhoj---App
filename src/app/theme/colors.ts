@@ -11,6 +11,8 @@ export const palette = {
     gradient4: '#F2F2F2',
     gradient5: '#818181',
     gradient6: '#FFFFFF',
+    gradient7: '#FF4D4D',
+    gradient8: '#913F3F',
 
     // Text Colors
     textPrimary: '#F76C6C',
@@ -40,11 +42,14 @@ export const colors = {
     background: palette.white,
     surface: palette.white,
     glass: palette.glass,
+    defaultLocations : [0.09, 0.77, 1] as [number, number, number],
 
     // Gradient Colors
     gradient1: palette.gradient1,
     gradient2: palette.gradient2,
     gradient3: palette.gradient3,
+
+    defaultColor: [palette.gradient1, palette.gradient2, palette.gradient3],
 
     // Text
     textGradient1: palette.textGradient1,

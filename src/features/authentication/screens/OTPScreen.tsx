@@ -1,15 +1,13 @@
 import React from 'react';
-import { View, Image, StyleSheet, Dimensions, StatusBar } from 'react-native';
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
+import { View, Image, StyleSheet, Dimensions } from 'react-native';
 import { theme } from '@app/theme/index';
 import OTPHeader from '../components/OTPHeader';
 import OTPInputSection from '../components/OTPInputSection';
-import { useRoute, RouteProp } from '@react-navigation/native';
-import { PublicStackParamList } from '@app/navigation/public/PublicStack';
+import { useRoute } from '@react-navigation/native';
+import { AUTH_VALUES } from '../auth.constants';
+import { OTPScreenRouteProp } from '../auth.types';
 
 const { width, height } = Dimensions.get('window');
-
-type OTPScreenRouteProp = RouteProp<PublicStackParamList, 'OTP'>;
 
 const OTPScreen = () => {
   const route = useRoute<OTPScreenRouteProp>();
@@ -37,7 +35,7 @@ const OTPScreen = () => {
         <Image
           source={require('@assets/images/otpscreen.png')}
           style={styles.image}
-          resizeMode="contain"
+          resizeMode="cover"
         />
       </View>
     </View>
@@ -50,18 +48,17 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   imageContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginTop: 100,//theme.spacing.paddings.xxxl,
-    minHeight: height * 0.4,
-  },
-  image: {
     position: 'absolute',
     right: 0,
     bottom: 0,
-    width: width * 0.8,
+    width: width * AUTH_VALUES.otpImageWidthRatio,
+    height: height * AUTH_VALUES.otpImageHeightRatio,
+    overflow: 'hidden',
+  },
+  image: {
+    width: '100%',
     height: '100%',
+
   },
 });
 

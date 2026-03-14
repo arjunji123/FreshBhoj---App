@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     },
     text: {
         color: colors.palette.white,
-        fontWeight: typography.fontWeights.semiBold,
+        fontFamily: typography.fontFamilies.plusJakartaSans.semibold,
         fontSize: typography.fontSizes.sm
     }
 })

@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
         }),
     },
     titleContainer: {
-        marginTop: theme.spacing.paddings.xxxl,
+        marginTop: theme.spacing.paddings.xxxl + 70,
         marginBottom: theme.spacing.paddings.lg,
     },
     titleText: {

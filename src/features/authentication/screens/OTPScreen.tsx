@@ -1,19 +1,36 @@
 import React from 'react';
-import { View, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, Image, StyleSheet, Dimensions, Alert, StatusBar } from 'react-native';
 import { theme } from '@app/theme/index';
 import OTPHeader from '../components/OTPHeader';
 import OTPInputSection from '../components/OTPInputSection';
-import { useRoute } from '@react-navigation/native';
+import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { AUTH_VALUES } from '../auth.constants';
 import { OTPScreenRouteProp } from '../auth.types';
+import authNavigation from '../hooks/authNavigation';
 
 const { width, height } = Dimensions.get('window');
 
 const OTPScreen = () => {
   const route = useRoute<OTPScreenRouteProp>();
   const phoneNumber = route.params?.phoneNumber;
+  const navigation = authNavigation();
+
+  useFocusEffect(() => {
+    StatusBar.setBarStyle('dark-content', true);
+    return () => {
+      StatusBar.setBarStyle('light-content', true);
+    }
+  });
+
+
   const handleSubmitOTP = (otp: string) => {
-    console.log('OTP Submitted:', otp);
+    if(otp === AUTH_VALUES.mockOtp) {
+      Alert.alert('OTP Verified', 'Your OTP has been verified successfully!');
+      navigation.navigate('OTPSuccess');
+    } else {
+      Alert.alert('Invalid OTP', 'The OTP you entered is incorrect. Please try again.');
+      // Show error message to user
+    }
     // Add OTP verification logic here
   };
 

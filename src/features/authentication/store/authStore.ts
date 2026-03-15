@@ -20,7 +20,6 @@ export const useAuthStore = create<AuthStoreState>()(
 			name: 'auth-store',
 			storage: createJSONStorage(() => mmkvZustandStorage),
 			partialize: (state) => ({
-				phoneNumber: state.phoneNumber,
 				rememberMe: state.rememberMe,
 			}),
 		},

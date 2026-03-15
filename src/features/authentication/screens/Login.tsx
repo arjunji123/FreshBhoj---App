@@ -14,8 +14,7 @@ import LoginTitle from '../components/LoginTitle';
 import LoginPhoneInput from '../components/LoginPhoneInput';
 import SocialLogin from '../components/SocialLogin';
 import LoginFooter from '../components/LoginFooter';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
-import { PublicStackParamList } from '@app/navigation/public/PublicStack';
+import authNavigation from '../hooks/authNavigation';
 import GradientButton from '@components/GradientButton';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { phoneNumberSchema } from '../auth.types';
@@ -26,7 +25,7 @@ const Login = () => {
   const rememberMe = useAuthStore((state) => state.rememberMe);
   const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
   const setRememberMe = useAuthStore((state) => state.setRememberMe);
-  const navigation = useNavigation<NavigationProp<PublicStackParamList>>();
+  const navigation = authNavigation();
 
   const isPhoneValid = useMemo(() => phoneNumberSchema.safeParse(phoneNumber).success, [phoneNumber]);
 

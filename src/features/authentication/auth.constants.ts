@@ -1,3 +1,5 @@
+
+
 export const AUTH_COPY = {
 	loginSkip: 'Skip',
 	loginRememberMe: 'Remember my login for faster Sign-in',
@@ -35,4 +37,5 @@ export const AUTH_VALUES = {
 	loginBrandTitleTopOffset: -120,
 	otpImageWidthRatio: 0.8,
 	otpImageHeightRatio: 0.4,
+	mockOtp: '123456',
 } as const;

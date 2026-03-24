@@ -4,6 +4,7 @@ import OTPScreen from '@features/authentication/screens/OTPScreen';
 import OnboardingScreen from '@features/onboarding/screens/OnboardingScreen';
 import OTPSuccess from '@features/authentication/screens/OTPSuccess';
 import PersonalDetails from '@features/authentication/screens/PersonalDetails';
+import SelectLocation from '@features/authentication/screens/SelectLocation';
 
 const Stack = createNativeStackNavigator();
 
@@ -13,6 +14,7 @@ export type PublicStackParamList = {
   OTP: { phoneNumber: string };
   OTPSuccess : undefined;
   PersonalDetails: undefined;
+  SelectLocation: undefined;
 };
 
 
@@ -24,6 +26,7 @@ export function PublicStack() {
       <Stack.Screen name="OTP" component={OTPScreen} />
       <Stack.Screen name="OTPSuccess" component={OTPSuccess} />
       <Stack.Screen name="PersonalDetails" component={PersonalDetails} />
+      <Stack.Screen name="SelectLocation" component={SelectLocation} />
     </Stack.Navigator>
   );
 }

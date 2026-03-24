@@ -10,9 +10,16 @@ import AppGradient from '@components/AppGradient';
 import RippleEffect from '../../../animations/RippleEffect';
 import AppButton from '@components/AppButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import authNavigation from '../hooks/authNavigation';
 
 const OTPSuccess = () => {
   const insets = useSafeAreaInsets();
+  const navigation = authNavigation();
+
+  const handleStartDiscovering = () => {
+    navigation.navigate('PersonalDetails');
+  };
+
   return (
     <AppGradient
       style={styles.container}
@@ -31,7 +38,7 @@ const OTPSuccess = () => {
 
         <Text style={styles.text}>You're In!</Text>
         <Text style={styles.description}>
-          Let’s personalize your food journey with FreshBhoj.
+          Let's personalize your food journey with FreshBhoj.
         </Text>
       </View>
 
@@ -39,6 +46,7 @@ const OTPSuccess = () => {
           title='Start Discovering'
           showOverlay={false}
           textStyle={styles.buttonText}
+          onPress={handleStartDiscovering}
           style={[styles.button, { marginBottom: insets.bottom }]} />
     </AppGradient>
   );

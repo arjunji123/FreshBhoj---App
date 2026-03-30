@@ -25,10 +25,24 @@ export interface OTPInputSectionProps {
 
 export type OTPScreenRouteProp = RouteProp<PublicStackParamList, 'OTP'>;
 
+export type LocationStoreState = {
+	address: string;
+	latitude: number;
+	longitude: number;
+};
+
 export interface AuthStoreState {
+	isAuthenticated?: boolean;
 	phoneNumber: string;
 	rememberMe: boolean;
+	fullName: string;
+	email: string;
+	location: LocationStoreState;
+	setisAuthenticated: (isAuthenticated: boolean) => void;
 	setPhoneNumber: (phoneNumber: string) => void;
 	setRememberMe: (rememberMe: boolean) => void;
+	setFullName: (fullName: string) => void;
+	setEmail: (email: string) => void;
+	setLocation: (location: Partial<LocationStoreState>) => void;
 	reset: () => void;
 }

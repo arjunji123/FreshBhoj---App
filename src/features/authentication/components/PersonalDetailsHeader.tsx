@@ -11,14 +11,14 @@ const PersonalDetailsHeader = () => {
     const insets = useSafeAreaInsets();
 
     return (
-        <AppGradient
-            colors={theme.colors.defaultColor}
-            locations={theme.colors.defaultLocations}
-            direction="diagonal"
+        <View
+            // colors={theme.colors.defaultColor}
+            // locations={theme.colors.defaultLocations}
+            // direction="diagonal"
             style={[styles.container, { paddingTop: insets.top }]}
         >
             <Text style={styles.brandTitle}>{AUTH_COPY.brandTitle}</Text>
-        </AppGradient>
+        </View>
     );
 };
 

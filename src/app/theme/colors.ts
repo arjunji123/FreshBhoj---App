@@ -1,3 +1,5 @@
+import {StyleSheet} from 'react-native';
+
 export const palette = {
     // Base colors
     white: '#FFFFFF',
@@ -27,11 +29,37 @@ export const palette = {
     gray4: '#656565',
 
     // Semantic
+    inactive: '#D5AFAF',
     success: '#4CAF50',
     warning: '#FFC107',
     error: '#F44336',
     info: '#2196F3',
 };
+
+export const Shadows = {
+    light: {
+        shadowColor: 'rgba(0, 0, 0, 0.1)',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+    medium: {
+        shadowColor: 'rgba(0, 0, 0, 0.15)',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 6,
+        elevation: 5,
+    },
+    heavy: {
+        shadowColor: 'rgba(0, 0, 0, 0.2)',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 1,
+        shadowRadius: 8,
+        elevation: 8,
+    },
+};
+
 
 export const colors = {
     // Global

@@ -1,13 +1,13 @@
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from '@features/home/screens/Home';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { BottomTabNavigator } from './BottomTabNavigator';
 
-const Tab = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 export function PrivateTabs() {
   return (
-    <Tab.Navigator>
-      <Tab.Screen name="Home" component={Home} options={{headerShown: false}} />
-      {/* Orders, Reels, Profile later */}
-    </Tab.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+      {/* Future private screens (e.g. OrderDetails, KitchenDetails) go here */}
+    </Stack.Navigator>
   );
 }

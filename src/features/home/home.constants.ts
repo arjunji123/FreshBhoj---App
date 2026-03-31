@@ -161,32 +161,32 @@ export const TRENDING_DATA: FoodCardItem[] = [
     price: 299,
     isFavorite: false,
   },
-  ...Array.from({ length: 92 }, (_, i) => ({
-    id: `${13 + i}`,
-    name: [
-      'Protein Power Bowl',
-      'Healthy Veg Mix Bowl',
-      'Spicy Chicken Bowl',
-      'Tofu Salad Bowl',
-      'Keto Delight Bowl',
-      'Brown Rice Nutrition Bowl',
-      'High Fiber Veg Bowl',
-      'Classic Diet Bowl'
-    ][i % 8],
-    image: `https://images.unsplash.com/photo-${1540000000000 + i}?w=400`,
-    rating: +(4 + Math.random()).toFixed(1),
-    restaurant: [
-      'Healthy Bites',
-      'Fit Feast',
-      'Urban Greens',
-      'Green Delight',
-      'Spice Route',
-      'Keto Kitchen'
-    ][i % 6],
-    distance: `${(1 + Math.random() * 4).toFixed(1)}km`,
-    price: Math.floor(180 + Math.random() * 200),
-    isFavorite: Math.random() > 0.7,
-  })),
+  // ...Array.from({ length: 92 }, (_, i) => ({
+  //   id: `${13 + i}`,
+  //   name: [
+  //     'Protein Power Bowl',
+  //     'Healthy Veg Mix Bowl',
+  //     'Spicy Chicken Bowl',
+  //     'Tofu Salad Bowl',
+  //     'Keto Delight Bowl',
+  //     'Brown Rice Nutrition Bowl',
+  //     'High Fiber Veg Bowl',
+  //     'Classic Diet Bowl'
+  //   ][i % 8],
+  //   image: `https://images.unsplash.com/photo-${1540000000000 + i}?w=400`,
+  //   rating: +(4 + Math.random()).toFixed(1),
+  //   restaurant: [
+  //     'Healthy Bites',
+  //     'Fit Feast',
+  //     'Urban Greens',
+  //     'Green Delight',
+  //     'Spice Route',
+  //     'Keto Kitchen'
+  //   ][i % 6],
+  //   distance: `${(1 + Math.random() * 4).toFixed(1)}km`,
+  //   price: Math.floor(180 + Math.random() * 200),
+  //   isFavorite: Math.random() > 0.7,
+  // })),
 ];
 
 // ── Home Header ─────────────────────────────────────────────────

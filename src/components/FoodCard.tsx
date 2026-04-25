@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import {Heart, Plus} from 'lucide-react-native';
 import {theme} from '@app/theme/index';
@@ -20,6 +21,7 @@ const CARD_WIDTH = (SCREEN_WIDTH - HORIZONTAL_PADDING * 2 - CARD_GAP) / 2;
 
 export interface FoodCardItem {
   id: string;
+  kitchenId: string;
   name: string;
   image: string;
   rating: number;
@@ -33,9 +35,10 @@ interface FoodCardProps {
   item: FoodCardItem;
   onFavoritePress?: (item: FoodCardItem) => void;
   onAddPress?: (item: FoodCardItem) => void;
+  isAdding?: boolean;
 }
 
-const FoodCard = ({item, onFavoritePress, onAddPress}: FoodCardProps) => {
+const FoodCard = ({item, onFavoritePress, onAddPress, isAdding = false}: FoodCardProps) => {
   return (
     <View style={styles.card}>
       {/* Image Section */}
@@ -84,12 +87,17 @@ const FoodCard = ({item, onFavoritePress, onAddPress}: FoodCardProps) => {
           <TouchableOpacity
             activeOpacity={0.7}
             style={styles.addButtonWrapper}
+            disabled={isAdding}
             onPress={() => onAddPress?.(item)}>
             <AppGradient
               colors={theme.colors.defaultColor}
               direction="diagonal"
               style={styles.addButton}>
-              <Plus size={16} color={theme.colors.palette.white} />
+              {isAdding ? (
+                <ActivityIndicator size="small" color={theme.colors.palette.white} />
+              ) : (
+                <Plus size={16} color={theme.colors.palette.white} />
+              )}
             </AppGradient>
           </TouchableOpacity>
         </View>

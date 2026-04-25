@@ -1,12 +1,22 @@
-import React from 'react';
-import { View, Text, TextInput, StyleSheet, Image } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { View, Text, TextInput, StyleSheet, Image, Pressable } from 'react-native';
 import { theme } from '@app/theme/index';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { LoginPhoneInputProps } from '../auth.types';
 
 const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }) => {
+    const inputRef = useRef<TextInput>(null);
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            inputRef.current?.focus();
+        }, 250);
+
+        return () => clearTimeout(timer);
+    }, []);
+
     return (
-        <View style={styles.inputWrapper}>
+        <Pressable style={styles.inputWrapper} onPressIn={() => inputRef.current?.focus()}>
             <View style={styles.countryCodeContainer}>
                 <Image
                     source={require('../../../../assets/images/indiaicon.png')}
@@ -16,16 +26,23 @@ const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }
             </View>
             <View style={styles.inputDivider} />
             <TextInput
+                ref={inputRef}
                 style={styles.textInput}
                 placeholder={AUTH_COPY.phonePlaceholder}
                 placeholderTextColor={theme.colors.textGray1}
-                keyboardType="phone-pad"
+                keyboardType="number-pad"
+                inputMode="numeric"
                 value={value}
                 cursorColor={theme.colors.primary}
                 onChangeText={onChangeText}
                 maxLength={AUTH_VALUES.phoneMaxLength}
+                showSoftInputOnFocus
+                autoComplete="tel"
+                textContentType="telephoneNumber"
+                returnKeyType="done"
+                autoFocus
             />
-        </View>
+        </Pressable>
     );
 };
 

@@ -5,6 +5,10 @@ export const mmkv = createMMKV({
 	id: 'freshbhoj-storage',
 });
 
+export const STORAGE_KEYS = {
+	hasSeenOnboarding: 'has_seen_onboarding',
+} as const;
+
 export const mmkvZustandStorage: StateStorage = {
 	getItem: (name) => {
 		const value = mmkv.getString(name);

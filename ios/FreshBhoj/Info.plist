@@ -34,7 +34,11 @@
 		<true/>
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string/>
+	<string>FreshBhoj ko nearby kitchens dikhane ke liye current location chahiye.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>FreshBhoj profile photo click karne ke liye camera access chahiye.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>FreshBhoj profile photo ke liye gallery access chahiye.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiredDeviceCapabilities</key>

@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   TextInput,
   Image,
+  Platform,
+  PermissionsAndroid,
+  Alert,
 } from 'react-native';
 import { ArrowRight, Search, Navigation, Crosshair } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
@@ -13,6 +16,7 @@ import GradientButton from '@components/GradientButton';
 import GradientText from '@components/GradientText';
 import AppGradient from '@components/AppGradient';
 import { useAuthStore } from '../store/authStore';
+import Geolocation from '@react-native-community/geolocation';
 
 const ICON_COLOR = '#94A3B8';
 const LABEL_COLOR = '#64748B';
@@ -28,9 +32,45 @@ const SelectLocationContent: React.FC<SelectLocationContentProps> = ({ onSaveAnd
   const address = useAuthStore((s) => s.location.address);
   const setLocation = useAuthStore((s) => s.setLocation);
 
-  const handleUseCurrentLocation = () => {
-    // TODO: Get current lat/lng and reverse geocode address
-    // setLocation({ address: '...', latitude: ..., longitude: ... });
+  const requestLocationPermission = async () => {
+    if (Platform.OS !== 'android') {
+      return true;
+    }
+
+    const status = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+    );
+
+    return status === PermissionsAndroid.RESULTS.GRANTED;
+  };
+
+  const handleUseCurrentLocation = async () => {
+    const hasPermission = await requestLocationPermission();
+    if (!hasPermission) {
+      Alert.alert('Location Permission', 'Location access allow karenge to current location set ho jayegi.');
+      return;
+    }
+
+    Geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const locationLabel = `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`;
+
+        setLocation({
+          address: locationLabel,
+          latitude,
+          longitude,
+        });
+      },
+      () => {
+        Alert.alert('Location Error', 'Current location fetch nahi ho payi, please try again.');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      },
+    );
   };
 
   return (

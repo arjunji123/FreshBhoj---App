@@ -21,6 +21,14 @@ export interface OTPHeaderProps {
 export interface OTPInputSectionProps {
 	onSubmit: (otp: string) => void;
 	onResend: () => void;
+	status: 'idle' | 'error' | 'success';
+	onOtpChange?: () => void;
+	resendInSeconds: number;
+	isResendDisabled: boolean;
+	remainingAttempts: number;
+	isLocked: boolean;
+	isSubmitting?: boolean;
+	helperText?: string;
 }
 
 export type OTPScreenRouteProp = RouteProp<PublicStackParamList, 'OTP'>;
@@ -35,12 +43,14 @@ export interface AuthStoreState {
 	isAuthenticated?: boolean;
 	phoneNumber: string;
 	rememberMe: boolean;
+	profileImageUri: string;
 	fullName: string;
 	email: string;
 	location: LocationStoreState;
 	setisAuthenticated: (isAuthenticated: boolean) => void;
 	setPhoneNumber: (phoneNumber: string) => void;
 	setRememberMe: (rememberMe: boolean) => void;
+	setProfileImageUri: (profileImageUri: string) => void;
 	setFullName: (fullName: string) => void;
 	setEmail: (email: string) => void;
 	setLocation: (location: Partial<LocationStoreState>) => void;

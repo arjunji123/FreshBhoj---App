@@ -7,6 +7,7 @@ const initialAuthState = {
 	isAuthenticated: false,
 	phoneNumber: '',
 	rememberMe: false,
+	profileImageUri: '',
 	fullName: '',
 	email: '',
 	location: {
@@ -23,6 +24,7 @@ export const useAuthStore = create<AuthStoreState>()(
 			setisAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
 			setPhoneNumber: (phoneNumber) => set({ phoneNumber }),
 			setRememberMe: (rememberMe) => set({ rememberMe }),
+			setProfileImageUri: (profileImageUri) => set({ profileImageUri }),
 			setFullName: (fullName) => set({ fullName }),
 			setEmail: (email) => set({ email }),
 			setLocation: (location) => set((state) => ({ location: { ...state.location, ...location } })),
@@ -34,6 +36,7 @@ export const useAuthStore = create<AuthStoreState>()(
 			partialize: (state) => ({
 				isAuthenticated: state.isAuthenticated,
 				rememberMe: state.rememberMe,
+				profileImageUri: state.profileImageUri,
 				fullName: state.fullName,
 				email: state.email,
 				location: state.location,

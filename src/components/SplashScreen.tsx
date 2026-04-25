@@ -91,7 +91,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tagline: {
-    color: theme.colors.palette.gray1,
+    color: theme.colors.palette.white,
     fontSize: theme.typography.fontSizes.lg,
     letterSpacing: 0.5,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,

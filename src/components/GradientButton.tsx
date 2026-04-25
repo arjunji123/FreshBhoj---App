@@ -3,6 +3,7 @@ import {
     StyleSheet,
     View,
     Text,
+    ActivityIndicator,
     TouchableOpacity,
     TouchableOpacityProps,
     ViewStyle,
@@ -31,6 +32,7 @@ export interface GradientButtonProps extends TouchableOpacityProps {
     style?: StyleProp<ViewStyle>;
     textStyle?: StyleProp<TextStyle>;
     gradientStyle?: StyleProp<ViewStyle>;
+    loading?: boolean;
 }
 
 const GradientButton: React.FC<GradientButtonProps> = ({
@@ -44,13 +46,14 @@ const GradientButton: React.FC<GradientButtonProps> = ({
     style,
     textStyle,
     gradientStyle,
+    loading = false,
     disabled,
     ...rest
 }) => {
     return (
         <TouchableOpacity
             activeOpacity={0.8}
-            disabled={disabled}
+            disabled={disabled || loading}
             style={[styles.button, disabled && styles.disabled, style]}
             {...rest}
         >
@@ -61,13 +64,18 @@ const GradientButton: React.FC<GradientButtonProps> = ({
                 style={[styles.gradient, gradientStyle]}
             />
             <View style={styles.contentRow}>
-                {leftIcon && (
+                {loading ? (
+                    <View style={styles.loadingContent}>
+                        <ActivityIndicator color={colors.palette.white} size="small" style={styles.loader} />
+                        <Text style={[styles.title, textStyle]}>{title}</Text>
+                    </View>
+                ) : leftIcon ? (
                     <View style={{ marginRight: iconSpacing }}>
                         {leftIcon}
                     </View>
-                )}
-                <Text style={[styles.title, textStyle]}>{title}</Text>
-                {rightIcon && (
+                ) : null}
+                {!loading && <Text style={[styles.title, textStyle]}>{title}</Text>}
+                {!loading && rightIcon && (
                     <View style={{ marginLeft: iconSpacing }}>
                         {rightIcon}
                     </View>
@@ -93,6 +101,15 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
+        minHeight: 20,
+    },
+    loadingContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    loader: {
+        marginRight: spacing.xs,
     },
     title: {
         color: colors.palette.white,

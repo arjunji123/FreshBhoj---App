@@ -40,6 +40,7 @@ export const CATEGORY_DATA: CategoryDataItem[] = [
 export const TRENDING_DATA: FoodCardItem[] = [
   {
     id: '1',
+    kitchenId: 'healthy-bites',
     name: 'Super Keto Bowl Special',
     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
     rating: 4.8,
@@ -50,6 +51,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '2',
+    kitchenId: 'healthy-bites',
     name: 'Super Keto Bowl Special',
     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
     rating: 4.8,
@@ -60,6 +62,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '3',
+    kitchenId: 'healthy-bites',
     name: 'Super Keto Bowl Special',
     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
     rating: 4.8,
@@ -70,6 +73,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '4',
+    kitchenId: 'healthy-bites',
     name: 'Super Keto Bowl Special',
     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400',
     rating: 4.8,
@@ -80,6 +84,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
     {
     id: '5',
+    kitchenId: 'fit-feast',
     name: 'Grilled Chicken Salad Bowl',
     image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=400',
     rating: 4.6,
@@ -90,6 +95,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '6',
+    kitchenId: 'green-delight',
     name: 'Vegan Power Bowl',
     image: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=400',
     rating: 4.7,
@@ -100,6 +106,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '7',
+    kitchenId: 'spice-route',
     name: 'Paneer Tikka Bowl',
     image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?w=400',
     rating: 4.5,
@@ -110,6 +117,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '8',
+    kitchenId: 'urban-greens',
     name: 'Quinoa Veg Bowl',
     image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400',
     rating: 4.4,
@@ -120,6 +128,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '9',
+    kitchenId: 'taco-hub',
     name: 'Mexican Burrito Bowl',
     image: 'https://images.unsplash.com/photo-1543339494-b4cd4f7ba686?w=400',
     rating: 4.6,
@@ -130,6 +139,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '10',
+    kitchenId: 'healthy-bites',
     name: 'Classic Caesar Salad',
     image: 'https://images.unsplash.com/photo-1551248429-40975aa4de74?w=400',
     rating: 4.3,
@@ -143,6 +153,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
 
   {
     id: '11',
+    kitchenId: 'keto-kitchen',
     name: 'Avocado Keto Bowl',
     image: 'https://images.unsplash.com/photo-1600891964599-f61ba0e24092?w=400',
     rating: 4.9,
@@ -153,6 +164,7 @@ export const TRENDING_DATA: FoodCardItem[] = [
   },
   {
     id: '12',
+    kitchenId: 'olive-tree',
     name: 'Mediterranean Bowl',
     image: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400',
     rating: 4.5,

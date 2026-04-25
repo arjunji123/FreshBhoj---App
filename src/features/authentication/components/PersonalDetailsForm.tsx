@@ -8,6 +8,8 @@ interface PersonalDetailsFormProps {
     email: string;
     onFullNameChange: (text: string) => void;
     onEmailChange: (text: string) => void;
+    fullNameError?: string;
+    emailError?: string;
 }
 
 const INPUT_ICON_COLOR = '#94A3B8';
@@ -21,13 +23,15 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
     email,
     onFullNameChange,
     onEmailChange,
+    fullNameError,
+    emailError,
 }) => {
     return (
         <View style={styles.container}>
             {/* Full Name Field */}
             <View style={styles.fieldContainer}>
                 <Text style={styles.label}>Full Name</Text>
-                <View style={styles.inputWrapper}>
+                <View style={[styles.inputWrapper, fullNameError ? styles.inputWrapperError : null]}>
                     <View style={styles.iconContainer}>
                         <User size={14} color={INPUT_ICON_COLOR} strokeWidth={1.8} />
                     </View>
@@ -41,12 +45,13 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                         returnKeyType="next"
                     />
                 </View>
+                {fullNameError ? <Text style={styles.errorText}>{fullNameError}</Text> : null}
             </View>
 
             {/* Email Address Field */}
             <View style={styles.fieldContainer}>
                 <Text style={styles.label}>Email Address</Text>
-                <View style={styles.inputWrapper}>
+                <View style={[styles.inputWrapper, emailError ? styles.inputWrapperError : null]}>
                     <View style={styles.iconContainer}>
                         <Mail size={16} color={INPUT_ICON_COLOR} strokeWidth={1.8} />
                     </View>
@@ -61,6 +66,7 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                         returnKeyType="done"
                     />
                 </View>
+                {emailError ? <Text style={styles.errorText}>{emailError}</Text> : null}
             </View>
         </View>
     );
@@ -103,6 +109,16 @@ const styles = StyleSheet.create({
         fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
         color: '#0F172A',
         padding: 0,
+    },
+    inputWrapperError: {
+        borderColor: theme.colors.error,
+        backgroundColor: '#FFF5F5',
+    },
+    errorText: {
+        paddingLeft: 6,
+        fontSize: theme.typography.fontSizes.sm,
+        color: theme.colors.error,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
     },
 });
 

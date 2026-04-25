@@ -4,6 +4,7 @@ import OTPScreen from '@features/authentication/screens/OTPScreen';
 import OnboardingScreen from '@features/onboarding/screens/OnboardingScreen';
 import OTPSuccess from '@features/authentication/screens/OTPSuccess';
 import PersonalDetails from '@features/authentication/screens/PersonalDetails';
+import { mmkv, STORAGE_KEYS } from '@utils/mmkvStorage';
 const Stack = createNativeStackNavigator();
 
 export type PublicStackParamList = {
@@ -16,8 +17,13 @@ export type PublicStackParamList = {
 
 
 export function PublicStack() {
+  const hasSeenOnboarding = mmkv.getBoolean(STORAGE_KEYS.hasSeenOnboarding) ?? false;
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator
+      initialRouteName={hasSeenOnboarding ? 'Login' : 'Onboarding'}
+      screenOptions={{ headerShown: false }}
+    >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="OTP" component={OTPScreen} />

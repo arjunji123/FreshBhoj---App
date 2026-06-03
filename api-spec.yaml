@@ -1,0 +1,2726 @@
+openapi: 3.1.0
+
+info:
+  title: FreshBhoj API
+  version: 1.0.0
+  description: |
+    Production API specification for the FreshBhoj mobile app.
+    Covers authentication, user profile, home feed, food items,
+    kitchens, cart, orders, subscriptions, search, and media upload.
+
+    **Generated from:** Full React Native codebase analysis (v0.0.1)
+
+    ## Auth Flow
+    1. `POST /auth/send-otp` → user receives 6-digit OTP via SMS
+    2. `POST /auth/verify-otp` → returns `accessToken` + `refreshToken`
+    3. Pass `Authorization: Bearer <accessToken>` on all protected endpoints
+    4. Use `POST /auth/refresh-token` when the access token expires (TTL 1h)
+
+  contact:
+    name: FreshBhoj Engineering
+    email: engineering@freshbhoj.com
+  license:
+    name: Private
+
+servers:
+  - url: https://api.freshbhoj.com/v1
+    description: Production
+  - url: https://stage-api.freshbhoj.com/v1
+    description: Staging
+  - url: https://dev-api.freshbhoj.com/v1
+    description: Development
+
+# ---------------------------------------------------------------------------
+# Security
+# ---------------------------------------------------------------------------
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: RS256-signed JWT. Expires in 1 hour.
+
+  # -------------------------------------------------------------------------
+  # Reusable Parameters
+  # -------------------------------------------------------------------------
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number (1-indexed)
+
+    LimitParam:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Number of results per page
+
+    LatParam:
+      name: lat
+      in: query
+      schema:
+        type: number
+        format: float
+        minimum: -90
+        maximum: 90
+      description: User latitude
+
+    LngParam:
+      name: lng
+      in: query
+      schema:
+        type: number
+        format: float
+        minimum: -180
+        maximum: 180
+      description: User longitude
+
+    RadiusParam:
+      name: radiusKm
+      in: query
+      schema:
+        type: number
+        format: float
+        minimum: 0.5
+        maximum: 50
+        default: 5
+      description: Search radius in kilometres
+
+  # -------------------------------------------------------------------------
+  # Reusable Schemas
+  # -------------------------------------------------------------------------
+
+  schemas:
+
+    # ------------------------------------------------------------------
+    # Primitives / shared shapes
+    # ------------------------------------------------------------------
+
+    SuccessEnvelope:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+          enum: [true]
+        data:
+          description: Endpoint-specific payload
+
+    PaginatedMeta:
+      type: object
+      required: [page, limit, total]
+      properties:
+        page:
+          type: integer
+          examples:
+            - 1
+        limit:
+          type: integer
+          examples:
+            - 20
+        total:
+          type: integer
+          examples:
+            - 148
+
+    ErrorEnvelope:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              examples:
+                - INVALID_OTP
+            message:
+              type: string
+              examples:
+                - The OTP you entered is incorrect.
+            details:
+              type: object
+              additionalProperties: true
+
+    Location:
+      type: object
+      required: [address, latitude, longitude]
+      properties:
+        address:
+          type: string
+          maxLength: 255
+          examples:
+            - "Koramangala, Bengaluru, Karnataka 560034"
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          examples:
+            - 12.9352
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          examples:
+            - 77.6245
+        landmark:
+          type: ["string", "null"]
+          maxLength: 100
+          examples:
+            - "Near Forum Mall"
+
+    # ------------------------------------------------------------------
+    # Auth
+    # ------------------------------------------------------------------
+
+    PhoneNumber:
+      type: string
+      pattern: '^\d{10}$'
+      description: 10-digit Indian mobile number (without country code)
+      examples:
+        - "9876543210"
+
+    CountryCode:
+      type: string
+      default: "+91"
+      examples:
+        - "+91"
+
+    OtpCode:
+      type: string
+      pattern: '^\d{6}$'
+      description: 6-digit one-time password
+      examples:
+        - "123456"
+
+    TokenPair:
+      type: object
+      required: [accessToken, refreshToken, accessTokenExpiresAt, refreshTokenExpiresAt]
+      properties:
+        accessToken:
+          type: string
+          description: RS256-signed JWT. TTL 1 hour.
+          examples:
+            - "eyJhbGciOiJSUzI1NiJ9..."
+        refreshToken:
+          type: string
+          description: Opaque random token. TTL 30 days. Store in device Keychain.
+          examples:
+            - "rt_a1b2c3d4e5f6..."
+        accessTokenExpiresAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-04-12T13:30:00Z"
+        refreshTokenExpiresAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-05-12T12:00:00Z"
+
+    # ------------------------------------------------------------------
+    # User
+    # ------------------------------------------------------------------
+
+    User:
+      type: object
+      required: [id, phoneNumber, countryCode, isNewUser, profileComplete, createdAt]
+      properties:
+        id:
+          type: string
+          description: ULID
+          examples:
+            - "usr_01HXYZ"
+        phoneNumber:
+          $ref: '#/components/schemas/PhoneNumber'
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        isNewUser:
+          type: boolean
+          description: True on first-ever login. Frontend uses this to decide whether to show PersonalDetails flow.
+          examples:
+            - true
+        profileComplete:
+          type: boolean
+          description: True once both profile and location have been saved.
+          examples:
+            - false
+        fullName:
+          type: ["string", "null"]
+          examples:
+            - "Sumit Sharma"
+        email:
+          type: ["string", "null"]
+          format: email
+          examples:
+            - "sumit@email.com"
+        profileImageUrl:
+          type: ["string", "null"]
+          format: uri
+          examples:
+            - "https://cdn.freshbhoj.com/users/usr_01HXYZ/avatar.jpg"
+        location:
+          oneOf:
+            - type: "null"
+            - $ref: '#/components/schemas/Location'
+        rememberMe:
+          type: boolean
+          examples:
+            - true
+        createdAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-04-12T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-04-12T12:10:00Z"
+
+    # ------------------------------------------------------------------
+    # Category
+    # ------------------------------------------------------------------
+
+    Category:
+      type: object
+      required: [id, name, slug, displayOrder]
+      properties:
+        id:
+          type: string
+          examples:
+            - "cat_01"
+        name:
+          type: string
+          examples:
+            - "Fast Food"
+        slug:
+          type: string
+          examples:
+            - "fast-food"
+        iconUrl:
+          type: ["string", "null"]
+          format: uri
+          examples:
+            - null
+        displayOrder:
+          type: integer
+          examples:
+            - 1
+
+    # ------------------------------------------------------------------
+    # Kitchen
+    # ------------------------------------------------------------------
+
+    KitchenSummary:
+      type: object
+      required: [id, name, rating, reviewCount, distanceKm, deliveryTimeMinutes, isOpen]
+      properties:
+        id:
+          type: string
+          examples:
+            - "ktn_01"
+        name:
+          type: string
+          examples:
+            - "Amma's Kitchen"
+        description:
+          type: ["string", "null"]
+          examples:
+            - "Home-style South Indian meals"
+        profileImageUrl:
+          type: ["string", "null"]
+          format: uri
+          examples:
+            - "https://cdn.freshbhoj.com/kitchens/ktn_01.jpg"
+        storyImageUrl:
+          type: ["string", "null"]
+          format: uri
+          examples:
+            - "https://cdn.freshbhoj.com/stories/ktn_01.jpg"
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          examples:
+            - 4.8
+        reviewCount:
+          type: integer
+          examples:
+            - 342
+        distanceKm:
+          type: number
+          format: float
+          examples:
+            - 0.8
+        deliveryTimeMinutes:
+          type: integer
+          examples:
+            - 30
+        minimumOrderRs:
+          type: integer
+          examples:
+            - 150
+        deliveryFeeRs:
+          type: integer
+          examples:
+            - 0
+        categories:
+          type: array
+          items:
+            type: string
+          examples:
+            - ["thali", "curry"]
+        offersSubscription:
+          type: boolean
+          examples:
+            - true
+        isOpen:
+          type: boolean
+          examples:
+            - true
+
+    KitchenDetail:
+      allOf:
+        - $ref: '#/components/schemas/KitchenSummary'
+        - type: object
+          properties:
+            address:
+              type: string
+              examples:
+                - "HSR Layout, Bengaluru"
+            latitude:
+              type: number
+              format: float
+              examples:
+                - 12.9355
+            longitude:
+              type: number
+              format: float
+              examples:
+                - 77.6248
+            openingTime:
+              type: string
+              examples:
+                - "08:00"
+            closingTime:
+              type: string
+              examples:
+                - "20:00"
+            menuItems:
+              type: array
+              items:
+                $ref: '#/components/schemas/FoodItem'
+            subscriptionPlans:
+              type: array
+              items:
+                $ref: '#/components/schemas/SubscriptionPlan'
+
+    KitchenStory:
+      type: object
+      required: [id, kitchenId, kitchenName, storyImageUrl, expiresAt]
+      properties:
+        id:
+          type: string
+          examples:
+            - "kst_01"
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        kitchenName:
+          type: string
+          examples:
+            - "Amma's Kitchen"
+        storyImageUrl:
+          type: string
+          format: uri
+          examples:
+            - "https://cdn.freshbhoj.com/stories/kst_01.jpg"
+        storyVideoUrl:
+          type: ["string", "null"]
+          format: uri
+          examples:
+            - null
+        expiresAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-04-12T23:59:59Z"
+
+    # ------------------------------------------------------------------
+    # Food Item
+    # ------------------------------------------------------------------
+
+    FoodItem:
+      type: object
+      required: [id, name, kitchenId, restaurantName, priceRs, rating, reviewCount, isVeg, isAvailable, isFavorite]
+      properties:
+        id:
+          type: string
+          examples:
+            - "food_01"
+        name:
+          type: string
+          examples:
+            - "Paneer Butter Masala"
+        description:
+          type: ["string", "null"]
+          examples:
+            - "Rich, creamy tomato-based curry with soft paneer cubes"
+        imageUrl:
+          type: ["string", "null"]
+          format: uri
+          examples:
+            - "https://cdn.freshbhoj.com/food/food_01.jpg"
+        rating:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 5
+          examples:
+            - 4.5
+        reviewCount:
+          type: integer
+          examples:
+            - 128
+        restaurantId:
+          type: string
+          examples:
+            - "ktn_01"
+        restaurantName:
+          type: string
+          examples:
+            - "Amma's Kitchen"
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        distanceKm:
+          type: number
+          format: float
+          examples:
+            - 1.2
+        priceRs:
+          type: integer
+          description: Price in Indian Rupees (whole number)
+          examples:
+            - 180
+        isFavorite:
+          type: boolean
+          examples:
+            - false
+        isVeg:
+          type: boolean
+          examples:
+            - true
+        isAvailable:
+          type: boolean
+          examples:
+            - true
+        categorySlug:
+          type: ["string", "null"]
+          examples:
+            - "curry"
+        tags:
+          type: array
+          items:
+            type: string
+          examples:
+            - ["popular", "bestseller"]
+
+    # ------------------------------------------------------------------
+    # Cart
+    # ------------------------------------------------------------------
+
+    CartItem:
+      type: object
+      required: [id, foodItemId, name, quantity, priceRs, lineTotalRs, kitchenId, kitchenName]
+      properties:
+        id:
+          type: string
+          examples:
+            - "citem_01"
+        foodItemId:
+          type: string
+          examples:
+            - "food_01"
+        name:
+          type: string
+          examples:
+            - "Paneer Butter Masala"
+        imageUrl:
+          type: ["string", "null"]
+          format: uri
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 10
+          examples:
+            - 2
+        priceRs:
+          type: integer
+          examples:
+            - 180
+        lineTotalRs:
+          type: integer
+          examples:
+            - 360
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        kitchenName:
+          type: string
+          examples:
+            - "Amma's Kitchen"
+
+    Cart:
+      type: object
+      required: [id, items, subtotalRs, deliveryFeeRs, taxRs, totalRs, itemCount]
+      properties:
+        id:
+          type: string
+          examples:
+            - "cart_01"
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        subtotalRs:
+          type: integer
+          examples:
+            - 360
+        deliveryFeeRs:
+          type: integer
+          examples:
+            - 0
+        taxRs:
+          type: integer
+          examples:
+            - 18
+        totalRs:
+          type: integer
+          examples:
+            - 378
+        itemCount:
+          type: integer
+          examples:
+            - 1
+        estimatedDeliveryMinutes:
+          type: ["integer", "null"]
+          examples:
+            - 30
+
+    # ------------------------------------------------------------------
+    # Orders
+    # ------------------------------------------------------------------
+
+    OrderStatus:
+      type: string
+      enum:
+        - delivering_today
+        - preparing
+        - scheduled
+        - paused
+        - placed
+        - out_for_delivery
+        - delivered
+        - cancelled
+      examples:
+        - delivering_today
+
+    ActiveOrder:
+      type: object
+      required: [id, title, status, statusLabel, kitchenName, kitchenId]
+      properties:
+        id:
+          type: string
+          examples:
+            - "ord_01"
+        title:
+          type: string
+          examples:
+            - "Daily Lunch Tiffin"
+        type:
+          type: string
+          enum: [subscription, one_time]
+          examples:
+            - subscription
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        statusLabel:
+          type: string
+          examples:
+            - "Delivering Today"
+        statusColor:
+          type: string
+          description: Hex color for the status badge
+          examples:
+            - "#22C55E"
+        nextDeliveryTime:
+          type: ["string", "null"]
+          examples:
+            - "12:30 PM"
+        nextDeliveryDate:
+          type: ["string", "null"]
+          format: date
+          examples:
+            - "2026-04-12"
+        kitchenName:
+          type: string
+          examples:
+            - "Amma's Kitchen"
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        kitchenImageUrl:
+          type: ["string", "null"]
+          format: uri
+        deliveryAddress:
+          type: ["string", "null"]
+          examples:
+            - "Koramangala, Bengaluru"
+        scheduleDetails:
+          type: ["object", "null"]
+          properties:
+            daysOfWeek:
+              type: array
+              items:
+                type: string
+              examples:
+                - ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+            deliveryTime:
+              type: string
+              examples:
+                - "12:30 PM"
+            startDate:
+              type: string
+              format: date
+              examples:
+                - "2026-04-01"
+            endDate:
+              type: ["string", "null"]
+              format: date
+              examples:
+                - "2026-04-30"
+
+    DeliveryEntry:
+      type: object
+      required: [date, dayLabel, deliveryTime, status]
+      properties:
+        date:
+          type: string
+          format: date
+          examples:
+            - "2026-04-12"
+        dayLabel:
+          type: string
+          examples:
+            - "Today"
+        deliveryTime:
+          type: string
+          examples:
+            - "12:30 PM"
+        status:
+          type: string
+          enum:
+            - scheduled
+            - out_for_delivery
+            - delivered
+            - skipped
+            - cancelled
+          examples:
+            - out_for_delivery
+        trackingAvailable:
+          type: boolean
+          examples:
+            - true
+
+    OrderDetail:
+      type: object
+      required: [id, userId, kitchenId, type, status, totalRs, createdAt]
+      properties:
+        id:
+          type: string
+          examples:
+            - "ord_01"
+        userId:
+          type: string
+          examples:
+            - "usr_01HXYZ"
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        kitchenName:
+          type: string
+          examples:
+            - "Amma's Kitchen"
+        subscriptionId:
+          type: ["string", "null"]
+          examples:
+            - "sub_01"
+        type:
+          type: string
+          enum: [subscription, one_time]
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        title:
+          type: ["string", "null"]
+          examples:
+            - "Daily Lunch Tiffin"
+        items:
+          type: array
+          items:
+            type: object
+            required: [foodItemId, name, priceRs, quantity, lineTotalRs]
+            properties:
+              foodItemId:
+                type: string
+              name:
+                type: string
+              priceRs:
+                type: integer
+              quantity:
+                type: integer
+              lineTotalRs:
+                type: integer
+        subtotalRs:
+          type: integer
+          examples:
+            - 360
+        deliveryFeeRs:
+          type: integer
+          examples:
+            - 0
+        taxRs:
+          type: integer
+          examples:
+            - 18
+        totalRs:
+          type: integer
+          examples:
+            - 378
+        deliveryAddress:
+          $ref: '#/components/schemas/Location'
+        deliveredAt:
+          type: ["string", "null"]
+          format: date-time
+        cancelledAt:
+          type: ["string", "null"]
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-04-12T12:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          examples:
+            - "2026-04-12T12:00:00Z"
+
+    # ------------------------------------------------------------------
+    # Subscriptions
+    # ------------------------------------------------------------------
+
+    SubscriptionPlan:
+      type: object
+      required: [id, kitchenId, name, priceRs, billingCycle, mealsPerDay, daysPerWeek, deliveryTimes, isVeg]
+      properties:
+        id:
+          type: string
+          examples:
+            - "plan_01"
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        name:
+          type: string
+          examples:
+            - "Monthly Lunch Tiffin"
+        description:
+          type: ["string", "null"]
+          examples:
+            - "2 rotis + sabzi + dal + rice + salad"
+        priceRs:
+          type: integer
+          examples:
+            - 2999
+        billingCycle:
+          type: string
+          enum: [weekly, monthly]
+          examples:
+            - monthly
+        mealsPerDay:
+          type: integer
+          minimum: 1
+          examples:
+            - 1
+        daysPerWeek:
+          type: integer
+          minimum: 1
+          maximum: 7
+          examples:
+            - 5
+        deliveryTimes:
+          type: array
+          items:
+            type: string
+          examples:
+            - ["12:30 PM"]
+        isVeg:
+          type: boolean
+          examples:
+            - true
+        trialDays:
+          type: integer
+          minimum: 0
+          examples:
+            - 3
+        cancellationPolicy:
+          type: ["string", "null"]
+          examples:
+            - "Cancel anytime, 24h notice"
+
+    Subscription:
+      type: object
+      required: [id, userId, planId, kitchenId, status, startDate, deliveryTime]
+      properties:
+        id:
+          type: string
+          examples:
+            - "sub_01"
+        userId:
+          type: string
+          examples:
+            - "usr_01HXYZ"
+        planId:
+          type: string
+          examples:
+            - "plan_01"
+        kitchenId:
+          type: string
+          examples:
+            - "ktn_01"
+        deliveryTime:
+          type: string
+          examples:
+            - "12:30 PM"
+        status:
+          type: string
+          enum: [active, paused, cancelled, expired]
+          examples:
+            - active
+        startDate:
+          type: string
+          format: date
+          examples:
+            - "2026-04-13"
+        endDate:
+          type: ["string", "null"]
+          format: date
+          examples:
+            - "2026-04-30"
+        pauseUntil:
+          type: ["string", "null"]
+          format: date
+        cancelledAt:
+          type: ["string", "null"]
+          format: date-time
+        cancellationReason:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+          format: date-time
+
+    # ------------------------------------------------------------------
+    # Geo
+    # ------------------------------------------------------------------
+
+    GeoPlace:
+      type: object
+      required: [placeId, address, latitude, longitude]
+      properties:
+        placeId:
+          type: string
+          examples:
+            - "ChIJ..."
+        address:
+          type: string
+          examples:
+            - "Koramangala, Bengaluru, Karnataka 560034"
+        latitude:
+          type: number
+          format: float
+          examples:
+            - 12.9352
+        longitude:
+          type: number
+          format: float
+          examples:
+            - 77.6245
+        type:
+          type: ["string", "null"]
+          examples:
+            - "neighborhood"
+
+    # ------------------------------------------------------------------
+    # Category Carousel item
+    # ------------------------------------------------------------------
+
+    CategoryCarouselItem:
+      type: object
+      required: [id, label, imageUrl, slug]
+      properties:
+        id:
+          type: string
+          examples:
+            - "ccat_01"
+        label:
+          type: string
+          examples:
+            - "Thali"
+        imageUrl:
+          type: string
+          format: uri
+          examples:
+            - "https://cdn.freshbhoj.com/categories/thali.jpg"
+        slug:
+          type: string
+          examples:
+            - "thali"
+
+  # -------------------------------------------------------------------------
+  # Reusable Responses
+  # -------------------------------------------------------------------------
+
+  responses:
+
+    Unauthorized:
+      description: Missing or invalid access token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            error:
+              code: UNAUTHORIZED
+              message: "Access token is missing or invalid."
+
+    Forbidden:
+      description: Token valid but insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            error:
+              code: FORBIDDEN
+              message: "You do not have permission to perform this action."
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            error:
+              code: NOT_FOUND
+              message: "The requested resource was not found."
+
+    ValidationError:
+      description: Request body failed validation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            error:
+              code: VALIDATION_ERROR
+              message: "One or more fields are invalid."
+              details:
+                phoneNumber: "Must be exactly 10 digits."
+
+    RateLimited:
+      description: Too many requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+          example:
+            success: false
+            error:
+              code: RATE_LIMITED
+              message: "Too many requests. Please try again later."
+
+# =============================================================================
+# PATHS
+# =============================================================================
+
+paths:
+
+  # ---------------------------------------------------------------------------
+  # Auth
+  # ---------------------------------------------------------------------------
+
+  /auth/send-otp:
+    post:
+      tags: [Auth]
+      summary: Send OTP
+      description: |
+        Sends a 6-digit OTP to the given phone number via SMS.
+        - Max **3 requests per phone per 10 minutes**.
+        - OTP is valid for **5 minutes**.
+        - OTP is single-use only.
+      operationId: sendOtp
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phoneNumber, countryCode]
+              properties:
+                phoneNumber:
+                  $ref: '#/components/schemas/PhoneNumber'
+                countryCode:
+                  $ref: '#/components/schemas/CountryCode'
+            example:
+              phoneNumber: "9876543210"
+              countryCode: "+91"
+      responses:
+        '200':
+          description: OTP sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [message, expiresInSeconds, maskedPhone]
+                    properties:
+                      message:
+                        type: string
+                        examples:
+                          - "OTP sent successfully"
+                      expiresInSeconds:
+                        type: integer
+                        examples:
+                          - 300
+                      maskedPhone:
+                        type: string
+                        examples:
+                          - "******3210"
+        '400':
+          description: Invalid phone number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                error:
+                  code: INVALID_PHONE
+                  message: "Enter a valid 10-digit mobile number."
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          description: SMS gateway unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                error:
+                  code: SMS_GATEWAY_UNAVAILABLE
+                  message: "Unable to send OTP right now. Please try again."
+
+  /auth/verify-otp:
+    post:
+      tags: [Auth]
+      summary: Verify OTP
+      description: |
+        Verifies the OTP and returns a token pair.
+        The `isNewUser` flag drives the frontend navigation decision:
+        - `true` → navigate to `OTPSuccess → PersonalDetails`
+        - `false` → navigate directly to `Home`
+
+        Max **5 failed attempts** per OTP before it is locked.
+      operationId: verifyOtp
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phoneNumber, countryCode, otp]
+              properties:
+                phoneNumber:
+                  $ref: '#/components/schemas/PhoneNumber'
+                countryCode:
+                  $ref: '#/components/schemas/CountryCode'
+                otp:
+                  $ref: '#/components/schemas/OtpCode'
+            example:
+              phoneNumber: "9876543210"
+              countryCode: "+91"
+              otp: "482917"
+      responses:
+        '200':
+          description: OTP verified. Tokens returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    allOf:
+                      - $ref: '#/components/schemas/TokenPair'
+                      - type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/User'
+        '400':
+          description: OTP verification failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                invalid_otp:
+                  summary: Wrong OTP
+                  value:
+                    success: false
+                    error:
+                      code: INVALID_OTP
+                      message: "The OTP you entered is incorrect."
+                otp_expired:
+                  summary: OTP expired
+                  value:
+                    success: false
+                    error:
+                      code: OTP_EXPIRED
+                      message: "This OTP has expired. Please request a new one."
+                otp_already_used:
+                  summary: OTP reused
+                  value:
+                    success: false
+                    error:
+                      code: OTP_ALREADY_USED
+                      message: "This OTP has already been used."
+                otp_locked:
+                  summary: Too many failed attempts
+                  value:
+                    success: false
+                    error:
+                      code: OTP_LOCKED
+                      message: "Too many incorrect attempts. Request a new OTP."
+        '404':
+          description: No active OTP found for this phone number
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                error:
+                  code: OTP_NOT_FOUND
+                  message: "No active OTP found. Please request a new one."
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /auth/refresh-token:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      description: |
+        Exchange a valid refresh token for a new access token.
+        The old refresh token is **revoked** on success (token rotation).
+        Store the new refresh token in device Keychain.
+      operationId: refreshToken
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  examples:
+                    - "rt_a1b2c3d4e5f6..."
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [accessToken, accessTokenExpiresAt]
+                    properties:
+                      accessToken:
+                        type: string
+                        examples:
+                          - "eyJhbGciOiJSUzI1NiJ9..."
+                      accessTokenExpiresAt:
+                        type: string
+                        format: date-time
+                        examples:
+                          - "2026-04-12T15:30:00Z"
+        '401':
+          description: Refresh token invalid or expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              examples:
+                invalid:
+                  value:
+                    success: false
+                    error:
+                      code: REFRESH_TOKEN_INVALID
+                      message: "Refresh token is invalid or has been revoked."
+                expired:
+                  value:
+                    success: false
+                    error:
+                      code: REFRESH_TOKEN_EXPIRED
+                      message: "Refresh token has expired. Please log in again."
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout
+      description: Revokes the provided refresh token server-side. The access token will expire naturally (TTL 1h).
+      operationId: logout
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken:
+                  type: string
+                  examples:
+                    - "rt_a1b2c3d4e5f6..."
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        examples:
+                          - "Logged out successfully."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # User / Profile
+  # ---------------------------------------------------------------------------
+
+  /users/me:
+    get:
+      tags: [User]
+      summary: Get my profile
+      description: Returns the full profile of the authenticated user.
+      operationId: getMyProfile
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/me/profile:
+    put:
+      tags: [User]
+      summary: Update personal details
+      description: |
+        Updates the user's personal details (name and email).
+        Corresponds to **Step 0** of the PersonalDetails screen.
+        Does **not** mark `profileComplete = true` — that requires a saved location too.
+      operationId: updateMyProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                  minLength: 2
+                  maxLength: 100
+                  examples:
+                    - "Sumit Sharma"
+                email:
+                  type: ["string", "null"]
+                  format: email
+                  examples:
+                    - "sumit@email.com"
+                profileImageUrl:
+                  type: ["string", "null"]
+                  format: uri
+                  description: URL of the uploaded profile image (use /media/upload-url to get an upload URL first)
+      responses:
+        '200':
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        examples:
+                          - "usr_01HXYZ"
+                      fullName:
+                        type: string
+                        examples:
+                          - "Sumit Sharma"
+                      email:
+                        type: string
+                        format: email
+                        examples:
+                          - "sumit@email.com"
+                      profileComplete:
+                        type: boolean
+                        examples:
+                          - false
+                      updatedAt:
+                        type: string
+                        format: date-time
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Email already in use by another account
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                error:
+                  code: EMAIL_ALREADY_IN_USE
+                  message: "This email is already linked to another account."
+
+  /users/me/location:
+    put:
+      tags: [User]
+      summary: Save delivery location
+      description: |
+        Saves the user's primary delivery location.
+        Corresponds to **Step 1** of the PersonalDetails screen.
+        Sets `profileComplete = true` once both profile and location are saved.
+      operationId: updateMyLocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [address, latitude, longitude]
+              properties:
+                address:
+                  type: string
+                  minLength: 5
+                  maxLength: 255
+                  examples:
+                    - "Koramangala, Bengaluru, Karnataka 560034"
+                latitude:
+                  type: number
+                  format: float
+                  minimum: -90
+                  maximum: 90
+                  examples:
+                    - 12.9352
+                longitude:
+                  type: number
+                  format: float
+                  minimum: -180
+                  maximum: 180
+                  examples:
+                    - 77.6245
+                landmark:
+                  type: ["string", "null"]
+                  maxLength: 100
+                  examples:
+                    - "Near Forum Mall"
+      responses:
+        '200':
+          description: Location saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    properties:
+                      location:
+                        $ref: '#/components/schemas/Location'
+                      profileComplete:
+                        type: boolean
+                        examples:
+                          - true
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # Geo / Address Search
+  # ---------------------------------------------------------------------------
+
+  /geo/search:
+    get:
+      tags: [Geo]
+      summary: Autocomplete address search
+      description: |
+        Returns address suggestions for the location search bar
+        in the PersonalDetails screen.
+        Proxies to Google Places API or MapMyIndia — API keys are **never** exposed to the client.
+      operationId: searchAddress
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+          description: Search query
+          example: "Koramangala"
+        - $ref: '#/components/parameters/LatParam'
+        - $ref: '#/components/parameters/LngParam'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+      responses:
+        '200':
+          description: Address suggestions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/GeoPlace'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # Home Feed
+  # ---------------------------------------------------------------------------
+
+  /home/feed:
+    get:
+      tags: [Home]
+      summary: Get home feed
+      description: |
+        Composite endpoint that returns all data for the Home screen in a single
+        request: categories, kitchen stories, category carousel items, trending
+        food items, and the active order card.
+
+        Use the user's saved `location.latitude` / `location.longitude` if
+        `lat` and `lng` are not provided in the query.
+      operationId: getHomeFeed
+      parameters:
+        - $ref: '#/components/parameters/LatParam'
+        - $ref: '#/components/parameters/LngParam'
+        - $ref: '#/components/parameters/RadiusParam'
+      responses:
+        '200':
+          description: Home feed data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [categories, kitchenStories, categoryCarousel, trendingItems]
+                    properties:
+                      categories:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Category'
+                      kitchenStories:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/KitchenStory'
+                      categoryCarousel:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CategoryCarouselItem'
+                      trendingItems:
+                        type: object
+                        required: [items, total, page, limit]
+                        properties:
+                          items:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/FoodItem'
+                          total:
+                            type: integer
+                            examples:
+                              - 48
+                          page:
+                            type: integer
+                            examples:
+                              - 1
+                          limit:
+                            type: integer
+                            examples:
+                              - 12
+                      activeOrder:
+                        oneOf:
+                          - type: "null"
+                          - $ref: '#/components/schemas/ActiveOrder'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # Categories
+  # ---------------------------------------------------------------------------
+
+  /categories:
+    get:
+      tags: [Categories]
+      summary: List all categories
+      description: Returns the full list of food categories for the CategoryPills component.
+      operationId: listCategories
+      responses:
+        '200':
+          description: Category list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # Kitchens
+  # ---------------------------------------------------------------------------
+
+  /kitchens:
+    get:
+      tags: [Kitchens]
+      summary: List kitchens near a location
+      description: Returns kitchens within the specified radius, used for kitchen stories and category carousels.
+      operationId: listKitchens
+      parameters:
+        - $ref: '#/components/parameters/LatParam'
+        - $ref: '#/components/parameters/LngParam'
+        - $ref: '#/components/parameters/RadiusParam'
+        - name: categorySlug
+          in: query
+          schema:
+            type: string
+          description: Filter by category
+          example: "thali"
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Kitchen list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/KitchenSummary'
+                  meta:
+                    $ref: '#/components/schemas/PaginatedMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /kitchens/{kitchenId}:
+    get:
+      tags: [Kitchens]
+      summary: Get kitchen detail
+      description: Full kitchen profile including menu and available subscription plans.
+      operationId: getKitchen
+      parameters:
+        - name: kitchenId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ktn_01"
+      responses:
+        '200':
+          description: Kitchen detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/KitchenDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Food Items
+  # ---------------------------------------------------------------------------
+
+  /food-items:
+    get:
+      tags: [Food Items]
+      summary: List food items
+      description: |
+        Search and list food items with filtering and sorting.
+        Used for the Trending Near You grid and the future Search screen.
+      operationId: listFoodItems
+      parameters:
+        - $ref: '#/components/parameters/LatParam'
+        - $ref: '#/components/parameters/LngParam'
+        - $ref: '#/components/parameters/RadiusParam'
+        - name: categorySlug
+          in: query
+          schema:
+            type: string
+          description: Filter by category slug
+          example: "curry"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [trending, rating, price_asc, price_desc, distance]
+            default: trending
+          description: Sort order
+        - name: isVeg
+          in: query
+          schema:
+            type: boolean
+          description: Filter to vegetarian items only
+        - name: maxPriceRs
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+          description: Maximum price in rupees
+          example: 300
+        - name: kitchenId
+          in: query
+          schema:
+            type: string
+          description: Filter to a specific kitchen
+        - name: q
+          in: query
+          schema:
+            type: string
+            minLength: 2
+          description: Full-text search query
+          example: "paneer"
+        - $ref: '#/components/parameters/PageParam'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 12
+      responses:
+        '200':
+          description: Food item list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FoodItem'
+                  meta:
+                    $ref: '#/components/schemas/PaginatedMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /food-items/favorites:
+    get:
+      tags: [Food Items]
+      summary: Get my favourites
+      description: Returns the authenticated user's favourited food items.
+      operationId: listFavorites
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Favourite food items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FoodItem'
+                  meta:
+                    $ref: '#/components/schemas/PaginatedMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /food-items/{foodItemId}:
+    get:
+      tags: [Food Items]
+      summary: Get food item detail
+      description: Full detail for a single food item (for future food item detail screen).
+      operationId: getFoodItem
+      parameters:
+        - name: foodItemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "food_01"
+      responses:
+        '200':
+          description: Food item detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/FoodItem'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /food-items/{foodItemId}/favorite:
+    post:
+      tags: [Food Items]
+      summary: Toggle favourite
+      description: |
+        Toggles the favourite state of a food item for the authenticated user.
+        Calling this on an already-favourited item removes it.
+        Triggered by the heart icon on `FoodCard`.
+      operationId: toggleFavorite
+      parameters:
+        - name: foodItemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "food_01"
+      requestBody:
+        description: No body required — this is a pure toggle.
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Toggle result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [foodItemId, isFavorite]
+                    properties:
+                      foodItemId:
+                        type: string
+                        examples:
+                          - "food_01"
+                      isFavorite:
+                        type: boolean
+                        examples:
+                          - true
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Orders
+  # ---------------------------------------------------------------------------
+
+  /orders/active:
+    get:
+      tags: [Orders]
+      summary: Get active order
+      description: |
+        Returns the user's currently active order or tiffin subscription.
+        This populates the `ActiveTiffinCard` on the Home screen.
+        Returns `null` in `data` if the user has no active order.
+      operationId: getActiveOrder
+      responses:
+        '200':
+          description: Active order (or null)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    oneOf:
+                      - type: "null"
+                      - $ref: '#/components/schemas/ActiveOrder'
+              examples:
+                with_active_order:
+                  summary: Active order exists
+                  value:
+                    success: true
+                    data:
+                      id: "ord_01"
+                      title: "Daily Lunch Tiffin"
+                      type: "subscription"
+                      status: "delivering_today"
+                      statusLabel: "Delivering Today"
+                      statusColor: "#22C55E"
+                      nextDeliveryTime: "12:30 PM"
+                      nextDeliveryDate: "2026-04-12"
+                      kitchenName: "Amma's Kitchen"
+                      kitchenId: "ktn_01"
+                no_active_order:
+                  summary: No active order
+                  value:
+                    success: true
+                    data: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /orders/active/schedule:
+    get:
+      tags: [Orders]
+      summary: Get active order schedule
+      description: |
+        Returns the full upcoming delivery schedule for the active tiffin subscription.
+        Triggered by the "View Schedule" button on `ActiveTiffinCard`.
+      operationId: getActiveOrderSchedule
+      responses:
+        '200':
+          description: Delivery schedule
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [orderId, deliveries]
+                    properties:
+                      orderId:
+                        type: string
+                        examples:
+                          - "ord_01"
+                      deliveries:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/DeliveryEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /orders:
+    get:
+      tags: [Orders]
+      summary: List order history
+      description: Returns paginated order history (one-time orders and subscriptions).
+      operationId: listOrders
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [subscription, one_time]
+          description: Filter by order type
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/OrderStatus'
+          description: Filter by status
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Order history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrderDetail'
+                  meta:
+                    $ref: '#/components/schemas/PaginatedMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /orders/{orderId}:
+    get:
+      tags: [Orders]
+      summary: Get order detail
+      operationId: getOrder
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "ord_01"
+      responses:
+        '200':
+          description: Order detail
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/OrderDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Subscriptions
+  # ---------------------------------------------------------------------------
+
+  /subscriptions/plans:
+    get:
+      tags: [Subscriptions]
+      summary: List subscription plans
+      description: Returns available tiffin subscription plans for a specific kitchen.
+      operationId: listSubscriptionPlans
+      parameters:
+        - name: kitchenId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Kitchen whose plans to fetch
+          example: "ktn_01"
+      responses:
+        '200':
+          description: Subscription plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscriptionPlan'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions:
+    get:
+      tags: [Subscriptions]
+      summary: List my subscriptions
+      description: Returns all active and past subscriptions for the authenticated user.
+      operationId: listSubscriptions
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [active, paused, cancelled, expired]
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Subscription list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscription'
+                  meta:
+                    $ref: '#/components/schemas/PaginatedMeta'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      tags: [Subscriptions]
+      summary: Create a subscription
+      description: Subscribe to a tiffin plan from a kitchen.
+      operationId: createSubscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planId, deliveryAddressId, startDate, deliveryTime]
+              properties:
+                planId:
+                  type: string
+                  examples:
+                    - "plan_01"
+                deliveryAddressId:
+                  type: string
+                  description: ID of user's saved location
+                  examples:
+                    - "addr_01"
+                startDate:
+                  type: string
+                  format: date
+                  description: Must be a future date
+                  examples:
+                    - "2026-04-13"
+                deliveryTime:
+                  type: string
+                  description: Must be one of the plan's deliveryTimes
+                  examples:
+                    - "12:30 PM"
+                paymentMethodId:
+                  type: ["string", "null"]
+                  examples:
+                    - "pm_01"
+      responses:
+        '201':
+          description: Subscription created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [subscriptionId, status, nextDeliveryDate, orderId]
+                    properties:
+                      subscriptionId:
+                        type: string
+                        examples:
+                          - "sub_01"
+                      status:
+                        type: string
+                        examples:
+                          - "active"
+                      nextDeliveryDate:
+                        type: string
+                        format: date
+                        examples:
+                          - "2026-04-13"
+                      orderId:
+                        type: string
+                        examples:
+                          - "ord_01"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /subscriptions/{subscriptionId}/pause:
+    patch:
+      tags: [Subscriptions]
+      summary: Pause a subscription
+      operationId: pauseSubscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "sub_01"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [pauseUntil]
+              properties:
+                pauseUntil:
+                  type: string
+                  format: date
+                  examples:
+                    - "2026-04-20"
+      responses:
+        '200':
+          description: Subscription paused
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/Subscription'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /subscriptions/{subscriptionId}:
+    delete:
+      tags: [Subscriptions]
+      summary: Cancel a subscription
+      operationId: cancelSubscription
+      parameters:
+        - name: subscriptionId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "sub_01"
+        - name: reason
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+          description: Cancellation reason
+          example: "Too expensive"
+      responses:
+        '200':
+          description: Subscription cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        examples:
+                          - "Subscription cancelled successfully."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Cart
+  # ---------------------------------------------------------------------------
+
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get cart
+      description: Returns the current cart for the authenticated user.
+      operationId: getCart
+      responses:
+        '200':
+          description: Current cart
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    delete:
+      tags: [Cart]
+      summary: Clear cart
+      description: Removes all items from the cart.
+      operationId: clearCart
+      responses:
+        '200':
+          description: Cart cleared
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                        examples:
+                          - "Cart cleared."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /cart/items:
+    post:
+      tags: [Cart]
+      summary: Add item to cart
+      description: |
+        Adds a food item to the cart. Triggered by the "+" button on `FoodCard`.
+
+        **Cross-kitchen rule:** All items in the cart must belong to the same kitchen.
+        If the user tries to add an item from a different kitchen, the API returns `409 CROSS_KITCHEN_CONFLICT`.
+        The frontend must ask the user to confirm clearing the existing cart before retrying.
+      operationId: addCartItem
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [foodItemId, quantity]
+              properties:
+                foodItemId:
+                  type: string
+                  examples:
+                    - "food_01"
+                quantity:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  examples:
+                    - 1
+      responses:
+        '200':
+          description: Item added. Returns updated cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '400':
+          description: Item not available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                error:
+                  code: ITEM_UNAVAILABLE
+                  message: "This item is currently unavailable."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          description: Item from a different kitchen than existing cart items
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+              example:
+                success: false
+                error:
+                  code: CROSS_KITCHEN_CONFLICT
+                  message: "Your cart has items from another kitchen. Clear the cart to add this item."
+                  details:
+                    existingKitchenId: "ktn_01"
+                    existingKitchenName: "Amma's Kitchen"
+                    newKitchenId: "ktn_02"
+                    newKitchenName: "Ritu's Dabba"
+
+  /cart/items/{cartItemId}:
+    patch:
+      tags: [Cart]
+      summary: Update cart item quantity
+      operationId: updateCartItem
+      parameters:
+        - name: cartItemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "citem_01"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity:
+                  type: integer
+                  minimum: 1
+                  maximum: 10
+                  examples:
+                    - 3
+      responses:
+        '200':
+          description: Cart updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      tags: [Cart]
+      summary: Remove cart item
+      operationId: removeCartItem
+      parameters:
+        - name: cartItemId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "citem_01"
+      responses:
+        '200':
+          description: Item removed. Returns updated cart.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    $ref: '#/components/schemas/Cart'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ---------------------------------------------------------------------------
+  # Search
+  # ---------------------------------------------------------------------------
+
+  /search:
+    get:
+      tags: [Search]
+      summary: Unified search
+      description: |
+        Search across food items and kitchens simultaneously.
+        Powers the future Search tab.
+      operationId: search
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 2
+          description: Search query
+          example: "paneer"
+        - $ref: '#/components/parameters/LatParam'
+        - $ref: '#/components/parameters/LngParam'
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [food, kitchen, all]
+            default: all
+          description: Restrict results to a specific type
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+      responses:
+        '200':
+          description: Search results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [query, total, foodItems, kitchens]
+                    properties:
+                      query:
+                        type: string
+                        examples:
+                          - "paneer"
+                      total:
+                        type: integer
+                        examples:
+                          - 42
+                      foodItems:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FoodItem'
+                      kitchens:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/KitchenSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ---------------------------------------------------------------------------
+  # Media Upload
+  # ---------------------------------------------------------------------------
+
+  /media/upload-url:
+    post:
+      tags: [Media]
+      summary: Get pre-signed upload URL
+      description: |
+        Generates a short-lived pre-signed URL for direct client-to-storage upload
+        (S3 or GCS). The client uploads the file directly to the URL, then passes
+        the returned `publicUrl` to the profile update endpoint.
+
+        **Never upload files to the API server directly.**
+      operationId: getUploadUrl
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [contentType, purpose]
+              properties:
+                contentType:
+                  type: string
+                  enum:
+                    - image/jpeg
+                    - image/png
+                    - image/webp
+                  examples:
+                    - "image/jpeg"
+                purpose:
+                  type: string
+                  enum:
+                    - profile_avatar
+                    - food_image
+                    - kitchen_image
+                  examples:
+                    - "profile_avatar"
+      responses:
+        '200':
+          description: Pre-signed upload URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    enum: [true]
+                  data:
+                    type: object
+                    required: [uploadUrl, publicUrl, expiresAt]
+                    properties:
+                      uploadUrl:
+                        type: string
+                        format: uri
+                        description: PUT this URL with the file binary. TTL 5 minutes.
+                        examples:
+                          - "https://storage.freshbhoj.com/presigned/..."
+                      publicUrl:
+                        type: string
+                        format: uri
+                        description: CDN URL to use in subsequent profile update calls.
+                        examples:
+                          - "https://cdn.freshbhoj.com/users/usr_01HXYZ/avatar.jpg"
+                      expiresAt:
+                        type: string
+                        format: date-time
+                        examples:
+                          - "2026-04-12T12:15:00Z"
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+# =============================================================================
+# Tags (for Swagger UI grouping)
+# =============================================================================
+
+tags:
+  - name: Auth
+    description: OTP-based phone authentication
+  - name: User
+    description: User profile and location management
+  - name: Geo
+    description: Address geocoding and autocomplete
+  - name: Home
+    description: Composite home feed endpoint
+  - name: Categories
+    description: Food category management
+  - name: Kitchens
+    description: Kitchen listings and detail
+  - name: Food Items
+    description: Food item discovery, search, and favourites
+  - name: Orders
+    description: Order history and active order tracking
+  - name: Subscriptions
+    description: Tiffin subscription plans and management
+  - name: Cart
+    description: Shopping cart operations
+  - name: Search
+    description: Unified full-text search
+  - name: Media
+    description: File upload URL generation

@@ -10,7 +10,12 @@ For IOS you would have to `pod install` and resolve linking of all native depend
 FreshBhoj is a React Native food discovery and ordering application. The current implementation establishes app shell, navigation, theme system, and reusable components that will later connect to backend APIs.
 
 ### Current Status
-UI Development Phase (no API integration yet).
+Phase 1 MVP complete: design system, full customer journey (onboarding → discovery
+→ meal detail → cart → checkout → tracking → history → kitchen profile → account),
+a shoppable reels Food Feed, and end-to-end integration with the NestJS backend.
+
+See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for tokens and the component library, and
+`../freshbhoj backend/API.md` for the API contract.
 
 ### Primary Tech Stack
 - React Native 0.84.0
@@ -18,6 +23,8 @@ UI Development Phase (no API integration yet).
 - React Navigation (native stack + bottom tabs)
 - Styling with React Native StyleSheet + centralized theme tokens
 - Zustand + MMKV (local persisted UI/auth state)
+- TanStack Query (server state, caching, infinite lists, optimistic updates)
+- Reanimated 4 (collapsing header, success animations, skeletons)
 - Zod (input validation)
 
 ## 2. Prerequisites and Installation
@@ -67,7 +74,11 @@ UI Development Phase (no API integration yet).
 - Base env variables are defined in .env:
   - APP_ENV
   - APP_NAME
-  - API_BASE_URL
+  - API_BASE_URL — must include the `/api/v1` prefix.
+    Android emulator: `http://10.0.2.2:3000/api/v1` (10.0.2.2 is the host machine).
+    iOS simulator: `http://localhost:3000/api/v1`.
+    Physical device: `http://<your-LAN-ip>:3000/api/v1`.
+    If unset, `src/api/client.ts` falls back to the Android emulator URL.
 - Android flavor to env mapping:
   - devDebug/devRelease -> .env.dev
   - stageDebug/stageRelease -> .env.stage
@@ -235,3 +246,60 @@ Font assets are stored in assets/fonts and consumed through theme typography map
 3. Connect Login and OTP to real auth endpoints.
 4. Add deep link / external navigation handlers for legal links.
 5. Expand private tab screens and data-driven UI modules.
+
+---
+
+## 12. API Layer
+
+All network access goes through `src/api`. Nothing else in the app calls `fetch`.
+
+```
+src/api/
+  client.ts      fetch wrapper: base URL, bearer token, timeout, error normalisation,
+                 and a single-flight refresh so parallel 401s don't race the
+                 rotating refresh token
+  tokenStore.ts  MMKV-backed tokens, kept out of Zustand so the client can read
+                 and rotate them without a circular import
+  queryClient.ts TanStack Query defaults (4xx never retried — it will stay wrong)
+  queryKeys.ts   every cache key in one place, so invalidation cannot miss one
+  types.ts       response shapes mirroring the backend DTOs
+  endpoints/     one typed module per domain
+```
+
+Each feature wraps those in hooks (`useCart`, `useMealFeed`, `useOrderTracking`,
+`useReelFeed`, …) that own caching, pagination and optimistic updates. Screens
+consume hooks and never touch the client directly.
+
+Behaviours worth knowing:
+
+- **Session expiry.** When a refresh finally fails, the client calls the handler
+  registered by `authStore`, which signs the user out and clears the query cache.
+- **Optimistic updates.** Favourites, kitchen follows and reel likes flip
+  instantly and revert on failure — a heart that waits for a round-trip feels broken.
+- **Polling that stops.** `useOrderTracking` polls every 15s only while the order
+  is moving; a delivered or cancelled order costs nothing.
+- **Cart conflicts.** A cart holds one kitchen's food. The API answers `409
+  CART_KITCHEN_CONFLICT`; `useAddToCartFlow` catches it, asks the user, and
+  replays the add with `replaceCart`.
+
+## 13. Screen Map
+
+**Public stack** — Onboarding → Login → OTP → OTPSuccess → PersonalDetails
+(profile step, then area selection).
+
+**Tabs** — Home · Search · Food Feed · Orders · Profile.
+
+**Private stack** — MealDetail, KitchenProfile, KitchenGallery, KitchenReviews,
+ReelViewer, Favorites, FollowedKitchens, Cart, Checkout, PaymentProcessing,
+OrderConfirmation, OrderTracking, OrderDetail, WriteReview, Addresses,
+AddressForm, Support, Settings, EditProfile.
+
+Route params are typed in [src/app/navigation/navigation.types.ts](src/app/navigation/navigation.types.ts).
+
+## 14. Testing
+
+`npm test` runs the Jest suite. `jest.setup.js` mocks the native modules that
+have no JS implementation under Node (Worklets/Reanimated, keyboard-controller,
+MMKV, config, gradients, masked view, bottom sheet, OTP entry, checkbox), and
+`jest.config.js` maps the `@app` / `@components` / `@features` / `@utils` / `@api`
+path aliases so tests resolve imports the same way Metro does.

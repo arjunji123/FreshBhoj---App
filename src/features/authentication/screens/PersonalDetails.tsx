@@ -3,7 +3,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
-import authNavigation from '../hooks/authNavigation';
+import useAuthNavigation from '../hooks/useAuthNavigation';
 import { useAuthStore } from '../store/authStore';
 
 // Theme
@@ -19,7 +19,7 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.82;
 
 const PersonalDetails = () => {
-  const navigation = authNavigation();
+  const navigation = useAuthNavigation();
   const sheetRef = useRef<any>(null);
   const [step, setStep] = useState(0); // 0 = Personal Details, 1 = Select Location
 

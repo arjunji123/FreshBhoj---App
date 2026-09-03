@@ -9,7 +9,6 @@ import {
   TextStyle,
 } from 'react-native';
 import { theme } from '@app/theme/index';
-import GradientButton from './GradientButton';
 import GradientText from './GradientText';
 
 interface SectionHeaderProps {

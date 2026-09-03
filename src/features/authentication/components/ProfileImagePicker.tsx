@@ -6,10 +6,9 @@ import { theme } from '@app/theme/index';
 
 const AVATAR_SIZE = 128;
 const BADGE_SIZE = 33;
-const BRAND_RED = 'rgba(212, 17, 27, 1)';
-const BRAND_RED_LIGHT = 'rgba(212, 17, 27, 0.05)';
-const BRAND_RED_BORDER = 'rgba(212, 17, 27, 0.2)';
-const BRAND_RED_ICON = 'rgba(212, 17, 27, 0.4)';
+const BRAND_RED_LIGHT = theme.colors.primary[50];
+const BRAND_RED_BORDER = theme.colors.overlay.primaryBorder;
+const BRAND_RED_ICON = theme.colors.primary[300];
 
 const ProfileImagePicker = () => {
     return (

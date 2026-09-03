@@ -2,9 +2,8 @@ import { View, Text, Image, Dimensions, StyleSheet } from 'react-native'
 import React, { useEffect } from 'react'
 import { colors, spacing, theme, typography } from '@app/theme';
 import OnboardingPaginator from './OnboardingPaginator';
-import AppButton from '@components/AppButton';
 import GradientButton from '@components/GradientButton';
-import { ArrowRight, Sparkles, Utensils } from 'lucide-react-native';
+import { ArrowRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import GradientText from '@components/GradientText';
@@ -81,7 +80,7 @@ const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive,
                 {item.variant === 'plate' ? (
                     <>
                         {/* <View style={styles.floatChipRight}>
-                            <Sparkles size={16} color={colors.secondary} />
+                            <Sparkles size={16} color={colors.gradient2} />
                         </View>
                         <View style={styles.floatChipLeft}>
                             <Utensils size={14} color={'#3B82F6'} />

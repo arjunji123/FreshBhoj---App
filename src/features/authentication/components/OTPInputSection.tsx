@@ -1,107 +1,140 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { OtpInput } from "react-native-otp-entry";
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { OtpInput } from 'react-native-otp-entry';
+import { AlertCircle } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import GradientButton from '@components/GradientButton';
+import { Button } from '@components/ui';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { OTPInputSectionProps } from '../auth.types';
+import { useResendCooldown } from '../hooks/useResendCooldown';
 
-const OTPInputSection: React.FC<OTPInputSectionProps> = ({ onSubmit, onResend }) => {
-    const [otpValue, setOtpValue] = useState('');
+const OTPInputSection: React.FC<OTPInputSectionProps> = ({
+  onSubmit,
+  onResend,
+  errorMessage,
+  isSubmitting = false,
+}) => {
+  const [otpValue, setOtpValue] = useState('');
+  const { canResend, label, restart } = useResendCooldown();
 
-    const handleSubmit = () => {
-        onSubmit(otpValue);
-    };
+  const handleResend = () => {
+    if (!canResend) return;
+    restart();
+    onResend();
+  };
 
-    return (
-        <View style={styles.container}>
-            <OtpInput
-                numberOfDigits={AUTH_VALUES.otpDigits}
-                onTextChange={setOtpValue}
-                focusColor={theme.colors.primary}
-                theme={{
-                    containerStyle: styles.otpContainer,
-                    pinCodeContainerStyle: styles.pinCodeContainer,
-                    pinCodeTextStyle: styles.pinCodeText,
-                    focusedPinCodeContainerStyle: styles.focusedPinCodeContainer,
-                }}
-            />
+  return (
+    <View style={styles.container}>
+      <OtpInput
+        numberOfDigits={AUTH_VALUES.otpDigits}
+        onTextChange={setOtpValue}
+        // Auto-submitting on the last digit saves a tap; the button stays for
+        // anyone who pastes a code or edits after filling.
+        onFilled={(code) => !isSubmitting && onSubmit(code)}
+        focusColor={errorMessage ? theme.colors.state.error : theme.colors.primary[600]}
+        theme={{
+          containerStyle: styles.otpContainer,
+          pinCodeContainerStyle: [
+            styles.pinCodeContainer,
+            errorMessage ? styles.pinCodeContainerError : null,
+          ] as any,
+          pinCodeTextStyle: styles.pinCodeText,
+          focusedPinCodeContainerStyle: styles.focusedPinCodeContainer,
+        }}
+      />
 
-            <View style={styles.resendContainer}>
-                <Text style={styles.resendText}>{AUTH_COPY.otpResendPrefix}</Text>
-                <TouchableOpacity onPress={onResend} activeOpacity={0.7}>
-                    <Text style={styles.resendLink}>{AUTH_COPY.otpResendAction}</Text>
-                    <View style={styles.resendLine} />
-                </TouchableOpacity>
-            </View>
-
-            <GradientButton
-                title={AUTH_COPY.otpSubmit}
-                onPress={handleSubmit}
-                style={styles.submitButton}
-                textStyle={styles.submiteButtonText}
-                disabled={otpValue.length < AUTH_VALUES.otpDigits}
-            />
+      {errorMessage ? (
+        <View style={styles.errorRow}>
+          <AlertCircle size={14} color={theme.colors.state.error} strokeWidth={2.4} />
+          <Text style={[theme.text.caption, styles.errorText]}>{errorMessage}</Text>
         </View>
-    );
+      ) : null}
+
+      <View style={styles.resendContainer}>
+        <Text style={[theme.text.bodySmall, styles.resendText]}>{AUTH_COPY.otpResendPrefix}</Text>
+        {canResend ? (
+          <Pressable onPress={handleResend} hitSlop={theme.layout.hitSlop}>
+            <Text style={[theme.text.label, styles.resendLink]}>{AUTH_COPY.otpResendAction}</Text>
+            <View style={styles.resendLine} />
+          </Pressable>
+        ) : (
+          <Text style={[theme.text.label, styles.resendCountdown]}>Resend in {label}</Text>
+        )}
+      </View>
+
+      <Button
+        title={AUTH_COPY.otpSubmit}
+        onPress={() => onSubmit(otpValue)}
+        loading={isSubmitting}
+        disabled={otpValue.length < AUTH_VALUES.otpDigits}
+      />
+    </View>
+  );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        paddingHorizontal: theme.spacing.screenPadding,
-        alignItems: 'center',
-        width: '100%',
-    },
-    otpContainer: {
-        width: '100%',
-        justifyContent: 'space-between',
-        marginBottom: theme.spacing.paddings.xl,
-    },
-    pinCodeContainer: {
-        width: 45,
-        height: 55,
-        borderRadius: theme.spacing.borderRadius.md,
-        borderColor: theme.colors.border,
-        borderWidth: 1,
-        backgroundColor: theme.colors.palette.white,
-    },
-    focusedPinCodeContainer: {
-        borderColor: theme.colors.primary,
-        borderWidth: 2,
-    },
-    pinCodeText: {
-        fontSize: theme.typography.fontSizes.xl,
-        fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
-        color: theme.colors.palette.black,
-    },
-    resendContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: theme.spacing.paddings.xxxl,
-    },
-    resendText: {
-        fontSize: theme.typography.fontSizes.sm,
-        fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
-        color: theme.colors.textGray1,
-    },
-    resendLink: {
-        fontSize: theme.typography.fontSizes.sm,
-        fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
-        color: theme.colors.primary,
-    },
-    resendLine: {
-        height: 1,
-        backgroundColor: theme.colors.primary,
-        width: '100%',
-        marginTop: 1,
-    },
-    submitButton: {
-        width: '100%',
-    },
-    submiteButtonText:{
-        fontSize: theme.typography.fontSizes.xxl,
-        fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
-    }
-});
-
 export default OTPInputSection;
+
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: theme.layout.screenPadding,
+    alignItems: 'center',
+    width: '100%',
+  },
+  otpContainer: {
+    width: '100%',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.lg,
+  },
+  pinCodeContainer: {
+    width: 48,
+    height: 58,
+    borderRadius: theme.radius.control,
+    borderColor: theme.colors.borders.subtle,
+    borderWidth: 1.5,
+    backgroundColor: theme.colors.neutral[50],
+  },
+  pinCodeContainerError: {
+    borderColor: theme.colors.state.error,
+    backgroundColor: theme.colors.state.errorBg,
+  },
+  focusedPinCodeContainer: {
+    borderColor: theme.colors.primary[600],
+    borderWidth: 2,
+    backgroundColor: theme.colors.surface.base,
+  },
+  pinCodeText: {
+    ...theme.text.h2,
+    color: theme.colors.text.primary,
+  },
+  errorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: theme.spacing.md,
+  },
+  errorText: {
+    color: theme.colors.state.error,
+    flexShrink: 1,
+  },
+  resendContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xxl,
+    gap: 4,
+  },
+  resendText: {
+    color: theme.colors.text.secondary,
+  },
+  resendLink: {
+    color: theme.colors.primary[600],
+  },
+  resendLine: {
+    height: 1.5,
+    backgroundColor: theme.colors.primary[600],
+    width: '100%',
+    marginTop: 1,
+  },
+  resendCountdown: {
+    color: theme.colors.text.tertiary,
+  },
+});

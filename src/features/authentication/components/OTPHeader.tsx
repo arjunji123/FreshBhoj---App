@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
         width: 40,
         height: 40,
         borderRadius: 20,
-        backgroundColor: theme.colors.primary,
+        backgroundColor: theme.colors.primary[600],
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 10,

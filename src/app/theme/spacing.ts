@@ -6,6 +6,10 @@ const layout = {
     borderWidth: 1
 };
 
+/**
+ * Radius scale. The app leans large — 16px is the default for a card, 24px for
+ * a hero surface — which is what gives the soft, modern feel.
+ */
 const borderRadius = {
     none: 0,
     xs: moderateScale(2),
@@ -16,6 +20,18 @@ const borderRadius = {
     xxl: moderateScale(24),
     xxxl: moderateScale(32),
     round: moderateScale(9999),
+
+    // ── Named aliases used by the component library ────────────────────────
+    /** Inputs, chips, small buttons. */
+    control: moderateScale(14),
+    /** Standard content card. */
+    card: moderateScale(20),
+    /** Large CTA buttons. */
+    button: moderateScale(18),
+    /** Bottom sheets and the curved bottom of the app header. */
+    sheet: moderateScale(28),
+    /** Fully rounded pill. */
+    pill: moderateScale(9999),
 };
 
 const paddings = {
@@ -30,6 +46,20 @@ const paddings = {
     xxxl: moderateScale(48),
     screenPadding: moderateScale(16),
     gutter: moderateScale(12),
+};
+
+/** Layout constants shared across screens. */
+export const layoutTokens = {
+    /** Horizontal gutter every screen uses. */
+    screenPadding: moderateScale(20),
+    /** Gap between cards in a grid. */
+    gridGap: moderateScale(16),
+    /** Height of the sticky bottom action bar (before safe-area inset). */
+    stickyBarHeight: moderateScale(76),
+    /** Height of the bottom tab bar (before safe-area inset). */
+    tabBarHeight: moderateScale(64),
+    /** Standard tap-target minimum. */
+    hitSlop: { top: 8, bottom: 8, left: 8, right: 8 },
 };
 
 export const spacing = {
@@ -50,6 +80,7 @@ export const spacing = {
     paddings: paddings,
     borderRadius: borderRadius,
     layout: layout,
+    tokens: layoutTokens,
 };
 
 

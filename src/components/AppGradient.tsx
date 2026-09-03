@@ -1,7 +1,7 @@
 import React from 'react';
-import { StyleSheet, ViewStyle, StyleProp } from 'react-native';
+import { ViewStyle, StyleProp } from 'react-native';
 import LinearGradient, { LinearGradientProps } from 'react-native-linear-gradient';
-import { colors, theme } from '@app/theme/index';
+import { theme } from '@app/theme/index';
 
 type GradientDirection = 'vertical' | 'horizontal' | 'diagonal';
 

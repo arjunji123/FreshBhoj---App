@@ -14,18 +14,22 @@ import LoginTitle from '../components/LoginTitle';
 import LoginPhoneInput from '../components/LoginPhoneInput';
 import SocialLogin from '../components/SocialLogin';
 import LoginFooter from '../components/LoginFooter';
-import authNavigation from '../hooks/authNavigation';
+import useAuthNavigation from '../hooks/useAuthNavigation';
 import GradientButton from '@components/GradientButton';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { phoneNumberSchema } from '../auth.types';
 import { useAuthStore } from '../store/authStore';
+import { useSendOtp } from '../hooks/useAuth';
+import { ApiError } from '@api';
 
 const Login = () => {
   const phoneNumber = useAuthStore((state) => state.phoneNumber);
   const rememberMe = useAuthStore((state) => state.rememberMe);
   const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
   const setRememberMe = useAuthStore((state) => state.setRememberMe);
-  const navigation = authNavigation();
+  const navigation = useAuthNavigation();
+  const sendOtp = useSendOtp();
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
   const isPhoneValid = useMemo(() => phoneNumberSchema.safeParse(phoneNumber).success, [phoneNumber]);
 
@@ -34,7 +38,25 @@ const Login = () => {
       .replace(AUTH_VALUES.phoneNonDigitRegex, '')
       .slice(0, AUTH_VALUES.phoneMaxLength);
 
+    setErrorMessage(null);
     setPhoneNumber(sanitizedValue);
+  };
+
+  const handleContinue = () => {
+    if (!isPhoneValid) return;
+    setErrorMessage(null);
+
+    sendOtp.mutate(phoneNumber, {
+      // Navigate on success only — sending the user to the OTP screen when no
+      // SMS actually went out is the worst version of this flow.
+      onSuccess: () => navigation.navigate('OTP', { phoneNumber }),
+      onError: (error) =>
+        setErrorMessage(
+          error instanceof ApiError
+            ? error.message
+            : 'We could not send the code. Please try again.',
+        ),
+    });
   };
 
   return (
@@ -59,20 +81,22 @@ const Login = () => {
           <CheckBox
             value={rememberMe}
             onValueChange={setRememberMe}
-            tintColors={{ true: theme.colors.primary, false: theme.colors.border }}
+            tintColors={{ true: theme.colors.primary[600], false: theme.colors.border }}
             boxType="square"
             onCheckColor={theme.colors.palette.white}
-            onFillColor={theme.colors.primary}
-            onTintColor={theme.colors.primary}
+            onFillColor={theme.colors.primary[600]}
+            onTintColor={theme.colors.primary[600]}
             style={Platform.OS === 'ios' ? styles.checkboxIOS : styles.checkboxAndroid}
           />
           <Text onPress={() => { setRememberMe(!rememberMe) }} style={styles.checkboxText}>{AUTH_COPY.loginRememberMe}</Text>
         </View>
 
+        {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+
         <GradientButton
-          title={AUTH_COPY.loginContinue}
-          onPress={() => { navigation.navigate('OTP', { phoneNumber: phoneNumber }) }}
-          disabled={!isPhoneValid}
+          title={sendOtp.isPending ? 'Sending code…' : AUTH_COPY.loginContinue}
+          onPress={handleContinue}
+          disabled={!isPhoneValid || sendOtp.isPending}
           style={styles.continueButton}
           textStyle={styles.continueButtonText}
           gradientColors={theme.colors.defaultColor}
@@ -129,6 +153,11 @@ const styles = StyleSheet.create({
   },
   checkboxAndroid: {
     marginRight: theme.spacing.paddings.xs,
+  },
+  errorText: {
+    ...theme.text.caption,
+    color: theme.colors.state.error,
+    marginBottom: theme.spacing.sm,
   },
   checkboxText: {
     fontSize: theme.typography.fontSizes.md,

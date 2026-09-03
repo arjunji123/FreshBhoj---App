@@ -1,27 +1,16 @@
-import type {ImageSourcePropType} from 'react-native';
-import type {SharedValue} from 'react-native-reanimated';
-import type {FoodCardItem} from '@components/FoodCard';
-
-export type {FoodCardItem};
-
-export interface StoryItem {
-  id: string;
-  name: string;
-  image: string;
-}
-
-export interface CategoryDataItem {
-  id: string;
-  name: string;
-  image: ImageSourcePropType;
-}
+import type { SharedValue } from 'react-native-reanimated';
+import type { GoalTag } from '@api/types';
 
 export interface HomeHeaderProps {
   scrollY: SharedValue<number>;
+  cartCount?: number;
+  onPressLocation?: () => void;
+  onPressSearch?: () => void;
+  onPressProfile?: () => void;
+  onPressCart?: () => void;
 }
 
-export interface CarouselItemProps {
-  item: CategoryDataItem;
-  index: number;
-  scrollX: SharedValue<number>;
+export interface GoalFilterState {
+  goalTags: GoalTag[];
+  category?: string;
 }

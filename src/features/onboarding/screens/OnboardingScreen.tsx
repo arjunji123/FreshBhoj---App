@@ -1,6 +1,6 @@
 import { View, StyleSheet } from 'react-native'
 import React, { useMemo, useState } from 'react'
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import OnboardingSlide from '../components/OnboardingSlide'
 import AppGradient from '@components/AppGradient'

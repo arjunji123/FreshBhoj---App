@@ -1,5 +1,3 @@
-
-
 export const AUTH_COPY = {
 	loginSkip: 'Skip',
 	loginRememberMe: 'Remember my login for faster Sign-in',
@@ -20,6 +18,18 @@ export const AUTH_COPY = {
 	countryCode: '+91',
 	phonePlaceholder: 'Enter Phone Number',
 	brandTitle: 'FreshBhoj',
+	brandTagline: 'Healthy food, made easier',
+
+	// ── Location step ────────────────────────────────────────────────────────
+	locationTitle: 'Where should we deliver?',
+	locationSubtitle: 'We are live across Jaipur — pick your area to see kitchens near you.',
+	locationSearchPlaceholder: 'Search for your area, street...',
+	locationUseCurrent: 'Use my current location',
+	locationSave: 'Save & Continue',
+	unservedTitle: 'We are not in your area yet',
+	unservedBody:
+		'You are early — we are adding new Jaipur neighbourhoods every month. Pick a nearby area to look around in the meantime.',
+	unservedCta: 'Browse a nearby area',
 } as const;
 
 export const AUTH_VALUES = {
@@ -37,5 +47,6 @@ export const AUTH_VALUES = {
 	loginBrandTitleTopOffset: -120,
 	otpImageWidthRatio: 0.8,
 	otpImageHeightRatio: 0.4,
-	mockOtp: '123456',
+	/** Seconds before "Resend OTP" becomes tappable again. */
+	resendCooldownSeconds: 30,
 } as const;

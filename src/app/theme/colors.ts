@@ -1,4 +1,6 @@
-import {StyleSheet} from 'react-native';
+import { accent, amber, foodType, gradients, neutral, overlay, primary, semantic } from './palette';
+
+export { primary, accent, neutral, amber, foodType, semantic, overlay, gradients };
 
 export const palette = {
     // Base colors
@@ -36,6 +38,65 @@ export const palette = {
     info: '#2196F3',
 };
 
+/**
+ * Soft, layered elevation. Deliberately low-opacity and wide-radius so cards
+ * lift off the page without a hard drop shadow.
+ * `elevation` is the Android equivalent; both are set on every step.
+ */
+export const elevation = {
+    none: {
+        shadowColor: 'transparent',
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0,
+        shadowRadius: 0,
+        elevation: 0,
+    },
+    xs: {
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.04,
+        shadowRadius: 3,
+        elevation: 1,
+    },
+    sm: {
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06,
+        shadowRadius: 8,
+        elevation: 3,
+    },
+    md: {
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.08,
+        shadowRadius: 16,
+        elevation: 6,
+    },
+    lg: {
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: 12 },
+        shadowOpacity: 0.1,
+        shadowRadius: 28,
+        elevation: 12,
+    },
+    /** For sticky bottom bars — the shadow points upward. */
+    bar: {
+        shadowColor: '#0F172A',
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 16,
+        elevation: 16,
+    },
+    /** Brand-tinted glow under primary CTAs. */
+    primary: {
+        shadowColor: '#E2121D',
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.28,
+        shadowRadius: 18,
+        elevation: 8,
+    },
+} as const;
+
 export const Shadows = {
     light: {
         shadowColor: 'rgba(0, 0, 0, 0.1)',
@@ -62,13 +123,15 @@ export const Shadows = {
 
 
 export const colors = {
+    // ── Colour scales (the design-system source of truth) ────────────────────
+    // Indexed 50–900, e.g. `theme.colors.primary[600]`.
+    primary,
+    accent,
+    neutral,
+    amber,
+
     // Global
-    // primary: palette.brandPrimary,
-    // secondary: palette.brandSecondary,
-    primary: palette.gradient1,
-    secondary: palette.gradient2,
     background: palette.white,
-    surface: palette.white,
     glass: palette.glass,
     defaultLocations : [0.09, 0.77, 1] as [number, number, number],
 
@@ -95,4 +158,53 @@ export const colors = {
     info: palette.info,
 
     palette, // Expose palette for direct access if needed
+
+    // ── Design-system token layer (use these in all new screens) ──────────────
+    // The keys above are kept for the screens built before the design system
+    // existed; everything new should reference the scales below.
+    brand: {
+        primary: primary[600],
+        primaryPressed: primary[700],
+        primarySubtle: primary[50],
+        onPrimary: neutral[0],
+        accent: accent[600],
+        accentSubtle: accent[50],
+        onAccent: neutral[0],
+    },
+
+    text: {
+        primary: neutral[900],
+        secondary: neutral[500],
+        tertiary: neutral[400],
+        inverse: neutral[0],
+        brand: primary[600],
+        accent: accent[700],
+        danger: semantic.error,
+        disabled: neutral[300],
+    },
+
+    surface: {
+        base: neutral[0],
+        /** Page background — a hair off pure white so cards read as raised. */
+        page: neutral[50],
+        subtle: neutral[100],
+        raised: neutral[0],
+        inverse: neutral[900],
+        overlay: overlay.scrim,
+        brandWash: overlay.primaryWash,
+        accentWash: overlay.accentWash,
+    },
+
+    borders: {
+        subtle: neutral[200],
+        default: neutral[300],
+        strong: neutral[400],
+        brand: overlay.primaryBorder,
+        focus: primary[600],
+    },
+
+    state: semantic,
+    foodType,
+    gradients,
+    overlay,
 };

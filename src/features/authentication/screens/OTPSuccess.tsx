@@ -10,11 +10,11 @@ import AppGradient from '@components/AppGradient';
 import RippleEffect from '../../../animations/RippleEffect';
 import AppButton from '@components/AppButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import authNavigation from '../hooks/authNavigation';
+import useAuthNavigation from '../hooks/useAuthNavigation';
 
 const OTPSuccess = () => {
   const insets = useSafeAreaInsets();
-  const navigation = authNavigation();
+  const navigation = useAuthNavigation();
 
   const handleStartDiscovering = () => {
     navigation.navigate('PersonalDetails');

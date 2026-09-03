@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import AppGradient from '@components/AppGradient';
 import { theme } from '@app/theme/index';
 import { AUTH_COPY } from '../auth.constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

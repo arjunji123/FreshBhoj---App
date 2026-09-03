@@ -12,6 +12,7 @@ module.exports = {
           '@utils': './src/utils',
           '@assets': './assets',
           '@animations': './src/animations',
+          '@api': './src/api',
         },
       },
     ],

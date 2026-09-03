@@ -1,18 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { AppNavigator } from './navigation/AppNavigator';
-import SplashScreen from '@components/SplashScreen';
-import { KeyboardProvider } from "react-native-keyboard-controller";
+import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'react-native';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { queryClient } from '@api';
+import SplashScreen from '@components/SplashScreen';
+import { AppNavigator } from './navigation/AppNavigator';
+
+const SPLASH_DURATION_MS = 2200;
+
 const MainApp = () => {
   const [isShowSplash, setIsShowSplash] = useState(true);
 
   useEffect(() => {
-    // INFO: Simulate Loading Time for Splash Screen (e.g. fetching resources, auth status etc.)
-    const timer = setTimeout(() => {
-      setIsShowSplash(false);
-    }, 2500);
-
+    // Persisted auth state rehydrates from MMKV synchronously, so the splash is
+    // purely a brand moment — no async gate to wait on here.
+    const timer = setTimeout(() => setIsShowSplash(false), SPLASH_DURATION_MS);
     return () => clearTimeout(timer);
   }, []);
 
@@ -21,12 +24,14 @@ const MainApp = () => {
   }
 
   return (
-    <SafeAreaProvider>
-      <KeyboardProvider>
-        <StatusBar barStyle="light-content" backgroundColor="transparent" translucent />
-        <AppNavigator />
-      </KeyboardProvider>
-    </SafeAreaProvider>
+    <QueryClientProvider client={queryClient}>
+      <SafeAreaProvider>
+        <KeyboardProvider>
+          <StatusBar barStyle="dark-content" backgroundColor="transparent" translucent />
+          <AppNavigator />
+        </KeyboardProvider>
+      </SafeAreaProvider>
+    </QueryClientProvider>
   );
 };
 

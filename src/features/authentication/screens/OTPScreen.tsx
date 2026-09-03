@@ -1,42 +1,66 @@
-import React from 'react';
-import { View, Image, StyleSheet, Dimensions, Alert, StatusBar } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
+import { StatusBar } from 'react-native';
 import { theme } from '@app/theme/index';
+import { ApiError } from '@api';
 import OTPHeader from '../components/OTPHeader';
 import OTPInputSection from '../components/OTPInputSection';
-import { useFocusEffect, useRoute } from '@react-navigation/native';
 import { AUTH_VALUES } from '../auth.constants';
 import { OTPScreenRouteProp } from '../auth.types';
-import authNavigation from '../hooks/authNavigation';
+import { useSendOtp, useVerifyOtp } from '../hooks/useAuth';
+import { useAuthStore } from '../store/authStore';
+import type { PublicNavigation } from '@app/navigation/navigation.types';
 
 const { width, height } = Dimensions.get('window');
 
 const OTPScreen = () => {
   const route = useRoute<OTPScreenRouteProp>();
-  const phoneNumber = route.params?.phoneNumber;
-  const navigation = authNavigation();
+  const navigation = useNavigation<PublicNavigation>();
+  const phoneNumber = route.params?.phoneNumber ?? '';
 
-  useFocusEffect(() => {
-    StatusBar.setBarStyle('dark-content', true);
-    return () => {
-      StatusBar.setBarStyle('light-content', true);
-    }
-  });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const verifyOtp = useVerifyOtp();
+  const sendOtp = useSendOtp();
+  const isProfilePending = useAuthStore((s) => s.isProfilePending);
+
+  useFocusEffect(
+    useCallback(() => {
+      StatusBar.setBarStyle('dark-content', true);
+      return () => StatusBar.setBarStyle('light-content', true);
+    }, []),
+  );
 
   const handleSubmitOTP = (otp: string) => {
-    if(otp === AUTH_VALUES.mockOtp) {
-      Alert.alert('OTP Verified', 'Your OTP has been verified successfully!');
-      navigation.navigate('OTPSuccess');
-    } else {
-      Alert.alert('Invalid OTP', 'The OTP you entered is incorrect. Please try again.');
-      // Show error message to user
-    }
-    // Add OTP verification logic here
+    if (otp.length < AUTH_VALUES.otpDigits) return;
+    setErrorMessage(null);
+
+    verifyOtp.mutate(
+      { phone: phoneNumber, otp },
+      {
+        onSuccess: () => {
+          // A returning user is already `isAuthenticated`, so the navigation
+          // gate swaps to the private stack and this screen unmounts. A new
+          // user still needs the profile + location steps.
+          if (useAuthStore.getState().isProfilePending || isProfilePending) {
+            navigation.navigate('OTPSuccess');
+          }
+        },
+        onError: (error) => {
+          setErrorMessage(
+            error instanceof ApiError
+              ? error.message
+              : 'We could not verify that code. Please try again.',
+          );
+        },
+      },
+    );
   };
 
   const handleResendOTP = () => {
-    console.log('Resend OTP clicked');
-    // Add OTP resend logic here
+    setErrorMessage(null);
+    sendOtp.mutate(phoneNumber);
   };
 
   return (
@@ -46,9 +70,11 @@ const OTPScreen = () => {
       <OTPInputSection
         onSubmit={handleSubmitOTP}
         onResend={handleResendOTP}
+        errorMessage={errorMessage}
+        isSubmitting={verifyOtp.isPending}
       />
 
-      <View style={styles.imageContainer}>
+      <View style={styles.imageContainer} pointerEvents="none">
         <Image
           source={require('@assets/images/otpscreen.png')}
           style={styles.image}
@@ -59,10 +85,12 @@ const OTPScreen = () => {
   );
 };
 
+export default OTPScreen;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: theme.colors.surface.base,
   },
   imageContainer: {
     position: 'absolute',
@@ -71,12 +99,10 @@ const styles = StyleSheet.create({
     width: width * AUTH_VALUES.otpImageWidthRatio,
     height: height * AUTH_VALUES.otpImageHeightRatio,
     overflow: 'hidden',
+    zIndex: -1,
   },
   image: {
     width: '100%',
     height: '100%',
-
   },
 });
-
-export default OTPScreen;

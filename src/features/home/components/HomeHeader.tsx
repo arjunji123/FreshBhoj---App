@@ -1,106 +1,127 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
-import { MapPin, Bell, Search, Mic, ChevronDown, User } from 'lucide-react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Bell, ChevronDown, MapPin, Search, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { useAnimatedStyle, interpolate, Extrapolation } from 'react-native-reanimated';
+import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
 import { theme } from '@app/theme/index';
 import { useAuthStore } from '@features/authentication/store/authStore';
-import { TOP_ROW_HEIGHT, SCROLL_THRESHOLD } from '../home.constants';
+import { HOME_COPY, SCROLL_THRESHOLD, TOP_ROW_HEIGHT } from '../home.constants';
 import type { HomeHeaderProps } from '../home.types';
 
-const HomeHeader = ({ scrollY }: HomeHeaderProps) => {
+/**
+ * Brand-gradient header that collapses as the feed scrolls: the greeting and
+ * location row fade away, the curved bottom tightens, and the search bar stays
+ * pinned — so search is always one tap away without eating the viewport.
+ */
+const HomeHeader = ({
+  scrollY,
+  cartCount = 0,
+  onPressLocation,
+  onPressSearch,
+  onPressProfile,
+  onPressCart,
+}: HomeHeaderProps) => {
   const insets = useSafeAreaInsets();
-  const address = useAuthStore((s) => s.location.address);
+  const location = useAuthStore((s) => s.location);
+  const fullName = useAuthStore((s) => s.fullName);
 
-  const topRowAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD],
-      [1, 0],
-      Extrapolation.CLAMP,
-    );
-    const height = interpolate(
+  const firstName = fullName?.trim().split(' ')[0];
+  const locationLabel = location.locality || location.address || 'Set your area';
+
+  const topRowStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [1, 0], Extrapolation.CLAMP),
+    height: interpolate(
       scrollY.value,
       [0, SCROLL_THRESHOLD],
       [TOP_ROW_HEIGHT, 0],
       Extrapolation.CLAMP,
-    );
-    const marginBottom = interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD],
-      [0, -16],
-      Extrapolation.CLAMP,
-    );
-    return { opacity, height, marginBottom, overflow: 'hidden' as const };
-  });
+    ),
+    marginBottom: interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [0, -12], Extrapolation.CLAMP),
+    overflow: 'hidden' as const,
+  }));
 
-  const containerAnimatedStyle = useAnimatedStyle(() => {
-    const borderRadius = interpolate(
-      scrollY.value,
-      [0, SCROLL_THRESHOLD],
-      [40, 20],
-      Extrapolation.CLAMP,
-    );
+  const containerStyle = useAnimatedStyle(() => {
+    const radius = interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [32, 18], Extrapolation.CLAMP);
     return {
-      borderBottomLeftRadius: borderRadius,
-      borderBottomRightRadius: borderRadius,
+      borderBottomLeftRadius: radius,
+      borderBottomRightRadius: radius,
       overflow: 'hidden' as const,
     };
   });
 
   return (
-    <Animated.View style={containerAnimatedStyle}>
+    <Animated.View style={containerStyle}>
       <AppGradient
-        colors={theme.colors.defaultColor}
-        locations={theme.colors.defaultLocations}
+        colors={theme.colors.gradients.brand}
+        locations={theme.colors.gradients.brandLocations}
         direction="vertical"
-        style={[styles.container, { paddingTop: insets.top + 12 }]}
+        style={[styles.container, { paddingTop: insets.top + theme.spacing.md }]}
       >
-      {/* Top Row: Location + Notification + Avatar */}
-      <Animated.View style={[styles.topRow, topRowAnimatedStyle]}>
-        {/* Location */}
-        <View style={styles.locationContainer}>
-          <MapPin size={20} color={theme.colors.palette.white} fill={theme.colors.palette.white} strokeWidth={2} />
-          <View style={styles.locationTextContainer}>
-            <Text style={styles.locationLabel}>CURRENT LOCATION</Text>
-            <TouchableOpacity style={styles.addressRow} activeOpacity={0.7}>
-              <Text style={styles.addressText} numberOfLines={1}>
-                {address || 'Location not given'}
+        <Animated.View style={[styles.topRow, topRowStyle]}>
+          <Pressable
+            style={styles.locationContainer}
+            onPress={onPressLocation}
+            accessibilityRole="button"
+            accessibilityLabel="Change delivery area"
+          >
+            <MapPin
+              size={18}
+              color={theme.colors.text.inverse}
+              fill={theme.colors.text.inverse}
+              strokeWidth={2}
+            />
+            <View style={styles.locationText}>
+              <Text style={[theme.text.caption, styles.greeting]} numberOfLines={1}>
+                {firstName ? `Hi ${firstName} · Delivering to` : 'DELIVERING TO'}
               </Text>
-              <ChevronDown size={16} color={theme.colors.palette.white} strokeWidth={2.5} />
-            </TouchableOpacity>
+              <View style={styles.addressRow}>
+                <Text style={[theme.text.h4, styles.address]} numberOfLines={1}>
+                  {locationLabel}
+                </Text>
+                <ChevronDown size={15} color={theme.colors.text.inverse} strokeWidth={2.5} />
+              </View>
+            </View>
+          </Pressable>
+
+          <View style={styles.actions}>
+            <Pressable
+              style={styles.iconButton}
+              onPress={onPressCart}
+              accessibilityRole="button"
+              accessibilityLabel="Cart"
+            >
+              <ShoppingBag size={19} color={theme.colors.text.inverse} strokeWidth={2} />
+              {cartCount > 0 ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
+                </View>
+              ) : null}
+            </Pressable>
+
+            <Pressable
+              style={styles.iconButton}
+              onPress={onPressProfile}
+              accessibilityRole="button"
+              accessibilityLabel="Notifications"
+            >
+              <Bell size={19} color={theme.colors.text.inverse} strokeWidth={2} />
+            </Pressable>
           </View>
-        </View>
+        </Animated.View>
 
-        {/* Right Icons */}
-        <View style={styles.rightIcons}>
-          <TouchableOpacity style={styles.notificationButton} activeOpacity={0.7}>
-            <Bell size={20} color={theme.colors.palette.white} strokeWidth={2} />
-            <View style={styles.notificationBadge} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.avatarButton} activeOpacity={0.7}>
-            <User size={20} color={theme.colors.palette.white} strokeWidth={2} />
-          </TouchableOpacity>
-        </View>
-      </Animated.View>
-
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Search size={18} color="#94A3B8" strokeWidth={2} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search for Tiffins, Meals or Kitchens..."
-            placeholderTextColor="#94A3B8"
-            returnKeyType="search"
-          />
-          <TouchableOpacity activeOpacity={0.7}>
-            <Mic size={20} color={theme.colors.gradient2} strokeWidth={2} />
-          </TouchableOpacity>
-        </View>
-      </View>
-    </AppGradient>
+        <Pressable
+          style={styles.searchBar}
+          onPress={onPressSearch}
+          accessibilityRole="search"
+          accessibilityLabel={HOME_COPY.searchPlaceholder}
+        >
+          <Search size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />
+          <Text style={[theme.text.body, styles.searchPlaceholder]}>
+            {HOME_COPY.searchPlaceholder}
+          </Text>
+        </Pressable>
+      </AppGradient>
     </Animated.View>
   );
 };
@@ -109,8 +130,8 @@ export default HomeHeader;
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: theme.layout.screenPadding,
+    paddingBottom: theme.spacing.lg,
   },
   topRow: {
     flexDirection: 'row',
@@ -120,80 +141,68 @@ const styles = StyleSheet.create({
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: theme.spacing.sm,
     flex: 1,
   },
-  locationTextContainer: {
+  locationText: {
     flex: 1,
   },
-  locationLabel: {
-    fontSize: theme.typography.fontSizes.sm,
-    fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
-    color: 'rgba(255, 255, 255, 0.7)',
-    letterSpacing: 0.5,
+  greeting: {
+    color: 'rgba(255,255,255,0.78)',
+    letterSpacing: 0.4,
   },
   addressRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
   },
-  addressText: {
-    fontSize: theme.typography.fontSizes.md,
-    fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
-    color: theme.colors.palette.white,
+  address: {
+    color: theme.colors.text.inverse,
+    flexShrink: 1,
   },
-  rightIcons: {
+  actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: theme.spacing.sm,
   },
-  notificationButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  iconButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: theme.colors.overlay.glass,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  notificationBadge: {
+  badge: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FBBF24',
-    borderWidth: 1.5,
-    borderColor: theme.colors.gradient1,
-  },
-  avatarButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    justifyContent: 'center',
+    top: 4,
+    right: 3,
+    minWidth: 16,
+    height: 16,
+    paddingHorizontal: 4,
+    borderRadius: 8,
+    backgroundColor: theme.colors.amber[500],
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
+    justifyContent: 'center',
   },
-  searchContainer: {
-    marginTop: 16,
+  badgeText: {
+    ...theme.text.caption,
+    fontSize: 9,
+    lineHeight: 12,
+    color: theme.colors.text.inverse,
   },
   searchBar: {
     height: 50,
-    backgroundColor: theme.colors.palette.white,
-    borderRadius: 25,
+    backgroundColor: theme.colors.surface.base,
+    borderRadius: theme.radius.pill,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    gap: 10,
+    paddingHorizontal: theme.spacing.lg,
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.lg,
+    ...theme.elevation.sm,
   },
-  searchInput: {
-    flex: 1,
-    height: '100%',
-    fontSize: theme.typography.fontSizes.sm,
-    fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
-    color: '#0F172A',
-    padding: 0,
+  searchPlaceholder: {
+    color: theme.colors.text.tertiary,
   },
 });

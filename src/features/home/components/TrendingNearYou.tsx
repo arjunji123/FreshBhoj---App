@@ -13,6 +13,8 @@ interface TrendingNearYouProps {
   hasLocation: boolean;
   onPressMeal: (meal: NearbyMealCard) => void;
   onAddMeal: (meal: NearbyMealCard) => void;
+  getQuantity?: (mealId: string) => number;
+  onChangeQuantity?: (mealId: string, next: number) => void;
   onToggleFavorite: (meal: NearbyMealCard) => void;
   onSetLocation: () => void;
 }
@@ -51,6 +53,8 @@ const TrendingNearYou: React.FC<TrendingNearYouProps> = ({
   hasLocation,
   onPressMeal,
   onAddMeal,
+  getQuantity,
+  onChangeQuantity,
   onToggleFavorite,
   onSetLocation,
 }) => {
@@ -87,6 +91,8 @@ const TrendingNearYou: React.FC<TrendingNearYouProps> = ({
                 meal={meal}
                 onPress={() => onPressMeal(meal)}
                 onAdd={() => onAddMeal(meal)}
+                quantity={getQuantity?.(meal.id) ?? 0}
+                onChangeQuantity={onChangeQuantity ? (next) => onChangeQuantity(meal.id, next) : undefined}
                 onToggleFavorite={() => onToggleFavorite(meal)}
               />
             ))}

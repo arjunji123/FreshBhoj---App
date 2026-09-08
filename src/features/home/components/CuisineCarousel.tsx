@@ -15,7 +15,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEM_WIDTH = SCREEN_WIDTH * 0.32;
 const SPACING = 12;
 const FULL_ITEM_SIZE = ITEM_WIDTH + SPACING;
-const CENTER_PADDING = (SCREEN_WIDTH - FULL_ITEM_SIZE) / 2;
 const IMAGE_SIZE = ITEM_WIDTH * 0.85;
 const RING_SIZE = IMAGE_SIZE + 8;
 
@@ -106,7 +105,7 @@ const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect })
         showsHorizontalScrollIndicator={false}
         snapToInterval={FULL_ITEM_SIZE}
         decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: CENTER_PADDING }}
+        contentContainerStyle={{ paddingHorizontal: theme.layout.screenPadding }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         keyExtractor={(item) => item.id}

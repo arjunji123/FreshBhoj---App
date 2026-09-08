@@ -9,6 +9,7 @@ import KitchenProfile from '@features/kitchens/screens/KitchenProfile';
 import KitchenGallery from '@features/kitchens/screens/KitchenGallery';
 import KitchenReviews from '@features/kitchens/screens/KitchenReviews';
 import ReelViewer from '@features/foodfeed/screens/ReelViewer';
+import FavoritesHub from '@features/profile/screens/FavoritesHub';
 import Favorites from '@features/profile/screens/Favorites';
 import FollowedKitchens from '@features/profile/screens/FollowedKitchens';
 
@@ -54,6 +55,7 @@ export function PrivateTabs() {
         component={ReelViewer}
         options={{ animation: 'fade', presentation: 'fullScreenModal' }}
       />
+      <Stack.Screen name="FavoritesHub" component={FavoritesHub} />
       <Stack.Screen name="Favorites" component={Favorites} />
       <Stack.Screen name="FollowedKitchens" component={FollowedKitchens} />
 

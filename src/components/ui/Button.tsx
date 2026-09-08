@@ -143,7 +143,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   fullWidth: { alignSelf: 'stretch' },
-  autoWidth: { alignSelf: 'flex-start' },
+  // `center`, not `flex-start` — a non-fullWidth button almost always sits in a
+  // centered container (EmptyState, dialogs), and flex-start was dragging it
+  // to the left edge there.
+  autoWidth: { alignSelf: 'center' },
   content: {
     flexDirection: 'row',
     alignItems: 'center',

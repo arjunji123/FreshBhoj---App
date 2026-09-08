@@ -10,6 +10,7 @@ import type { PaymentMethod } from '@api/types';
 import { AppBar, Button, Card, Divider, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { usePlaceOrder } from '@features/orders/hooks/useOrders';
 import BillSummary from '../components/BillSummary';
 import PaymentMethodPicker from '../components/PaymentMethodPicker';
@@ -22,6 +23,7 @@ import { useCart } from '../hooks/useCart';
  */
 const Checkout = () => {
   const navigation = useNavigation<PrivateNavigation>();
+  const requireAuth = useRequireAuth();
 
   const { data: cart } = useCart();
   const { data: addresses } = useAddresses();
@@ -43,6 +45,8 @@ const Checkout = () => {
   );
 
   const handlePlaceOrder = () => {
+    if (!requireAuth(handlePlaceOrder)) return;
+
     if (!selectedAddress) {
       Alert.alert('Add a delivery address', 'We need somewhere to send your food.');
       return;

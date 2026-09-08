@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Dimensions, FlatList, Share, StyleSheet, View } from 'react-native';
+import { Dimensions, FlatList, Pressable, Share, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Clapperboard } from 'lucide-react-native';
+import { ArrowLeft, Clapperboard } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { Chip, EmptyState, Skeleton } from '@components/ui';
 import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
@@ -10,6 +10,7 @@ import type { Reel } from '@api/types';
 import type { ReelFeedType } from '@api/endpoints/reels.api';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
+import { useCartQuantityControls } from '@features/cart/hooks/useCart';
 import ReelCard from '../components/ReelCard';
 import {
   recordReelShare,
@@ -44,6 +45,7 @@ const FoodFeed = () => {
   const toggleLike = useToggleReelLike();
   const toggleSave = useToggleReelSave();
   const { addToCart, conflictDialog } = useAddToCartFlow();
+  const { getQuantity, changeQuantity } = useCartQuantityControls();
 
   const reels = useMemo(
     () => query.data?.pages.flatMap((page) => page.items) ?? [],
@@ -140,11 +142,31 @@ const FoodFeed = () => {
                 id: item.meal.id,
                 name: item.meal.name,
                 isOrderable: item.meal.isAvailable,
+                image: item.meal.image,
+                price: item.meal.price,
+                mrp: item.meal.mrp,
+                foodType: item.meal.foodType,
+                calories: item.meal.calories,
+                proteinG: item.meal.proteinG,
+                isAvailable: item.meal.isAvailable,
+                kitchen: item.kitchen,
               })
             }
+            quantity={item.meal ? getQuantity(item.meal.id) : 0}
+            onChangeQuantity={item.meal ? (next) => changeQuantity(item.meal!.id, next) : undefined}
           />
         )}
       />
+
+      <Pressable
+        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
+        accessibilityRole="button"
+        accessibilityLabel="Back"
+        hitSlop={theme.layout.hitSlop}
+        style={[styles.backButton, { top: insets.top + theme.spacing.md }]}
+      >
+        <ArrowLeft size={20} color={theme.colors.text.inverse} strokeWidth={2.5} />
+      </Pressable>
 
       {/* Feed switcher floats over the video, like every reels UI. */}
       <View style={[styles.tabs, { top: insets.top + theme.spacing.md }]} pointerEvents="box-none">
@@ -173,6 +195,17 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.neutral[900],
+  },
+  backButton: {
+    position: 'absolute',
+    left: theme.layout.screenPadding,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1,
   },
   tabs: {
     position: 'absolute',

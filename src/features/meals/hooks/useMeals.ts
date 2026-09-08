@@ -1,7 +1,9 @@
+import { useCallback } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mealsApi, qk } from '@api';
 import type { MealListParams, TrendingNearbyParams } from '@api/endpoints/meals.api';
 import type { MealCard, NearbyMealCard, Paginated } from '@api/types';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 
 const PAGE_SIZE = 10;
 
@@ -74,33 +76,67 @@ export function useFavorites() {
   return useQuery({ queryKey: qk.meals.favorites, queryFn: () => mealsApi.favorites() });
 }
 
+/** Flips `isFavorite` wherever a meal shows up: detail, paginated lists, or infinite-query pages. */
+function toggleFavoriteInCache(data: unknown, mealId: string): unknown {
+  if (!data || typeof data !== 'object') return data;
+
+  if ('pages' in data && Array.isArray((data as any).pages)) {
+    return { ...data, pages: (data as any).pages.map((page: unknown) => toggleFavoriteInCache(page, mealId)) };
+  }
+  if ('items' in data && Array.isArray((data as any).items)) {
+    return {
+      ...data,
+      items: (data as any).items.map((item: any) =>
+        item?.id === mealId ? { ...item, isFavorite: !item.isFavorite } : item,
+      ),
+    };
+  }
+  if ((data as any).id === mealId && 'isFavorite' in data) {
+    return { ...data, isFavorite: !(data as any).isFavorite };
+  }
+  return data;
+}
+
 /**
- * Optimistic favourite toggle — the heart has to fill instantly, and a failure
- * simply reverts the flag rather than showing an error the user can't act on.
+ * Optimistic favourite toggle. The heart lives on several independent caches
+ * at once — the Home feed, Search results, Trending Near You and the
+ * Favourites list all hold their own copy of the same meal — so patching only
+ * `meals.detail` left every card except the detail screen stale until the
+ * next refetch. This walks every `meals.*` query and flips the flag in place.
  */
 export function useToggleFavorite() {
   const queryClient = useQueryClient();
+  const requireAuth = useRequireAuth();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (mealId: string) => mealsApi.toggleFavorite(mealId),
     onMutate: async (mealId) => {
-      await queryClient.cancelQueries({ queryKey: qk.meals.detail(mealId) });
-      const previous = queryClient.getQueryData(qk.meals.detail(mealId));
+      await queryClient.cancelQueries({ queryKey: qk.meals.all });
+      const previousQueries = queryClient.getQueriesData({ queryKey: qk.meals.all });
 
-      queryClient.setQueryData(qk.meals.detail(mealId), (old: any) =>
-        old ? { ...old, isFavorite: !old.isFavorite } : old,
-      );
+      previousQueries.forEach(([key, data]) => {
+        queryClient.setQueryData(key, toggleFavoriteInCache(data, mealId));
+      });
 
-      return { previous, mealId };
+      return { previousQueries };
     },
     onError: (_error, _mealId, context) => {
-      if (context?.previous) {
-        queryClient.setQueryData(qk.meals.detail(context.mealId), context.previous);
-      }
+      context?.previousQueries?.forEach(([key, data]) => {
+        queryClient.setQueryData(key, data);
+      });
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: qk.meals.all });
       queryClient.invalidateQueries({ queryKey: qk.home.feed });
     },
   });
+
+  // A guest sees the login sheet instead of an optimistic flip that would
+  // just 401 — the heart re-runs on its own once they've logged in.
+  const mutate: typeof mutation.mutate = useCallback(
+    (mealId, options) => requireAuth(() => mutation.mutate(mealId, options)),
+    [requireAuth, mutation],
+  );
+
+  return { ...mutation, mutate };
 }

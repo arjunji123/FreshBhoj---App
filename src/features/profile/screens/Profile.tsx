@@ -14,6 +14,7 @@ import {
 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatPhone } from '@utils/format';
+import Logo from '@components/Logo';
 import { Avatar, Card, Divider, ListItem, Screen } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
@@ -138,7 +139,10 @@ const Profile = () => {
           />
         </Card>
 
-        <Text style={[theme.text.caption, styles.version]}>FreshBhoj · Jaipur · v1.0.0</Text>
+        <View style={styles.brandFooter}>
+          <Logo size="sm" />
+          <Text style={[theme.text.caption, styles.version]}>Jaipur · v1.0.0</Text>
+        </View>
       </ScrollView>
     </Screen>
   );
@@ -187,9 +191,13 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: theme.spacing.lg,
   },
+  brandFooter: {
+    alignItems: 'center',
+    gap: 4,
+    marginTop: theme.spacing.xl,
+  },
   version: {
     textAlign: 'center',
     color: theme.colors.text.tertiary,
-    marginTop: theme.spacing.md,
   },
 });

@@ -17,6 +17,7 @@ import {
   VerifiedBadge,
 } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import CartItemRow from '../components/CartItemRow';
 import CouponPanel from '../components/CouponPanel';
 import BillSummary from '../components/BillSummary';
@@ -31,6 +32,7 @@ import {
 
 const Cart = () => {
   const navigation = useNavigation<PrivateNavigation>();
+  const requireAuth = useRequireAuth();
   const [couponError, setCouponError] = useState<string | null>(null);
 
   const { data: cart, isLoading } = useCart();
@@ -165,7 +167,7 @@ const Cart = () => {
           </View>
           <Button
             title="Proceed to Checkout"
-            onPress={() => navigation.navigate('Checkout')}
+            onPress={() => requireAuth(() => navigation.navigate('Checkout'))}
             disabled={!cart.checkout.canCheckout}
             fullWidth={false}
             style={styles.checkoutButton}

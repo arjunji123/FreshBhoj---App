@@ -16,8 +16,8 @@ export const SCROLL_THRESHOLD = 80;
 
 export const HOME_COPY = {
   searchPlaceholder: 'Search healthy meals...',
-  featuredKitchens: 'Curated Kitchens',
-  featuredKitchensSubtitle: 'Hand-picked, hygiene-verified partners',
+  featuredKitchens: 'Newly Joined Kitchens',
+  featuredKitchensSubtitle: 'The newest verified partners near you',
   categories: 'What are you eating?',
   feedTitle: 'Meals for you',
   feedSubtitle: 'Matched to your goals and your area',

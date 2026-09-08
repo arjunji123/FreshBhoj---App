@@ -15,7 +15,7 @@ export type PublicStackParamList = {
 /** The five bottom tabs. */
 export type MainTabParamList = {
   Home: undefined;
-  Search: { query?: string; goalTag?: GoalTag; category?: string } | undefined;
+  Search: { query?: string; goalTag?: GoalTag; category?: string; categoryName?: string } | undefined;
   FoodFeed: undefined;
   Orders: undefined;
   Profile: undefined;
@@ -31,6 +31,7 @@ export type PrivateStackParamList = {
   KitchenGallery: { kitchenId: string; initialIndex?: number };
   KitchenReviews: { kitchenId: string; kitchenName?: string };
   ReelViewer: { reelId?: string; kitchenId?: string; feed?: ReelFeedType };
+  FavoritesHub: undefined;
   Favorites: undefined;
   FollowedKitchens: undefined;
 
@@ -42,7 +43,7 @@ export type PrivateStackParamList = {
   OrderTracking: { orderId: string };
   OrderDetail: { orderId: string };
   WriteReview: {
-    orderId: string;
+    orderId?: string;
     kitchenId: string;
     kitchenName?: string;
     mealId?: string;

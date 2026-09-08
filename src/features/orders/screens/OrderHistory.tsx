@@ -109,7 +109,7 @@ const OrderHistory = () => {
                   ? 'Your first FreshBhoj meal is waiting. Verified kitchens, real nutrition numbers, no guesswork.'
                   : 'Try another filter to see the rest of your orders.'
               }
-              actionLabel={filterIndex === 0 ? 'Browse meals' : undefined}
+              actionLabel={filterIndex === 0 ? 'Explore Meals' : undefined}
               onAction={() => navigation.navigate('MainTabs', { screen: 'Home' })}
             />
           }

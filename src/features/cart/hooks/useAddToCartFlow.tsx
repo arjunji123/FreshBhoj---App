@@ -5,7 +5,12 @@ import { theme } from '@app/theme/index';
 import { Button } from '@components/ui';
 import type { MealCard } from '@api/types';
 import type { AddCartItemInput } from '@api/endpoints/cart.api';
+import type { GuestCartMealInput } from '../store/guestCartStore';
 import { getKitchenConflict, useAddToCart } from './useCart';
+
+/** What every call site actually has on hand — a full `MealCard` most of the
+ * time, or just enough of one (Food Feed, Reels) to still build a guest cart line. */
+type AddableMeal = Pick<MealCard, 'id' | 'name' | 'isOrderable'> & Partial<GuestCartMealInput>;
 
 interface PendingAdd extends AddCartItemInput {
   mealName: string;
@@ -25,7 +30,7 @@ export function useAddToCartFlow() {
 
   const add = useCallback(
     (
-      meal: Pick<MealCard, 'id' | 'name' | 'isOrderable'>,
+      meal: AddableMeal,
       options: Omit<AddCartItemInput, 'mealId'> = {},
       callbacks: { onSuccess?: () => void } = {},
     ) => {
@@ -35,7 +40,7 @@ export function useAddToCartFlow() {
       }
 
       addToCart.mutate(
-        { mealId: meal.id, ...options },
+        { mealId: meal.id, ...options, mealSnapshot: meal },
         {
           onSuccess: () => callbacks.onSuccess?.(),
           onError: (error) => {

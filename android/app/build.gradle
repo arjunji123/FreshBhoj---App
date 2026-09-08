@@ -2,13 +2,20 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+// These per-flavour files (.env.dev/.env.stage/.env.prod) are gitignored and
+// meant to be created locally when those environments actually differ from
+// each other. None exist yet, and react-native-config does not fall back to
+// plain `.env` when the mapped file is missing — it silently loads an empty
+// config instead, which is why native code (e.g. the Google Maps API key
+// meta-data) couldn't find a value at all. Point every flavour at the one
+// tracked `.env` file until real per-flavour files are added.
 project.ext.envConfigFiles = [
-    devdebug: ".env.dev",
-    devrelease: ".env.dev",
-    stagedebug: ".env.stage",
-    stagerelease: ".env.stage",
-    proddebug: ".env.prod",
-    prodrelease: ".env.prod",
+    devdebug: ".env",
+    devrelease: ".env",
+    stagedebug: ".env",
+    stagerelease: ".env",
+    proddebug: ".env",
+    prodrelease: ".env",
 ]
 
 apply from: project(':react-native-config').projectDir.getPath() + "/dotenv.gradle"

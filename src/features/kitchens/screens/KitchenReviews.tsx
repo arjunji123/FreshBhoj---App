@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { MessageSquare } from 'lucide-react-native';
+import { MessageSquare, PenLine } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import { AppBar, Chip, ChipRow, EmptyState, Skeleton } from '@components/ui';
+import { AppBar, AppBarAction, Chip, ChipRow, EmptyState, Skeleton } from '@components/ui';
 import ReviewCard from '@features/meals/components/ReviewCard';
 import { useMarkReviewHelpful } from '@features/reviews/hooks/useReviews';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
@@ -35,6 +35,19 @@ const KitchenReviews = () => {
         title="Reviews"
         subtitle={params.kitchenName}
         onBack={navigation.goBack}
+        right={
+          <AppBarAction
+            accessibilityLabel="Write a review"
+            onPress={() =>
+              navigation.navigate('WriteReview', {
+                kitchenId: params.kitchenId,
+                kitchenName: params.kitchenName,
+              })
+            }
+          >
+            <PenLine size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
+          </AppBarAction>
+        }
       />
 
       {isLoading ? (

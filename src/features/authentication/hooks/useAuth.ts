@@ -12,14 +12,13 @@ export function useVerifyOtp() {
 
   return useMutation({
     mutationFn: ({ phone, otp }: { phone: string; otp: string }) => authApi.verifyOtp(phone, otp),
-    onSuccess: (result) => {
+    onSuccess: (result) =>
       signIn({
         accessToken: result.tokens.accessToken,
         refreshToken: result.tokens.refreshToken,
         user: result.user,
         isNewUser: result.isNewUser,
-      });
-    },
+      }),
   });
 }
 

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Heart, Plus } from 'lucide-react-native';
+import { Heart } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
+import AddToCartControl from '@components/AddToCartControl';
 import { RatingPill } from '@components/ui/Rating';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { NearbyMealCard } from '@api/types';
@@ -15,6 +16,8 @@ interface NearbyMealTileProps {
   meal: NearbyMealCard;
   onPress: () => void;
   onAdd: () => void;
+  quantity?: number;
+  onChangeQuantity?: (next: number) => void;
   onToggleFavorite: () => void;
 }
 
@@ -24,7 +27,14 @@ interface NearbyMealTileProps {
  * overlays the photo here and the kitchen line shows real distance, which no
  * other meal card in the app needs.
  */
-const NearbyMealTile: React.FC<NearbyMealTileProps> = ({ meal, onPress, onAdd, onToggleFavorite }) => {
+const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
+  meal,
+  onPress,
+  onAdd,
+  quantity = 0,
+  onChangeQuantity,
+  onToggleFavorite,
+}) => {
   const unavailable = !meal.isOrderable;
 
   return (
@@ -77,19 +87,12 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({ meal, onPress, onAdd, o
 
         <View style={styles.footer}>
           <Text style={theme.text.numeric}>{formatCurrency(meal.price)}</Text>
-          <Pressable
-            onPress={onAdd}
+          <AddToCartControl
+            quantity={onChangeQuantity ? quantity : 0}
+            onAdd={onAdd}
+            onChangeQuantity={onChangeQuantity ?? (() => {})}
             disabled={unavailable}
-            accessibilityRole="button"
-            accessibilityLabel={`Add ${meal.name} to cart`}
-            style={({ pressed }) => [
-              styles.addButton,
-              unavailable ? styles.addButtonDisabled : null,
-              pressed ? styles.addButtonPressed : null,
-            ]}
-          >
-            <Plus size={16} color={theme.colors.text.inverse} strokeWidth={2.6} />
-          </Pressable>
+          />
         </View>
       </View>
     </Pressable>
@@ -168,19 +171,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 4,
-  },
-  addButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: theme.colors.primary[600],
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  addButtonDisabled: {
-    opacity: 0.4,
-  },
-  addButtonPressed: {
-    transform: [{ scale: 0.92 }],
   },
 });

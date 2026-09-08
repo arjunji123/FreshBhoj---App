@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,6 +14,7 @@ import {
   Chip,
   ChipRow,
   EmptyState,
+  FoodTypeDot,
   Skeleton,
   VerifiedBadge,
 } from '@components/ui';
@@ -21,8 +22,11 @@ import { RatingPill } from '@components/ui/Rating';
 import MealCard from '@components/MealCard';
 import ReviewCard from '@features/meals/components/ReviewCard';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
+import { useCartQuantityControls } from '@features/cart/hooks/useCart';
+import { useToggleFavorite } from '@features/meals/hooks/useMeals';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
-import KitchenGalleryGrid from '../components/KitchenGalleryGrid';
+import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
+import KitchenFoodFeedSection from '../components/KitchenFoodFeedSection';
 import RatingSummary from '../components/RatingSummary';
 import {
   useKitchen,
@@ -34,12 +38,19 @@ import {
 } from '../hooks/useKitchens';
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenProfile'>;
-type Tab = 'menu' | 'gallery' | 'reviews';
+type Tab = 'menu' | 'foodfeed' | 'reviews';
+type VegFilter = 'ALL' | 'VEG' | 'NON_VEG';
 
 const TABS: Array<{ key: Tab; label: string }> = [
   { key: 'menu', label: 'Menu' },
-  { key: 'gallery', label: 'Gallery' },
+  { key: 'foodfeed', label: 'Food Feed' },
   { key: 'reviews', label: 'Reviews' },
+];
+
+const VEG_FILTERS: Array<{ key: VegFilter; label: string }> = [
+  { key: 'ALL', label: 'All' },
+  { key: 'VEG', label: 'Veg' },
+  { key: 'NON_VEG', label: 'Non-Veg' },
 ];
 
 /**
@@ -53,6 +64,8 @@ const KitchenProfile = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
   const [tab, setTab] = useState<Tab>('menu');
+  const [vegFilter, setVegFilter] = useState<VegFilter>('ALL');
+  const [descExpanded, setDescExpanded] = useState(false);
 
   const { data: kitchen, isLoading } = useKitchen(params.kitchenId);
   const { data: media } = useKitchenMedia(params.kitchenId);
@@ -62,6 +75,30 @@ const KitchenProfile = () => {
 
   const toggleFollow = useToggleFollowKitchen(params.kitchenId);
   const { addToCart, conflictDialog } = useAddToCartFlow();
+  const { getQuantity, changeQuantity } = useCartQuantityControls();
+  const toggleFavorite = useToggleFavorite();
+
+  const menuSections = useMemo(() => {
+    const items = menu?.items ?? [];
+    const filtered = items.filter((meal) => {
+      if (vegFilter === 'ALL') return true;
+      if (vegFilter === 'VEG') return meal.foodType === 'VEG' || meal.foodType === 'VEGAN';
+      return meal.foodType === 'NON_VEG' || meal.foodType === 'EGG';
+    });
+
+    const order: string[] = [];
+    const groups = new Map<string, typeof filtered>();
+    filtered.forEach((meal) => {
+      const key = meal.category?.name ?? 'Other';
+      if (!groups.has(key)) {
+        groups.set(key, []);
+        order.push(key);
+      }
+      groups.get(key)!.push(meal);
+    });
+
+    return order.map((key) => ({ title: key, items: groups.get(key)! }));
+  }, [menu, vegFilter]);
 
   if (isLoading || !kitchen) {
     return (
@@ -186,7 +223,17 @@ const KitchenProfile = () => {
         ) : null}
 
         {kitchen.description ? (
-          <Text style={[theme.text.body, styles.description]}>{kitchen.description}</Text>
+          <Pressable onPress={() => setDescExpanded((current) => !current)}>
+            <Text
+              style={[theme.text.body, styles.description]}
+              numberOfLines={descExpanded ? undefined : 1}
+            >
+              {kitchen.description}
+            </Text>
+            <Text style={[theme.text.label, styles.descriptionToggle]}>
+              {descExpanded ? 'Show less' : 'Read more'}
+            </Text>
+          </Pressable>
         ) : null}
 
         <View style={styles.statsRow}>
@@ -218,26 +265,61 @@ const KitchenProfile = () => {
 
         {tab === 'menu' ? (
           menu?.items.length ? (
-            <View style={styles.menuList}>
-              {menu.items.map((meal) => (
-                <MealCard
-                  key={meal.id}
-                  meal={meal}
-                  onPress={() =>
-                    navigation.navigate('MealDetail', { mealId: meal.id, mealName: meal.name })
-                  }
-                  onAdd={() => addToCart(meal)}
-                />
+            <>
+              <View style={styles.vegFilterRow}>
+                {VEG_FILTERS.map((option) => {
+                  const isActive = vegFilter === option.key;
+                  return (
+                    <Pressable
+                      key={option.key}
+                      onPress={() => setVegFilter(option.key)}
+                      style={[styles.vegFilterPill, isActive ? styles.vegFilterPillActive : null]}
+                    >
+                      {option.key !== 'ALL' ? (
+                        <FoodTypeDot type={option.key === 'VEG' ? 'VEG' : 'NON_VEG'} size={9} />
+                      ) : null}
+                      <Text
+                        style={[
+                          theme.text.label,
+                          { color: isActive ? theme.colors.primary[700] : theme.colors.text.secondary },
+                        ]}
+                      >
+                        {option.label}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+
+              {menuSections.map((section) => (
+                <View key={section.title} style={styles.menuSection}>
+                  <Text style={[theme.text.h4, styles.menuSectionTitle]}>{section.title}</Text>
+                  <View style={styles.menuList}>
+                    {section.items.map((meal) => (
+                      <MealCard
+                        key={meal.id}
+                        meal={meal}
+                        onPress={() =>
+                          navigation.navigate('MealDetail', { mealId: meal.id, mealName: meal.name })
+                        }
+                        onAdd={() => addToCart(meal)}
+                        quantity={getQuantity(meal.id)}
+                        onChangeQuantity={(next) => changeQuantity(meal.id, next)}
+                        onToggleFavorite={() => toggleFavorite.mutate(meal.id)}
+                      />
+                    ))}
+                  </View>
+                </View>
               ))}
-            </View>
+            </>
           ) : (
             <EmptyState title="No dishes listed yet" description="Check back soon." />
           )
         ) : null}
 
-        {tab === 'gallery' ? (
+        {tab === 'foodfeed' ? (
           media?.length ? (
-            <KitchenGalleryGrid
+            <KitchenFoodFeedSection
               media={media}
               onPressItem={(index) =>
                 navigation.navigate('KitchenGallery', {
@@ -248,8 +330,8 @@ const KitchenProfile = () => {
             />
           ) : (
             <EmptyState
-              title="No photos yet"
-              description="This kitchen has not shared any behind-the-scenes shots."
+              title="No posts yet"
+              description="This kitchen has not shared any behind-the-scenes shots or reels."
             />
           )
         ) : null}
@@ -283,6 +365,13 @@ const KitchenProfile = () => {
               <EmptyState
                 title="No reviews yet"
                 description="Be the first to tell others what you thought."
+                actionLabel="Write a review"
+                onAction={() =>
+                  navigation.navigate('WriteReview', {
+                    kitchenId: kitchen.id,
+                    kitchenName: kitchen.name,
+                  })
+                }
               />
             )}
           </View>
@@ -313,7 +402,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.md,
   },
   scroll: {
-    paddingBottom: theme.spacing.xxxl,
+    paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE,
   },
   cover: {
     height: 200,
@@ -409,6 +498,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.layout.screenPadding,
     marginTop: theme.spacing.lg,
   },
+  descriptionToggle: {
+    color: theme.colors.primary[600],
+    paddingHorizontal: theme.layout.screenPadding,
+    marginTop: 4,
+  },
   statsRow: {
     flexDirection: 'row',
     marginTop: theme.spacing.lg,
@@ -432,6 +526,34 @@ const styles = StyleSheet.create({
   },
   tabs: {
     paddingVertical: theme.spacing.lg,
+  },
+  vegFilterRow: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    paddingHorizontal: theme.layout.screenPadding,
+    marginBottom: theme.spacing.lg,
+  },
+  vegFilterPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    height: 30,
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface.raised,
+    borderWidth: 1,
+    borderColor: theme.colors.borders.subtle,
+  },
+  vegFilterPillActive: {
+    backgroundColor: theme.colors.surface.brandWash,
+    borderColor: theme.colors.borders.brand,
+  },
+  menuSection: {
+    marginBottom: theme.spacing.xl,
+  },
+  menuSectionTitle: {
+    paddingHorizontal: theme.layout.screenPadding,
+    marginBottom: theme.spacing.md,
   },
   menuList: {
     paddingHorizontal: theme.layout.screenPadding,

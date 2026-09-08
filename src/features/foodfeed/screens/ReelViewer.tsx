@@ -123,6 +123,14 @@ const ReelViewer = () => {
                 id: item.meal.id,
                 name: item.meal.name,
                 isOrderable: item.meal.isAvailable,
+                image: item.meal.image,
+                price: item.meal.price,
+                mrp: item.meal.mrp,
+                foodType: item.meal.foodType,
+                calories: item.meal.calories,
+                proteinG: item.meal.proteinG,
+                isAvailable: item.meal.isAvailable,
+                kitchen: item.kitchen,
               })
             }
           />

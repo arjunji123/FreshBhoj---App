@@ -1,5 +1,12 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, Dimensions } from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withTiming,
+} from 'react-native-reanimated';
 import { theme } from '@app/theme/index';
 
 // components
@@ -8,14 +15,34 @@ import AppGradient from './AppGradient';
 
 const { width } = Dimensions.get('window');
 
+/** Plate images ease in a beat after the wordmark, rather than all landing at once. */
+const useCornerImageAnimation = (delay: number, fromOffset: number) => {
+  const progress = useSharedValue(0);
+
+  useEffect(() => {
+    progress.value = withDelay(
+      delay,
+      withTiming(1, { duration: 550, easing: Easing.out(Easing.cubic) }),
+    );
+  }, [delay, progress]);
+
+  return useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * fromOffset }],
+  }));
+};
+
 const SplashScreen = () => {
+  const topImageStyle = useCornerImageAnimation(280, -40);
+  const bottomImageStyle = useCornerImageAnimation(420, 40);
+
   return (
     <AppGradient style={styles.container}>
 
       {/* --- Top Left Plate --- */}
-      <Image
+      <Animated.Image
         source={require('@assets/images/plate_top.png')}
-        style={styles.topLeftImage}
+        style={[styles.topLeftImage, topImageStyle]}
         resizeMode="contain"
       />
 
@@ -45,9 +72,9 @@ const SplashScreen = () => {
       </View>
 
       {/* --- Bottom Right Plate --- */}
-      <Image
+      <Animated.Image
         source={require('@assets/images/plate_bottom.png')}
-        style={styles.bottomRightImage}
+        style={[styles.bottomRightImage, bottomImageStyle]}
         resizeMode="contain"
       />
 
@@ -91,7 +118,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   tagline: {
-    color: theme.colors.palette.gray1,
+    color: theme.colors.palette.white,
     fontSize: theme.typography.fontSizes.lg,
     letterSpacing: 0.5,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,

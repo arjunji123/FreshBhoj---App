@@ -28,6 +28,10 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   const insets = useSafeAreaInsets();
   const { data: activeOrders } = useActiveOrders();
 
+  // Food Feed is full-bleed vertical video — no nav bar at all, same as every
+  // reels UI. FoodFeed's own back button (top-left) is how you leave it.
+  if (state.routes[state.index].name === 'FoodFeed') return null;
+
   return (
     <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       <View style={styles.separator} />

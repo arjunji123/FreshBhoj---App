@@ -2,11 +2,13 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { mmkvZustandStorage } from '@utils/mmkvStorage';
 import { queryClient, setSessionExpiredHandler, tokenStore } from '@api';
+import { mergeGuestCartIntoAccount } from '@features/cart/store/guestCartStore';
 import { AuthStoreState } from '../auth.types';
 
 const initialAuthState = {
 	isAuthenticated: false,
 	isProfilePending: false,
+	isGuest: false,
 	user: null,
 	phoneNumber: '',
 	rememberMe: false,
@@ -34,8 +36,14 @@ export const useAuthStore = create<AuthStoreState>()(
 			setLocation: (location) => set((state) => ({ location: { ...state.location, ...location } })),
 			setUser: (user) => set({ user }),
 
-			signIn: ({ accessToken, refreshToken, user, isNewUser }) => {
+			continueAsGuest: () => set({ isGuest: true }),
+
+			signIn: async ({ accessToken, refreshToken, user, isNewUser }) => {
 				tokenStore.setTokens(accessToken, refreshToken);
+				// Replay the guest cart into the real one before the private app can
+				// render as authenticated, so the first fetch already has it — no
+				// empty-cart flash, and nothing needs clearing.
+				await mergeGuestCartIntoAccount();
 				set({
 					user,
 					phoneNumber: user.phone?.replace('+91', '') ?? '',
@@ -45,6 +53,7 @@ export const useAuthStore = create<AuthStoreState>()(
 					// a new one is routed through the profile + location steps first.
 					isProfilePending: isNewUser || user.status === 'PENDING_PROFILE',
 					isAuthenticated: !isNewUser && user.status !== 'PENDING_PROFILE',
+					isGuest: false,
 				});
 			},
 
@@ -63,6 +72,7 @@ export const useAuthStore = create<AuthStoreState>()(
 			partialize: (state) => ({
 				isAuthenticated: state.isAuthenticated,
 				isProfilePending: state.isProfilePending,
+				isGuest: state.isGuest,
 				user: state.user,
 				rememberMe: state.rememberMe,
 				phoneNumber: state.phoneNumber,
@@ -70,6 +80,16 @@ export const useAuthStore = create<AuthStoreState>()(
 				email: state.email,
 				location: state.location,
 			}),
+			// "Remember me" left unchecked means the session shouldn't survive a
+			// cold start — sign out the moment the persisted state comes back,
+			// before anything renders off it. Checked-and-authenticated state is
+			// left untouched, which is the only other case this can hydrate into.
+			onRehydrateStorage: () => (state) => {
+				if (state?.isAuthenticated && !state.rememberMe) {
+					tokenStore.clear();
+					useAuthStore.setState({ ...initialAuthState });
+				}
+			},
 		},
 	),
 );

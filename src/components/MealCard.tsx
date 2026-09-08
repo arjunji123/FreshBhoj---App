@@ -1,9 +1,10 @@
 import React from 'react';
 import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { Clock, Heart, Plus } from 'lucide-react-native';
+import { Clock, Heart } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { MealCard as MealCardType } from '@api/types';
+import AddToCartControl from './AddToCartControl';
 import Badge from './ui/Badge';
 import FoodTypeDot from './ui/FoodTypeDot';
 import NutritionBadgeRow from './ui/NutritionBadge';
@@ -13,6 +14,9 @@ interface MealCardProps {
   meal: MealCardType;
   onPress?: () => void;
   onAdd?: () => void;
+  /** Quantity already in the cart. Omit (or leave 0) to always show the plain add button. */
+  quantity?: number;
+  onChangeQuantity?: (next: number) => void;
   onToggleFavorite?: () => void;
   /** `list` is the full-width feed row; `compact` is the horizontal rail. */
   layout?: 'list' | 'compact';
@@ -30,6 +34,8 @@ const MealCard: React.FC<MealCardProps> = ({
   meal,
   onPress,
   onAdd,
+  quantity = 0,
+  onChangeQuantity,
   onToggleFavorite,
   layout = 'list',
   style,
@@ -132,20 +138,13 @@ const MealCard: React.FC<MealCardProps> = ({
           </View>
 
           {onAdd ? (
-            <Pressable
-              onPress={onAdd}
+            <AddToCartControl
+              variant="pill"
+              quantity={onChangeQuantity ? quantity : 0}
+              onAdd={onAdd}
+              onChangeQuantity={onChangeQuantity ?? (() => {})}
               disabled={unavailable}
-              accessibilityRole="button"
-              accessibilityLabel={`Add ${meal.name} to cart`}
-              style={({ pressed }) => [
-                styles.addButton,
-                unavailable ? styles.addButtonDisabled : null,
-                pressed ? styles.addButtonPressed : null,
-              ]}
-            >
-              <Plus size={14} color={theme.colors.primary[600]} strokeWidth={3} />
-              <Text style={[theme.text.buttonSmall, styles.addText]}>ADD</Text>
-            </Pressable>
+            />
           ) : null}
         </View>
       </View>
@@ -276,26 +275,5 @@ const styles = StyleSheet.create({
   mrp: {
     color: theme.colors.text.tertiary,
     textDecorationLine: 'line-through',
-  },
-  addButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: theme.spacing.md,
-    height: 34,
-    borderRadius: theme.radius.control,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borders.brand,
-    backgroundColor: theme.colors.surface.brandWash,
-  },
-  addButtonDisabled: {
-    opacity: 0.4,
-  },
-  addButtonPressed: {
-    transform: [{ scale: 0.95 }],
-  },
-  addText: {
-    color: theme.colors.primary[600],
-    letterSpacing: 0.5,
   },
 });

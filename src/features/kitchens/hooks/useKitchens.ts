@@ -1,7 +1,9 @@
+import { useCallback } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { kitchensApi, qk } from '@api';
 import type { KitchenListParams } from '@api/endpoints/kitchens.api';
 import type { KitchenCard, Paginated } from '@api/types';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 
 export function useKitchens(params: KitchenListParams = {}) {
   return useInfiniteQuery({
@@ -62,8 +64,9 @@ export function useFollowedKitchens() {
 /** Optimistic follow so the button flips the instant it's tapped. */
 export function useToggleFollowKitchen(kitchenId: string) {
   const queryClient = useQueryClient();
+  const requireAuth = useRequireAuth();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: () => kitchensApi.toggleFollow(kitchenId),
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: qk.kitchens.detail(kitchenId) });
@@ -91,4 +94,13 @@ export function useToggleFollowKitchen(kitchenId: string) {
       queryClient.invalidateQueries({ queryKey: qk.kitchens.following });
     },
   });
+
+  // A guest sees the login sheet instead of an optimistic flip that would
+  // just 401 — the follow re-runs on its own once they've logged in.
+  const mutate: typeof mutation.mutate = useCallback(
+    (variables, options) => requireAuth(() => mutation.mutate(variables, options)),
+    [requireAuth, mutation],
+  );
+
+  return { ...mutation, mutate };
 }

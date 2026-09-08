@@ -1,8 +1,9 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Bell, ChefHat, MessageCircle, Sparkles, Tag } from 'lucide-react-native';
+import { Bell, ChefHat, Heart, MessageCircle, Sparkles, Tag } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
+import Logo from '@components/Logo';
 import { AppBar, Card, Divider, ListItem, Skeleton } from '@components/ui';
 import type { NotificationPreferences } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -100,12 +101,21 @@ const Settings = () => {
           <Divider spacing={0} />
           <ListItem title="Saved addresses" onPress={() => navigation.navigate('Addresses')} />
           <Divider spacing={0} />
+          <ListItem
+            title="Favourites"
+            icon={<Heart size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />}
+            onPress={() => navigation.navigate('FavoritesHub')}
+          />
+          <Divider spacing={0} />
           <ListItem title="Help & support" onPress={() => navigation.navigate('Support')} />
           <Divider spacing={0} />
           <ListItem title="Log out" destructive showChevron={false} onPress={handleLogout} />
         </Card>
 
-        <Text style={[theme.text.caption, styles.version]}>FreshBhoj · Jaipur · v1.0.0</Text>
+        <View style={styles.brandFooter}>
+          <Logo size="sm" />
+          <Text style={[theme.text.caption, styles.version]}>Jaipur · v1.0.0</Text>
+        </View>
       </ScrollView>
     </View>
   );
@@ -127,9 +137,13 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.md,
   },
+  brandFooter: {
+    alignItems: 'center',
+    gap: 4,
+    marginTop: theme.spacing.xl,
+  },
   version: {
     textAlign: 'center',
     color: theme.colors.text.tertiary,
-    marginTop: theme.spacing.xl,
   },
 });

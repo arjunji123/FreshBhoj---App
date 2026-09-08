@@ -1,10 +1,24 @@
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ApiError, cartApi, couponsApi, qk } from '@api';
 import type { AddCartItemInput } from '@api/endpoints/cart.api';
-import type { Cart } from '@api/types';
+import type { Cart, CartLine } from '@api/types';
 import { useAuthStore } from '@features/authentication/store/authStore';
+import {
+  buildGuestCart,
+  fromGuestLineId,
+  isGuestLineId,
+  useGuestCartStore,
+  type GuestCartMealInput,
+} from '../store/guestCartStore';
 
-/** Full cart with server-computed pricing and checkout blockers. */
+/**
+ * Full cart with server-computed pricing and checkout blockers.
+ *
+ * A guest never fetches this — `enabled` stays false — but the cache still
+ * holds whatever `buildGuestCart()` last wrote via a cart mutation, so this
+ * reads back exactly like a real cart until the guest logs in.
+ */
 export function useCart() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
@@ -46,17 +60,31 @@ function useCartMutationOptions() {
   };
 }
 
+/**
+ * Adding a meal from any screen — as a guest this only ever touches the
+ * local guest cart (there is no anonymous cart on the server); it still
+ * resolves to a `Cart`, so `useCartMutationOptions`'s `onSuccess` writes it
+ * into the same cache a real add-to-cart would.
+ */
 export function useAddToCart() {
   const options = useCartMutationOptions();
+  const isGuest = useAuthStore((s) => s.isGuest);
 
   return useMutation({
-    mutationFn: (input: AddCartItemInput) => cartApi.addItem(input),
+    mutationFn: (input: AddCartItemInput & { mealSnapshot?: GuestCartMealInput }) => {
+      if (isGuest) {
+        useGuestCartStore.getState().addItem(input.mealSnapshot ?? { id: input.mealId, name: '' }, input.quantity ?? 1);
+        return Promise.resolve(buildGuestCart(useGuestCartStore.getState().lines));
+      }
+      return cartApi.addItem(input);
+    },
     ...options,
   });
 }
 
 export function useUpdateCartItem() {
   const options = useCartMutationOptions();
+  const isGuest = useAuthStore((s) => s.isGuest);
 
   return useMutation({
     mutationFn: ({
@@ -67,23 +95,47 @@ export function useUpdateCartItem() {
       itemId: string;
       quantity: number;
       specialInstructions?: string;
-    }) => cartApi.updateItem(itemId, { quantity, specialInstructions }),
+    }) => {
+      if (isGuest && isGuestLineId(itemId)) {
+        useGuestCartStore.getState().setQuantity(fromGuestLineId(itemId), quantity);
+        return Promise.resolve(buildGuestCart(useGuestCartStore.getState().lines));
+      }
+      return cartApi.updateItem(itemId, { quantity, specialInstructions });
+    },
     ...options,
   });
 }
 
 export function useRemoveCartItem() {
   const options = useCartMutationOptions();
+  const isGuest = useAuthStore((s) => s.isGuest);
 
   return useMutation({
-    mutationFn: (itemId: string) => cartApi.removeItem(itemId),
+    mutationFn: (itemId: string) => {
+      if (isGuest && isGuestLineId(itemId)) {
+        useGuestCartStore.getState().removeItem(fromGuestLineId(itemId));
+        return Promise.resolve(buildGuestCart(useGuestCartStore.getState().lines));
+      }
+      return cartApi.removeItem(itemId);
+    },
     ...options,
   });
 }
 
 export function useClearCart() {
   const options = useCartMutationOptions();
-  return useMutation({ mutationFn: cartApi.clear, ...options });
+  const isGuest = useAuthStore((s) => s.isGuest);
+
+  return useMutation({
+    mutationFn: () => {
+      if (isGuest) {
+        useGuestCartStore.getState().clear();
+        return Promise.resolve(buildGuestCart({}));
+      }
+      return cartApi.clear();
+    },
+    ...options,
+  });
 }
 
 export function useApplyCoupon() {
@@ -107,6 +159,48 @@ export function useCoupons(itemsTotal: number) {
     queryFn: () => couponsApi.list(itemsTotal),
     staleTime: 5 * 60_000,
   });
+}
+
+/** Maps `mealId -> cart line`, so any card can show the right quantity. */
+export function useCartLineIndex(): Map<string, CartLine> {
+  const { data: cart } = useCart();
+
+  return useMemo(() => {
+    const map = new Map<string, CartLine>();
+    cart?.items.forEach((line) => map.set(line.meal.id, line));
+    return map;
+  }, [cart]);
+}
+
+/**
+ * Quantity read/write for the shared `AddToCartControl` — first unit goes
+ * through the caller's kitchen-conflict-aware `addToCart`, every change after
+ * that is a plain update or remove against the existing cart line.
+ */
+export function useCartQuantityControls() {
+  const cartLines = useCartLineIndex();
+  const updateItem = useUpdateCartItem();
+  const removeItem = useRemoveCartItem();
+
+  const getQuantity = useCallback(
+    (mealId: string) => cartLines.get(mealId)?.quantity ?? 0,
+    [cartLines],
+  );
+
+  const changeQuantity = useCallback(
+    (mealId: string, next: number) => {
+      const line = cartLines.get(mealId);
+      if (!line) return;
+      if (next <= 0) {
+        removeItem.mutate(line.id);
+        return;
+      }
+      updateItem.mutate({ itemId: line.id, quantity: next });
+    },
+    [cartLines, updateItem, removeItem],
+  );
+
+  return { getQuantity, changeQuantity, isBusy: updateItem.isPending || removeItem.isPending };
 }
 
 /** Extracts the "items from another kitchen" details out of a 409. */

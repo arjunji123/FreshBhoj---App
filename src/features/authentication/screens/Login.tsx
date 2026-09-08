@@ -27,6 +27,7 @@ const Login = () => {
   const rememberMe = useAuthStore((state) => state.rememberMe);
   const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
   const setRememberMe = useAuthStore((state) => state.setRememberMe);
+  const continueAsGuest = useAuthStore((state) => state.continueAsGuest);
   const navigation = useAuthNavigation();
   const sendOtp = useSendOtp();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -65,7 +66,7 @@ const Login = () => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.headerRow}>
-        <GlassButton style={{}} title={AUTH_COPY.loginSkip} onPress={() => { }} />
+        <GlassButton style={{}} title={AUTH_COPY.loginSkip} onPress={continueAsGuest} />
       </View>
 
       {/* Top Section */}
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   },
   checkboxContainer: {
     flexDirection: 'row',
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: theme.spacing.paddings.lg,
     marginBottom: theme.spacing.paddings.xl,

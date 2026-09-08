@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { Bookmark, Heart, Plus, Share2, Store } from 'lucide-react-native';
+import { Bookmark, Heart, Share2, Store } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
+import AddToCartControl from '@components/AddToCartControl';
 import { VerifiedBadge } from '@components/ui';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { Reel } from '@api/types';
@@ -18,6 +19,8 @@ interface ReelCardProps {
   onOpenKitchen: () => void;
   onOpenMeal: () => void;
   onAddToCart: () => void;
+  quantity?: number;
+  onChangeQuantity?: (next: number) => void;
   onView: (reelId: string) => void;
 }
 
@@ -42,6 +45,8 @@ const ReelCard: React.FC<ReelCardProps> = ({
   onOpenKitchen,
   onOpenMeal,
   onAddToCart,
+  quantity = 0,
+  onChangeQuantity,
   onView,
 }) => {
   useEffect(() => {
@@ -162,19 +167,13 @@ const ReelCard: React.FC<ReelCardProps> = ({
               </Text>
             </View>
 
-            <Pressable
-              onPress={onAddToCart}
+            <AddToCartControl
+              quantity={onChangeQuantity ? quantity : 0}
+              onAdd={onAddToCart}
+              onChangeQuantity={onChangeQuantity ?? (() => {})}
               disabled={!reel.meal.isAvailable}
-              accessibilityRole="button"
-              accessibilityLabel="Add to cart"
-              style={({ pressed }) => [
-                styles.shopAdd,
-                !reel.meal?.isAvailable ? styles.shopAddDisabled : null,
-                pressed ? styles.pressed : null,
-              ]}
-            >
-              <Plus size={16} color={theme.colors.text.inverse} strokeWidth={3} />
-            </Pressable>
+              size="md"
+            />
           </Pressable>
         ) : null}
       </View>
@@ -295,16 +294,5 @@ const styles = StyleSheet.create({
   shopMeta: {
     color: 'rgba(255,255,255,0.8)',
     marginTop: 2,
-  },
-  shopAdd: {
-    width: 34,
-    height: 34,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.primary[600],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  shopAddDisabled: {
-    opacity: 0.4,
   },
 });

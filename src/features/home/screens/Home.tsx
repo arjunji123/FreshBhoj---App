@@ -17,13 +17,14 @@ import type {
 } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages, useMealFeed, useToggleFavorite, useTrendingNearby } from '@features/meals/hooks/useMeals';
-import { useCartCount } from '@features/cart/hooks/useCart';
+import { useCartCount, useCartQuantityControls } from '@features/cart/hooks/useCart';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
+import { useKitchens } from '@features/kitchens/hooks/useKitchens';
+import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import HomeHeader from '../components/HomeHeader';
 import GoalFilterRow from '../components/GoalFilterRow';
 import CategoryGrid from '../components/CategoryGrid';
-import CuisinePillRow from '../components/CuisinePillRow';
 import CuisineCarousel from '../components/CuisineCarousel';
 import KitchenStoriesRail from '../components/KitchenStoriesRail';
 import TrendingNearYou from '../components/TrendingNearYou';
@@ -47,19 +48,21 @@ const Home = () => {
   const scrollY = useSharedValue(0);
 
   const [goalTags, setGoalTags] = useState<GoalTag[]>([]);
-  const [category, setCategory] = useState<string | undefined>();
   const [cuisine, setCuisine] = useState<string | undefined>();
 
   const location = useAuthStore((s) => s.location);
   const hasLocation = Boolean(location.latitude && location.longitude);
 
   const homeQuery = useHomeFeed();
+  const recentKitchensQuery = useKitchens({ sortBy: 'newest', limit: 6 });
+  const recentKitchens = flattenPages(recentKitchensQuery.data?.pages).slice(0, 6);
   const cuisinesQuery = useCuisines();
   const storiesQuery = useKitchenStories(location.city);
   const markStorySeen = useMarkStorySeen();
   const { data: cartCount } = useCartCount();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
+  const { getQuantity, changeQuantity } = useCartQuantityControls();
 
   const nearbyQuery = useTrendingNearby(
     hasLocation
@@ -69,8 +72,8 @@ const Home = () => {
   const nearbyMeals = flattenPages(nearbyQuery.data?.pages).slice(0, 4);
 
   const feedFilters = useMemo(
-    () => ({ goalTags: goalTags.length ? goalTags : undefined, category, cuisine }),
-    [goalTags, category, cuisine],
+    () => ({ goalTags: goalTags.length ? goalTags : undefined, cuisine }),
+    [goalTags, cuisine],
   );
 
   const feedQuery = useMealFeed(feedFilters);
@@ -89,10 +92,18 @@ const Home = () => {
     );
   }, []);
 
-  const handleSelectCategory = useCallback((selected: MealCategory) => {
-    // Tapping the active category clears it, so the grid doubles as a toggle.
-    setCategory((current) => (current === selected.slug ? undefined : selected.slug));
-  }, []);
+  const handleSelectCategory = useCallback(
+    (selected: MealCategory) => {
+      // Categories open their own filtered results page rather than filtering
+      // the Home feed in place — Breakfast/Lunch/Dinner/Healthy Snacks are
+      // meant to feel like distinct destinations, not a toggle.
+      navigation.navigate('MainTabs', {
+        screen: 'Search',
+        params: { category: selected.slug, categoryName: selected.name },
+      });
+    },
+    [navigation],
+  );
 
   const handleSelectCuisine = useCallback((selected: Cuisine) => {
     setCuisine((current) => (current === selected.slug ? undefined : selected.slug));
@@ -120,12 +131,13 @@ const Home = () => {
     homeQuery.refetch();
     feedQuery.refetch();
     storiesQuery.refetch();
+    recentKitchensQuery.refetch();
     if (hasLocation) nearbyQuery.refetch();
-  }, [homeQuery, feedQuery, storiesQuery, nearbyQuery, hasLocation]);
+  }, [homeQuery, feedQuery, storiesQuery, recentKitchensQuery, nearbyQuery, hasLocation]);
 
   const home = homeQuery.data;
   const activeOrder = home?.activeOrders?.[0];
-  const isFiltered = goalTags.length > 0 || Boolean(category) || Boolean(cuisine);
+  const isFiltered = goalTags.length > 0 || Boolean(cuisine);
 
   return (
     <View style={styles.screen}>
@@ -161,14 +173,6 @@ const Home = () => {
           }
         }}
       >
-        <View style={styles.cuisinePillSection}>
-          <CuisinePillRow
-            cuisines={cuisinesQuery.data ?? []}
-            selectedSlug={cuisine}
-            onSelect={handleSelectCuisine}
-          />
-        </View>
-
         <KitchenStoriesRail
           groups={storiesQuery.data ?? []}
           onPressGroup={handlePressStoryGroup}
@@ -193,14 +197,13 @@ const Home = () => {
           <SectionHeader title={HOME_COPY.categories} />
           <CategoryGrid
             categories={home?.categories ?? []}
-            activeSlug={category}
             onSelect={handleSelectCategory}
           />
         </View>
 
         <FeaturedKitchens
-          kitchens={home?.featuredKitchens ?? []}
-          isLoading={homeQuery.isLoading}
+          kitchens={recentKitchens}
+          isLoading={recentKitchensQuery.isLoading}
           onPressKitchen={(kitchen) =>
             navigation.navigate('KitchenProfile', {
               kitchenId: kitchen.id,
@@ -221,6 +224,8 @@ const Home = () => {
           hasLocation={hasLocation}
           onPressMeal={openMeal}
           onAddMeal={(meal) => addToCart(meal)}
+          getQuantity={getQuantity}
+          onChangeQuantity={changeQuantity}
           onToggleFavorite={(meal) => toggleFavorite.mutate(meal.id)}
           onSetLocation={() => navigation.navigate('Addresses')}
         />
@@ -247,7 +252,6 @@ const Home = () => {
               actionLabel={isFiltered ? 'Clear filters' : undefined}
               onAction={() => {
                 setGoalTags([]);
-                setCategory(undefined);
                 setCuisine(undefined);
               }}
             />
@@ -259,6 +263,8 @@ const Home = () => {
                   meal={meal}
                   onPress={() => openMeal(meal)}
                   onAdd={() => addToCart(meal)}
+                  quantity={getQuantity(meal.id)}
+                  onChangeQuantity={(next) => changeQuantity(meal.id, next)}
                   onToggleFavorite={() => toggleFavorite.mutate(meal.id)}
                 />
               ))}
@@ -282,16 +288,13 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.surface.page,
   },
   scrollContent: {
-    paddingBottom: theme.spacing.xxxl,
-  },
-  cuisinePillSection: {
-    marginTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE,
   },
   categorySection: {
-    marginTop: theme.spacing.xl,
+    marginTop: theme.spacing.lg,
   },
   feedSection: {
-    marginTop: theme.spacing.xl,
+    marginTop: theme.spacing.lg,
   },
   feedSubtitle: {
     color: theme.colors.text.secondary,

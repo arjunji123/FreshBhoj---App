@@ -23,7 +23,8 @@ export function PublicStack() {
       screenOptions={{ headerShown: false, animation: 'slide_from_right' }}
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-      <Stack.Screen name="Login" component={Login} />
+      {/* Instant — no slide-in, so the hero image is just there immediately. */}
+      <Stack.Screen name="Login" component={Login} options={{ animation: 'none' }} />
       <Stack.Screen name="OTP" component={OTPScreen} />
       <Stack.Screen name="OTPSuccess" component={OTPSuccess} options={{ animation: 'fade' }} />
       <Stack.Screen name="PersonalDetails" component={PersonalDetails} />

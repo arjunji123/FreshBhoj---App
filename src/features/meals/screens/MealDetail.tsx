@@ -7,6 +7,7 @@ import {
   Clock,
   Heart,
   Share2,
+  ShoppingBag,
   UtensilsCrossed,
 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
@@ -314,9 +315,11 @@ const MealDetailScreen = () => {
 
         {cartCount && cartCount.itemCount > 0 ? (
           <Pressable style={styles.viewCart} onPress={() => navigation.navigate('Cart')}>
+            <ShoppingBag size={14} color={theme.colors.primary[600]} strokeWidth={2.2} />
             <Text style={[theme.text.label, styles.viewCartText]}>
               View cart ({cartCount.itemCount} {cartCount.itemCount === 1 ? 'item' : 'items'})
             </Text>
+            <ChevronRight size={14} color={theme.colors.primary[600]} strokeWidth={2.4} />
           </Pressable>
         ) : null}
       </StickyBar>
@@ -503,8 +506,14 @@ const styles = StyleSheet.create({
     maxWidth: 200,
   },
   viewCart: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
     marginTop: theme.spacing.sm,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface.brandWash,
   },
   viewCartText: {
     color: theme.colors.primary[600],

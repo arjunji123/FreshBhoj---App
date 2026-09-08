@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { theme } from '@app/theme/index';
+import AppGradient from '@components/AppGradient';
 
 export interface ChipProps {
   label: string;
@@ -11,34 +12,63 @@ export interface ChipProps {
 }
 
 /**
- * Goal-filter chip. Selected state uses the *accent* green — green is the
- * health signal in this product, and red is reserved for CTAs, so a selected
- * filter must never compete with the primary action on screen.
+ * Filter / tab chip used across Home, Search, Orders, Kitchen and Food Feed.
+ * Selected state is the brand gradient — the same red used on every primary
+ * CTA — so every "active" state in the app reads as one consistent colour
+ * language instead of some screens going green and others red.
  */
-export const Chip: React.FC<ChipProps> = ({ label, selected = false, onPress, icon, style }) => (
-  <Pressable
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityState={{ selected }}
-    style={({ pressed }) => [
-      styles.chip,
-      selected ? styles.chipSelected : styles.chipIdle,
-      pressed ? styles.pressed : null,
-      style,
-    ]}
-  >
-    {icon ? <View style={styles.icon}>{icon}</View> : null}
-    <Text
-      style={[
-        theme.text.label,
-        { color: selected ? theme.colors.text.inverse : theme.colors.text.secondary },
+export const Chip: React.FC<ChipProps> = ({ label, selected = false, onPress, icon, style }) => {
+  const content = (
+    <>
+      {icon ? <View style={styles.icon}>{icon}</View> : null}
+      <Text
+        style={[
+          theme.text.label,
+          { color: selected ? theme.colors.text.inverse : theme.colors.text.secondary },
+        ]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+    </>
+  );
+
+  if (selected) {
+    return (
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityState={{ selected }}
+        style={({ pressed }) => [pressed ? styles.pressed : null, style]}
+      >
+        <AppGradient
+          colors={theme.colors.gradients.brand}
+          locations={theme.colors.gradients.brandLocations}
+          direction="diagonal"
+          style={[styles.chip, styles.chipSelected]}
+        >
+          {content}
+        </AppGradient>
+      </Pressable>
+    );
+  }
+
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      style={({ pressed }) => [
+        styles.chip,
+        styles.chipIdle,
+        pressed ? styles.pressed : null,
+        style,
       ]}
-      numberOfLines={1}
     >
-      {label}
-    </Text>
-  </Pressable>
-);
+      {content}
+    </Pressable>
+  );
+};
 
 interface ChipRowProps {
   children: React.ReactNode;
@@ -73,8 +103,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.borders.subtle,
   },
   chipSelected: {
-    backgroundColor: theme.colors.accent[600],
-    borderColor: theme.colors.accent[600],
+    borderColor: 'transparent',
   },
   pressed: {
     opacity: 0.85,

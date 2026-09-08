@@ -41,6 +41,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onS
             <Text
               style={[
                 theme.text.caption,
+                styles.label,
                 { color: isActive ? theme.colors.primary[700] : theme.colors.text.secondary },
               ]}
               numberOfLines={2}
@@ -100,5 +101,8 @@ const styles = StyleSheet.create({
   },
   emoji: {
     fontSize: 24,
+  },
+  label: {
+    textAlign: 'center',
   },
 });

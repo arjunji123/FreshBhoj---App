@@ -65,6 +65,6 @@ export default GoalFilterRow;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: theme.spacing.lg,
+    marginTop: theme.spacing.sm,
   },
 });

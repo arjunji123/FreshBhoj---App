@@ -8,12 +8,15 @@ import MealCard from '@components/MealCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useFavorites, useToggleFavorite } from '@features/meals/hooks/useMeals';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
+import { useCartQuantityControls } from '@features/cart/hooks/useCart';
+import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 
 const Favorites = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const { data, isLoading } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
+  const { getQuantity, changeQuantity } = useCartQuantityControls();
 
   return (
     <View style={styles.screen}>
@@ -50,6 +53,8 @@ const Favorites = () => {
                 navigation.navigate('MealDetail', { mealId: item.id, mealName: item.name })
               }
               onAdd={() => addToCart(item)}
+              quantity={getQuantity(item.id)}
+              onChangeQuantity={(next) => changeQuantity(item.id, next)}
               onToggleFavorite={() => toggleFavorite.mutate(item.id)}
             />
           )}
@@ -74,7 +79,7 @@ const styles = StyleSheet.create({
   },
   list: {
     padding: theme.layout.screenPadding,
-    paddingBottom: theme.spacing.xxxl,
+    paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE,
   },
   listEmpty: {
     flexGrow: 1,

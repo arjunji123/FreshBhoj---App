@@ -12,6 +12,7 @@ import Animated, {
 import { Check, Clock, Receipt, X } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
+import Logo from '@components/Logo';
 import { Button, Card, Skeleton } from '@components/ui';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useOrder } from '../hooks/useOrders';
@@ -58,7 +59,7 @@ const OrderConfirmation = () => {
         >
           <X size={22} color={theme.colors.text.primary} strokeWidth={2.4} />
         </Pressable>
-        <Text style={[theme.text.h4, styles.brand]}>FreshBhoj</Text>
+        <Logo size="sm" />
         <View style={styles.headerSpacer} />
       </View>
 
@@ -138,9 +139,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: theme.layout.screenPadding,
-  },
-  brand: {
-    color: theme.colors.text.primary,
   },
   headerSpacer: {
     width: 22,

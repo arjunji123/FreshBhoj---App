@@ -7,6 +7,7 @@ import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import type { AddressLabel } from '@api/types';
 import { AppBar, Button, Chip, Input, StickyBar } from '@components/ui';
+import LocationMapPicker, { type PickedLocation } from '@components/LocationMapPicker';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useAddresses, useCreateAddress, useUpdateAddress } from '../hooks/useProfile';
 
@@ -34,9 +35,20 @@ const AddressForm = () => {
   const [landmark, setLandmark] = useState(existing?.landmark ?? '');
   const [locality, setLocality] = useState(existing?.locality ?? '');
   const [pincode, setPincode] = useState(existing?.pincode ?? '');
+  const [city, setCity] = useState(existing?.city ?? 'Jaipur');
+  const [state, setState] = useState(existing?.state ?? 'Rajasthan');
   const [receiverName, setReceiverName] = useState(existing?.receiverName ?? '');
   const [receiverPhone, setReceiverPhone] = useState(existing?.receiverPhone ?? '');
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null);
+
+  const handleLocationChange = (location: PickedLocation) => {
+    setPickedLocation(location);
+    if (location.locality) setLocality(location.locality);
+    if (location.pincode) setPincode(location.pincode);
+    if (location.city) setCity(location.city);
+    if (location.state) setState(location.state);
+  };
 
   const create = useCreateAddress();
   const update = useUpdateAddress();
@@ -65,8 +77,10 @@ const AddressForm = () => {
       pincode,
       receiverName: receiverName.trim() || undefined,
       receiverPhone: receiverPhone.trim() || undefined,
-      city: 'Jaipur',
-      state: 'Rajasthan',
+      city,
+      state,
+      latitude: pickedLocation?.latitude ?? existing?.latitude ?? undefined,
+      longitude: pickedLocation?.longitude ?? existing?.longitude ?? undefined,
     };
 
     const onError = (error: unknown) =>
@@ -98,6 +112,13 @@ const AddressForm = () => {
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
       >
+        <LocationMapPicker
+          initialLatitude={existing?.latitude}
+          initialLongitude={existing?.longitude}
+          onLocationChange={handleLocationChange}
+          height={220}
+        />
+
         <Text style={[theme.text.overline, styles.sectionLabel]}>SAVE AS</Text>
         <View style={styles.labelRow}>
           {LABELS.map(({ key, label: text, Icon }) => (

@@ -90,13 +90,17 @@ const WriteReview = () => {
             <View style={[styles.mealImage, styles.mealImageFallback]} />
           )}
           <View style={styles.mealText}>
-            <Text style={[theme.text.overline, styles.eyebrow]}>RECENTLY DELIVERED</Text>
+            <Text style={[theme.text.overline, styles.eyebrow]}>
+              {params.mealName ? 'RECENTLY DELIVERED' : 'RATING'}
+            </Text>
             <Text style={theme.text.h3} numberOfLines={2}>
-              {params.mealName ?? 'Your order'}
+              {params.mealName ?? params.kitchenName ?? 'This kitchen'}
             </Text>
-            <Text style={[theme.text.caption, styles.kitchenName]} numberOfLines={1}>
-              {params.kitchenName}
-            </Text>
+            {params.mealName ? (
+              <Text style={[theme.text.caption, styles.kitchenName]} numberOfLines={1}>
+                {params.kitchenName}
+              </Text>
+            ) : null}
           </View>
         </Card>
 

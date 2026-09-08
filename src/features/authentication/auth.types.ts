@@ -43,6 +43,8 @@ export interface AuthStoreState {
 	isAuthenticated?: boolean;
 	/** True between OTP verification and profile completion. */
 	isProfilePending: boolean;
+	/** Browsing without an account — can add to cart, blocked at login-gated actions. */
+	isGuest: boolean;
 	user: UserProfile | null;
 	phoneNumber: string;
 	rememberMe: boolean;
@@ -56,8 +58,14 @@ export interface AuthStoreState {
 	setEmail: (email: string) => void;
 	setLocation: (location: Partial<LocationStoreState>) => void;
 	setUser: (user: UserProfile | null) => void;
-	/** Stores tokens, hydrates the user, and flips the navigation gate. */
-	signIn: (payload: { accessToken: string; refreshToken: string; user: UserProfile; isNewUser: boolean }) => void;
+	/** Skip on the login screen — lets the person into the app shell without an account. */
+	continueAsGuest: () => void;
+	/**
+	 * Stores tokens, merges any guest cart into the real one, hydrates the
+	 * user, and flips the navigation gate — in that order, so the private app
+	 * only ever renders once the merge is already done.
+	 */
+	signIn: (payload: { accessToken: string; refreshToken: string; user: UserProfile; isNewUser: boolean }) => Promise<void>;
 	signOut: () => void;
 	reset: () => void;
 }

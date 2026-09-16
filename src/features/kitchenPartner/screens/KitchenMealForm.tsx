@@ -29,7 +29,8 @@ const KitchenMealForm = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [foodType, setFoodType] = useState('VEG');
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [isAvailable, setIsAvailable] = useState(true);
   const [nutrition, setNutrition] = useState<NutritionAnalysisResult | null>(null);
 
   useEffect(() => {
@@ -38,7 +39,8 @@ const KitchenMealForm = () => {
       setDescription(existing.description ?? '');
       setPrice(String(existing.price));
       setFoodType(existing.foodType);
-      setImageUrl(existing.image);
+      setImages(existing.images ?? []);
+      setIsAvailable(existing.isAvailable);
       setNutrition({
         calories: existing.nutrition.calories,
         proteinG: existing.nutrition.proteinG,
@@ -58,15 +60,16 @@ const KitchenMealForm = () => {
   const create = useCreateMeal();
   const update = useUpdateMeal();
   const isSaving = create.isPending || update.isPending;
+  const isSaveBlocked = isSaving || upload.isPending;
 
   const handlePickPhoto = async () => {
     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8, selectionLimit: 1 });
     if (result.didCancel || !result.assets?.[0]?.uri) return;
     const asset = result.assets[0];
     upload.mutate(
-      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName }, purpose: 'MENU_IMAGE' },
+      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName }, purpose: 'MENU_IMAGE', fallbackType: 'image/jpeg' },
       {
-        onSuccess: (res) => setImageUrl(res.url),
+        onSuccess: (res) => setImages((prev) => [...prev, res.url]),
         onError: (error) =>
           Alert.alert('Could not upload photo', error instanceof KitchenApiError ? error.message : 'Please try again.'),
       },
@@ -96,7 +99,7 @@ const KitchenMealForm = () => {
     const input = {
       name,
       description,
-      images: imageUrl ? [imageUrl] : [],
+      images,
       price: Number(price),
       foodType,
       calories: nutrition.calories,
@@ -104,7 +107,7 @@ const KitchenMealForm = () => {
       carbsG: nutrition.carbsG,
       fatG: nutrition.fatG,
       fiberG: nutrition.fiberG,
-      isAvailable: true,
+      isAvailable,
     };
     const onSuccess = () => navigation.goBack();
     const onError = (error: unknown) =>
@@ -133,10 +136,12 @@ const KitchenMealForm = () => {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Card style={styles.photoCard} onPress={handlePickPhoto}>
-          {imageUrl ? (
-            <Text style={styles.photoHint}>Photo added — tap to change</Text>
+          {upload.isPending ? (
+            <Text style={styles.photoHint}>Uploading…</Text>
+          ) : images.length > 0 ? (
+            <Text style={styles.photoHint}>{images.length > 1 ? `${images.length} photos added — tap to add another` : 'Photo added — tap to add another'}</Text>
           ) : (
-            <Text style={styles.photoHint}>{upload.isPending ? 'Uploading…' : 'Tap to add a photo'}</Text>
+            <Text style={styles.photoHint}>Tap to add a photo</Text>
           )}
         </Card>
 
@@ -191,7 +196,13 @@ const KitchenMealForm = () => {
           </Card>
         ) : null}
 
-        <Button title={isSaving ? 'Saving…' : mealId ? 'Save changes' : 'Publish dish'} onPress={handleSave} loading={isSaving} style={styles.field} />
+        <Button
+          title={isSaving ? 'Saving…' : upload.isPending ? 'Waiting for photo…' : mealId ? 'Save changes' : 'Publish dish'}
+          onPress={handleSave}
+          loading={isSaving}
+          disabled={isSaveBlocked}
+          style={styles.field}
+        />
       </ScrollView>
     </Screen>
   );

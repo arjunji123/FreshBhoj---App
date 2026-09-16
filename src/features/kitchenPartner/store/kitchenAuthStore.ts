@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
+import { queryClient } from '@api';
 import { kitchenMmkvZustandStorage, kitchenTokenStore } from '../api/kitchenTokenStore';
 import { setKitchenSessionExpiredHandler } from '../api/kitchenClient';
 import type { KitchenAccount, KitchenTokenPair } from '../kitchenPartner.types';
@@ -31,6 +32,8 @@ export const useKitchenAuthStore = create<KitchenAuthState>()(
 
       signOut: () => {
         kitchenTokenStore.clear();
+        // Cached dashboard/orders/menu/stories belong to the previous kitchen.
+        queryClient.clear();
         set({ ...initialState });
       },
     }),
@@ -43,6 +46,7 @@ export const useKitchenAuthStore = create<KitchenAuthState>()(
         // if it's gone but persisted state says authenticated, the tokens
         // were cleared elsewhere (e.g. a hard 401) and this is stale.
         if (state?.isAuthenticated && !kitchenTokenStore.isAuthenticated()) {
+          queryClient.clear();
           useKitchenAuthStore.setState({ ...initialState });
         }
       },

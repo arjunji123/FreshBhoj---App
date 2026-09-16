@@ -77,7 +77,6 @@ export type KitchenTabParamList = {
 export type KitchenPartnerStackParamList = {
   KitchenTabs: NavigatorScreenParams<KitchenTabParamList>;
   KitchenMealForm: { mealId?: string } | undefined;
-  KitchenOnboardingPending: undefined;
 };
 
 export type KitchenPartnerNavigation = NativeStackNavigationProp<KitchenPartnerStackParamList>;

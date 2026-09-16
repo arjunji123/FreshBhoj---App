@@ -73,7 +73,9 @@ export function useAddToCart() {
   return useMutation({
     mutationFn: (input: AddCartItemInput & { mealSnapshot?: GuestCartMealInput }) => {
       if (isGuest) {
-        useGuestCartStore.getState().addItem(input.mealSnapshot ?? { id: input.mealId, name: '' }, input.quantity ?? 1);
+        useGuestCartStore
+          .getState()
+          .addItem(input.mealSnapshot ?? { id: input.mealId, name: '' }, input.quantity ?? 1, input.sourceStoryId);
         return Promise.resolve(buildGuestCart(useGuestCartStore.getState().lines));
       }
       return cartApi.addItem(input);

@@ -8,6 +8,7 @@ import { formatCurrency } from '@utils/format';
 import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
 import type { StoryItem } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useMarkStorySeen, useRegisterStoryShare, useToggleStoryLike } from '../hooks/useHomeFeed';
 
@@ -33,14 +34,23 @@ const KitchenStoryViewer = () => {
   const toggleLike = useToggleStoryLike();
   const registerShare = useRegisterStoryShare();
   const { addToCart, conflictDialog } = useAddToCartFlow();
+  const requireAuth = useRequireAuth();
 
   const current = items[index];
   const progress = useRef(new Animated.Value(0)).current;
+  // Guards against the last segment's animation-completion callback firing a
+  // second `navigation.goBack()` after a manual tap already exited (the
+  // in-flight Animated.timing for that segment isn't stopped when the index
+  // doesn't change, since no re-render happens for a same-value setState).
+  const hasExitedRef = useRef(false);
 
   const goNext = useCallback(() => {
     setIndex((i) => {
       if (i + 1 >= items.length) {
-        navigation.goBack();
+        if (!hasExitedRef.current) {
+          hasExitedRef.current = true;
+          navigation.goBack();
+        }
         return i;
       }
       return i + 1;
@@ -76,32 +86,38 @@ const KitchenStoryViewer = () => {
 
   const handleLike = () => {
     if (!current) return;
-    const wasLiked = current.isLiked;
     const storyId = current.id;
-    setItems((prev) =>
-      prev.map((it) =>
-        it.id === storyId
-          ? { ...it, isLiked: !wasLiked, likeCount: it.likeCount + (wasLiked ? -1 : 1) }
-          : it,
-      ),
-    );
-    toggleLike.mutate(storyId, {
-      onSuccess: (result) => {
-        setItems((prev) =>
-          prev.map((it) =>
-            it.id === storyId ? { ...it, isLiked: result.isLiked, likeCount: result.likeCount } : it,
-          ),
-        );
-      },
-      onError: () => {
-        setItems((prev) =>
-          prev.map((it) =>
-            it.id === storyId
-              ? { ...it, isLiked: wasLiked, likeCount: it.likeCount + (wasLiked ? 1 : -1) }
-              : it,
-          ),
-        );
-      },
+    // Only flip the optimistic "liked" UI once the mutation is actually
+    // going to run — for a guest that means only after the auth-gate sheet's
+    // login completes and this action re-fires. Otherwise a dismissed login
+    // sheet leaves the heart stuck "liked" with nothing to reconcile it.
+    requireAuth(() => {
+      const wasLiked = current.isLiked;
+      setItems((prev) =>
+        prev.map((it) =>
+          it.id === storyId
+            ? { ...it, isLiked: !wasLiked, likeCount: it.likeCount + (wasLiked ? -1 : 1) }
+            : it,
+        ),
+      );
+      toggleLike.mutate(storyId, {
+        onSuccess: (result) => {
+          setItems((prev) =>
+            prev.map((it) =>
+              it.id === storyId ? { ...it, isLiked: result.isLiked, likeCount: result.likeCount } : it,
+            ),
+          );
+        },
+        onError: () => {
+          setItems((prev) =>
+            prev.map((it) =>
+              it.id === storyId
+                ? { ...it, isLiked: wasLiked, likeCount: it.likeCount + (wasLiked ? 1 : -1) }
+                : it,
+            ),
+          );
+        },
+      });
     });
   };
 

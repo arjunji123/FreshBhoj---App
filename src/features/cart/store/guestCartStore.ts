@@ -30,11 +30,14 @@ interface GuestCartLine {
   mealId: string;
   quantity: number;
   meal: GuestCartMealInput;
+  /** Set when this line came from tapping "Order Now" on a shoppable Kitchen
+   * Story — carried through the post-login merge so attribution survives. */
+  sourceStoryId?: string;
 }
 
 interface GuestCartState {
   lines: Record<string, GuestCartLine>;
-  addItem: (meal: GuestCartMealInput, quantity?: number) => void;
+  addItem: (meal: GuestCartMealInput, quantity?: number, sourceStoryId?: string) => void;
   setQuantity: (mealId: string, quantity: number) => void;
   removeItem: (mealId: string) => void;
   clear: () => void;
@@ -44,14 +47,19 @@ export const useGuestCartStore = create<GuestCartState>()(
   persist(
     (set) => ({
       lines: {},
-      addItem: (meal, quantity = 1) =>
+      addItem: (meal, quantity = 1, sourceStoryId) =>
         set((state) => {
           const existing = state.lines[meal.id];
           const nextQuantity = (existing?.quantity ?? 0) + quantity;
           return {
             lines: {
               ...state.lines,
-              [meal.id]: { mealId: meal.id, quantity: nextQuantity, meal: existing ? { ...existing.meal, ...meal } : meal },
+              [meal.id]: {
+                mealId: meal.id,
+                quantity: nextQuantity,
+                meal: existing ? { ...existing.meal, ...meal } : meal,
+                sourceStoryId: sourceStoryId ?? existing?.sourceStoryId,
+              },
             },
           };
         }),
@@ -173,12 +181,12 @@ export async function mergeGuestCartIntoAccount(): Promise<void> {
 
   for (const line of guestLines) {
     try {
-      await cartApi.addItem({ mealId: line.mealId, quantity: line.quantity, replaceCart });
+      await cartApi.addItem({ mealId: line.mealId, quantity: line.quantity, replaceCart, sourceStoryId: line.sourceStoryId });
     } catch (error) {
       if (error instanceof ApiError && error.isKitchenConflict && !replaceCart) {
         replaceCart = true;
         try {
-          await cartApi.addItem({ mealId: line.mealId, quantity: line.quantity, replaceCart: true });
+          await cartApi.addItem({ mealId: line.mealId, quantity: line.quantity, replaceCart: true, sourceStoryId: line.sourceStoryId });
         } catch {
           // Meal couldn't be merged even after clearing the account cart — skip it.
         }

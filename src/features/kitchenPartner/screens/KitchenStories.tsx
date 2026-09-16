@@ -30,7 +30,11 @@ const KitchenStories = () => {
     const mediaType = asset.type?.startsWith('video') ? 'VIDEO' : 'IMAGE';
 
     upload.mutate(
-      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName }, purpose: 'STORY_MEDIA' },
+      {
+        asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName },
+        purpose: 'STORY_MEDIA',
+        fallbackType: mediaType === 'VIDEO' ? 'video/mp4' : 'image/jpeg',
+      },
       {
         onSuccess: (res) =>
           publish.mutate(
@@ -76,7 +80,11 @@ const KitchenStories = () => {
         />
       </View>
 
-      {query.isLoading ? (
+      {query.isError ? (
+        <View style={styles.emptyPadding}>
+          <EmptyState title="Something went wrong" description="We couldn't load your stories." actionLabel="Retry" onAction={() => query.refetch()} />
+        </View>
+      ) : query.isLoading ? (
         <View style={styles.listPadding}>
           {[0, 1].map((i) => (
             <Skeleton key={i} height={200} radius={theme.radius.card} style={{ marginBottom: theme.spacing.paddings.sm }} />

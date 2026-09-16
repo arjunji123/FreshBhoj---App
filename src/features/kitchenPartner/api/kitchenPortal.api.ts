@@ -110,16 +110,51 @@ export const kitchenDashboardApi = {
 
 // ── Upload ────────────────────────────────────────────────────────────────
 
+const EXTENSION_MIME_TYPES: Record<string, string> = {
+  mp4: 'video/mp4',
+  mov: 'video/quicktime',
+  m4v: 'video/x-m4v',
+  webm: 'video/webm',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  heic: 'image/heic',
+  heif: 'image/heic',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+};
+
+/**
+ * react-native-image-picker sometimes omits `type`, especially for video on
+ * some devices/formats. Falling back straight to 'image/jpeg' mis-tags a
+ * video upload, so try the file extension first and only fall back to the
+ * caller-provided (or default) type when that doesn't resolve either.
+ */
+function resolveUploadMimeType(asset: { uri: string; type?: string; fileName?: string }, fallbackType?: string): string {
+  if (asset.type) return asset.type;
+  const source = asset.fileName ?? asset.uri;
+  const ext = source.split('.').pop()?.toLowerCase().split(/[?#]/)[0];
+  if (ext && EXTENSION_MIME_TYPES[ext]) return EXTENSION_MIME_TYPES[ext];
+  return fallbackType ?? 'image/jpeg';
+}
+
 export const kitchenUploadApi = {
-  /** `asset` is a react-native-image-picker result — `{uri, type, fileName}`. */
-  upload: (asset: { uri: string; type?: string; fileName?: string }, purpose: string) => {
+  /**
+   * `asset` is a react-native-image-picker result — `{uri, type, fileName}`.
+   * `fallbackType` lets the caller say whether it picked a photo or a video
+   * when the picker itself didn't return a MIME type and the extension is
+   * ambiguous.
+   */
+  upload: (asset: { uri: string; type?: string; fileName?: string }, purpose: string, fallbackType?: string) => {
     const form = new FormData();
     form.append('file', {
       uri: asset.uri,
-      type: asset.type ?? 'image/jpeg',
+      type: resolveUploadMimeType(asset, fallbackType),
       name: asset.fileName ?? `upload-${Date.now()}.jpg`,
     } as any);
     form.append('purpose', purpose);
-    return kitchenClient.post<{ url: string }>('/partner/upload', form);
+    // Story videos can legitimately take longer than the default timeout on
+    // a slow connection — give uploads more room than a normal API call.
+    return kitchenClient.post<{ url: string }>('/partner/upload', form, { timeoutMs: 90_000 });
   },
 };

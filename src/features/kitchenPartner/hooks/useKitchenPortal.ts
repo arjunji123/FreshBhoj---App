@@ -146,7 +146,14 @@ export function useUpdateStoryCaption() {
 
 export function useKitchenUpload() {
   return useMutation({
-    mutationFn: ({ asset, purpose }: { asset: { uri: string; type?: string; fileName?: string }; purpose: string }) =>
-      kitchenUploadApi.upload(asset, purpose),
+    mutationFn: ({
+      asset,
+      purpose,
+      fallbackType,
+    }: {
+      asset: { uri: string; type?: string; fileName?: string };
+      purpose: string;
+      fallbackType?: string;
+    }) => kitchenUploadApi.upload(asset, purpose, fallbackType),
   });
 }

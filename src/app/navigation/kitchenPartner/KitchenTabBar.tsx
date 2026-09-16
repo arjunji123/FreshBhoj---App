@@ -31,10 +31,21 @@ export default function KitchenTabBar({ state, navigation }: BottomTabBarProps) 
         const Icon = ICONS[route.name] ?? LayoutGrid;
         const color = isFocused ? theme.colors.brand.primary : theme.colors.text.tertiary;
 
+        const onPress = () => {
+          const event = navigation.emit({
+            type: 'tabPress',
+            target: route.key,
+            canPreventDefault: true,
+          });
+          if (!isFocused && !event.defaultPrevented) {
+            navigation.navigate(route.name);
+          }
+        };
+
         return (
           <TouchableOpacity
             key={route.key}
-            onPress={() => navigation.navigate(route.name)}
+            onPress={onPress}
             style={styles.tab}
             activeOpacity={0.7}
           >

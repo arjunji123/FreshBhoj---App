@@ -2,7 +2,8 @@ import React from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { LogOut, Mail, MapPin, Phone, Star } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import { Badge, Card, Screen, Skeleton } from '@components/ui';
+import { Badge, Card, EmptyState, Screen, Skeleton } from '@components/ui';
+import { KitchenApiError } from '../api/kitchenClient';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
 import { useKitchenLogout } from '../hooks/useKitchenAuth';
 import { useKitchenProfile, useSetAcceptingOrders } from '../hooks/useKitchenPortal';
@@ -25,7 +26,14 @@ const KitchenProfile = () => {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Text style={theme.text.h1}>Kitchen Profile</Text>
 
-        {profile.isLoading || !profile.data ? (
+        {profile.isError ? (
+          <EmptyState
+            title="Something went wrong"
+            description="We couldn't load your profile."
+            actionLabel="Retry"
+            onAction={() => profile.refetch()}
+          />
+        ) : profile.isLoading || !profile.data ? (
           <Skeleton height={160} radius={theme.radius.card} style={{ marginTop: theme.spacing.paddings.md }} />
         ) : (
           <Card style={styles.card}>
@@ -56,7 +64,12 @@ const KitchenProfile = () => {
               <Text style={styles.acceptingLabel}>Accepting orders</Text>
               <Switch
                 value={profile.data.isAcceptingOrders}
-                onValueChange={(value) => setAccepting.mutate(value)}
+                onValueChange={(value) =>
+                  setAccepting.mutate(value, {
+                    onError: (error) =>
+                      Alert.alert('Could not update status', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+                  })
+                }
                 disabled={setAccepting.isPending}
                 trackColor={{ true: theme.colors.brand.primary }}
               />

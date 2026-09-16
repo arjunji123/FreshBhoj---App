@@ -21,6 +21,16 @@ export type KitchenOnboardingStep =
   | 'SUBMITTED'
   | 'COMPLETED';
 
+export type KitchenDocumentType =
+  | 'FSSAI'
+  | 'GST'
+  | 'PAN'
+  | 'AADHAAR'
+  | 'SHOP_LICENSE'
+  | 'BANK_PROOF'
+  | 'KITCHEN_PHOTOS';
+
+export type DocumentStatus = 'PENDING' | 'VERIFIED' | 'REJECTED';
 export type KitchenStatus = 'PENDING' | 'ACTIVE' | 'PAUSED' | 'SUSPENDED';
 export type FoodType = 'VEG' | 'EGG' | 'NON_VEG' | 'VEGAN';
 export type MediaType = 'IMAGE' | 'VIDEO';
@@ -48,6 +58,8 @@ export interface KitchenAccount {
   status: KitchenAccountStatus;
   onboardingStep: KitchenOnboardingStep;
   rejectionReason: string | null;
+  submittedAt: string | null;
+  approvedAt: string | null;
 }
 
 export interface OnboardingStepState {
@@ -58,6 +70,24 @@ export interface OnboardingStepState {
   isCurrent: boolean;
 }
 
+export interface KitchenDocument {
+  id: string;
+  type: KitchenDocumentType;
+  number: string | null;
+  fileUrl: string;
+  status: DocumentStatus;
+  remarks: string | null;
+}
+
+export interface KitchenBankAccount {
+  accountHolderName: string;
+  accountNumberMasked: string;
+  ifsc: string;
+  bankName: string | null;
+  upiId: string | null;
+  isVerified: boolean;
+}
+
 export interface OnboardingStatus {
   status: KitchenAccountStatus;
   currentStep: KitchenOnboardingStep;
@@ -66,6 +96,8 @@ export interface OnboardingStatus {
   canSubmit: boolean;
   pending: string[];
   rejectionReason: string | null;
+  documents: KitchenDocument[];
+  bankAccount: KitchenBankAccount | null;
   kitchenId: string | null;
 }
 
@@ -82,13 +114,21 @@ export interface KitchenProfile {
   rating: number;
   ratingCount: number;
   followerCount: number;
+  addressLine: string | null;
+  locality: string | null;
   city: string;
+  pincode: string | null;
+  latitude: number | null;
+  longitude: number | null;
   prepTimeMins: number;
   opensAt: string;
   closesAt: string;
   isAcceptingOrders: boolean;
   contactPhone: string | null;
+  fssaiLicense: string | null;
+  hygieneScore: number | null;
   cuisines: string[];
+  createdAt: string;
 }
 
 export interface MealDetail {

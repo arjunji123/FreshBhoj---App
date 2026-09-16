@@ -1,10 +1,11 @@
 import React from 'react';
-import { FlatList, Image, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, FlatList, Image, RefreshControl, StyleSheet, Switch, Text, View } from 'react-native';
 import { Plus, Sparkles } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
 import { Badge, Button, Card, EmptyState, Screen, Skeleton } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
+import { KitchenApiError } from '../api/kitchenClient';
 import { useKitchenMenu, useSetMealAvailability } from '../hooks/useKitchenPortal';
 import type { MealDetail } from '../kitchenPartner.types';
 
@@ -20,7 +21,11 @@ const KitchenMenu = () => {
         <Button title="Add dish" leftIcon={<Plus size={16} color={theme.colors.palette.white} />} size="sm" fullWidth={false} onPress={() => navigation.navigate('KitchenMealForm')} />
       </View>
 
-      {query.isLoading ? (
+      {query.isError ? (
+        <View style={styles.emptyPadding}>
+          <EmptyState title="Something went wrong" description="We couldn't load your menu." actionLabel="Retry" onAction={() => query.refetch()} />
+        </View>
+      ) : query.isLoading ? (
         <View style={styles.listPadding}>
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} height={104} radius={theme.radius.card} style={{ marginBottom: theme.spacing.paddings.sm }} />
@@ -45,7 +50,15 @@ const KitchenMenu = () => {
           renderItem={({ item }) => (
             <MealRow
               meal={item}
-              onToggle={(value) => setAvailability.mutate({ id: item.id, isAvailable: value })}
+              onToggle={(value) =>
+                setAvailability.mutate(
+                  { id: item.id, isAvailable: value },
+                  {
+                    onError: (error) =>
+                      Alert.alert('Could not update dish', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+                  },
+                )
+              }
               onPress={() => navigation.navigate('KitchenMealForm', { mealId: item.id })}
             />
           )}

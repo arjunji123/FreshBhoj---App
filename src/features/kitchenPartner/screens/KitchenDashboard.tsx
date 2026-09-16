@@ -1,9 +1,10 @@
 import React, { useCallback } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Bell, IndianRupee, Package, Star, TrendingUp, Users } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import { Card, Screen, Skeleton } from '@components/ui';
+import { Card, EmptyState, Screen, Skeleton } from '@components/ui';
 import AppGradient from '@components/AppGradient';
+import { KitchenApiError } from '../api/kitchenClient';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
 import { useKitchenDashboard, useKitchenIncomingOrders, useSetAcceptingOrders } from '../hooks/useKitchenPortal';
 
@@ -48,7 +49,12 @@ const KitchenDashboard = () => {
               <Text style={styles.acceptingLabel}>{summary.isAcceptingOrders ? 'Taking orders' : 'Paused'}</Text>
               <Switch
                 value={summary.isAcceptingOrders}
-                onValueChange={(value) => setAccepting.mutate(value)}
+                onValueChange={(value) =>
+                  setAccepting.mutate(value, {
+                    onError: (error) =>
+                      Alert.alert('Could not update status', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+                  })
+                }
                 disabled={setAccepting.isPending}
                 trackColor={{ true: 'rgba(255,255,255,0.4)', false: 'rgba(0,0,0,0.25)' }}
                 thumbColor={theme.colors.palette.white}
@@ -64,7 +70,15 @@ const KitchenDashboard = () => {
           </Card>
         ) : null}
 
-        {dashboard.isLoading || !summary ? (
+        {dashboard.isError ? (
+          <EmptyState
+            icon={<Bell size={28} color={theme.colors.text.tertiary} />}
+            title="Something went wrong"
+            description="We couldn't load your dashboard."
+            actionLabel="Retry"
+            onAction={() => dashboard.refetch()}
+          />
+        ) : dashboard.isLoading || !summary ? (
           <View style={styles.statsGrid}>
             {[0, 1, 2, 3].map((i) => (
               <Skeleton key={i} height={96} radius={theme.radius.card} style={styles.statSkeleton} />

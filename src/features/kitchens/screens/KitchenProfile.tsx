@@ -83,7 +83,7 @@ const KitchenProfile = () => {
   const handleShare = () => {
     if (!kitchen) return;
     Share.share({
-      message: `${kitchen.name} on FreshBhoj — verified home kitchen\nhttps://freshbhoj.com/kitchens/${kitchen.slug}`,
+      message: `${kitchen.name} on FreshBhoj — verified for nutrition and hygiene\nhttps://freshbhoj.com/kitchens/${kitchen.slug}`,
     }).catch(() => undefined);
   };
 

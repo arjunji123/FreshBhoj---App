@@ -19,7 +19,7 @@ const ReferralScreen = () => {
     if (!data) return;
     Share.share({
       message:
-        `Join me on FreshBhoj — verified home kitchens, real nutrition numbers. ` +
+        `Join me on FreshBhoj — verified kitchens, real nutrition numbers. ` +
         `Use my code ${data.code} when you sign up and we both get FreshBhoj Coins!\n` +
         `${REFERRAL_LINK_BASE}/${data.code}`,
     }).catch(() => undefined);

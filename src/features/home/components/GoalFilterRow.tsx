@@ -8,13 +8,14 @@ import {
   TrendingDown,
 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import { Chip, ChipRow } from '@components/ui';
+import { Chip, ChipRow, Skeleton } from '@components/ui';
 import type { GoalTag, GoalTagOption } from '@api/types';
 
 interface GoalFilterRowProps {
   options: GoalTagOption[];
   selected: GoalTag[];
   onToggle: (tag: GoalTag) => void;
+  isLoading?: boolean;
 }
 
 /** Icon per goal, keyed off the `icon` slug the backend sends. */
@@ -30,7 +31,17 @@ const ICONS: Record<string, React.FC<{ size: number; color: string; strokeWidth:
  * Goal-based quick filters. Multi-select: someone can be chasing high protein
  * *and* low calorie, and the API's `hasSome` filter handles the union.
  */
-const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onToggle }) => {
+const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onToggle, isLoading }) => {
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.skeletonRow]}>
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Skeleton key={index} width={index === 0 ? 92 : 80} height={32} radius={theme.radius.pill} />
+        ))}
+      </View>
+    );
+  }
+
   if (!options.length) return null;
 
   return (
@@ -66,5 +77,10 @@ export default GoalFilterRow;
 const styles = StyleSheet.create({
   container: {
     marginTop: theme.spacing.sm,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+    paddingHorizontal: theme.layout.screenPadding,
   },
 });

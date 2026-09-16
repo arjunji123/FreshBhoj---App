@@ -1,6 +1,6 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Bell, ChevronDown, MapPin, Search, ShoppingBag } from 'lucide-react-native';
+import { Bell, ChevronDown, Gift, MapPin, Search, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
@@ -8,6 +8,9 @@ import { theme } from '@app/theme/index';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { HOME_COPY, SCROLL_THRESHOLD, TOP_ROW_HEIGHT } from '../home.constants';
 import type { HomeHeaderProps } from '../home.types';
+
+/** Deliberately not brand red — this icon needs to read as "reward", not another CTA. */
+const REFERRAL_ICON_GRADIENT = ['#FFD166', '#FF6B6B', '#8B5CF6'];
 
 /**
  * Brand-gradient header that collapses as the feed scrolls: the greeting and
@@ -19,8 +22,9 @@ const HomeHeader = ({
   cartCount = 0,
   onPressLocation,
   onPressSearch,
-  onPressProfile,
+  onPressNotifications,
   onPressCart,
+  onPressReferral,
 }: HomeHeaderProps) => {
   const insets = useSafeAreaInsets();
   const location = useAuthStore((s) => s.location);
@@ -86,6 +90,20 @@ const HomeHeader = ({
 
           <View style={styles.actions}>
             <Pressable
+              onPress={onPressReferral}
+              accessibilityRole="button"
+              accessibilityLabel="Refer and earn"
+            >
+              <AppGradient
+                colors={REFERRAL_ICON_GRADIENT}
+                direction="diagonal"
+                style={styles.iconButton}
+              >
+                <Gift size={18} color={theme.colors.text.inverse} strokeWidth={2.2} />
+              </AppGradient>
+            </Pressable>
+
+            <Pressable
               style={styles.iconButton}
               onPress={onPressCart}
               accessibilityRole="button"
@@ -101,7 +119,7 @@ const HomeHeader = ({
 
             <Pressable
               style={styles.iconButton}
-              onPress={onPressProfile}
+              onPress={onPressNotifications}
               accessibilityRole="button"
               accessibilityLabel="Notifications"
             >

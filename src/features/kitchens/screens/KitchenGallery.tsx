@@ -1,5 +1,14 @@
 import React, { useRef, useState } from 'react';
-import { Dimensions, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Dimensions,
+  FlatList,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Play, X } from 'lucide-react-native';
@@ -16,12 +25,29 @@ const KitchenGallery = () => {
   const insets = useSafeAreaInsets();
   const { params } = useRoute<Route>();
 
-  const { data: media } = useKitchenMedia(params.kitchenId);
+  const { data: media, isLoading } = useKitchenMedia(params.kitchenId);
   const [index, setIndex] = useState(params.initialIndex ?? 0);
   const listRef = useRef<FlatList>(null);
 
   const items = media ?? [];
   const current = items[index];
+
+  if (isLoading) {
+    return (
+      <View style={[styles.screen, styles.loadingScreen]}>
+        <ActivityIndicator color={theme.colors.palette.white} size="large" />
+        <Pressable
+          onPress={navigation.goBack}
+          hitSlop={theme.layout.hitSlop}
+          accessibilityRole="button"
+          accessibilityLabel="Close gallery"
+          style={[styles.closeButton, { top: insets.top + theme.spacing.md }]}
+        >
+          <X size={20} color={theme.colors.text.inverse} strokeWidth={2.5} />
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.screen}>
@@ -82,6 +108,10 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.neutral[900],
+  },
+  loadingScreen: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   page: {
     width: SCREEN_WIDTH,

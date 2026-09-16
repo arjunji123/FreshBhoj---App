@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addressesApi, authApi, qk, supportApi, usersApi } from '@api';
 import type { AddressInput } from '@api/endpoints/addresses.api';
-import type { NotificationPreferences } from '@api/types';
+import type { NotificationPreferences, UserProfile } from '@api/types';
 import { useAuthStore } from '@features/authentication/store/authStore';
+import { useAuthGatedMutate } from '@features/authentication/hooks/useRequireAuth';
 
 // ── Profile ─────────────────────────────────────────────────────────────────
 
@@ -37,13 +38,37 @@ export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const setUser = useAuthStore((s) => s.setUser);
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: usersApi.completeProfile,
     onSuccess: (user) => {
       setUser(user);
       queryClient.setQueryData(qk.user.me, user);
     },
   });
+
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
+}
+
+export function useUpdateProfileImage() {
+  const queryClient = useQueryClient();
+  const setUser = useAuthStore((s) => s.setUser);
+  const currentUser = useAuthStore((s) => s.user);
+
+  const mutation = useMutation({
+    mutationFn: (profileImage: { uri: string; name: string; type: string }) =>
+      usersApi.updateProfileImage(profileImage),
+    onSuccess: ({ profileImage }) => {
+      const previous = queryClient.getQueryData<UserProfile>(qk.user.me) ?? currentUser;
+      if (!previous) return;
+      const updated = { ...previous, profileImage };
+      setUser(updated);
+      queryClient.setQueryData(qk.user.me, updated);
+    },
+  });
+
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 export function useLogout() {
@@ -97,26 +122,34 @@ function useAddressMutationOptions() {
 
 export function useCreateAddress() {
   const options = useAddressMutationOptions();
-  return useMutation({ mutationFn: (input: AddressInput) => addressesApi.create(input), ...options });
+  const mutation = useMutation({ mutationFn: (input: AddressInput) => addressesApi.create(input), ...options });
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 export function useUpdateAddress() {
   const options = useAddressMutationOptions();
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<AddressInput> }) =>
       addressesApi.update(id, input),
     ...options,
   });
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 export function useSetDefaultAddress() {
   const options = useAddressMutationOptions();
-  return useMutation({ mutationFn: (id: string) => addressesApi.setDefault(id), ...options });
+  const mutation = useMutation({ mutationFn: (id: string) => addressesApi.setDefault(id), ...options });
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 export function useDeleteAddress() {
   const options = useAddressMutationOptions();
-  return useMutation({ mutationFn: (id: string) => addressesApi.remove(id), ...options });
+  const mutation = useMutation({ mutationFn: (id: string) => addressesApi.remove(id), ...options });
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 // ── Support & settings ──────────────────────────────────────────────────────

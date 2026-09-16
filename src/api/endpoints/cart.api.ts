@@ -8,6 +8,8 @@ export interface AddCartItemInput {
   specialInstructions?: string;
   /** Set after the user confirms the "clear cart?" prompt on a kitchen conflict. */
   replaceCart?: boolean;
+  /** Set when this add-to-cart came from tapping a shoppable Kitchen Story. */
+  sourceStoryId?: string;
 }
 
 export const cartApi = {
@@ -27,6 +29,11 @@ export const cartApi = {
   applyCoupon: (code: string) => apiClient.post<Cart>('/customer/cart/coupon', { code }),
 
   removeCoupon: () => apiClient.delete<Cart>('/customer/cart/coupon'),
+
+  /** No body — redeems the most the cart currently qualifies for. */
+  applyCoins: () => apiClient.post<Cart>('/customer/cart/coins'),
+
+  removeCoins: () => apiClient.delete<Cart>('/customer/cart/coins'),
 };
 
 export const couponsApi = {

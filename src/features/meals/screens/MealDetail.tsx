@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
   AlertTriangle,
@@ -38,6 +38,7 @@ import {
   useSimilarMeals,
   useToggleFavorite,
 } from '../hooks/useMeals';
+import { useMarkReviewHelpful } from '@features/reviews/hooks/useReviews';
 import MealHero from '../components/MealHero';
 import NutritionPanel from '../components/NutritionPanel';
 import CustomizationSheet from '../components/CustomizationSheet';
@@ -61,9 +62,19 @@ const MealDetailScreen = () => {
   const { data: cartCount } = useCartCount();
 
   const toggleFavorite = useToggleFavorite();
+  const markHelpful = useMarkReviewHelpful();
   const { addToCart, conflictDialog, isAdding } = useAddToCartFlow();
 
   const hasCustomizations = Boolean(meal?.customizationGroups?.length);
+
+  const handleShare = () => {
+    if (!meal) return;
+    Share.share({
+      message:
+        `${meal.name} from ${meal.kitchen.name} on FreshBhoj\n` +
+        `https://freshbhoj.com/meals/${meal.slug}`,
+    }).catch(() => undefined);
+  };
 
   const handleAddPress = () => {
     if (!meal) return;
@@ -131,7 +142,7 @@ const MealDetailScreen = () => {
                     strokeWidth={2.2}
                   />
                 </AppBarAction>
-                <AppBarAction floating accessibilityLabel="Share">
+                <AppBarAction floating accessibilityLabel="Share" onPress={handleShare}>
                   <Share2 size={18} color={theme.colors.text.primary} strokeWidth={2.2} />
                 </AppBarAction>
               </>
@@ -256,7 +267,11 @@ const MealDetailScreen = () => {
 
               <View style={styles.reviewList}>
                 {reviews.items.map((review) => (
-                  <ReviewCard key={review.id} review={review} />
+                  <ReviewCard
+                    key={review.id}
+                    review={review}
+                    onHelpful={() => markHelpful.mutate(review.id)}
+                  />
                 ))}
               </View>
             </View>

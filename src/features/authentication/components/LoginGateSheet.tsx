@@ -11,13 +11,16 @@ import { useAuthStore } from '../store/authStore';
 import { useAuthGateStore } from '../store/authGateStore';
 import LoginPhoneInput from './LoginPhoneInput';
 import OTPInputSection from './OTPInputSection';
+import SocialLogin from './SocialLogin';
 
 type Step = 'phone' | 'otp';
 
 /**
- * The compact "log in to continue" sheet a guest sees when they follow a
- * kitchen, favourite a meal, or try to check out — a smaller, self-contained
- * two-step phone + OTP flow, not the full Login screen. Mounted once,
+ * The "log in or sign up" sheet a guest sees when they follow a kitchen,
+ * favourite a meal, or try to check out — a self-contained two-step phone +
+ * OTP flow mirroring the full Login screen (same copy, same social row),
+ * just shorter. One form handles both new and returning numbers, same as
+ * Login — the backend tells us which via `isNewUser`. Mounted once,
  * globally, and driven entirely by `useAuthGateStore` / `useRequireAuth`.
  */
 const LoginGateSheet = () => {
@@ -97,15 +100,17 @@ const LoginGateSheet = () => {
   return (
     <Sheet
       ref={sheetRef}
-      eyebrow={step === 'phone' ? 'LOG IN REQUIRED' : 'VERIFY YOUR NUMBER'}
-      title={step === 'phone' ? 'Log in to continue' : `Code sent to +91 ${phoneNumber}`}
-      heightRatio={step === 'phone' ? 0.46 : 0.58}
+      eyebrow={step === 'phone' ? 'CONTINUE TO SAVE THIS' : 'VERIFY YOUR NUMBER'}
+      title={step === 'phone' ? AUTH_COPY.loginDivider : `Code sent to +91 ${phoneNumber}`}
+      heightRatio={step === 'phone' ? 0.62 : 0.6}
       onClose={close}
+      onBack={step === 'otp' ? () => setStep('phone') : undefined}
     >
       {step === 'phone' ? (
         <View style={styles.phoneStep}>
           <Text style={[theme.text.body, styles.subtitle]}>
-            You're browsing as a guest — log in to save this to your account.
+            You're browsing as a guest — whether you're new here or already have an account, just
+            verify your number to save this.
           </Text>
 
           <LoginPhoneInput value={phoneNumber} onChangeText={handlePhoneChange} />
@@ -121,6 +126,8 @@ const LoginGateSheet = () => {
             direction="diagonal"
             locations={theme.colors.defaultLocations}
           />
+
+          <SocialLogin />
         </View>
       ) : (
         <OTPInputSection

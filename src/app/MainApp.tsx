@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, { Easing, runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 import { queryClient } from '@api';
 import SplashScreen from '@components/SplashScreen';
+import { useCaptureReferralLink } from '@features/referral/useCaptureReferralLink';
 import { AppNavigator } from './navigation/AppNavigator';
 
 const SPLASH_DURATION_MS = 2200;
@@ -14,6 +15,8 @@ const SPLASH_FADE_MS = 320;
 const MainApp = () => {
   const [showSplashOverlay, setShowSplashOverlay] = useState(true);
   const splashOpacity = useSharedValue(1);
+
+  useCaptureReferralLink();
 
   useEffect(() => {
     // The navigator mounts immediately, hidden behind the splash overlay, so

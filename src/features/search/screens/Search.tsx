@@ -11,6 +11,7 @@ import {
   Input,
   MealCardSkeleton,
   Screen,
+  Skeleton,
   VerifiedBadge,
   type SheetHandle,
 } from '@components/ui';
@@ -61,7 +62,7 @@ const Search = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  const { data: suggestions } = useSearchSuggestions();
+  const { data: suggestions, isLoading: isSuggestionsLoading } = useSearchSuggestions();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
   const { getQuantity, changeQuantity } = useCartQuantityControls();
@@ -234,7 +235,28 @@ const Search = () => {
         </>
       ) : (
         <View style={styles.suggestions}>
-          {showHistory ? (
+          {isSuggestionsLoading ? (
+            <>
+              <View style={styles.sectionRow}>
+                <Skeleton width={120} height={12} />
+              </View>
+              <View style={styles.tagCloud}>
+                <Skeleton width={90} height={34} radius={theme.radius.pill} />
+                <Skeleton width={120} height={34} radius={theme.radius.pill} />
+                <Skeleton width={80} height={34} radius={theme.radius.pill} />
+                <Skeleton width={100} height={34} radius={theme.radius.pill} />
+              </View>
+              <View style={[styles.sectionRow, styles.gapTop]}>
+                <Skeleton width={140} height={12} />
+              </View>
+              {Array.from({ length: 3 }).map((_, index) => (
+                <View key={index} style={styles.kitchenRow}>
+                  <Skeleton width={38} height={38} radius={19} />
+                  <Skeleton width="50%" height={14} />
+                </View>
+              ))}
+            </>
+          ) : showHistory ? (
             <>
               <View style={styles.sectionRow}>
                 <Clock size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
@@ -407,6 +429,9 @@ const styles = StyleSheet.create({
   },
   suggestions: {
     paddingHorizontal: theme.layout.screenPadding,
+  },
+  gapTop: {
+    marginTop: theme.spacing.md,
   },
   sectionRow: {
     flexDirection: 'row',

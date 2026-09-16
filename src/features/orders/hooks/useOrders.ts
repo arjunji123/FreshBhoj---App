@@ -81,6 +81,10 @@ export function usePlaceOrder() {
       queryClient.setQueryData(qk.orders.detail(order.id), order);
       queryClient.invalidateQueries({ queryKey: qk.orders.all });
       queryClient.invalidateQueries({ queryKey: qk.cart.all });
+      // COD debits redeemed coins immediately — refresh the balance everywhere it's shown.
+      if (order.pricing.coinsRedeemed > 0) {
+        queryClient.invalidateQueries({ queryKey: qk.referral.me });
+      }
     },
   });
 }
@@ -96,6 +100,10 @@ export function useConfirmPayment() {
       queryClient.invalidateQueries({ queryKey: qk.orders.all });
       // The cart is emptied server-side once payment lands.
       queryClient.invalidateQueries({ queryKey: qk.cart.all });
+      // Non-COD debits redeemed coins here, once payment is confirmed.
+      if (order.pricing.coinsRedeemed > 0) {
+        queryClient.invalidateQueries({ queryKey: qk.referral.me });
+      }
     },
   });
 }

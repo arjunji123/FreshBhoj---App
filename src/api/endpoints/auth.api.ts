@@ -8,6 +8,14 @@ export const toE164 = (phone: string): string => {
 };
 
 export const authApi = {
+  /** Single-screen login: resolves which OTP flow a phone belongs to before any OTP is sent. */
+  accountType: (phone: string) =>
+    apiClient.post<{ accountType: 'KITCHEN' | 'CUSTOMER' }>(
+      '/auth/account-type',
+      { phone: toE164(phone) },
+      { skipAuth: true },
+    ),
+
   sendOtp: (phone: string) =>
     apiClient.post<{ expiresInMinutes: number; devOtp?: string }>(
       '/auth/otp/send',
@@ -47,6 +55,13 @@ export const usersApi = {
     if (input.email) form.append('email', input.email);
     if (input.profileImage) form.append('profileImage', input.profileImage as any);
     return apiClient.post<UserProfile>('/customer/profile/complete', form);
+  },
+
+  /** Avatar-only update, used from Edit Profile — swaps the photo without touching name/email. */
+  updateProfileImage: (profileImage: { uri: string; name: string; type: string }) => {
+    const form = new FormData();
+    form.append('profileImage', profileImage as any);
+    return apiClient.patch<{ profileImage: string }>('/customer/profile/image', form);
   },
 
   updateLocation: (input: {

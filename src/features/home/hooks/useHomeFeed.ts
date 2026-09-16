@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { catalogApi, homeApi, qk, storiesApi } from '@api';
+import { useAuthGatedMutate } from '@features/authentication/hooks/useRequireAuth';
 
 /** Everything above the Home meal feed, in a single request. */
 export function useHomeFeed() {
@@ -15,23 +16,6 @@ export function useSearchSuggestions() {
     queryKey: qk.home.suggestions,
     queryFn: homeApi.searchSuggestions,
     staleTime: 10 * 60_000,
-  });
-}
-
-/** Goal chips. Cached hard — this list barely changes. */
-export function useGoalTags() {
-  return useQuery({
-    queryKey: qk.catalog.goalTags,
-    queryFn: catalogApi.goalTags,
-    staleTime: 60 * 60_000,
-  });
-}
-
-export function useCategories() {
-  return useQuery({
-    queryKey: qk.catalog.categories,
-    queryFn: catalogApi.categories,
-    staleTime: 60 * 60_000,
   });
 }
 
@@ -68,5 +52,32 @@ export function useMarkStorySeen() {
       // mounted at a time, so invalidating every `stories` entry is simplest.
       queryClient.invalidateQueries({ queryKey: ['stories'] });
     },
+  });
+}
+
+/**
+ * The viewer keeps its own local like/count state (it's handed a snapshot via
+ * navigation params, not a live query), so this only needs to return the
+ * authoritative result to reconcile with — cache patching happens via the
+ * broad `['stories']` invalidate, same as `useMarkStorySeen`.
+ */
+export function useToggleStoryLike() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (storyId: string) => storiesApi.toggleLike(storyId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stories'] });
+    },
+  });
+
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
+}
+
+/** Fire-and-forget, called right after the native share sheet opens. */
+export function useRegisterStoryShare() {
+  return useMutation({
+    mutationFn: (storyId: string) => storiesApi.registerShare(storyId),
   });
 }

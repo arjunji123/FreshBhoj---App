@@ -20,12 +20,15 @@ import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import CartItemRow from '../components/CartItemRow';
 import CouponPanel from '../components/CouponPanel';
+import CoinsPanel from '../components/CoinsPanel';
 import BillSummary from '../components/BillSummary';
 import {
+  useApplyCoins,
   useApplyCoupon,
   useCart,
   useClearCart,
   useCoupons,
+  useRemoveCoins,
   useRemoveCoupon,
   useUpdateCartItem,
 } from '../hooks/useCart';
@@ -40,6 +43,8 @@ const Cart = () => {
   const clearCart = useClearCart();
   const applyCoupon = useApplyCoupon();
   const removeCoupon = useRemoveCoupon();
+  const applyCoins = useApplyCoins();
+  const removeCoins = useRemoveCoins();
   const { data: coupons } = useCoupons(cart?.pricing.itemsTotal ?? 0);
 
   const handleClear = () => {
@@ -143,6 +148,14 @@ const Cart = () => {
             setCouponError(null);
             removeCoupon.mutate();
           }}
+        />
+
+        <CoinsPanel
+          cart={cart}
+          isApplying={applyCoins.isPending}
+          isRemoving={removeCoins.isPending}
+          onApply={() => applyCoins.mutate()}
+          onRemove={() => removeCoins.mutate()}
         />
 
         <BillSummary pricing={cart.pricing} couponCode={cart.coupon.code} />

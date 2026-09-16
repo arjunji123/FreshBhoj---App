@@ -1,6 +1,6 @@
 import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
-import { X } from 'lucide-react-native';
+import { ArrowLeft, X } from 'lucide-react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { theme } from '@app/theme/index';
 
@@ -18,6 +18,8 @@ interface SheetProps {
   title?: string;
   eyebrow?: string;
   onClose?: () => void;
+  /** Shows a back button before the title, for a sheet with more than one step. */
+  onBack?: () => void;
   closeOnMask?: boolean;
   showHandle?: boolean;
 }
@@ -34,6 +36,7 @@ const Sheet = forwardRef<SheetHandle, SheetProps>(
       title,
       eyebrow,
       onClose,
+      onBack,
       closeOnMask = true,
       showHandle = true,
     },
@@ -67,6 +70,18 @@ const Sheet = forwardRef<SheetHandle, SheetProps>(
 
         {title || eyebrow ? (
           <View style={styles.header}>
+            {onBack ? (
+              <Pressable
+                onPress={onBack}
+                hitSlop={theme.layout.hitSlop}
+                accessibilityRole="button"
+                accessibilityLabel="Go back"
+                style={({ pressed }) => [styles.backButton, pressed ? styles.pressed : null]}
+              >
+                <ArrowLeft size={18} color={theme.colors.text.secondary} strokeWidth={2.5} />
+              </Pressable>
+            ) : null}
+
             <View style={styles.headerText}>
               {eyebrow ? (
                 <Text style={[theme.text.overline, styles.eyebrow]}>{eyebrow}</Text>
@@ -136,6 +151,14 @@ const styles = StyleSheet.create({
     color: theme.colors.primary[600],
   },
   closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.neutral[100],
+  },
+  backButton: {
     width: 32,
     height: 32,
     borderRadius: 16,

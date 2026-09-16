@@ -22,6 +22,7 @@ import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useKitchens } from '@features/kitchens/hooks/useKitchens';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import { useAuthStore } from '@features/authentication/store/authStore';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import HomeHeader from '../components/HomeHeader';
 import GoalFilterRow from '../components/GoalFilterRow';
 import CategoryGrid from '../components/CategoryGrid';
@@ -32,7 +33,7 @@ import FeaturedKitchens from '../components/FeaturedKitchens';
 import ReelsRail from '../components/ReelsRail';
 import ActiveOrderStrip from '../components/ActiveOrderStrip';
 import { HOME_COPY } from '../home.constants';
-import { useCuisines, useHomeFeed, useKitchenStories, useMarkStorySeen } from '../hooks/useHomeFeed';
+import { useCuisines, useHomeFeed, useKitchenStories } from '../hooks/useHomeFeed';
 
 /**
  * Discovery screen.
@@ -45,6 +46,7 @@ import { useCuisines, useHomeFeed, useKitchenStories, useMarkStorySeen } from '.
  */
 const Home = () => {
   const navigation = useNavigation<PrivateNavigation>();
+  const requireAuth = useRequireAuth();
   const scrollY = useSharedValue(0);
 
   const [goalTags, setGoalTags] = useState<GoalTag[]>([]);
@@ -58,7 +60,6 @@ const Home = () => {
   const recentKitchens = flattenPages(recentKitchensQuery.data?.pages).slice(0, 6);
   const cuisinesQuery = useCuisines();
   const storiesQuery = useKitchenStories(location.city);
-  const markStorySeen = useMarkStorySeen();
   const { data: cartCount } = useCartCount();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
@@ -117,14 +118,15 @@ const Home = () => {
 
   const handlePressStoryGroup = useCallback(
     (group: KitchenStoryGroup) => {
-      const firstUnseen = group.items.find((item) => !item.isSeen) ?? group.items[0];
-      if (firstUnseen) markStorySeen.mutate(firstUnseen.id);
-      navigation.navigate('KitchenProfile', {
+      const firstUnseenIndex = group.items.findIndex((item) => !item.isSeen);
+      navigation.navigate('KitchenStoryViewer', {
         kitchenId: group.kitchen.id,
         kitchenName: group.kitchen.name,
+        items: group.items,
+        initialIndex: firstUnseenIndex >= 0 ? firstUnseenIndex : 0,
       });
     },
-    [navigation, markStorySeen],
+    [navigation],
   );
 
   const handleRefresh = useCallback(() => {
@@ -146,7 +148,8 @@ const Home = () => {
         cartCount={cartCount?.itemCount ?? 0}
         onPressSearch={() => navigation.navigate('MainTabs', { screen: 'Search' })}
         onPressCart={() => navigation.navigate('Cart')}
-        onPressProfile={() => navigation.navigate('MainTabs', { screen: 'Profile' })}
+        onPressNotifications={() => requireAuth(() => navigation.navigate('Notifications'))}
+        onPressReferral={() => requireAuth(() => navigation.navigate('Referral'))}
         onPressLocation={() => navigation.navigate('Addresses')}
       />
 
@@ -176,6 +179,7 @@ const Home = () => {
         <KitchenStoriesRail
           groups={storiesQuery.data ?? []}
           onPressGroup={handlePressStoryGroup}
+          isLoading={storiesQuery.isLoading}
         />
 
         {activeOrder ? (
@@ -189,15 +193,21 @@ const Home = () => {
           options={home?.goalTags ?? []}
           selected={goalTags}
           onToggle={handleToggleGoal}
+          isLoading={homeQuery.isLoading}
         />
 
-        <CuisineCarousel cuisines={cuisinesQuery.data ?? []} onSelect={handleSelectCuisine} />
+        <CuisineCarousel
+          cuisines={cuisinesQuery.data ?? []}
+          onSelect={handleSelectCuisine}
+          isLoading={cuisinesQuery.isLoading}
+        />
 
         <View style={styles.categorySection}>
           <SectionHeader title={HOME_COPY.categories} />
           <CategoryGrid
             categories={home?.categories ?? []}
             onSelect={handleSelectCategory}
+            isLoading={homeQuery.isLoading}
           />
         </View>
 

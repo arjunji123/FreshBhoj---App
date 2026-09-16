@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { launchImageLibrary } from 'react-native-image-picker';
+import { Camera } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import { AppBar, Avatar, Button, Input, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
-import { useProfile, useUpdateProfile } from '../hooks/useProfile';
+import { useProfile, useUpdateProfile, useUpdateProfileImage } from '../hooks/useProfile';
 
 const EditProfile = () => {
   const navigation = useNavigation<PrivateNavigation>();
@@ -20,6 +22,34 @@ const EditProfile = () => {
   const [error, setError] = useState<string | null>(null);
 
   const updateProfile = useUpdateProfile();
+  const updateProfileImage = useUpdateProfileImage();
+
+  const handlePickPhoto = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      quality: 0.8,
+      selectionLimit: 1,
+    });
+    if (result.didCancel || !result.assets?.[0]) return;
+
+    const asset = result.assets[0];
+    if (!asset.uri) return;
+
+    updateProfileImage.mutate(
+      {
+        uri: asset.uri,
+        name: asset.fileName ?? 'profile.jpg',
+        type: asset.type ?? 'image/jpeg',
+      },
+      {
+        onError: (apiError) =>
+          Alert.alert(
+            'Could not update photo',
+            apiError instanceof ApiError ? apiError.message : 'Please try again.',
+          ),
+      },
+    );
+  };
 
   const handleSave = () => {
     if (fullName.trim().length < 2) {
@@ -56,7 +86,24 @@ const EditProfile = () => {
         bottomOffset={24}
       >
         <View style={styles.avatarWrap}>
-          <Avatar uri={profile?.profileImage} name={fullName || profile?.fullName} size={92} />
+          <Pressable
+            onPress={handlePickPhoto}
+            disabled={updateProfileImage.isPending}
+            accessibilityRole="button"
+            accessibilityLabel="Change profile photo"
+            style={({ pressed }) => [styles.avatarPressable, pressed ? styles.avatarPressed : null]}
+          >
+            <Avatar uri={profile?.profileImage} name={fullName || profile?.fullName} size={92} />
+            {updateProfileImage.isPending ? (
+              <View style={styles.avatarOverlay}>
+                <ActivityIndicator color={theme.colors.palette.white} />
+              </View>
+            ) : (
+              <View style={styles.cameraBadge}>
+                <Camera size={14} color={theme.colors.palette.white} strokeWidth={2.4} />
+              </View>
+            )}
+          </Pressable>
         </View>
 
         <Input
@@ -115,6 +162,34 @@ const styles = StyleSheet.create({
   avatarWrap: {
     alignItems: 'center',
     marginVertical: theme.spacing.xl,
+  },
+  avatarPressable: {
+    width: 92,
+    height: 92,
+    borderRadius: 46,
+  },
+  avatarPressed: {
+    opacity: 0.85,
+  },
+  avatarOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 46,
+    backgroundColor: 'rgba(0,0,0,0.35)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cameraBadge: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.primary[600],
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: theme.colors.surface.page,
   },
   field: {
     marginTop: theme.spacing.lg,

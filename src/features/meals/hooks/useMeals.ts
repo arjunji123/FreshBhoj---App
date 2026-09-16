@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { mealsApi, qk } from '@api';
 import type { MealListParams, TrendingNearbyParams } from '@api/endpoints/meals.api';
 import type { MealCard, NearbyMealCard, Paginated } from '@api/types';
+import { useAuthStore } from '@features/authentication/store/authStore';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 
 const PAGE_SIZE = 10;
@@ -73,7 +74,13 @@ export function useMealReviews(mealId: string, limit = 4) {
 }
 
 export function useFavorites() {
-  return useQuery({ queryKey: qk.meals.favorites, queryFn: () => mealsApi.favorites() });
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  return useQuery({
+    queryKey: qk.meals.favorites,
+    queryFn: () => mealsApi.favorites(),
+    enabled: Boolean(isAuthenticated),
+  });
 }
 
 /** Flips `isFavorite` wherever a meal shows up: detail, paginated lists, or infinite-query pages. */

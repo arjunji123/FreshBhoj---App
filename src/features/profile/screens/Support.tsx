@@ -10,7 +10,7 @@ import { useFaqs, useSupportContact } from '../hooks/useProfile';
 /** Support hub: one-tap WhatsApp, plus an FAQ accordion. */
 const Support = () => {
   const navigation = useNavigation<PrivateNavigation>();
-  const { data: contact } = useSupportContact();
+  const { data: contact, isLoading: isContactLoading } = useSupportContact();
   const { data: faqs, isLoading } = useFaqs();
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -38,18 +38,21 @@ const Support = () => {
               icon={<MessageCircle size={19} color={theme.colors.accent[600]} strokeWidth={2.2} />}
               label="WhatsApp"
               tone="accent"
+              disabled={isContactLoading}
               onPress={() => contact && open(contact.whatsapp.url)}
             />
             <ContactButton
               icon={<Phone size={19} color={theme.colors.primary[600]} strokeWidth={2.2} />}
               label="Call us"
               tone="brand"
+              disabled={isContactLoading}
               onPress={() => contact && open(`tel:${contact.phone}`)}
             />
             <ContactButton
               icon={<Mail size={19} color={theme.colors.primary[600]} strokeWidth={2.2} />}
               label="Email"
               tone="brand"
+              disabled={isContactLoading}
               onPress={() => contact && open(`mailto:${contact.email}`)}
             />
           </View>
@@ -105,15 +108,19 @@ const ContactButton: React.FC<{
   icon: React.ReactNode;
   label: string;
   tone: 'accent' | 'brand';
+  disabled?: boolean;
   onPress: () => void;
-}> = ({ icon, label, tone, onPress }) => (
+}> = ({ icon, label, tone, disabled, onPress }) => (
   <Pressable
     onPress={onPress}
+    disabled={disabled}
     accessibilityRole="button"
     accessibilityLabel={label}
+    accessibilityState={{ disabled }}
     style={({ pressed }) => [
       styles.contactButton,
       tone === 'accent' ? styles.contactAccent : styles.contactBrand,
+      disabled ? styles.contactDisabled : null,
       pressed ? styles.pressed : null,
     ]}
   >
@@ -161,6 +168,9 @@ const styles = StyleSheet.create({
   },
   contactBrand: {
     backgroundColor: theme.colors.primary[50],
+  },
+  contactDisabled: {
+    opacity: 0.5,
   },
   contactLabel: {
     color: theme.colors.text.secondary,

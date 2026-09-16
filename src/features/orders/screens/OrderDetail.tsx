@@ -159,10 +159,17 @@ const OrderDetail = () => {
             tone={order.pricing.deliveryFee === 0 ? 'free' : 'default'}
           />
           <SummaryRow label="Taxes & charges" value={order.pricing.taxes} tone="muted" />
-          {order.pricing.discount > 0 ? (
+          {order.pricing.couponDiscount > 0 ? (
             <SummaryRow
               label={order.pricing.couponCode ?? 'Discount'}
-              value={order.pricing.discount}
+              value={order.pricing.couponDiscount}
+              tone="discount"
+            />
+          ) : null}
+          {order.pricing.coinDiscount > 0 ? (
+            <SummaryRow
+              label={`FreshBhoj Coins (${order.pricing.coinsRedeemed})`}
+              value={order.pricing.coinDiscount}
               tone="discount"
             />
           ) : null}

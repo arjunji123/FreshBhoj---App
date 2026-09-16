@@ -20,7 +20,8 @@ import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { phoneNumberSchema } from '../auth.types';
 import { useAuthStore } from '../store/authStore';
 import { useSendOtp } from '../hooks/useAuth';
-import { ApiError } from '@api';
+import { useSendKitchenOtp } from '@features/kitchenPartner/hooks/useKitchenAuth';
+import { authApi, ApiError } from '@api';
 
 const Login = () => {
   const phoneNumber = useAuthStore((state) => state.phoneNumber);
@@ -30,7 +31,9 @@ const Login = () => {
   const continueAsGuest = useAuthStore((state) => state.continueAsGuest);
   const navigation = useAuthNavigation();
   const sendOtp = useSendOtp();
+  const sendKitchenOtp = useSendKitchenOtp();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [isDetecting, setIsDetecting] = React.useState(false);
 
   const isPhoneValid = useMemo(() => phoneNumberSchema.safeParse(phoneNumber).success, [phoneNumber]);
 
@@ -43,21 +46,34 @@ const Login = () => {
     setPhoneNumber(sanitizedValue);
   };
 
-  const handleContinue = () => {
-    if (!isPhoneValid) return;
+  // One phone-entry screen for both customer and kitchen-partner accounts —
+  // the backend resolves which one this number belongs to before any OTP is
+  // sent, and an existing kitchen account always wins that check.
+  const handleContinue = async () => {
+    if (!isPhoneValid || isDetecting) return;
     setErrorMessage(null);
+    setIsDetecting(true);
 
-    sendOtp.mutate(phoneNumber, {
-      // Navigate on success only — sending the user to the OTP screen when no
-      // SMS actually went out is the worst version of this flow.
-      onSuccess: () => navigation.navigate('OTP', { phoneNumber }),
-      onError: (error) =>
-        setErrorMessage(
-          error instanceof ApiError
-            ? error.message
-            : 'We could not send the code. Please try again.',
-        ),
-    });
+    try {
+      const { accountType } = await authApi.accountType(phoneNumber);
+      const otpMutation = accountType === 'KITCHEN' ? sendKitchenOtp : sendOtp;
+
+      otpMutation.mutate(phoneNumber, {
+        onSuccess: () => navigation.navigate('OTP', { phoneNumber, accountType }),
+        onError: (error) =>
+          setErrorMessage(
+            error instanceof ApiError
+              ? error.message
+              : 'We could not send the code. Please try again.',
+          ),
+      });
+    } catch (error) {
+      setErrorMessage(
+        error instanceof ApiError ? error.message : 'We could not send the code. Please try again.',
+      );
+    } finally {
+      setIsDetecting(false);
+    }
   };
 
   return (
@@ -95,9 +111,9 @@ const Login = () => {
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
         <GradientButton
-          title={sendOtp.isPending ? 'Sending code…' : AUTH_COPY.loginContinue}
+          title={isDetecting || sendOtp.isPending || sendKitchenOtp.isPending ? 'Sending code…' : AUTH_COPY.loginContinue}
           onPress={handleContinue}
-          disabled={!isPhoneValid || sendOtp.isPending}
+          disabled={!isPhoneValid || isDetecting || sendOtp.isPending || sendKitchenOtp.isPending}
           style={styles.continueButton}
           textStyle={styles.continueButtonText}
           gradientColors={theme.colors.defaultColor}

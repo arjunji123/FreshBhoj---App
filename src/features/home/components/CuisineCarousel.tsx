@@ -7,6 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
 import { theme } from '@app/theme/index';
+import { Skeleton } from '@components/ui';
 import { useCoverFlowAnimations } from '@animations/useCoverFlowAnimations';
 import type { Cuisine } from '@api/types';
 
@@ -83,10 +84,11 @@ const CarouselItem: React.FC<CarouselItemProps> = ({ item, index, scrollX, onPre
 interface CuisineCarouselProps {
   cuisines: Cuisine[];
   onSelect: (cuisine: Cuisine) => void;
+  isLoading?: boolean;
 }
 
 /** Cover-flow style carousel of cuisines — the centred item scales up and glows. */
-const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect }) => {
+const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect, isLoading }) => {
   const scrollX = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -94,6 +96,19 @@ const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect })
       scrollX.value = event.contentOffset.x;
     },
   });
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, styles.skeletonRow]}>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <View key={index} style={styles.skeletonItem}>
+            <Skeleton width={RING_SIZE} height={RING_SIZE} radius={RING_SIZE / 2} />
+            <Skeleton width={ITEM_WIDTH * 0.6} height={10} style={styles.gapTop} />
+          </View>
+        ))}
+      </View>
+    );
+  }
 
   if (!cuisines.length) return null;
 
@@ -129,6 +144,18 @@ const styles = StyleSheet.create({
   container: {
     marginTop: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
+    paddingHorizontal: theme.layout.screenPadding,
+    gap: SPACING,
+  },
+  skeletonItem: {
+    width: ITEM_WIDTH,
+    alignItems: 'center',
+  },
+  gapTop: {
+    marginTop: 10,
   },
   itemContainer: {
     width: ITEM_WIDTH,

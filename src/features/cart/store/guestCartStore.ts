@@ -133,10 +133,15 @@ export function buildGuestCart(lines: Record<string, GuestCartLine>): Cart {
       : null,
     items,
     coupon: { code: null, title: null, discount: 0, invalidReason: null },
+    // Coins are account-bound — a guest has no balance to redeem, and applying
+    // them only becomes possible once the real, server-side cart takes over.
+    coins: { balance: 0, applied: 0, discount: 0, maxRedeemable: 0, minOrderValue: 0, maxPerOrder: 0, invalidReason: null },
     pricing: {
       itemsTotal,
       deliveryFee: 0,
       taxes: 0,
+      couponDiscount: 0,
+      coinDiscount: 0,
       discount: 0,
       totalAmount: itemsTotal,
       freeDeliveryApplied: true,

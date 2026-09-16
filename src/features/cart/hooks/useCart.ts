@@ -152,6 +152,16 @@ export function useRemoveCoupon() {
   return useMutation({ mutationFn: cartApi.removeCoupon, ...options });
 }
 
+export function useApplyCoins() {
+  const options = useCartMutationOptions();
+  return useMutation({ mutationFn: cartApi.applyCoins, ...options });
+}
+
+export function useRemoveCoins() {
+  const options = useCartMutationOptions();
+  return useMutation({ mutationFn: cartApi.removeCoins, ...options });
+}
+
 /** Offers list, flagged against the current subtotal. */
 export function useCoupons(itemsTotal: number) {
   return useQuery({

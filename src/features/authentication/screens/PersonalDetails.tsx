@@ -12,6 +12,7 @@ import { theme } from '@app/theme/index';
 // Components
 import PersonalDetailsHeader from '../components/PersonalDetailsHeader';
 import PersonalDetailsContent from '../components/PersonalDetailsContent';
+import ReferralCodeContent from '../components/ReferralCodeContent';
 import SelectLocationContent from '../components/SelectLocationContent';
 import AppGradient from '@components/AppGradient';
 
@@ -21,7 +22,7 @@ const SHEET_HEIGHT = SCREEN_HEIGHT * 0.82;
 const PersonalDetails = () => {
   const navigation = useAuthNavigation();
   const sheetRef = useRef<any>(null);
-  const [step, setStep] = useState(0); // 0 = Personal Details, 1 = Select Location
+  const [step, setStep] = useState(0); // 0 = Personal Details, 1 = Referral Code, 2 = Select Location
 
   useEffect(() => {
     // Open the bottom sheet on mount
@@ -35,6 +36,10 @@ const PersonalDetails = () => {
     setStep(1);
   };
 
+  const handleReferralSave = () => {
+    setStep(2);
+  };
+
   const setIsAuthenticated = useAuthStore((s) => s.setisAuthenticated);
 
   const handleLocationSave = () => {
@@ -42,14 +47,15 @@ const PersonalDetails = () => {
   };
 
   const handleBack = () => {
-    if (step === 1) {
-      setStep(0);
+    if (step > 0) {
+      setStep(step - 1);
     } else {
       navigation.goBack();
     }
   };
 
-  const headerTitle = step === 0 ? 'Personal Details' : 'Select Location';
+  const headerTitle =
+    step === 0 ? 'Personal Details' : step === 1 ? 'Referral Code' : 'Select Location';
 
   return (
     <AppGradient
@@ -100,13 +106,11 @@ const PersonalDetails = () => {
 
           {/* Step Content */}
           {step === 0 ? (
-            <PersonalDetailsContent
-              onSaveAndContinue={handlePersonalDetailsSave}
-            />
+            <PersonalDetailsContent onSaveAndContinue={handlePersonalDetailsSave} />
+          ) : step === 1 ? (
+            <ReferralCodeContent onSaveAndContinue={handleReferralSave} />
           ) : (
-            <SelectLocationContent
-              onSaveAndContinue={handleLocationSave}
-            />
+            <SelectLocationContent onSaveAndContinue={handleLocationSave} />
           )}
         </KeyboardAwareScrollView>
       </RBSheet>

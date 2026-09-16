@@ -176,8 +176,15 @@ async function executeRequest<T>(
     if (refreshed) {
       return executeRequest<T>(path, options, true);
     }
-    tokenStore.clear();
-    onSessionExpired?.();
+    // A guest never had a session to expire — only force sign-out when there
+    // was an actual access token that just went bad. Guest-triggered 401s are
+    // meant to be caught before they get here (see useRequireAuth), but this
+    // keeps a guest from being kicked to the logged-out screen if one slips
+    // through.
+    if (accessToken) {
+      tokenStore.clear();
+      onSessionExpired?.();
+    }
   }
 
   throw new ApiError(

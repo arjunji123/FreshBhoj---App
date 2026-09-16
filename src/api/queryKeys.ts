@@ -78,4 +78,7 @@ export const qk = {
   user: {
     me: ['user', 'me'] as const,
   },
+  referral: {
+    me: ['referral', 'me'] as const,
+  },
 } as const;

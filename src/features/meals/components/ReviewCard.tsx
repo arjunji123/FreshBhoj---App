@@ -59,11 +59,25 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onHelpful }) => (
         onPress={onHelpful}
         hitSlop={theme.layout.hitSlop}
         accessibilityRole="button"
-        accessibilityLabel="Mark as helpful"
+        accessibilityState={{ selected: review.isHelpful }}
+        accessibilityLabel={review.isHelpful ? 'Marked as helpful' : 'Mark as helpful'}
         style={styles.footerAction}
       >
-        <ThumbsUp size={14} color={theme.colors.text.tertiary} strokeWidth={2.2} />
-        <Text style={[theme.text.caption, styles.footerText]}>{review.likeCount}</Text>
+        <ThumbsUp
+          size={14}
+          color={review.isHelpful ? theme.colors.primary[600] : theme.colors.text.tertiary}
+          fill={review.isHelpful ? theme.colors.primary[600] : 'transparent'}
+          strokeWidth={2.2}
+        />
+        <Text
+          style={[
+            theme.text.caption,
+            styles.footerText,
+            review.isHelpful ? styles.footerTextActive : null,
+          ]}
+        >
+          {review.likeCount}
+        </Text>
       </Pressable>
 
       {review.meal ? (
@@ -137,5 +151,8 @@ const styles = StyleSheet.create({
   },
   footerText: {
     color: theme.colors.text.tertiary,
+  },
+  footerTextActive: {
+    color: theme.colors.primary[600],
   },
 });

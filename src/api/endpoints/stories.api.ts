@@ -16,4 +16,13 @@ export const storiesApi = {
     apiClient.post<{ storyId: string; isSeen: boolean; recorded: boolean }>(
       `/stories/${storyId}/seen`,
     ),
+
+  toggleLike: (storyId: string) =>
+    apiClient.post<{ storyId: string; isLiked: boolean; likeCount: number }>(
+      `/stories/${storyId}/like`,
+    ),
+
+  /** Fire-and-forget — called right after the native share sheet opens. */
+  registerShare: (storyId: string) =>
+    apiClient.post<{ storyId: string; shareCount: number }>(`/stories/${storyId}/share`),
 };

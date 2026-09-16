@@ -6,8 +6,9 @@ export interface HomeHeaderProps {
   cartCount?: number;
   onPressLocation?: () => void;
   onPressSearch?: () => void;
-  onPressProfile?: () => void;
+  onPressNotifications?: () => void;
   onPressCart?: () => void;
+  onPressReferral?: () => void;
 }
 
 export interface GoalFilterState {

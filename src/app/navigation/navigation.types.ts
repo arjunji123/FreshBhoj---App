@@ -1,13 +1,13 @@
 import type { NavigatorScreenParams } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { GoalTag, PaymentMethod } from '@api/types';
+import type { GoalTag, PaymentMethod, StoryItem } from '@api/types';
 import type { ReelFeedType } from '@api/endpoints/reels.api';
 
 /** Screens available before sign-in. */
 export type PublicStackParamList = {
   Onboarding: undefined;
   Login: undefined;
-  OTP: { phoneNumber: string };
+  OTP: { phoneNumber: string; accountType?: 'KITCHEN' | 'CUSTOMER' };
   OTPSuccess: undefined;
   PersonalDetails: undefined;
 };
@@ -30,6 +30,7 @@ export type PrivateStackParamList = {
   KitchenProfile: { kitchenId: string; kitchenName?: string };
   KitchenGallery: { kitchenId: string; initialIndex?: number };
   KitchenReviews: { kitchenId: string; kitchenName?: string };
+  KitchenStoryViewer: { kitchenId: string; kitchenName: string; items: StoryItem[]; initialIndex?: number };
   ReelViewer: { reelId?: string; kitchenId?: string; feed?: ReelFeedType };
   FavoritesHub: undefined;
   Favorites: undefined;
@@ -55,9 +56,28 @@ export type PrivateStackParamList = {
   Addresses: { selectMode?: boolean } | undefined;
   AddressForm: { addressId?: string } | undefined;
   Support: undefined;
-  Settings: undefined;
+  Notifications: undefined;
   EditProfile: undefined;
+  Referral: undefined;
 };
 
 export type PrivateNavigation = NativeStackNavigationProp<PrivateStackParamList>;
 export type PublicNavigation = NativeStackNavigationProp<PublicStackParamList>;
+
+/** The kitchen-partner app's four bottom tabs. */
+export type KitchenTabParamList = {
+  KitchenDashboard: undefined;
+  KitchenOrders: undefined;
+  KitchenMenu: undefined;
+  KitchenStories: undefined;
+  KitchenProfile: undefined;
+};
+
+/** Everything reachable once signed in as a kitchen partner. */
+export type KitchenPartnerStackParamList = {
+  KitchenTabs: NavigatorScreenParams<KitchenTabParamList>;
+  KitchenMealForm: { mealId?: string } | undefined;
+  KitchenOnboardingPending: undefined;
+};
+
+export type KitchenPartnerNavigation = NativeStackNavigationProp<KitchenPartnerStackParamList>;

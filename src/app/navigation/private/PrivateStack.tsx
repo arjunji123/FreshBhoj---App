@@ -8,6 +8,7 @@ import MealDetail from '@features/meals/screens/MealDetail';
 import KitchenProfile from '@features/kitchens/screens/KitchenProfile';
 import KitchenGallery from '@features/kitchens/screens/KitchenGallery';
 import KitchenReviews from '@features/kitchens/screens/KitchenReviews';
+import KitchenStoryViewer from '@features/home/screens/KitchenStoryViewer';
 import ReelViewer from '@features/foodfeed/screens/ReelViewer';
 import FavoritesHub from '@features/profile/screens/FavoritesHub';
 import Favorites from '@features/profile/screens/Favorites';
@@ -26,8 +27,9 @@ import WriteReview from '@features/reviews/screens/WriteReview';
 import Addresses from '@features/profile/screens/Addresses';
 import AddressForm from '@features/profile/screens/AddressForm';
 import Support from '@features/profile/screens/Support';
-import Settings from '@features/profile/screens/Settings';
+import Notifications from '@features/profile/screens/Notifications';
 import EditProfile from '@features/profile/screens/EditProfile';
+import ReferralScreen from '@features/referral/screens/ReferralScreen';
 
 const Stack = createNativeStackNavigator<PrivateStackParamList>();
 
@@ -50,6 +52,11 @@ export function PrivateTabs() {
         options={{ animation: 'fade', presentation: 'fullScreenModal' }}
       />
       <Stack.Screen name="KitchenReviews" component={KitchenReviews} />
+      <Stack.Screen
+        name="KitchenStoryViewer"
+        component={KitchenStoryViewer}
+        options={{ animation: 'fade', presentation: 'fullScreenModal' }}
+      />
       <Stack.Screen
         name="ReelViewer"
         component={ReelViewer}
@@ -83,8 +90,9 @@ export function PrivateTabs() {
       <Stack.Screen name="Addresses" component={Addresses} />
       <Stack.Screen name="AddressForm" component={AddressForm} />
       <Stack.Screen name="Support" component={Support} />
-      <Stack.Screen name="Settings" component={Settings} />
+      <Stack.Screen name="Notifications" component={Notifications} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
+      <Stack.Screen name="Referral" component={ReferralScreen} />
     </Stack.Navigator>
   );
 }

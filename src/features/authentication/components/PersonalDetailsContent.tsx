@@ -89,6 +89,7 @@ const PersonalDetailsContent: React.FC<PersonalDetailsContentProps> = ({ onSaveA
       <View style={styles.dotsContainer}>
         <View style={styles.dotActive} />
         <View style={styles.dotInactive} />
+        <View style={styles.dotInactive} />
       </View>
     </View>
   );

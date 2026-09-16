@@ -1,5 +1,15 @@
 import React from 'react';
-import { Alert, Image, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  Linking,
+  Pressable,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
   HelpCircle,
@@ -36,8 +46,18 @@ const OrderTracking = () => {
   const { params } = useRoute<Route>();
 
   const { data: tracking, isLoading } = useOrderTracking(params.orderId);
-  const { data: order } = useOrder(params.orderId);
+  const { data: order, isLoading: isOrderLoading } = useOrder(params.orderId);
   const cancelOrder = useCancelOrder();
+
+  const handleShareTracking = () => {
+    if (!tracking) return;
+    Share.share({
+      message:
+        `My FreshBhoj order from ${tracking.kitchen.name} is on its way! ` +
+        `Status: ${tracking.statusLabel ?? tracking.status.replace(/_/g, ' ')}\n` +
+        `https://freshbhoj.com/track/${tracking.orderNumber}`,
+    }).catch(() => undefined);
+  };
 
   const openWhatsApp = () => {
     const number = tracking?.support?.whatsapp?.replace(/\D/g, '');
@@ -170,7 +190,12 @@ const OrderTracking = () => {
             </Pressable>
           </View>
 
-          {order ? (
+          {isOrderLoading ? (
+            <>
+              <Divider spacing={theme.spacing.md} />
+              <Skeleton height={64} radius={theme.radius.md} />
+            </>
+          ) : order ? (
             <>
               <Divider spacing={theme.spacing.md} />
               <Text style={[theme.text.overline, styles.summaryLabel]}>ORDER SUMMARY</Text>
@@ -238,7 +263,7 @@ const OrderTracking = () => {
 
           <Button
             title="Share Live Tracking"
-            onPress={openWhatsApp}
+            onPress={handleShareTracking}
             leftIcon={<Share2 size={16} color={theme.colors.text.inverse} strokeWidth={2.2} />}
             style={styles.actionButton}
             fullWidth={false}

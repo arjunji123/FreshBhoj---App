@@ -17,5 +17,7 @@ export const reviewsApi = {
   pending: () => apiClient.get<PendingReviewPrompt[]>('/customer/reviews/pending'),
 
   markHelpful: (reviewId: string) =>
-    apiClient.post<{ id: string; likeCount: number }>(`/customer/reviews/${reviewId}/helpful`),
+    apiClient.post<{ id: string; likeCount: number; isHelpful: boolean }>(
+      `/customer/reviews/${reviewId}/helpful`,
+    ),
 };

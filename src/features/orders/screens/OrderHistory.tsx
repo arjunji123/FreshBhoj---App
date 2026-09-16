@@ -155,7 +155,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   filters: {
-    paddingVertical: theme.spacing.lg,
+    paddingTop: theme.spacing.sm,
+    paddingBottom: theme.spacing.md,
   },
   loading: {
     paddingHorizontal: theme.layout.screenPadding,

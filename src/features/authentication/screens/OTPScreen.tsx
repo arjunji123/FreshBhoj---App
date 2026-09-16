@@ -9,6 +9,7 @@ import OTPInputSection from '../components/OTPInputSection';
 import { AUTH_VALUES } from '../auth.constants';
 import { OTPScreenRouteProp } from '../auth.types';
 import { useSendOtp, useVerifyOtp } from '../hooks/useAuth';
+import { useSendKitchenOtp, useVerifyKitchenOtp } from '@features/kitchenPartner/hooks/useKitchenAuth';
 import { useAuthStore } from '../store/authStore';
 import type { PublicNavigation } from '@app/navigation/navigation.types';
 
@@ -18,11 +19,14 @@ const OTPScreen = () => {
   const route = useRoute<OTPScreenRouteProp>();
   const navigation = useNavigation<PublicNavigation>();
   const phoneNumber = route.params?.phoneNumber ?? '';
+  const isKitchen = route.params?.accountType === 'KITCHEN';
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const verifyOtp = useVerifyOtp();
+  const verifyKitchenOtp = useVerifyKitchenOtp();
   const sendOtp = useSendOtp();
+  const sendKitchenOtp = useSendKitchenOtp();
   const isProfilePending = useAuthStore((s) => s.isProfilePending);
 
   useFocusEffect(
@@ -35,6 +39,23 @@ const OTPScreen = () => {
   const handleSubmitOTP = (otp: string) => {
     if (otp.length < AUTH_VALUES.otpDigits) return;
     setErrorMessage(null);
+
+    if (isKitchen) {
+      // A kitchen sign-in either lands on the partner dashboard (verified) or
+      // the pending-approval screen (still onboarding) — both are handled by
+      // the navigation gate the moment `isAuthenticated` flips, no extra step
+      // needed here the way a new customer needs the profile screens.
+      verifyKitchenOtp.mutate(
+        { phone: phoneNumber, otp },
+        {
+          onError: (error) =>
+            setErrorMessage(
+              error instanceof ApiError ? error.message : 'We could not verify that code. Please try again.',
+            ),
+        },
+      );
+      return;
+    }
 
     verifyOtp.mutate(
       { phone: phoneNumber, otp },
@@ -60,7 +81,11 @@ const OTPScreen = () => {
 
   const handleResendOTP = () => {
     setErrorMessage(null);
-    sendOtp.mutate(phoneNumber);
+    if (isKitchen) {
+      sendKitchenOtp.mutate(phoneNumber);
+    } else {
+      sendOtp.mutate(phoneNumber);
+    }
   };
 
   return (
@@ -71,7 +96,7 @@ const OTPScreen = () => {
         onSubmit={handleSubmitOTP}
         onResend={handleResendOTP}
         errorMessage={errorMessage}
-        isSubmitting={verifyOtp.isPending}
+        isSubmitting={isKitchen ? verifyKitchenOtp.isPending : verifyOtp.isPending}
       />
 
       <View style={styles.imageContainer} pointerEvents="none">

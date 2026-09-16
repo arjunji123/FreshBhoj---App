@@ -127,6 +127,7 @@ const SelectLocationContent: React.FC<SelectLocationContentProps> = ({ onSaveAnd
 
       <View style={styles.dots}>
         <View style={styles.dotInactive} />
+        <View style={styles.dotInactive} />
         <View style={styles.dotActive} />
       </View>
     </View>

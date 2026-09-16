@@ -15,5 +15,6 @@ export * from './endpoints/reviews.api';
 export * from './endpoints/reels.api';
 export * from './endpoints/stories.api';
 export * from './endpoints/support.api';
+export * from './endpoints/referral.api';
 
 export type * from './types';

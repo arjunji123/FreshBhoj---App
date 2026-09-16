@@ -7,7 +7,7 @@ import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type { PaymentMethod } from '@api/types';
-import { AppBar, Button, Card, Divider, StickyBar } from '@components/ui';
+import { AppBar, Button, Card, Divider, Skeleton, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
@@ -25,9 +25,9 @@ const Checkout = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const requireAuth = useRequireAuth();
 
-  const { data: cart } = useCart();
-  const { data: addresses } = useAddresses();
-  const { data: defaultAddress } = useDefaultAddress();
+  const { data: cart, isLoading: isCartLoading } = useCart();
+  const { data: addresses, isLoading: isAddressesLoading } = useAddresses();
+  const { data: defaultAddress, isLoading: isDefaultAddressLoading } = useDefaultAddress();
   const placeOrder = usePlaceOrder();
 
   const [addressId, setAddressId] = useState<string | undefined>();
@@ -78,6 +78,22 @@ const Checkout = () => {
       },
     );
   };
+
+  const isLoading = isCartLoading || isAddressesLoading || isDefaultAddressLoading;
+
+  if (isLoading) {
+    return (
+      <View style={styles.screen}>
+        <AppBar title="Checkout" onBack={navigation.goBack} />
+        <View style={styles.scroll}>
+          <Skeleton height={80} radius={theme.radius.card} style={styles.loadingBlock} />
+          <Skeleton height={64} radius={theme.radius.card} style={styles.loadingBlock} />
+          <Skeleton height={140} radius={theme.radius.card} style={styles.loadingBlock} />
+          <Skeleton height={100} radius={theme.radius.card} style={styles.loadingBlock} />
+        </View>
+      </View>
+    );
+  }
 
   if (!cart || cart.isEmpty) {
     return (
@@ -252,6 +268,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: theme.spacing.lg,
+  },
+  loadingBlock: {
+    marginTop: theme.spacing.lg,
   },
   sectionHeader: {
     flexDirection: 'row',

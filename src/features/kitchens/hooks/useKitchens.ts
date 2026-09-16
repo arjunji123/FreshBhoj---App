@@ -3,6 +3,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { kitchensApi, qk } from '@api';
 import type { KitchenListParams } from '@api/endpoints/kitchens.api';
 import type { KitchenCard, Paginated } from '@api/types';
+import { useAuthStore } from '@features/authentication/store/authStore';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 
 export function useKitchens(params: KitchenListParams = {}) {
@@ -58,7 +59,13 @@ export function useKitchenReviewSummary(kitchenId: string) {
 }
 
 export function useFollowedKitchens() {
-  return useQuery({ queryKey: qk.kitchens.following, queryFn: () => kitchensApi.following() });
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+
+  return useQuery({
+    queryKey: qk.kitchens.following,
+    queryFn: () => kitchensApi.following(),
+    enabled: Boolean(isAuthenticated),
+  });
 }
 
 /** Optimistic follow so the button flips the instant it's tapped. */

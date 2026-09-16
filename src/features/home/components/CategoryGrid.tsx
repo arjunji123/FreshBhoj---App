@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { theme } from '@app/theme/index';
+import { Skeleton } from '@components/ui';
 import type { MealCategory } from '@api/types';
 import { CATEGORY_EMOJI } from '../home.constants';
 
@@ -8,10 +9,24 @@ interface CategoryGridProps {
   categories: MealCategory[];
   activeSlug?: string;
   onSelect: (category: MealCategory) => void;
+  isLoading?: boolean;
 }
 
 /** Breakfast / Lunch / Dinner / Healthy Snacks — four tiles, one row. */
-const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onSelect }) => {
+const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onSelect, isLoading }) => {
+  if (isLoading) {
+    return (
+      <View style={styles.grid}>
+        {Array.from({ length: 4 }).map((_, index) => (
+          <View key={index} style={styles.tile}>
+            <Skeleton width={52} height={52} radius={26} />
+            <Skeleton width="70%" height={11} />
+          </View>
+        ))}
+      </View>
+    );
+  }
+
   if (!categories.length) return null;
 
   return (

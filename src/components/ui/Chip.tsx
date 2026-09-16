@@ -80,6 +80,11 @@ export const ChipRow: React.FC<ChipRowProps> = ({ children, style }) => (
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
+    // On Android, an unstyled horizontal ScrollView stretches to fill the
+    // rest of its flex-column parent's height instead of wrapping its
+    // content — without this it pushes everything below it (a list, an
+    // empty state) far down the screen.
+    style={styles.scroll}
     contentContainerStyle={[styles.row, style]}
   >
     {children}
@@ -111,6 +116,10 @@ const styles = StyleSheet.create({
   },
   icon: {
     justifyContent: 'center',
+  },
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 0,
   },
   row: {
     paddingHorizontal: theme.layout.screenPadding,

@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Info, Sparkles } from 'lucide-react-native';
+import { Coins, Info, Sparkles } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { Card, Divider, SummaryRow } from '@components/ui';
@@ -33,12 +33,21 @@ const BillSummary: React.FC<BillSummaryProps> = ({
 
       <SummaryRow label="Taxes & charges" value={pricing.taxes} tone="muted" />
 
-      {pricing.discount > 0 ? (
+      {pricing.couponDiscount > 0 ? (
         <SummaryRow
           label={couponCode ? `Coupon ${couponCode}` : 'Discount'}
-          value={pricing.discount}
+          value={pricing.couponDiscount}
           tone="discount"
           icon={<Sparkles size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
+        />
+      ) : null}
+
+      {pricing.coinDiscount > 0 ? (
+        <SummaryRow
+          label="FreshBhoj Coins"
+          value={pricing.coinDiscount}
+          tone="discount"
+          icon={<Coins size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
         />
       ) : null}
 

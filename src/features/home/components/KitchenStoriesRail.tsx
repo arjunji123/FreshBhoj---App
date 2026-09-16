@@ -4,12 +4,13 @@ import { Play } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
 import SectionHeader from '@components/SectionHeader';
-import { VerifiedBadge } from '@components/ui';
+import { Skeleton, VerifiedBadge } from '@components/ui';
 import type { KitchenStoryGroup } from '@api/types';
 
 interface KitchenStoriesRailProps {
   groups: KitchenStoryGroup[];
   onPressGroup: (group: KitchenStoryGroup) => void;
+  isLoading?: boolean;
 }
 
 /**
@@ -18,7 +19,20 @@ interface KitchenStoriesRailProps {
  * already decided is local. One card per kitchen; a red ring means that
  * kitchen has something the customer hasn't seen yet.
  */
-const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPressGroup }) => {
+const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPressGroup, isLoading }) => {
+  if (isLoading) {
+    return (
+      <View style={styles.container}>
+        <SectionHeader title="Kitchen Stories" />
+        <View style={[styles.scrollContent, styles.skeletonRow]}>
+          {Array.from({ length: 3 }).map((_, index) => (
+            <Skeleton key={index} width={CARD_WIDTH} height={CARD_HEIGHT} radius={theme.radius.lg} />
+          ))}
+        </View>
+      </View>
+    );
+  }
+
   // The header lives here, not in the parent, so an empty city (no stories
   // yet) never shows a floating "Kitchen Stories" title above nothing.
   if (!groups.length) return null;
@@ -106,6 +120,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: theme.layout.screenPadding,
     gap: theme.spacing.md,
+  },
+  skeletonRow: {
+    flexDirection: 'row',
   },
   pressed: {
     opacity: 0.92,

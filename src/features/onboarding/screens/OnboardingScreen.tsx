@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native'
 import OnboardingSlide from '../components/OnboardingSlide'
 import AppGradient from '@components/AppGradient'
 import { spacing } from '@app/theme'
+import { onboardingStore } from '../onboardingStore'
 // @ts-ignore
 import { onboardingData } from '../constants/onboardingData'
 
@@ -20,6 +21,7 @@ const OnboardingScreen = () => {
             return;
         }
 
+        onboardingStore.markSeen();
         navigation.navigate('Login');
     }
 

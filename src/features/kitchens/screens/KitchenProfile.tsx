@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
@@ -21,6 +21,7 @@ import {
 import { RatingPill } from '@components/ui/Rating';
 import MealCard from '@components/MealCard';
 import ReviewCard from '@features/meals/components/ReviewCard';
+import { useMarkReviewHelpful } from '@features/reviews/hooks/useReviews';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useCartQuantityControls } from '@features/cart/hooks/useCart';
 import { useToggleFavorite } from '@features/meals/hooks/useMeals';
@@ -68,15 +69,23 @@ const KitchenProfile = () => {
   const [descExpanded, setDescExpanded] = useState(false);
 
   const { data: kitchen, isLoading } = useKitchen(params.kitchenId);
-  const { data: media } = useKitchenMedia(params.kitchenId);
-  const { data: menu } = useKitchenMenu(params.kitchenId);
-  const { data: reviews } = useKitchenReviews(params.kitchenId, 4);
+  const { data: media, isLoading: isMediaLoading } = useKitchenMedia(params.kitchenId);
+  const { data: menu, isLoading: isMenuLoading } = useKitchenMenu(params.kitchenId);
+  const { data: reviews, isLoading: isReviewsLoading } = useKitchenReviews(params.kitchenId, 4);
   const { data: reviewSummary } = useKitchenReviewSummary(params.kitchenId);
 
   const toggleFollow = useToggleFollowKitchen(params.kitchenId);
   const { addToCart, conflictDialog } = useAddToCartFlow();
   const { getQuantity, changeQuantity } = useCartQuantityControls();
   const toggleFavorite = useToggleFavorite();
+  const markHelpful = useMarkReviewHelpful();
+
+  const handleShare = () => {
+    if (!kitchen) return;
+    Share.share({
+      message: `${kitchen.name} on FreshBhoj — verified home kitchen\nhttps://freshbhoj.com/kitchens/${kitchen.slug}`,
+    }).catch(() => undefined);
+  };
 
   const menuSections = useMemo(() => {
     const items = menu?.items ?? [];
@@ -151,7 +160,7 @@ const KitchenProfile = () => {
                       strokeWidth={2.2}
                     />
                   </AppBarAction>
-                  <AppBarAction floating accessibilityLabel="Share kitchen">
+                  <AppBarAction floating accessibilityLabel="Share kitchen" onPress={handleShare}>
                     <Share2 size={18} color={theme.colors.text.primary} strokeWidth={2.2} />
                   </AppBarAction>
                 </>
@@ -264,7 +273,13 @@ const KitchenProfile = () => {
         </ChipRow>
 
         {tab === 'menu' ? (
-          menu?.items.length ? (
+          isMenuLoading ? (
+            <View style={styles.menuList}>
+              <Skeleton height={104} radius={theme.radius.card} />
+              <Skeleton height={104} radius={theme.radius.card} />
+              <Skeleton height={104} radius={theme.radius.card} />
+            </View>
+          ) : menu?.items.length ? (
             <>
               <View style={styles.vegFilterRow}>
                 {VEG_FILTERS.map((option) => {
@@ -318,7 +333,14 @@ const KitchenProfile = () => {
         ) : null}
 
         {tab === 'foodfeed' ? (
-          media?.length ? (
+          isMediaLoading ? (
+            <View style={styles.mediaGridSkeleton}>
+              <Skeleton height={160} radius={theme.radius.card} />
+              <Skeleton height={160} radius={theme.radius.card} />
+              <Skeleton height={160} radius={theme.radius.card} />
+              <Skeleton height={160} radius={theme.radius.card} />
+            </View>
+          ) : media?.length ? (
             <KitchenFoodFeedSection
               media={media}
               onPressItem={(index) =>
@@ -342,11 +364,20 @@ const KitchenProfile = () => {
               <RatingSummary summary={reviewSummary} />
             ) : null}
 
-            {reviews?.items.length ? (
+            {isReviewsLoading ? (
+              <View style={styles.reviewList}>
+                <Skeleton height={140} radius={theme.radius.card} />
+                <Skeleton height={140} radius={theme.radius.card} />
+              </View>
+            ) : reviews?.items.length ? (
               <>
                 <View style={styles.reviewList}>
                   {reviews.items.map((review) => (
-                    <ReviewCard key={review.id} review={review} />
+                    <ReviewCard
+                      key={review.id}
+                      review={review}
+                      onHelpful={() => markHelpful.mutate(review.id)}
+                    />
                   ))}
                 </View>
                 <Pressable
@@ -557,6 +588,12 @@ const styles = StyleSheet.create({
   },
   menuList: {
     paddingHorizontal: theme.layout.screenPadding,
+    gap: theme.spacing.md,
+  },
+  mediaGridSkeleton: {
+    paddingHorizontal: theme.layout.screenPadding,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: theme.spacing.md,
   },
   reviewsSection: {

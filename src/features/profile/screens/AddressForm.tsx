@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
@@ -41,6 +41,26 @@ const AddressForm = () => {
   const [receiverPhone, setReceiverPhone] = useState(existing?.receiverPhone ?? '');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null);
+
+  // `existing` can resolve after this screen has already mounted (the
+  // addresses list may still be loading), so the fields seeded from it above
+  // would otherwise stay blank forever. Runs once, the moment it first shows
+  // up, and never again — a user's own edits are never overwritten.
+  const hasHydrated = useRef(false);
+  useEffect(() => {
+    if (!existing || hasHydrated.current) return;
+    hasHydrated.current = true;
+    setLabel(existing.label);
+    setLine1(existing.line1 ?? '');
+    setLine2(existing.line2 ?? '');
+    setLandmark(existing.landmark ?? '');
+    setLocality(existing.locality ?? '');
+    setPincode(existing.pincode ?? '');
+    setCity(existing.city ?? 'Jaipur');
+    setState(existing.state ?? 'Rajasthan');
+    setReceiverName(existing.receiverName ?? '');
+    setReceiverPhone(existing.receiverPhone ?? '');
+  }, [existing]);
 
   const handleLocationChange = (location: PickedLocation) => {
     setPickedLocation(location);

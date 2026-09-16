@@ -1,23 +1,15 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {
-  Bell,
-  ChefHat,
-  Heart,
-  HelpCircle,
-  LogOut,
-  MapPin,
-  Receipt,
-  Settings as SettingsIcon,
-  UserCog,
-} from 'lucide-react-native';
+import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatPhone } from '@utils/format';
 import Logo from '@components/Logo';
-import { Avatar, Card, Divider, ListItem, Screen } from '@components/ui';
+import { AppBarAction, Avatar, Card, Divider, ListItem, Screen, Skeleton } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
+import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
+import { useReferralSummary } from '@features/referral/hooks/useReferral';
 import { useLogout, useProfile, useProfileStats } from '../hooks/useProfile';
 
 const ICON_PROPS = { size: 18, strokeWidth: 2.2 };
@@ -25,10 +17,13 @@ const ICON_PROPS = { size: 18, strokeWidth: 2.2 };
 /** Account home. Deliberately plain — this screen is a hub, not a destination. */
 const Profile = () => {
   const navigation = useNavigation<PrivateNavigation>();
+  const requireAuth = useRequireAuth();
   const storedUser = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   const { data: user } = useProfile();
-  const { data: stats } = useProfileStats();
+  const { data: stats, isLoading: isStatsLoading } = useProfileStats();
+  const { data: referral } = useReferralSummary();
   const logout = useLogout();
 
   // Render from the persisted copy first so the header never flashes empty.
@@ -45,6 +40,15 @@ const Profile = () => {
     <Screen background="page">
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         <Card padding="lg" elevation="sm" style={styles.headerCard}>
+          <View style={styles.editButton}>
+            <AppBarAction
+              onPress={() => navigation.navigate('EditProfile')}
+              accessibilityLabel="Edit profile"
+            >
+              <Pencil size={16} color={theme.colors.primary[600]} strokeWidth={2.2} />
+            </AppBarAction>
+          </View>
+
           <View style={styles.headerRow}>
             <Avatar uri={profile?.profileImage} name={profile?.fullName} size={62} />
             <View style={styles.headerText}>
@@ -70,6 +74,11 @@ const Profile = () => {
                 <Stat value={stats.favoriteCount} label="Favourites" />
                 <Stat value={stats.followingCount} label="Following" />
               </View>
+            </>
+          ) : isAuthenticated && isStatsLoading ? (
+            <>
+              <Divider spacing={theme.spacing.lg} />
+              <Skeleton height={40} radius={theme.radius.sm} />
             </>
           ) : null}
         </Card>
@@ -100,19 +109,20 @@ const Profile = () => {
             icon={<ChefHat {...ICON_PROPS} color={theme.colors.primary[600]} />}
             onPress={() => navigation.navigate('FollowedKitchens')}
           />
+          <Divider spacing={0} />
+          <ListItem
+            title="Refer & Earn"
+            subtitle={referral ? `${referral.coinsBalance} FreshBhoj Coins` : 'Invite friends, earn coins'}
+            icon={<Gift {...ICON_PROPS} color={theme.colors.primary[600]} />}
+            onPress={() => requireAuth(() => navigation.navigate('Referral'))}
+          />
         </Card>
 
         <Card padding="none" elevation="xs" style={styles.section}>
           <ListItem
-            title="Edit Profile"
-            icon={<UserCog {...ICON_PROPS} color={theme.colors.primary[600]} />}
-            onPress={() => navigation.navigate('EditProfile')}
-          />
-          <Divider spacing={0} />
-          <ListItem
             title="Notifications"
             icon={<Bell {...ICON_PROPS} color={theme.colors.primary[600]} />}
-            onPress={() => navigation.navigate('Settings')}
+            onPress={() => navigation.navigate('Notifications')}
           />
           <Divider spacing={0} />
           <ListItem
@@ -120,12 +130,6 @@ const Profile = () => {
             subtitle="WhatsApp us, or read the FAQs"
             icon={<HelpCircle {...ICON_PROPS} color={theme.colors.primary[600]} />}
             onPress={() => navigation.navigate('Support')}
-          />
-          <Divider spacing={0} />
-          <ListItem
-            title="Settings"
-            icon={<SettingsIcon {...ICON_PROPS} color={theme.colors.primary[600]} />}
-            onPress={() => navigation.navigate('Settings')}
           />
         </Card>
 
@@ -165,6 +169,12 @@ const styles = StyleSheet.create({
   headerCard: {
     marginBottom: theme.spacing.lg,
   },
+  editButton: {
+    position: 'absolute',
+    top: theme.spacing.md,
+    right: theme.spacing.md,
+    zIndex: 1,
+  },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -172,6 +182,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     flex: 1,
+    paddingRight: theme.spacing.xxl,
   },
   headerMeta: {
     color: theme.colors.text.secondary,

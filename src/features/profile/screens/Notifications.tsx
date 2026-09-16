@@ -1,17 +1,12 @@
 import React from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Bell, ChefHat, Heart, MessageCircle, Sparkles, Tag } from 'lucide-react-native';
+import { AlertCircle, Bell, ChefHat, MessageCircle, Sparkles, Tag } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import Logo from '@components/Logo';
-import { AppBar, Card, Divider, ListItem, Skeleton } from '@components/ui';
+import { AppBar, Card, Divider, EmptyState, ListItem, Skeleton } from '@components/ui';
 import type { NotificationPreferences } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
-import {
-  useLogout,
-  useNotificationPreferences,
-  useUpdateNotificationPreferences,
-} from '../hooks/useProfile';
+import { useNotificationPreferences, useUpdateNotificationPreferences } from '../hooks/useProfile';
 
 const TOGGLES: Array<{
   key: keyof NotificationPreferences;
@@ -46,28 +41,26 @@ const TOGGLES: Array<{
   },
 ];
 
-const Settings = () => {
+const Notifications = () => {
   const navigation = useNavigation<PrivateNavigation>();
-  const { data: preferences, isLoading } = useNotificationPreferences();
+  const { data: preferences, isLoading, isError, refetch } = useNotificationPreferences();
   const updatePreferences = useUpdateNotificationPreferences();
-  const logout = useLogout();
-
-  const handleLogout = () => {
-    Alert.alert('Log out?', 'You will need your phone number to sign back in.', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Log out', style: 'destructive', onPress: () => logout.mutate() },
-    ]);
-  };
 
   return (
     <View style={styles.screen}>
-      <AppBar title="Settings" onBack={navigation.goBack} />
+      <AppBar title="Notifications" onBack={navigation.goBack} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <Text style={[theme.text.overline, styles.sectionLabel]}>NOTIFICATIONS</Text>
-
-        {isLoading || !preferences ? (
+        {isLoading ? (
           <Skeleton height={280} radius={theme.radius.card} />
+        ) : isError || !preferences ? (
+          <EmptyState
+            icon={<AlertCircle size={36} color={theme.colors.state.error} strokeWidth={1.8} />}
+            title="Could not load your preferences"
+            description="Check your connection and try again."
+            actionLabel="Retry"
+            onAction={() => refetch()}
+          />
         ) : (
           <Card padding="none" elevation="xs">
             {TOGGLES.map(({ key, title, subtitle, Icon }, index) => (
@@ -94,34 +87,12 @@ const Settings = () => {
             ))}
           </Card>
         )}
-
-        <Text style={[theme.text.overline, styles.sectionLabel]}>ACCOUNT</Text>
-        <Card padding="none" elevation="xs">
-          <ListItem title="Edit profile" onPress={() => navigation.navigate('EditProfile')} />
-          <Divider spacing={0} />
-          <ListItem title="Saved addresses" onPress={() => navigation.navigate('Addresses')} />
-          <Divider spacing={0} />
-          <ListItem
-            title="Favourites"
-            icon={<Heart size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />}
-            onPress={() => navigation.navigate('FavoritesHub')}
-          />
-          <Divider spacing={0} />
-          <ListItem title="Help & support" onPress={() => navigation.navigate('Support')} />
-          <Divider spacing={0} />
-          <ListItem title="Log out" destructive showChevron={false} onPress={handleLogout} />
-        </Card>
-
-        <View style={styles.brandFooter}>
-          <Logo size="sm" />
-          <Text style={[theme.text.caption, styles.version]}>Jaipur · v1.0.0</Text>
-        </View>
       </ScrollView>
     </View>
   );
 };
 
-export default Settings;
+export default Notifications;
 
 const styles = StyleSheet.create({
   screen: {
@@ -131,19 +102,5 @@ const styles = StyleSheet.create({
   scroll: {
     padding: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxxl,
-  },
-  sectionLabel: {
-    color: theme.colors.text.tertiary,
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
-  },
-  brandFooter: {
-    alignItems: 'center',
-    gap: 4,
-    marginTop: theme.spacing.xl,
-  },
-  version: {
-    textAlign: 'center',
-    color: theme.colors.text.tertiary,
   },
 });

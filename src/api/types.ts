@@ -198,9 +198,12 @@ export interface StoryItem {
   caption: string | null;
   durationSec: number;
   viewCount: number;
+  likeCount: number;
+  shareCount: number;
   publishedAt: string;
   expiresAt: string;
   isSeen: boolean;
+  isLiked: boolean;
   meal: StoryMealRef | null;
 }
 
@@ -315,6 +318,9 @@ export interface PriceBreakdown {
   itemsTotal: number;
   deliveryFee: number;
   taxes: number;
+  couponDiscount: number;
+  coinDiscount: number;
+  /** couponDiscount + coinDiscount */
   discount: number;
   totalAmount: number;
   freeDeliveryApplied: boolean;
@@ -341,6 +347,15 @@ export interface Cart {
     code: string | null;
     title: string | null;
     discount: number;
+    invalidReason: string | null;
+  };
+  coins: {
+    balance: number;
+    applied: number;
+    discount: number;
+    maxRedeemable: number;
+    minOrderValue: number;
+    maxPerOrder: number;
     invalidReason: string | null;
   };
   pricing: PriceBreakdown;
@@ -440,6 +455,9 @@ export interface OrderDetail extends OrderCard {
     deliveryFee: number;
     taxes: number;
     discount: number;
+    couponDiscount: number;
+    coinsRedeemed: number;
+    coinDiscount: number;
     totalAmount: number;
     couponCode: string | null;
   };
@@ -475,6 +493,7 @@ export interface Review {
   tags: string[];
   isVerified: boolean;
   likeCount: number;
+  isHelpful: boolean;
   createdAt: string;
   meal: { id: string; name: string } | null;
   author: { id: string; name: string; avatar: string | null; initials: string };
@@ -543,8 +562,6 @@ export interface HomeFeed {
   currentSlot: MealSlot;
   goalTags: GoalTagOption[];
   categories: MealCategory[];
-  featuredKitchens: KitchenCard[];
-  recommendedMeals: MealCard[];
   trendingReels: Reel[];
   activeOrders: OrderDetail[];
 }
@@ -590,4 +607,15 @@ export interface ProfileStats {
   favoriteCount: number;
   followingCount: number;
   addressCount: number;
+}
+
+export interface ReferralSummary {
+  code: string;
+  coinsBalance: number;
+  invitesCount: number;
+  hasRedeemed: boolean;
+}
+
+export interface RedeemReferralResult extends ReferralSummary {
+  coinsEarned: number;
 }

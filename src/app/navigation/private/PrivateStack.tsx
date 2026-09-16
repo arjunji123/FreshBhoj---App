@@ -29,6 +29,7 @@ import AddressForm from '@features/profile/screens/AddressForm';
 import Support from '@features/profile/screens/Support';
 import Notifications from '@features/profile/screens/Notifications';
 import EditProfile from '@features/profile/screens/EditProfile';
+import DeleteAccount from '@features/profile/screens/DeleteAccount';
 import ReferralScreen from '@features/referral/screens/ReferralScreen';
 
 const Stack = createNativeStackNavigator<PrivateStackParamList>();
@@ -93,6 +94,7 @@ export function PrivateTabs() {
       <Stack.Screen name="Notifications" component={Notifications} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
       <Stack.Screen name="Referral" component={ReferralScreen} />
+      <Stack.Screen name="DeleteAccount" component={DeleteAccount} />
     </Stack.Navigator>
   );
 }

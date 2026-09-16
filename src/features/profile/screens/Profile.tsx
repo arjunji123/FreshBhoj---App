@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt } from 'lucide-react-native';
+import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Trash2 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatPhone } from '@utils/format';
 import Logo from '@components/Logo';
@@ -140,6 +140,14 @@ const Profile = () => {
             showChevron={false}
             icon={<LogOut {...ICON_PROPS} color={theme.colors.state.error} />}
             onPress={handleLogout}
+          />
+          <Divider spacing={0} />
+          <ListItem
+            title="Delete Account"
+            subtitle="Permanently delete your account and data"
+            destructive
+            icon={<Trash2 {...ICON_PROPS} color={theme.colors.state.error} />}
+            onPress={() => navigation.navigate('DeleteAccount')}
           />
         </Card>
 

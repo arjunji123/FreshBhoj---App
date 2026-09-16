@@ -6,6 +6,7 @@ import { Button } from '@components/ui';
 import { useKitchenOnboardingStatus } from '@features/kitchenPartner/hooks/useKitchenPortal';
 import KitchenOnboardingPending from '@features/kitchenPartner/screens/KitchenOnboardingPending';
 import KitchenMealForm from '@features/kitchenPartner/screens/KitchenMealForm';
+import KitchenDeleteAccount from '@features/kitchenPartner/screens/KitchenDeleteAccount';
 import type { KitchenPartnerStackParamList } from '../navigation.types';
 import { KitchenTabNavigator } from './KitchenTabNavigator';
 
@@ -57,6 +58,7 @@ export function KitchenPartnerStack() {
     <Stack.Navigator screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
       <Stack.Screen name="KitchenTabs" component={KitchenGate} />
       <Stack.Screen name="KitchenMealForm" component={KitchenMealForm} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="KitchenDeleteAccount" component={KitchenDeleteAccount} />
     </Stack.Navigator>
   );
 }

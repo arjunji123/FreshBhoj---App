@@ -36,6 +36,17 @@ export const authApi = {
   logout: (refreshToken?: string) => apiClient.post<null>('/auth/logout', { refreshToken }),
 
   me: () => apiClient.get<UserProfile>('/auth/me'),
+
+  /** Same OTP-ownership-proof flow as login, re-used to confirm a destructive account deletion. */
+  requestAccountDeletion: (phone: string) =>
+    apiClient.post<{ expiresInMinutes: number; devOtp?: string }>(
+      '/auth/account-deletion/request',
+      { phone: toE164(phone) },
+      { skipAuth: true },
+    ),
+
+  confirmAccountDeletion: (phone: string, otp: string) =>
+    apiClient.post<null>('/auth/account-deletion/confirm', { phone: toE164(phone), otp }, { skipAuth: true }),
 };
 
 export const usersApi = {

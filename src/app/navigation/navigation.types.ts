@@ -59,6 +59,7 @@ export type PrivateStackParamList = {
   Notifications: undefined;
   EditProfile: undefined;
   Referral: undefined;
+  DeleteAccount: undefined;
 };
 
 export type PrivateNavigation = NativeStackNavigationProp<PrivateStackParamList>;
@@ -77,6 +78,7 @@ export type KitchenTabParamList = {
 export type KitchenPartnerStackParamList = {
   KitchenTabs: NavigatorScreenParams<KitchenTabParamList>;
   KitchenMealForm: { mealId?: string } | undefined;
+  KitchenDeleteAccount: undefined;
 };
 
 export type KitchenPartnerNavigation = NativeStackNavigationProp<KitchenPartnerStackParamList>;

@@ -27,6 +27,16 @@ export const kitchenAuthApi = {
     ),
 
   logout: () => kitchenClient.post<null>('/partner/auth/logout'),
+
+  requestAccountDeletion: (phone: string) =>
+    kitchenClient.post<{ expiresInMinutes: number; devOtp?: string }>(
+      '/partner/auth/account-deletion/request',
+      { phone },
+      { skipAuth: true },
+    ),
+
+  confirmAccountDeletion: (phone: string, otp: string) =>
+    kitchenClient.post<null>('/partner/auth/account-deletion/confirm', { phone, otp }, { skipAuth: true }),
 };
 
 // ── Onboarding ────────────────────────────────────────────────────────────

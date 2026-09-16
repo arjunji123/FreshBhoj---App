@@ -1,14 +1,17 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
-import { LogOut, Mail, MapPin, Phone, Star } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
+import { LogOut, Mail, MapPin, Phone, Star, Trash2 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { Badge, Card, EmptyState, Screen, Skeleton } from '@components/ui';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
 import { useKitchenLogout } from '../hooks/useKitchenAuth';
 import { useKitchenProfile, useSetAcceptingOrders } from '../hooks/useKitchenPortal';
+import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 
 const KitchenProfile = () => {
+  const navigation = useNavigation<KitchenPartnerNavigation>();
   const account = useKitchenAuthStore((s) => s.account);
   const profile = useKitchenProfile();
   const setAccepting = useSetAcceptingOrders();
@@ -90,6 +93,13 @@ const KitchenProfile = () => {
           <View style={styles.logoutRow}>
             <LogOut size={16} color={theme.colors.text.danger} />
             <Text style={styles.logoutText}>{logout.isPending ? 'Logging out…' : 'Log out'}</Text>
+          </View>
+        </Card>
+
+        <Card style={styles.card} onPress={() => navigation.navigate('KitchenDeleteAccount')}>
+          <View style={styles.logoutRow}>
+            <Trash2 size={16} color={theme.colors.text.danger} />
+            <Text style={styles.logoutText}>Delete Account</Text>
           </View>
         </Card>
       </ScrollView>

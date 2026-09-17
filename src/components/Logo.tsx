@@ -34,6 +34,10 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'gradient', style })
         colors={theme.colors.gradients.brand}
         direction="diagonal"
         style={[textStyle, style]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.5}
+        maxFontSizeMultiplier={1}
       >
         FreshBhoj
       </GradientText>
@@ -47,6 +51,10 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'gradient', style })
         { color: variant === 'inverse' ? theme.colors.palette.white : theme.colors.primary[600] },
         style,
       ]}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.5}
+      maxFontSizeMultiplier={1}
     >
       FreshBhoj
     </Text>

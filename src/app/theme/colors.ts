@@ -185,8 +185,8 @@ export const colors = {
 
     surface: {
         base: neutral[0],
-        /** Page background — a hair off pure white so cards read as raised. */
-        page: neutral[50],
+        /** Page background — pure white throughout the app. */
+        page: neutral[0],
         subtle: neutral[100],
         raised: neutral[0],
         inverse: neutral[900],

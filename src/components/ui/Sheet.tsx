@@ -2,6 +2,7 @@ import React, { forwardRef, useImperativeHandle, useRef } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ArrowLeft, X } from 'lucide-react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -43,6 +44,7 @@ const Sheet = forwardRef<SheetHandle, SheetProps>(
     ref,
   ) => {
     const sheetRef = useRef<any>(null);
+    const insets = useSafeAreaInsets();
 
     useImperativeHandle(ref, () => ({
       open: () => sheetRef.current?.open(),
@@ -105,7 +107,7 @@ const Sheet = forwardRef<SheetHandle, SheetProps>(
           </View>
         ) : null}
 
-        {children}
+        <View style={{ flex: 1, paddingBottom: Math.max(insets.bottom, 24) }}>{children}</View>
       </RBSheet>
     );
   },

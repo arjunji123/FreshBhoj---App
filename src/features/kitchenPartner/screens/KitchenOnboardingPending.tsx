@@ -1,6 +1,7 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Clock3 } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { Button, Card, Screen } from '@components/ui';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
@@ -27,6 +28,7 @@ const STATUS_COPY: Record<string, { title: string; body: string }> = {
 };
 
 const KitchenOnboardingPending = () => {
+  const insets = useSafeAreaInsets();
   const account = useKitchenAuthStore((s) => s.account);
   const onboarding = useKitchenOnboardingStatus();
   const logout = useKitchenLogout();
@@ -43,7 +45,10 @@ const KitchenOnboardingPending = () => {
 
   return (
     <Screen background="page">
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.iconWrap}>
           <Clock3 size={28} color={theme.colors.brand.primary} />
         </View>

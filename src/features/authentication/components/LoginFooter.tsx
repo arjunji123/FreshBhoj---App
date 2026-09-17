@@ -18,7 +18,7 @@ const LoginFooter = () => {
     };
 
     return (
-        <View style={[styles.footerContainer, { paddingBottom: bottom }]}>
+        <View style={[styles.footerContainer, { paddingBottom: Math.max(bottom, 24) }]}>
             <Text style={styles.footerText}>{AUTH_COPY.loginFooterPrefix}</Text>
             <View style={styles.footerLinksRow}>
                 <TouchableOpacity onPress={() => openDoc('terms')}>

@@ -90,7 +90,7 @@ const KitchenGallery = () => {
         <X size={20} color={theme.colors.text.inverse} strokeWidth={2.5} />
       </Pressable>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + theme.spacing.xl }]}>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 24) + theme.spacing.xl }]}>
         {current?.caption ? (
           <Text style={[theme.text.bodyLarge, styles.caption]}>{current.caption}</Text>
         ) : null}

@@ -3,6 +3,7 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useAuthNavigation from '../hooks/useAuthNavigation';
 import { useAuthStore } from '../store/authStore';
 
@@ -21,6 +22,7 @@ const SHEET_HEIGHT = SCREEN_HEIGHT * 0.82;
 
 const PersonalDetails = () => {
   const navigation = useAuthNavigation();
+  const insets = useSafeAreaInsets();
   const sheetRef = useRef<any>(null);
   const [step, setStep] = useState(0); // 0 = Personal Details, 1 = Referral Code, 2 = Select Location
 
@@ -84,7 +86,7 @@ const PersonalDetails = () => {
       >
         <KeyboardAwareScrollView
           style={styles.flex}
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: Math.max(insets.bottom, 24) + 16 }]}
           showsVerticalScrollIndicator={false}
           bounces={false}
           keyboardShouldPersistTaps="handled"

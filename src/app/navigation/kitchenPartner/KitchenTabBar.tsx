@@ -25,7 +25,7 @@ export default function KitchenTabBar({ state, navigation }: BottomTabBarProps) 
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, theme.spacing.paddings.sm) }]}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 24) }]}>
       {state.routes.map((route, index) => {
         const isFocused = state.index === index;
         const Icon = ICONS[route.name] ?? LayoutGrid;

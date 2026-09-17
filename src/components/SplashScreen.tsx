@@ -57,10 +57,26 @@ const SplashScreen = () => {
         </View>
 
         {/* Main Title */}
-        <Text style={styles.title}>FreshBhoj</Text>
+        <Text
+          style={styles.title}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.5}
+          maxFontSizeMultiplier={1}
+        >
+          FreshBhoj
+        </Text>
 
         {/* Tagline */}
-        <Text style={styles.tagline}>Where Freshness Meets Flavor.</Text>
+        <Text
+          style={styles.tagline}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.6}
+          maxFontSizeMultiplier={1}
+        >
+          Where Freshness Meets Flavor.
+        </Text>
 
         {/* Bottom Divider */}
         <View style={styles.dividerContainer}>
@@ -107,21 +123,24 @@ const styles = StyleSheet.create({
 
   // --- Center Text Block ---
   centerContent: {
-    width: '80%',
+    width: '90%',
     alignItems: 'center',
     zIndex: 1,
   },
   title: {
     fontFamily: theme.typography.fontFamilies.medievalSharp,
-    fontSize: theme.typography.fontSizes.display6,
+    fontSize: theme.typography.fontSizes.display4,
     color: theme.colors.palette.white,
     textAlign: 'center',
+    alignSelf: 'stretch',
   },
   tagline: {
     color: theme.colors.palette.white,
     fontSize: theme.typography.fontSizes.lg,
     letterSpacing: 0.5,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
+    textAlign: 'center',
+    alignSelf: 'stretch',
   },
 
   dividerContainer: {

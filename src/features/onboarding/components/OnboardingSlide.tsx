@@ -108,7 +108,7 @@ const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive,
             <Animated.View
                 style={[
                     styles.textContainer,
-                    { paddingBottom: spacing.paddings.lg + insets.bottom },
+                    { paddingBottom: spacing.paddings.lg + Math.max(insets.bottom, 24) },
                     cardAnimatedStyle,
                 ]}
             >
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: height * 0.45,
         alignItems: 'center',
-        backgroundColor: '#F9FAFB',
+        backgroundColor: colors.palette.white,
         borderTopLeftRadius: spacing.borderRadius.xxxl,
         borderTopRightRadius: spacing.borderRadius.xxxl,
         paddingTop: spacing.paddings.xl,

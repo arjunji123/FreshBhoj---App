@@ -19,8 +19,18 @@ const LoginTopSection = () => {
                     style={styles.plateImage}
                     resizeMode="cover"
                 />
-                <Text style={styles.brandTitle}>{AUTH_COPY.brandTitle}</Text>
             </View>
+            {/* Positioned independent of the image's own flow/size so it always
+                clears the white sheet's overlap, regardless of device aspect ratio. */}
+            <Text
+                style={styles.brandTitle}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.5}
+                maxFontSizeMultiplier={1}
+            >
+                {AUTH_COPY.brandTitle}
+            </Text>
         </AppGradient>
     );
 };
@@ -36,6 +46,7 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'flex-start',
+        paddingHorizontal: theme.spacing.lg,
     },
     plateImage: {
         width: width * AUTH_VALUES.loginPlateImageWidthRatio,
@@ -44,11 +55,18 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     brandTitle: {
+        position: 'absolute',
+        left: theme.spacing.lg,
+        right: theme.spacing.lg,
+        // A fixed distance from the bottom of the red section — always clears
+        // the white sheet below (which overlaps it by only ~24dp), no matter
+        // how tall the plate image renders on a given device.
+        bottom: 40,
         fontFamily: theme.typography.fontFamilies.medievalSharp,
-        fontSize: theme.typography.fontSizes.display6,
+        fontSize: theme.typography.fontSizes.display4,
         color: theme.colors.palette.white,
-        marginTop: AUTH_VALUES.loginBrandTitleTopOffset,
         zIndex: 10,
+        textAlign: 'center',
     },
 });
 

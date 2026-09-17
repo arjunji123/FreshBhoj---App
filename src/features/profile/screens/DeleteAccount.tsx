@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AlertTriangle } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { AppBar, Button, Card, Input, Screen } from '@components/ui';
 import { ApiError, authApi } from '@api';
@@ -24,6 +25,7 @@ type Step = 'confirm' | 'otp';
 
 const DeleteAccount = () => {
   const navigation = useNavigation<PrivateNavigation>();
+  const insets = useSafeAreaInsets();
   const phone = useAuthStore((s) => s.user?.phone ?? s.phoneNumber);
   const signOut = useAuthStore((s) => s.signOut);
 
@@ -66,7 +68,10 @@ const DeleteAccount = () => {
   return (
     <Screen background="page">
       <AppBar title="Delete Account" onBack={navigation.goBack} />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.xxxl + Math.max(insets.bottom, 24) }]}
+      >
         <View style={styles.warningBanner}>
           <AlertTriangle size={18} color={theme.colors.state.error} />
           <Text style={styles.warningText}>This permanently deletes your account. It cannot be undone.</Text>

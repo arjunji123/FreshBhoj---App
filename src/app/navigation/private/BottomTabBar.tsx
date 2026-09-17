@@ -33,7 +33,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   if (state.routes[state.index].name === 'FoodFeed') return null;
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 8) }]}>
+    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 24) }]}>
       <View style={styles.separator} />
       <View style={styles.tabRow}>
         {state.routes.map((route, index) => {

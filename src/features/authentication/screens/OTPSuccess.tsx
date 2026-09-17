@@ -47,7 +47,7 @@ const OTPSuccess = () => {
           showOverlay={false}
           textStyle={styles.buttonText}
           onPress={handleStartDiscovering}
-          style={[styles.button, { marginBottom: insets.bottom }]} />
+          style={[styles.button, { marginBottom: Math.max(insets.bottom, 24) }]} />
     </AppGradient>
   );
 };

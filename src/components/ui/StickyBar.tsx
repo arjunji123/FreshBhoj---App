@@ -12,7 +12,14 @@ interface StickyBarProps {
  * Bottom action bar that stays put while the page scrolls (Add to Cart,
  * Proceed to Checkout, Place Order). Owns the bottom safe-area inset so the
  * button never sits under the home indicator.
+ *
+ * The floor below is a real minimum clearance (an Android 3-button nav bar
+ * is ~48dp, a gesture bar ~24-32dp) — not a design-spacing token — so it
+ * still protects the button even on a device/OS combination where
+ * `insets.bottom` under-reports the actual system bar height.
  */
+const MIN_BOTTOM_CLEARANCE = 24;
+
 const StickyBar: React.FC<StickyBarProps> = ({ children, style }) => {
   const insets = useSafeAreaInsets();
 
@@ -20,7 +27,7 @@ const StickyBar: React.FC<StickyBarProps> = ({ children, style }) => {
     <View
       style={[
         styles.bar,
-        { paddingBottom: Math.max(insets.bottom, theme.spacing.md) },
+        { paddingBottom: Math.max(insets.bottom, MIN_BOTTOM_CLEARANCE) },
         style,
       ]}
     >

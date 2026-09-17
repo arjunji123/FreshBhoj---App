@@ -56,8 +56,8 @@ const MiniCartBar = () => {
 
   // Bottom tabs are only on screen when the focused route sits inside them.
   const isOnTabScreen = routeNames[0] === 'MainTabs';
-  const bottom =
-    (isOnTabScreen ? theme.layout.tabBarHeight + insets.bottom : insets.bottom) + GAP_ABOVE_BAR;
+  const safeBottom = Math.max(insets.bottom, 24);
+  const bottom = (isOnTabScreen ? theme.layout.tabBarHeight + safeBottom : safeBottom) + GAP_ABOVE_BAR;
 
   return (
     <Pressable

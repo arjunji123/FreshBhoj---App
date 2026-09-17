@@ -3,6 +3,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { ArrowLeft, Sparkles } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { Badge, Button, Card, Chip, ChipRow, Input, Screen } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
@@ -20,6 +21,7 @@ const FOOD_TYPES = ['VEG', 'EGG', 'NON_VEG', 'VEGAN'];
 
 const KitchenMealForm = () => {
   const navigation = useNavigation<KitchenPartnerNavigation>();
+  const insets = useSafeAreaInsets();
   const route = useRoute<any>();
   const mealId: string | undefined = route.params?.mealId;
   const menu = useKitchenMenu();
@@ -134,7 +136,10 @@ const KitchenMealForm = () => {
         <Text style={theme.text.h2}>{mealId ? 'Edit dish' : 'Add a dish'}</Text>
       </View>
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
+        showsVerticalScrollIndicator={false}
+      >
         <Card style={styles.photoCard} onPress={handlePickPhoto}>
           {upload.isPending ? (
             <Text style={styles.photoHint}>Uploading…</Text>

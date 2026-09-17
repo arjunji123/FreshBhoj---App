@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AlertTriangle } from 'lucide-react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { Button, Card, Input, Screen } from '@components/ui';
 import { KitchenApiError } from '../api/kitchenClient';
@@ -23,6 +24,7 @@ type Step = 'confirm' | 'otp';
 
 const KitchenDeleteAccount = () => {
   const navigation = useNavigation<KitchenPartnerNavigation>();
+  const insets = useSafeAreaInsets();
   const account = useKitchenAuthStore((s) => s.account);
   const signOut = useKitchenAuthStore((s) => s.signOut);
   const phone = account?.phone;
@@ -68,7 +70,10 @@ const KitchenDeleteAccount = () => {
       <View style={styles.header}>
         <Button title="Back" variant="ghost" size="sm" fullWidth={false} onPress={() => navigation.goBack()} />
       </View>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
+      >
         <View style={styles.warningBanner}>
           <AlertTriangle size={18} color={theme.colors.text.danger} />
           <Text style={styles.warningText}>This permanently deletes your Kitchen Partner account. It cannot be undone.</Text>

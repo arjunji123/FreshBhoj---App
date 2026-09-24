@@ -58,7 +58,8 @@ export const qk = {
   },
   reels: {
     all: ['reels'] as const,
-    feed: (feed: string, kitchenId?: string) => ['reels', 'feed', feed, kitchenId ?? ''] as const,
+    feed: (feed: string, kitchenId?: string, cuisineId?: string) =>
+      ['reels', 'feed', feed, kitchenId ?? '', cuisineId ?? ''] as const,
     detail: (id: string) => ['reels', 'detail', id] as const,
     saved: ['reels', 'saved'] as const,
   },

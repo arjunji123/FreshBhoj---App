@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { Dimensions, FlatList, Pressable, Share, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
+import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { Skeleton } from '@components/ui';
 import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
+import { qk, reelsApi } from '@api';
 import type { Reel } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
@@ -33,23 +35,31 @@ const ReelViewer = () => {
   const insets = useSafeAreaInsets();
   const { params } = useRoute<Route>();
 
-  const query = useReelFeed(params.feed ?? 'for_you', params.kitchenId);
+  const query = useReelFeed(params.feed ?? 'for_you', params.kitchenId, params.cuisineId);
   const toggleLike = useToggleReelLike();
   const toggleSave = useToggleReelSave();
   const { addToCart, conflictDialog } = useAddToCartFlow();
 
-  const reels = useMemo(
-    () => query.data?.pages.flatMap((page) => page.items) ?? [],
-    [query.data],
-  );
+  // The feed's first page (`limit: 6`) may not contain the exact reel this
+  // viewer was opened for — fetch it directly so the right one always opens,
+  // regardless of which filtered feed it was tapped from.
+  const targetReelQuery = useQuery({
+    queryKey: qk.reels.detail(params.reelId ?? ''),
+    queryFn: () => reelsApi.detail(params.reelId as string),
+    enabled: Boolean(params.reelId),
+    staleTime: 60_000,
+  });
 
-  const initialIndex = useMemo(() => {
-    if (!params.reelId) return 0;
-    const index = reels.findIndex((reel) => reel.id === params.reelId);
-    return index >= 0 ? index : 0;
-  }, [params.reelId, reels]);
+  const reels = useMemo(() => {
+    const feedReels = query.data?.pages.flatMap((page) => page.items) ?? [];
+    if (!targetReelQuery.data) return feedReels;
+    return [targetReelQuery.data, ...feedReels.filter((reel) => reel.id !== targetReelQuery.data!.id)];
+  }, [query.data, targetReelQuery.data]);
 
-  const [activeIndex, setActiveIndex] = useState(initialIndex);
+  // The target reel (when there is one) is always placed first by construction
+  // above, so the viewer opens on it without needing to search for its index.
+  const [activeIndex, setActiveIndex] = useState(0);
+  const isResolvingTarget = Boolean(params.reelId) && !targetReelQuery.data && !targetReelQuery.isError;
 
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 70 }).current;
   const onViewableItemsChanged = useRef(
@@ -66,7 +76,7 @@ const ReelViewer = () => {
     }).catch(() => undefined);
   }, []);
 
-  if (query.isLoading) {
+  if (isResolvingTarget || (!params.reelId && query.isLoading)) {
     return (
       <View style={styles.screen}>
         <FocusAwareStatusBar barStyle="light-content" />
@@ -84,7 +94,6 @@ const ReelViewer = () => {
         keyExtractor={(reel) => reel.id}
         pagingEnabled
         showsVerticalScrollIndicator={false}
-        initialScrollIndex={initialIndex}
         snapToInterval={SCREEN_HEIGHT}
         decelerationRate="fast"
         getItemLayout={(_, index) => ({

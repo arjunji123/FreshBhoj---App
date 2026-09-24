@@ -31,7 +31,7 @@ export type PrivateStackParamList = {
   KitchenGallery: { kitchenId: string; initialIndex?: number };
   KitchenReviews: { kitchenId: string; kitchenName?: string };
   KitchenStoryViewer: { kitchenId: string; kitchenName: string; items: StoryItem[]; initialIndex?: number };
-  ReelViewer: { reelId?: string; kitchenId?: string; feed?: ReelFeedType };
+  ReelViewer: { reelId?: string; kitchenId?: string; feed?: ReelFeedType; cuisineId?: string };
   FavoritesHub: undefined;
   Favorites: undefined;
   FollowedKitchens: undefined;
@@ -65,12 +65,13 @@ export type PrivateStackParamList = {
 export type PrivateNavigation = NativeStackNavigationProp<PrivateStackParamList>;
 export type PublicNavigation = NativeStackNavigationProp<PublicStackParamList>;
 
-/** The kitchen-partner app's four bottom tabs. */
+/** The kitchen-partner app's six bottom tabs. */
 export type KitchenTabParamList = {
   KitchenDashboard: undefined;
   KitchenOrders: undefined;
   KitchenMenu: undefined;
   KitchenStories: undefined;
+  KitchenReels: undefined;
   KitchenProfile: undefined;
 };
 

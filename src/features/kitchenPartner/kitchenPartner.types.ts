@@ -184,6 +184,25 @@ export interface KitchenStory {
   expiresAt: string;
 }
 
+export type ReelStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+
+export interface KitchenReel {
+  id: string;
+  videoUrl: string;
+  thumbnailUrl: string | null;
+  caption: string | null;
+  hashtags: string[];
+  durationSec: number;
+  status: ReelStatus;
+  viewCount: number;
+  likeCount: number;
+  shareCount: number;
+  commentCount: number;
+  mealName: string | null;
+  publishedAt: string;
+  createdAt: string;
+}
+
 export interface KitchenOrderCard {
   id: string;
   orderNumber: string;

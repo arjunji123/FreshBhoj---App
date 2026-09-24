@@ -8,6 +8,7 @@ export interface ReelFeedParams {
   limit?: number;
   feed?: ReelFeedType;
   kitchenId?: string;
+  cuisineId?: string;
   q?: string;
 }
 

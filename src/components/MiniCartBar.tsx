@@ -24,7 +24,6 @@ const HIDDEN_ROUTES = new Set([
   'PaymentProcessing',
   'OrderConfirmation',
   'MealDetail',
-  'FoodFeed',
   'ReelViewer',
   'WriteReview',
 ]);

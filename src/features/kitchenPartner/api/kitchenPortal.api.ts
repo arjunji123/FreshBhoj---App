@@ -4,6 +4,7 @@ import type {
   KitchenAccount,
   KitchenOrderCard,
   KitchenProfile,
+  KitchenReel,
   KitchenStory,
   KitchenTokenPair,
   MealDetail,
@@ -110,6 +111,23 @@ export const kitchenStoriesApi = {
   }) => kitchenClient.post<KitchenStory>('/partner/stories', input),
   deactivate: (id: string) => kitchenClient.delete<{ id: string }>(`/partner/stories/${id}`),
   updateCaption: (id: string, caption: string) => kitchenClient.patch<KitchenStory>(`/partner/stories/${id}`, { caption }),
+};
+
+// ── Reels ─────────────────────────────────────────────────────────────────
+
+export const kitchenReelsApi = {
+  list: () => kitchenClient.get<KitchenReel[]>('/partner/reels'),
+  publish: (input: {
+    videoUrl: string;
+    thumbnailUrl?: string;
+    caption?: string;
+    hashtags?: string[];
+    mealId?: string;
+    durationSec?: number;
+  }) => kitchenClient.post<KitchenReel>('/partner/reels', input),
+  update: (id: string, input: { caption?: string; hashtags?: string[] }) =>
+    kitchenClient.patch<KitchenReel>(`/partner/reels/${id}`, input),
+  archive: (id: string) => kitchenClient.delete<{ id: string }>(`/partner/reels/${id}`),
 };
 
 // ── Dashboard ─────────────────────────────────────────────────────────────

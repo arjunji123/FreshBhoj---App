@@ -1,49 +1,42 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { Dimensions, FlatList, Pressable, Share, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Clapperboard } from 'lucide-react-native';
+import { ArrowLeft, Clapperboard, Search } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import { Chip, EmptyState, Skeleton } from '@components/ui';
-import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
+import AppGradient from '@components/AppGradient';
+import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
 import type { Reel } from '@api/types';
-import type { ReelFeedType } from '@api/endpoints/reels.api';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useCartQuantityControls } from '@features/cart/hooks/useCart';
-import ReelCard from '../components/ReelCard';
+import { useCuisines } from '@features/home/hooks/useHomeFeed';
+import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
+import FoodFeedCard from '../components/FoodFeedCard';
 import {
   recordReelShare,
   recordReelView,
   useReelFeed,
   useToggleReelLike,
-  useToggleReelSave,
 } from '../hooks/useReels';
 
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-const FEEDS: Array<{ key: ReelFeedType; label: string }> = [
-  { key: 'for_you', label: 'For You' },
-  { key: 'trending', label: 'Trending' },
-  { key: 'following', label: 'Following' },
-];
-
 /**
- * The Food Feed — vertical, full-screen, shoppable reels.
+ * Food Feed — a normal scrollable browse list, one reel preview per row.
  *
- * This is the piece Swiggy and Zomato don't have wired to the cart: every reel
- * can carry the exact dish being cooked, so discovery and ordering are the same
- * gesture instead of two separate journeys.
+ * The full-screen swipe-through player (`ReelViewer`) is a tap away, not the
+ * default: scrolling here costs nothing (no video takes over the screen),
+ * while tapping a card commits to watching it full-screen and continuing from
+ * there — the split Instagram's own feed vs. Reels tab makes for the same reason.
  */
 const FoodFeed = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
-  const [feed, setFeed] = useState<ReelFeedType>('for_you');
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [cuisineId, setCuisineId] = useState<string | undefined>(undefined);
+  const [muted, setMuted] = useState(true);
 
-  const query = useReelFeed(feed);
+  const cuisinesQuery = useCuisines();
+  const query = useReelFeed('for_you', undefined, cuisineId);
   const toggleLike = useToggleReelLike();
-  const toggleSave = useToggleReelSave();
   const { addToCart, conflictDialog } = useAddToCartFlow();
   const { getQuantity, changeQuantity } = useCartQuantityControls();
 
@@ -52,14 +45,10 @@ const FoodFeed = () => {
     [query.data],
   );
 
-  // Full-bleed pages: the tab bar overlays the video rather than shrinking it.
-  const pageHeight = SCREEN_HEIGHT;
-
-  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 70 }).current;
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current;
   const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
-      const first = viewableItems[0];
-      if (typeof first?.index === 'number') setActiveIndex(first.index);
+    ({ viewableItems }: { viewableItems: Array<{ item: Reel }> }) => {
+      viewableItems.forEach(({ item }) => recordReelView(item.id));
     },
   ).current;
 
@@ -70,157 +59,172 @@ const FoodFeed = () => {
     }).catch(() => undefined);
   }, []);
 
-  if (query.isLoading) {
-    return (
-      <View style={styles.screen}>
-        <FocusAwareStatusBar barStyle="light-content" />
-        <Skeleton height={pageHeight} radius={0} />
-      </View>
-    );
-  }
+  const openReel = useCallback(
+    (reelId: string) => navigation.navigate('ReelViewer', { reelId, feed: 'for_you', cuisineId }),
+    [navigation, cuisineId],
+  );
 
   return (
-    <View style={styles.screen}>
-      <FocusAwareStatusBar barStyle="light-content" />
-
-      <FlatList
-        data={reels}
-        keyExtractor={(reel) => reel.id}
-        pagingEnabled
-        showsVerticalScrollIndicator={false}
-        snapToInterval={pageHeight}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        getItemLayout={(_, index) => ({
-          length: pageHeight,
-          offset: pageHeight * index,
-          index,
-        })}
-        viewabilityConfig={viewabilityConfig}
-        onViewableItemsChanged={onViewableItemsChanged}
-        onEndReachedThreshold={0.5}
-        onEndReached={() => {
-          if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
-        }}
-        ListEmptyComponent={
-          <View style={[styles.empty, { height: pageHeight }]}>
-            <EmptyState
-              icon={<Clapperboard size={36} color={theme.colors.primary[600]} strokeWidth={1.8} />}
-              title={feed === 'following' ? 'Nothing from your kitchens yet' : 'No reels yet'}
-              description={
-                feed === 'following'
-                  ? 'Follow a kitchen and their behind-the-scenes clips show up here.'
-                  : 'Our kitchens are filming. Check back shortly.'
-              }
-              actionLabel={feed === 'following' ? 'Discover kitchens' : undefined}
-              onAction={() => navigation.navigate('MainTabs', { screen: 'Home' })}
-            />
-          </View>
-        }
-        renderItem={({ item, index }) => (
-          <ReelCard
-            reel={item}
-            height={pageHeight}
-            isActive={index === activeIndex}
-            onView={recordReelView}
-            onLike={() => toggleLike.mutate(item.id)}
-            onSave={() => toggleSave.mutate(item.id)}
-            onShare={() => handleShare(item)}
-            onOpenKitchen={() =>
-              navigation.navigate('KitchenProfile', {
-                kitchenId: item.kitchen.id,
-                kitchenName: item.kitchen.name,
-              })
-            }
-            onOpenMeal={() =>
-              item.meal &&
-              navigation.navigate('MealDetail', { mealId: item.meal.id, mealName: item.meal.name })
-            }
-            onAddToCart={() =>
-              item.meal &&
-              addToCart({
-                id: item.meal.id,
-                name: item.meal.name,
-                isOrderable: item.meal.isAvailable,
-                image: item.meal.image,
-                price: item.meal.price,
-                mrp: item.meal.mrp,
-                foodType: item.meal.foodType,
-                calories: item.meal.calories,
-                proteinG: item.meal.proteinG,
-                isAvailable: item.meal.isAvailable,
-                kitchen: item.kitchen,
-              })
-            }
-            quantity={item.meal ? getQuantity(item.meal.id) : 0}
-            onChangeQuantity={item.meal ? (next) => changeQuantity(item.meal!.id, next) : undefined}
-          />
-        )}
-      />
-
-      <Pressable
-        onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        hitSlop={theme.layout.hitSlop}
-        style={[styles.backButton, { top: insets.top + theme.spacing.md }]}
+    <Screen background="page" edges={[]} barStyle="light-content">
+      <AppGradient
+        colors={theme.colors.gradients.brand}
+        locations={theme.colors.gradients.brandLocations}
+        direction="vertical"
+        style={[styles.header, { paddingTop: insets.top + theme.spacing.sm }]}
       >
-        <ArrowLeft size={20} color={theme.colors.text.inverse} strokeWidth={2.5} />
-      </Pressable>
+        <View style={styles.headerRow}>
+          <Pressable
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            hitSlop={theme.layout.hitSlop}
+            style={styles.headerIconButton}
+          >
+            <ArrowLeft size={19} color={theme.colors.text.inverse} strokeWidth={2.5} />
+          </Pressable>
 
-      {/* Feed switcher floats over the video, like every reels UI. */}
-      <View style={[styles.tabs, { top: insets.top + theme.spacing.md }]} pointerEvents="box-none">
-        {FEEDS.map((option) => (
+          <View style={styles.headerTitleWrap}>
+            <Text style={[theme.text.h3, styles.headerTitle]}>Food Feed</Text>
+            <Text style={[theme.text.caption, styles.headerSubtitle]}>Watch what you like</Text>
+          </View>
+
+          <Pressable
+            onPress={() => navigation.navigate('MainTabs', { screen: 'Search' })}
+            accessibilityRole="button"
+            accessibilityLabel="Search"
+            hitSlop={theme.layout.hitSlop}
+            style={styles.headerIconButton}
+          >
+            <Search size={19} color={theme.colors.text.inverse} strokeWidth={2.2} />
+          </Pressable>
+        </View>
+      </AppGradient>
+
+      <ChipRow style={styles.chipRow}>
+        <Chip label="All" selected={!cuisineId} onPress={() => setCuisineId(undefined)} />
+        {(cuisinesQuery.data ?? []).map((cuisine) => (
           <Chip
-            key={option.key}
-            label={option.label}
-            selected={feed === option.key}
-            onPress={() => {
-              setFeed(option.key);
-              setActiveIndex(0);
-            }}
-            style={feed === option.key ? undefined : styles.tabIdle}
+            key={cuisine.id}
+            label={cuisine.name}
+            selected={cuisineId === cuisine.id}
+            onPress={() => setCuisineId(cuisine.id)}
           />
         ))}
-      </View>
+      </ChipRow>
+
+      {query.isLoading ? (
+        <View style={styles.listPadding}>
+          {[0, 1].map((i) => (
+            <Skeleton key={i} height={420} radius={0} style={styles.skeletonCard} />
+          ))}
+        </View>
+      ) : (
+        <FlatList
+          data={reels}
+          keyExtractor={(reel) => reel.id}
+          showsVerticalScrollIndicator={false}
+          viewabilityConfig={viewabilityConfig}
+          onViewableItemsChanged={onViewableItemsChanged}
+          onEndReachedThreshold={0.5}
+          onEndReached={() => {
+            if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
+          }}
+          contentContainerStyle={reels.length ? styles.listContent : styles.emptyContent}
+          ListEmptyComponent={
+            <EmptyState
+              icon={<Clapperboard size={36} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+              title="No reels yet"
+              description={
+                cuisineId
+                  ? 'Nothing in this cuisine right now — try another filter.'
+                  : 'Our kitchens are filming. Check back shortly.'
+              }
+              actionLabel={cuisineId ? 'Clear filter' : undefined}
+              onAction={cuisineId ? () => setCuisineId(undefined) : undefined}
+            />
+          }
+          renderItem={({ item }) => (
+            <FoodFeedCard
+              reel={item}
+              muted={muted}
+              onToggleMute={() => setMuted((prev) => !prev)}
+              onPress={() => openReel(item.id)}
+              onLike={() => toggleLike.mutate(item.id)}
+              onShare={() => handleShare(item)}
+              onAddToCart={() =>
+                item.meal &&
+                addToCart({
+                  id: item.meal.id,
+                  name: item.meal.name,
+                  isOrderable: item.meal.isAvailable,
+                  image: item.meal.image,
+                  price: item.meal.price,
+                  mrp: item.meal.mrp,
+                  foodType: item.meal.foodType,
+                  calories: item.meal.calories,
+                  proteinG: item.meal.proteinG,
+                  isAvailable: item.meal.isAvailable,
+                  kitchen: item.kitchen,
+                })
+              }
+              quantity={item.meal ? getQuantity(item.meal.id) : 0}
+              onChangeQuantity={item.meal ? (next) => changeQuantity(item.meal!.id, next) : undefined}
+            />
+          )}
+        />
+      )}
 
       {conflictDialog}
-    </View>
+    </Screen>
   );
 };
 
 export default FoodFeed;
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: theme.colors.neutral[900],
+  header: {
+    paddingHorizontal: theme.layout.screenPadding,
+    paddingBottom: theme.spacing.md,
+    borderBottomLeftRadius: theme.radius.sheet,
+    borderBottomRightRadius: theme.radius.sheet,
   },
-  backButton: {
-    position: 'absolute',
-    left: theme.layout.screenPadding,
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.18)',
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: theme.colors.overlay.glass,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1,
   },
-  tabs: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
+  headerTitleWrap: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    color: theme.colors.text.inverse,
+  },
+  headerSubtitle: {
+    color: 'rgba(255,255,255,0.8)',
+    marginTop: 1,
+  },
+  chipRow: {
+    paddingVertical: theme.spacing.md,
+  },
+  listContent: {
+    paddingBottom: MINI_CART_BAR_CLEARANCE,
+  },
+  emptyContent: {
+    flexGrow: 1,
     justifyContent: 'center',
-    gap: theme.spacing.sm,
   },
-  tabIdle: {
-    backgroundColor: 'rgba(15,23,42,0.45)',
-    borderColor: 'rgba(255,255,255,0.3)',
+  listPadding: {
+    gap: theme.spacing.lg,
   },
-  empty: {
-    justifyContent: 'center',
-    backgroundColor: theme.colors.surface.page,
+  skeletonCard: {
+    marginHorizontal: 0,
   },
 });

@@ -3,12 +3,12 @@ import { qk, reelsApi } from '@api';
 import type { ReelFeedType } from '@api/endpoints/reels.api';
 import type { Paginated, Reel } from '@api/types';
 
-export function useReelFeed(feed: ReelFeedType = 'for_you', kitchenId?: string) {
+export function useReelFeed(feed: ReelFeedType = 'for_you', kitchenId?: string, cuisineId?: string) {
   return useInfiniteQuery({
-    queryKey: qk.reels.feed(feed, kitchenId),
+    queryKey: qk.reels.feed(feed, kitchenId, cuisineId),
     initialPageParam: 1,
     queryFn: ({ pageParam }) =>
-      reelsApi.feed({ feed, kitchenId, page: pageParam as number, limit: 6 }),
+      reelsApi.feed({ feed, kitchenId, cuisineId, page: pageParam as number, limit: 6 }),
     getNextPageParam: (lastPage: Paginated<Reel>) =>
       lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
     staleTime: 60_000,

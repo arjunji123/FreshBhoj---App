@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
-import { LayoutGrid, ClipboardList, UtensilsCrossed, Camera, UserCircle } from 'lucide-react-native';
+import { LayoutGrid, ClipboardList, UtensilsCrossed, Camera, Clapperboard, UserCircle } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 
 const ICONS: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
@@ -10,6 +10,7 @@ const ICONS: Record<string, React.ComponentType<{ size?: number; color?: string 
   KitchenOrders: ClipboardList,
   KitchenMenu: UtensilsCrossed,
   KitchenStories: Camera,
+  KitchenReels: Clapperboard,
   KitchenProfile: UserCircle,
 };
 
@@ -18,6 +19,7 @@ const LABELS: Record<string, string> = {
   KitchenOrders: 'Orders',
   KitchenMenu: 'Menu',
   KitchenStories: 'Stories',
+  KitchenReels: 'Reels',
   KitchenProfile: 'Profile',
 };
 

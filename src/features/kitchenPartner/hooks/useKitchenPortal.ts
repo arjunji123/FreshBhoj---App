@@ -5,6 +5,7 @@ import {
   kitchenOnboardingApi,
   kitchenOrdersApi,
   kitchenProfileApi,
+  kitchenReelsApi,
   kitchenStoriesApi,
   kitchenUploadApi,
   UpsertMealInput,
@@ -20,6 +21,7 @@ const kitchenKeys = {
   ordersHistory: (params: unknown) => ['kitchen', 'orders', 'history', params] as const,
   menu: ['kitchen', 'menu'] as const,
   stories: ['kitchen', 'stories'] as const,
+  reels: ['kitchen', 'reels'] as const,
 };
 
 function useKitchenAuthed() {
@@ -141,6 +143,36 @@ export function useUpdateStoryCaption() {
   return useMutation({
     mutationFn: ({ id, caption }: { id: string; caption: string }) => kitchenStoriesApi.updateCaption(id, caption),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.stories }),
+  });
+}
+
+export function useKitchenReels() {
+  const enabled = useKitchenAuthed();
+  return useQuery({ queryKey: kitchenKeys.reels, queryFn: kitchenReelsApi.list, enabled });
+}
+
+export function usePublishReel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: kitchenReelsApi.publish,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.reels }),
+  });
+}
+
+export function useUpdateReel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: { caption?: string; hashtags?: string[] } }) =>
+      kitchenReelsApi.update(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.reels }),
+  });
+}
+
+export function useArchiveReel() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => kitchenReelsApi.archive(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.reels }),
   });
 }
 

@@ -1,10 +1,19 @@
-import React, { useEffect } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  Image,
+  LayoutChangeEvent,
+  PanResponder,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { Bookmark, Heart, Share2, Store } from 'lucide-react-native';
+import { Bookmark, Heart, Share2, ShoppingBag } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import AddToCartControl from '@components/AddToCartControl';
+import AppGradient from '@components/AppGradient';
 import { VerifiedBadge } from '@components/ui';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { Reel } from '@api/types';
@@ -34,6 +43,8 @@ interface ReelCardProps {
  * The video itself renders as its poster frame — `react-native-video` is not a
  * dependency yet, so this shows the thumbnail and keeps every other behaviour
  * (paging, likes, saves, shoppable CTA, view counting) real and testable.
+ * The scrub bar below fakes playback progress against `durationSec` for the
+ * same reason — it seeks and loops correctly, it just isn't tied to a decoder.
  */
 const ReelCard: React.FC<ReelCardProps> = ({
   reel,
@@ -53,6 +64,58 @@ const ReelCard: React.FC<ReelCardProps> = ({
     // Counted once per time the reel becomes the active page.
     if (isActive) onView(reel.id);
   }, [isActive, reel.id, onView]);
+
+  const durationMs = Math.max((reel.durationSec || 15) * 1000, 1000);
+  const [progress, setProgress] = useState(0);
+  const [seeking, setSeeking] = useState(false);
+  const progressRef = useRef(0);
+  const barWidthRef = useRef(0);
+
+  // Reset to the start every time this card stops being the one on screen.
+  useEffect(() => {
+    if (!isActive) {
+      progressRef.current = 0;
+      setProgress(0);
+    }
+  }, [isActive]);
+
+  // Ticks progress forward while active; pauses the instant the user grabs the bar.
+  useEffect(() => {
+    if (!isActive || seeking) return;
+    let startedAt = Date.now() - progressRef.current * durationMs;
+    const id = setInterval(() => {
+      let next = (Date.now() - startedAt) / durationMs;
+      if (next >= 1) {
+        next = 0;
+        startedAt = Date.now();
+      }
+      progressRef.current = next;
+      setProgress(next);
+    }, 100);
+    return () => clearInterval(id);
+  }, [isActive, seeking, durationMs]);
+
+  const seekTo = (locationX: number) => {
+    const width = barWidthRef.current;
+    if (!width) return;
+    const next = Math.min(Math.max(locationX / width, 0), 1);
+    progressRef.current = next;
+    setProgress(next);
+  };
+
+  const seekResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt) => {
+        setSeeking(true);
+        seekTo(evt.nativeEvent.locationX);
+      },
+      onPanResponderMove: (evt) => seekTo(evt.nativeEvent.locationX),
+      onPanResponderRelease: () => setSeeking(false),
+      onPanResponderTerminate: () => setSeeking(false),
+    }),
+  ).current;
 
   return (
     <View style={[styles.container, { height }]}>
@@ -75,17 +138,34 @@ const ReelCard: React.FC<ReelCardProps> = ({
       {/* ── Right action rail ─────────────────────────────────────── */}
       <View style={styles.rail}>
         <Action
+          gradient
           icon={
             <Heart
-              size={26}
-              color={reel.isLiked ? theme.colors.primary[500] : theme.colors.text.inverse}
-              fill={reel.isLiked ? theme.colors.primary[500] : 'transparent'}
+              size={22}
+              color={theme.colors.text.inverse}
+              fill={reel.isLiked ? theme.colors.text.inverse : 'transparent'}
               strokeWidth={2.2}
             />
           }
           label={reel.stats.likesLabel}
           onPress={onLike}
           accessibilityLabel={reel.isLiked ? 'Unlike' : 'Like'}
+        />
+        {reel.meal ? (
+          <Action
+            gradient
+            icon={<ShoppingBag size={20} color={theme.colors.text.inverse} strokeWidth={2.2} />}
+            label="Add"
+            onPress={onAddToCart}
+            accessibilityLabel="Add to cart"
+          />
+        ) : null}
+        <Action
+          gradient
+          icon={<Share2 size={20} color={theme.colors.text.inverse} strokeWidth={2.2} />}
+          label="Share"
+          onPress={onShare}
+          accessibilityLabel="Share reel"
         />
         <Action
           icon={
@@ -99,18 +179,6 @@ const ReelCard: React.FC<ReelCardProps> = ({
           label="Save"
           onPress={onSave}
           accessibilityLabel={reel.isSaved ? 'Unsave' : 'Save'}
-        />
-        <Action
-          icon={<Share2 size={24} color={theme.colors.text.inverse} strokeWidth={2.2} />}
-          label="Share"
-          onPress={onShare}
-          accessibilityLabel="Share reel"
-        />
-        <Action
-          icon={<Store size={24} color={theme.colors.text.inverse} strokeWidth={2.2} />}
-          label="Kitchen"
-          onPress={onOpenKitchen}
-          accessibilityLabel="Open kitchen"
         />
       </View>
 
@@ -177,6 +245,31 @@ const ReelCard: React.FC<ReelCardProps> = ({
           </Pressable>
         ) : null}
       </View>
+
+      {/* ── Scrub bar — how much of the reel is left, drag to seek ──── */}
+      <View
+        style={styles.progressHitArea}
+        onLayout={(e: LayoutChangeEvent) => {
+          barWidthRef.current = e.nativeEvent.layout.width;
+        }}
+        {...seekResponder.panHandlers}
+      >
+        <View style={styles.progressTrack}>
+          <AppGradient
+            colors={theme.colors.gradients.brand}
+            locations={theme.colors.gradients.brandLocations}
+            direction="horizontal"
+            style={[styles.progressFill, { width: `${progress * 100}%` }]}
+          />
+        </View>
+        <View
+          style={[
+            styles.progressThumb,
+            seeking ? styles.progressThumbActive : null,
+            { left: `${progress * 100}%` },
+          ]}
+        />
+      </View>
     </View>
   );
 };
@@ -186,7 +279,8 @@ const Action: React.FC<{
   label: string;
   onPress: () => void;
   accessibilityLabel: string;
-}> = ({ icon, label, onPress, accessibilityLabel }) => (
+  gradient?: boolean;
+}> = ({ icon, label, onPress, accessibilityLabel, gradient = false }) => (
   <Pressable
     onPress={onPress}
     hitSlop={theme.layout.hitSlop}
@@ -194,7 +288,18 @@ const Action: React.FC<{
     accessibilityLabel={accessibilityLabel}
     style={({ pressed }) => [styles.action, pressed ? styles.pressed : null]}
   >
-    {icon}
+    {gradient ? (
+      <AppGradient
+        colors={theme.colors.gradients.brand}
+        locations={theme.colors.gradients.brandLocations}
+        direction="diagonal"
+        style={styles.actionCircle}
+      >
+        {icon}
+      </AppGradient>
+    ) : (
+      icon
+    )}
     <Text style={styles.actionLabel}>{label}</Text>
   </Pressable>
 );
@@ -220,6 +325,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
+  actionCircle: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...theme.elevation.sm,
+  },
   actionLabel: {
     ...theme.text.caption,
     fontSize: 10,
@@ -235,6 +348,42 @@ const styles = StyleSheet.create({
     right: 76,
     bottom: theme.spacing.xxl,
     gap: theme.spacing.sm,
+  },
+  progressHitArea: {
+    position: 'absolute',
+    left: theme.layout.screenPadding,
+    right: theme.layout.screenPadding,
+    bottom: theme.spacing.sm,
+    height: 24,
+    justifyContent: 'center',
+  },
+  progressTrack: {
+    height: 3,
+    borderRadius: theme.radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: theme.radius.pill,
+  },
+  progressThumb: {
+    position: 'absolute',
+    top: '50%',
+    width: 11,
+    height: 11,
+    borderRadius: 6,
+    marginTop: -5.5,
+    marginLeft: -5.5,
+    backgroundColor: theme.colors.text.inverse,
+    ...theme.elevation.xs,
+  },
+  progressThumbActive: {
+    width: 15,
+    height: 15,
+    borderRadius: 8,
+    marginTop: -7.5,
+    marginLeft: -7.5,
   },
   kitchenRow: {
     flexDirection: 'row',

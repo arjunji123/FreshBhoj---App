@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Trash2 } from 'lucide-react-native';
+import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Store, Trash2 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatPhone } from '@utils/format';
 import Logo from '@components/Logo';
@@ -115,6 +115,13 @@ const Profile = () => {
             subtitle={referral ? `${referral.coinsBalance} FreshBhoj Coins` : 'Invite friends, earn coins'}
             icon={<Gift {...ICON_PROPS} color={theme.colors.primary[600]} />}
             onPress={() => requireAuth(() => navigation.navigate('Referral'))}
+          />
+          <Divider spacing={0} />
+          <ListItem
+            title="Register your Kitchen"
+            subtitle="Become a FreshBhoj partner"
+            icon={<Store {...ICON_PROPS} color={theme.colors.primary[600]} />}
+            onPress={() => navigation.navigate('Login', { intent: 'KITCHEN' })}
           />
         </Card>
 

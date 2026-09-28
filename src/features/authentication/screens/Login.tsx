@@ -5,6 +5,7 @@ import {
   Platform,
   Text,
 } from 'react-native';
+import { useRoute } from '@react-navigation/native';
 import CheckBox from '@react-native-community/checkbox';
 import GlassButton from '@components/GlassButton';
 import { theme } from '@app/theme/index';
@@ -30,6 +31,12 @@ const Login = () => {
   const setRememberMe = useAuthStore((state) => state.setRememberMe);
   const continueAsGuest = useAuthStore((state) => state.continueAsGuest);
   const navigation = useAuthNavigation();
+  // Reached either pre-login (no params) or from a signed-in customer's
+  // Profile screen with `intent: 'KITCHEN'` — see PrivateStack.tsx, which
+  // mounts this same screen under the private stack so registering a
+  // kitchen doesn't sign the customer out of their session.
+  const route = useRoute<any>();
+  const isKitchenIntent = route.params?.intent === 'KITCHEN';
   const sendOtp = useSendOtp();
   const sendKitchenOtp = useSendKitchenOtp();
   const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
@@ -48,10 +55,24 @@ const Login = () => {
 
   // One phone-entry screen for both customer and kitchen-partner accounts —
   // the backend resolves which one this number belongs to before any OTP is
-  // sent, and an existing kitchen account always wins that check.
+  // sent, and an existing kitchen account always wins that check. When
+  // reached with an explicit kitchen intent (the "Register your Kitchen"
+  // entry point), skip that lookup entirely and always send a kitchen OTP.
   const handleContinue = async () => {
     if (!isPhoneValid || isDetecting) return;
     setErrorMessage(null);
+
+    if (isKitchenIntent) {
+      sendKitchenOtp.mutate(phoneNumber, {
+        onSuccess: () => navigation.navigate('OTP', { phoneNumber, accountType: 'KITCHEN' }),
+        onError: (error) =>
+          setErrorMessage(
+            error instanceof ApiError ? error.message : 'We could not send the code. Please try again.',
+          ),
+      });
+      return;
+    }
+
     setIsDetecting(true);
 
     try {
@@ -81,9 +102,11 @@ const Login = () => {
       style={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <View style={styles.headerRow}>
-        <GlassButton style={{}} title={AUTH_COPY.loginSkip} onPress={continueAsGuest} />
-      </View>
+      {!isKitchenIntent ? (
+        <View style={styles.headerRow}>
+          <GlassButton style={{}} title={AUTH_COPY.loginSkip} onPress={continueAsGuest} />
+        </View>
+      ) : null}
 
       {/* Top Section */}
       <LoginTopSection />
@@ -92,21 +115,27 @@ const Login = () => {
       <View style={styles.bottomSection}>
         <LoginTitle />
 
+        {isKitchenIntent ? (
+          <Text style={styles.kitchenIntentBanner}>Register your Kitchen — verify your phone number to get started.</Text>
+        ) : null}
+
         <LoginPhoneInput value={phoneNumber} onChangeText={handlePhoneChange} />
 
-        <View style={styles.checkboxContainer}>
-          <CheckBox
-            value={rememberMe}
-            onValueChange={setRememberMe}
-            tintColors={{ true: theme.colors.primary[600], false: theme.colors.border }}
-            boxType="square"
-            onCheckColor={theme.colors.palette.white}
-            onFillColor={theme.colors.primary[600]}
-            onTintColor={theme.colors.primary[600]}
-            style={Platform.OS === 'ios' ? styles.checkboxIOS : styles.checkboxAndroid}
-          />
-          <Text onPress={() => { setRememberMe(!rememberMe) }} style={styles.checkboxText}>{AUTH_COPY.loginRememberMe}</Text>
-        </View>
+        {!isKitchenIntent ? (
+          <View style={styles.checkboxContainer}>
+            <CheckBox
+              value={rememberMe}
+              onValueChange={setRememberMe}
+              tintColors={{ true: theme.colors.primary[600], false: theme.colors.border }}
+              boxType="square"
+              onCheckColor={theme.colors.palette.white}
+              onFillColor={theme.colors.primary[600]}
+              onTintColor={theme.colors.primary[600]}
+              style={Platform.OS === 'ios' ? styles.checkboxIOS : styles.checkboxAndroid}
+            />
+            <Text onPress={() => { setRememberMe(!rememberMe) }} style={styles.checkboxText}>{AUTH_COPY.loginRememberMe}</Text>
+          </View>
+        ) : null}
 
         {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
@@ -121,7 +150,7 @@ const Login = () => {
           locations={theme.colors.defaultLocations}
         />
 
-        <SocialLogin />
+        {!isKitchenIntent ? <SocialLogin /> : null}
 
         <View style={styles.flexSpacer} />
 
@@ -155,6 +184,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.screenPadding,
     paddingTop: theme.spacing.paddings.xxl,
     paddingBottom: theme.spacing.paddings.xl,
+  },
+  kitchenIntentBanner: {
+    ...theme.text.bodySmall,
+    color: theme.colors.text.secondary,
+    textAlign: 'center',
+    marginBottom: theme.spacing.paddings.lg,
   },
   checkboxContainer: {
     flexDirection: 'row',

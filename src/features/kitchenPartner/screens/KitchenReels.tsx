@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Clapperboard, Eye, Heart, Pencil, Share2, Trash2 } from 'lucide-react-native';
+import { Clapperboard, Eye, Heart, Music, Pause, Pencil, Play, Scissors, ShoppingBag, Share2, SlidersHorizontal, Sparkles, Trash2 } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { Badge, Button, Card, Chip, EmptyState, Screen, Skeleton } from '@components/ui';
 import { KitchenApiError } from '../api/kitchenClient';
@@ -10,7 +10,9 @@ import {
   useKitchenMenu,
   useKitchenReels,
   useKitchenUpload,
+  usePauseReel,
   usePublishReel,
+  useResumeReel,
   useUpdateReel,
 } from '../hooks/useKitchenPortal';
 import type { KitchenReel } from '../kitchenPartner.types';
@@ -22,6 +24,8 @@ const KitchenReels = () => {
   const updateReel = useUpdateReel();
   const upload = useKitchenUpload();
   const publish = usePublishReel();
+  const pauseReel = usePauseReel();
+  const resumeReel = useResumeReel();
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftCaption, setDraftCaption] = useState('');
@@ -82,6 +86,17 @@ const KitchenReels = () => {
     ]);
   };
 
+  const handleTogglePause = (reel: KitchenReel) => {
+    const mutation = reel.isPaused ? resumeReel : pauseReel;
+    mutation.mutate(reel.id, {
+      onError: (error) =>
+        Alert.alert(
+          reel.isPaused ? 'Could not resume reel' : 'Could not pause reel',
+          error instanceof KitchenApiError ? error.message : 'Please try again.',
+        ),
+    });
+  };
+
   const startEdit = (reel: KitchenReel) => {
     setEditingId(reel.id);
     setDraftCaption(reel.caption ?? '');
@@ -108,6 +123,31 @@ const KitchenReels = () => {
       {videoUrl ? (
         <Card style={styles.composeCard} padding="md">
           <Text style={theme.text.overline}>Video uploaded</Text>
+
+          <View style={styles.editToolsRow}>
+            <TouchableOpacity
+              style={styles.editToolPill}
+              onPress={() => Alert.alert('Coming soon', 'Trimming your reel right in the app is on the way.')}
+            >
+              <Scissors size={13} color={theme.colors.text.secondary} />
+              <Text style={styles.editToolLabel}>Trim</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.editToolPill}
+              onPress={() => Alert.alert('Coming soon', 'Adding music to your reel is on the way.')}
+            >
+              <Music size={13} color={theme.colors.text.secondary} />
+              <Text style={styles.editToolLabel}>Music</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.editToolPill}
+              onPress={() => Alert.alert('Coming soon', 'Video filters are on the way.')}
+            >
+              <SlidersHorizontal size={13} color={theme.colors.text.secondary} />
+              <Text style={styles.editToolLabel}>Filters</Text>
+            </TouchableOpacity>
+          </View>
+
           <TextInput
             value={caption}
             onChangeText={setCaption}
@@ -190,13 +230,16 @@ const KitchenReels = () => {
                 </View>
               )}
 
-              {item.status !== 'PUBLISHED' ? (
-                <Badge
-                  label={item.status === 'ARCHIVED' ? 'Archived' : 'Draft'}
-                  tone="neutral"
-                  size="sm"
-                  style={styles.statusBadge}
-                />
+              {item.status !== 'PUBLISHED' || item.isPaused || item.isSponsored ? (
+                <View style={styles.badgeRow}>
+                  {item.status !== 'PUBLISHED' ? (
+                    <Badge label={item.status === 'ARCHIVED' ? 'Archived' : 'Draft'} tone="neutral" size="sm" />
+                  ) : null}
+                  {item.isPaused ? <Badge label="Paused" tone="warning" size="sm" /> : null}
+                  {item.isSponsored ? (
+                    <Badge label="Sponsored" tone="brand" size="sm" icon={<Sparkles size={11} color={theme.colors.primary[700]} />} />
+                  ) : null}
+                </View>
               ) : null}
 
               {item.mealName ? <Badge label={item.mealName} tone="accent" size="sm" style={styles.mealBadge} /> : null}
@@ -205,6 +248,7 @@ const KitchenReels = () => {
                 <StatChip icon={<Eye size={11} color={theme.colors.text.tertiary} />} value={item.viewCount} />
                 <StatChip icon={<Heart size={11} color={theme.colors.text.tertiary} />} value={item.likeCount} />
                 <StatChip icon={<Share2 size={11} color={theme.colors.text.tertiary} />} value={item.shareCount} />
+                <StatChip icon={<ShoppingBag size={11} color={theme.colors.text.tertiary} />} value={item.orderCount} />
               </View>
 
               {editingId === item.id ? (
@@ -234,6 +278,17 @@ const KitchenReels = () => {
                     </Text>
                   ) : null}
                   <View style={styles.rowActions}>
+                    <TouchableOpacity
+                      onPress={() => handleTogglePause(item)}
+                      disabled={(pauseReel.isPending && pauseReel.variables === item.id) || (resumeReel.isPending && resumeReel.variables === item.id)}
+                      style={styles.iconButton}
+                    >
+                      {item.isPaused ? (
+                        <Play size={13} color={theme.colors.brand.primary} />
+                      ) : (
+                        <Pause size={13} color={theme.colors.text.secondary} />
+                      )}
+                    </TouchableOpacity>
                     <TouchableOpacity onPress={() => startEdit(item)} style={styles.iconButton}>
                       <Pencil size={13} color={theme.colors.text.secondary} />
                     </TouchableOpacity>
@@ -272,6 +327,18 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.paddings.md,
   },
   composeCard: { marginHorizontal: theme.layout.screenPadding, marginBottom: theme.spacing.paddings.md },
+  editToolsRow: { flexDirection: 'row', gap: theme.spacing.paddings.sm, marginTop: theme.spacing.paddings.sm },
+  editToolPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: theme.spacing.paddings.sm,
+    paddingVertical: 6,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.borders.default,
+  },
+  editToolLabel: { ...theme.text.caption, color: theme.colors.text.secondary, fontWeight: '700' as const },
   composeLabel: { ...theme.text.caption, color: theme.colors.text.secondary, marginTop: theme.spacing.paddings.sm },
   mealWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.xs, marginTop: theme.spacing.paddings.xs },
   composeActions: {
@@ -295,7 +362,7 @@ const styles = StyleSheet.create({
   reelCard: { flex: 1, marginBottom: theme.spacing.paddings.sm },
   reelThumb: { width: '100%', height: 160, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface.subtle },
   reelThumbFallback: { alignItems: 'center', justifyContent: 'center' },
-  statusBadge: { marginTop: theme.spacing.paddings.xs, alignSelf: 'flex-start' },
+  badgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: theme.spacing.paddings.xs },
   mealBadge: { marginTop: theme.spacing.paddings.xs, alignSelf: 'flex-start' },
   statsRow: { flexDirection: 'row', gap: theme.spacing.paddings.sm, marginTop: theme.spacing.paddings.xs },
   statChip: { flexDirection: 'row', alignItems: 'center', gap: 3 },

@@ -6,7 +6,8 @@ import type { ReelFeedType } from '@api/endpoints/reels.api';
 /** Screens available before sign-in. */
 export type PublicStackParamList = {
   Onboarding: undefined;
-  Login: undefined;
+  /** `intent: 'KITCHEN'` skips the account-type lookup and goes straight to a kitchen OTP. */
+  Login: { intent?: 'KITCHEN' } | undefined;
   OTP: { phoneNumber: string; accountType?: 'KITCHEN' | 'CUSTOMER' };
   OTPSuccess: undefined;
   PersonalDetails: undefined;
@@ -60,6 +61,14 @@ export type PrivateStackParamList = {
   EditProfile: undefined;
   Referral: undefined;
   DeleteAccount: undefined;
+
+  // Kitchen-partner registration entry point. A signed-in customer stays
+  // signed in while doing this — kitchen auth is a wholly separate session
+  // (see `kitchenAuthStore`) — so this pushes the *same* Login/OTP screens
+  // used pre-login onto this stack instead of swapping the app's root
+  // navigator, which would sign the customer out of this stack entirely.
+  Login: { intent?: 'KITCHEN' } | undefined;
+  OTP: { phoneNumber: string; accountType?: 'KITCHEN' | 'CUSTOMER' };
 };
 
 export type PrivateNavigation = NativeStackNavigationProp<PrivateStackParamList>;
@@ -80,6 +89,18 @@ export type KitchenPartnerStackParamList = {
   KitchenTabs: NavigatorScreenParams<KitchenTabParamList>;
   KitchenMealForm: { mealId?: string } | undefined;
   KitchenDeleteAccount: undefined;
+  FssaiAssistance: undefined;
+  BhojAiChat: undefined;
+  Notifications: undefined;
+  Payouts: undefined;
+  KitchenTimings: undefined;
+  UploadGuide: undefined;
+  /** `orderNumber` is optional — purely so the chat header can show "#1234" without an extra fetch (there's no order-detail endpoint yet). */
+  OrderChat: { orderId: string; orderNumber?: string };
+  AdsCampaigns: undefined;
+  AdsCampaignDetail: { campaignId: string };
+  Subscribers: undefined;
+  SubscriberDetail: { subscriptionId: string };
 };
 
 export type KitchenPartnerNavigation = NativeStackNavigationProp<KitchenPartnerStackParamList>;

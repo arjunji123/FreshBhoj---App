@@ -32,6 +32,12 @@ import EditProfile from '@features/profile/screens/EditProfile';
 import DeleteAccount from '@features/profile/screens/DeleteAccount';
 import ReferralScreen from '@features/referral/screens/ReferralScreen';
 
+// Kitchen-partner registration entry point (see navigation.types.ts) — the
+// same screens the pre-login `PublicStack` uses, reused here so a signed-in
+// customer can register a kitchen without losing their customer session.
+import Login from '@features/authentication/screens/Login';
+import OTPScreen from '@features/authentication/screens/OTPScreen';
+
 const Stack = createNativeStackNavigator<PrivateStackParamList>();
 
 export function PrivateTabs() {
@@ -95,6 +101,9 @@ export function PrivateTabs() {
       <Stack.Screen name="EditProfile" component={EditProfile} />
       <Stack.Screen name="Referral" component={ReferralScreen} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccount} />
+
+      <Stack.Screen name="Login" component={Login} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="OTP" component={OTPScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
     </Stack.Navigator>
   );
 }

@@ -13,11 +13,14 @@ import {
   kitchenOrderChatApi,
   kitchenOrdersApi,
   kitchenPayoutsApi,
+  kitchenPremiumApi,
   kitchenProfileApi,
   kitchenReelsApi,
   kitchenStoriesApi,
   kitchenSubscriptionsApi,
+  kitchenSuggestionsApi,
   kitchenUploadApi,
+  kitchenWalletApi,
   LocationInput,
   OnboardingDocumentInput,
   OwnerDetailsInput,
@@ -27,11 +30,13 @@ import {
 } from '../api/kitchenPortal.api';
 import type {
   CampaignStatus,
+  CampaignSuggestionStatus,
   FssaiAssistanceDocumentType,
   KitchenProfile,
   NotificationCategory,
   OrderMessage,
   OrderStatus,
+  PremiumTier,
   SubscriptionStatus,
 } from '../kitchenPartner.types';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
@@ -61,6 +66,13 @@ const kitchenKeys = {
   subscriptions: ['kitchen', 'subscriptions'] as const,
   subscriptionsList: (params: unknown) => ['kitchen', 'subscriptions', 'list', params] as const,
   subscriptionDetail: (id: string) => ['kitchen', 'subscriptions', 'detail', id] as const,
+  walletSummary: ['kitchen', 'wallet', 'summary'] as const,
+  walletTransactions: (params: unknown) => ['kitchen', 'wallet', 'transactions', params] as const,
+  suggestions: ['kitchen', 'ads', 'suggestions'] as const,
+  suggestionsList: (params: unknown) => ['kitchen', 'ads', 'suggestions', 'list', params] as const,
+  suggestionDetail: (id: string) => ['kitchen', 'ads', 'suggestions', 'detail', id] as const,
+  premiumTiers: ['kitchen', 'premium', 'tiers'] as const,
+  premiumSubscription: ['kitchen', 'premium', 'subscription'] as const,
 };
 
 function useKitchenAuthed() {
@@ -591,8 +603,12 @@ export function useCampaignEstimate(dailyBudgetRs: number | null) {
 export function useCreateCampaign() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (input: { reelId: string; dailyBudgetRs: number; endDate?: string }) => kitchenAdsApi.create(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.campaigns }),
+    mutationFn: (input: { reelId: string; dailyBudgetRs: number; durationDays: number }) => kitchenAdsApi.create(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.campaigns });
+      // The full cost was just charged from the wallet — keep the balance fresh.
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.walletSummary });
+    },
   });
 }
 
@@ -685,5 +701,116 @@ export function useSkipDelivery() {
   return useMutation({
     mutationFn: ({ id, date, reason }: { id: string; date: string; reason?: string }) => kitchenSubscriptionsApi.skipDelivery(id, date, reason),
     onSuccess: (_result, variables) => queryClient.invalidateQueries({ queryKey: kitchenKeys.subscriptionDetail(variables.id) }),
+  });
+}
+
+// ── Kitchen Wallet ────────────────────────────────────────────────────────
+
+export function useWalletSummary() {
+  const enabled = useKitchenAuthed();
+  return useQuery({ queryKey: kitchenKeys.walletSummary, queryFn: kitchenWalletApi.summary, enabled });
+}
+
+export function useWalletTransactions(params: { page: number }) {
+  const enabled = useKitchenAuthed();
+  return useQuery({
+    queryKey: kitchenKeys.walletTransactions(params),
+    queryFn: () => kitchenWalletApi.transactions({ ...params, limit: 20 }),
+    enabled,
+  });
+}
+
+export function useTopupWallet() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (amountRs: number) => kitchenWalletApi.topup(amountRs),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.walletSummary });
+      queryClient.invalidateQueries({ queryKey: ['kitchen', 'wallet', 'transactions'] });
+    },
+  });
+}
+
+// ── AI Optimization Suggestions ──────────────────────────────────────────
+
+export function useSuggestions(params: { status?: CampaignSuggestionStatus; q?: string; page: number }) {
+  const enabled = useKitchenAuthed();
+  return useQuery({
+    queryKey: kitchenKeys.suggestionsList(params),
+    queryFn: () => kitchenSuggestionsApi.list({ ...params, limit: 20 }),
+    enabled,
+  });
+}
+
+export function useSuggestionDetail(id: string) {
+  const enabled = useKitchenAuthed();
+  return useQuery({
+    queryKey: kitchenKeys.suggestionDetail(id),
+    queryFn: () => kitchenSuggestionsApi.get(id),
+    enabled: enabled && !!id,
+  });
+}
+
+/**
+ * Capped to once per kitchen per IST day server-side — calling again the
+ * same day just re-returns the existing batch, which is why this doesn't
+ * need any client-side "already generated today" guard. Can 503 when
+ * Gemini is under load; callers should surface that as a retry-able error
+ * state, not a crash.
+ */
+export function useGenerateSuggestions() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => kitchenSuggestionsApi.generate(),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.suggestions }),
+  });
+}
+
+export function useApplySuggestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => kitchenSuggestionsApi.apply(id),
+    onSuccess: (_result, id) => {
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.suggestions });
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.suggestionDetail(id) });
+      // A BUDGET_INCREASE/DELIVERY_RADIUS suggestion can mechanically change
+      // a campaign — keep the campaigns list in sync too.
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.campaigns });
+    },
+  });
+}
+
+export function useDismissSuggestion() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => kitchenSuggestionsApi.dismiss(id),
+    onSuccess: (_result, id) => {
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.suggestions });
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.suggestionDetail(id) });
+    },
+  });
+}
+
+// ── Kitchen Premium Plans ─────────────────────────────────────────────────
+
+export function usePremiumTiers() {
+  const enabled = useKitchenAuthed();
+  return useQuery({ queryKey: kitchenKeys.premiumTiers, queryFn: kitchenPremiumApi.tiers, enabled });
+}
+
+export function usePremiumSubscription() {
+  const enabled = useKitchenAuthed();
+  return useQuery({ queryKey: kitchenKeys.premiumSubscription, queryFn: kitchenPremiumApi.subscription, enabled });
+}
+
+export function usePurchasePremium() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (tier: PremiumTier) => kitchenPremiumApi.purchase(tier),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.premiumSubscription });
+      // Purchase charges the wallet immediately.
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.walletSummary });
+    },
   });
 }

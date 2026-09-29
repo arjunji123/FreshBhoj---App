@@ -24,6 +24,12 @@ import AdsCampaigns from '@features/kitchenPartner/screens/AdsCampaigns';
 import AdsCampaignDetail from '@features/kitchenPartner/screens/AdsCampaignDetail';
 import Subscribers from '@features/kitchenPartner/screens/Subscribers';
 import SubscriberDetail from '@features/kitchenPartner/screens/SubscriberDetail';
+import Wallet from '@features/kitchenPartner/screens/Wallet';
+import AdsInsights from '@features/kitchenPartner/screens/AdsInsights';
+import SuggestionDetail from '@features/kitchenPartner/screens/SuggestionDetail';
+import SuggestionHistory from '@features/kitchenPartner/screens/SuggestionHistory';
+import PremiumPlans from '@features/kitchenPartner/screens/PremiumPlans';
+import PremiumSubscriptionDetail from '@features/kitchenPartner/screens/PremiumSubscriptionDetail';
 import type { KitchenPartnerStackParamList } from '../navigation.types';
 import { KitchenTabNavigator } from './KitchenTabNavigator';
 
@@ -116,6 +122,12 @@ export function KitchenPartnerStack() {
       <Stack.Screen name="AdsCampaignDetail" component={AdsCampaignDetail} />
       <Stack.Screen name="Subscribers" component={Subscribers} />
       <Stack.Screen name="SubscriberDetail" component={SubscriberDetail} />
+      <Stack.Screen name="Wallet" component={Wallet} />
+      <Stack.Screen name="AdsInsights" component={AdsInsights} />
+      <Stack.Screen name="SuggestionDetail" component={SuggestionDetail} />
+      <Stack.Screen name="SuggestionHistory" component={SuggestionHistory} />
+      <Stack.Screen name="PremiumPlans" component={PremiumPlans} />
+      <Stack.Screen name="PremiumSubscriptionDetail" component={PremiumSubscriptionDetail} />
     </Stack.Navigator>
   );
 }

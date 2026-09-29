@@ -101,6 +101,12 @@ export type KitchenPartnerStackParamList = {
   AdsCampaignDetail: { campaignId: string };
   Subscribers: undefined;
   SubscriberDetail: { subscriptionId: string };
+  Wallet: undefined;
+  AdsInsights: undefined;
+  SuggestionDetail: { suggestionId: string };
+  SuggestionHistory: undefined;
+  PremiumPlans: undefined;
+  PremiumSubscriptionDetail: undefined;
 };
 
 export type KitchenPartnerNavigation = NativeStackNavigationProp<KitchenPartnerStackParamList>;

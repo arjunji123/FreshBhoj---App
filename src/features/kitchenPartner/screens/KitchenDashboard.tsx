@@ -12,6 +12,7 @@ import {
   TrendingUp,
   UtensilsCrossed,
   Users,
+  Wallet,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LineChart } from 'react-native-gifted-charts';
@@ -154,6 +155,11 @@ const KitchenDashboard = () => {
             icon={<Users size={20} color={theme.colors.brand.primary} />}
             label="Subscribers"
             onPress={() => navigation.navigate('Subscribers')}
+          />
+          <QuickAction
+            icon={<Wallet size={20} color={theme.colors.brand.primary} />}
+            label="Wallet"
+            onPress={() => navigation.navigate('Wallet')}
           />
         </View>
 

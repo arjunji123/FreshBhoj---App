@@ -510,6 +510,8 @@ export interface Campaign {
   dailyBudgetRs: number;
   /** `YYYY-MM-DD`, or null when the campaign runs indefinitely. */
   endDate: string | null;
+  /** Boost duration in days, set at creation — the full cost (`dailyBudgetRs × durationDays`) is charged from the wallet upfront. */
+  durationDays: number | null;
   status: CampaignStatus;
   spendRs: number;
   impressions: number;
@@ -608,4 +610,109 @@ export interface SubscriptionDelivery {
   dispatchedAt: string | null;
   skipReason: string | null;
   createdAt: string;
+}
+
+// ── Kitchen Wallet ────────────────────────────────────────────────────────
+// Funds a kitchen's reel boosts and premium plan purchases. No real payment
+// gateway is wired — `topup` completes immediately, same placeholder pattern
+// as FSSAI assistance payment and subscription billing.
+
+export type WalletTransactionType = 'CREDIT' | 'DEBIT';
+export type WalletTransactionReason = 'TOPUP' | 'AD_BOOST' | 'PREMIUM_PLAN';
+
+export interface WalletSummary {
+  balanceRs: number;
+  totalCreditsRs: number;
+  thisMonthSpentRs: number;
+  nextBillingAt: string | null;
+}
+
+export interface WalletTransaction {
+  id: string;
+  type: WalletTransactionType;
+  reason: WalletTransactionReason;
+  amountRs: number;
+  description: string;
+  referenceId: string | null;
+  createdAt: string;
+}
+
+// ── AI Optimization Suggestions ──────────────────────────────────────────
+// Gemini-generated, once per kitchen per IST day. `generate` can 503 when
+// the model is under load — callers should treat that as retry-able, not
+// a crash.
+
+export type CampaignSuggestionType = 'BUDGET_INCREASE' | 'DELIVERY_RADIUS' | 'TARGET_CUISINE' | 'CREATIVE_REFRESH';
+export type CampaignSuggestionStatus = 'NEW' | 'APPLIED' | 'DISMISSED';
+export type CampaignSuggestionEffort = 'LOW' | 'MEDIUM' | 'HIGH';
+
+export interface CampaignSuggestionImpact {
+  reachDeltaPct: number | null;
+  ordersDeltaPct: number | null;
+  roiDeltaPct: number | null;
+  expectedOrders: number | null;
+  suggestedDailyBudgetRs: number | null;
+  suggestedRadiusKm: number | null;
+  costRs: number;
+  effort: CampaignSuggestionEffort;
+}
+
+export interface CampaignSuggestionAppliedChange {
+  field: string;
+  before: number;
+  after: number;
+}
+
+export interface CampaignSuggestion {
+  id: string;
+  type: CampaignSuggestionType;
+  title: string;
+  description: string;
+  campaignId: string | null;
+  impact: CampaignSuggestionImpact;
+  reasoning: string;
+  status: CampaignSuggestionStatus;
+  appliedChanges: CampaignSuggestionAppliedChange | null;
+  /** `YYYY-MM-DD`, IST — the daily batch this suggestion belongs to. */
+  batchDate: string;
+  appliedAt: string | null;
+  dismissedAt: string | null;
+  createdAt: string;
+}
+
+// ── Kitchen Premium Plans ────────────────────────────────────────────────
+
+export type PremiumTier = 'BASIC' | 'PRO' | 'ELITE';
+export type PremiumSubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'NONE';
+
+export interface PremiumFeatures {
+  /** `null` = unlimited (PRO/ELITE); `2` for BASIC. */
+  reelsPerMonth: number | null;
+  advancedAnalytics: boolean;
+  priorityBoostMultiplier: number;
+  aiVideoEditing: boolean;
+  sponsoredProfile: boolean;
+  aiMenuInsights: boolean;
+  prioritySupport: boolean;
+  verifiedBadge: boolean;
+  dedicatedGrowthManager: boolean;
+}
+
+export interface PremiumTierCatalog {
+  tier: PremiumTier;
+  /** Per 28-day period, placeholder pricing. */
+  priceRs: number;
+  /** Always PRO in practice. */
+  isMostPopular: boolean;
+  features: PremiumFeatures;
+}
+
+export interface PremiumSubscription {
+  /** `null` only when `status === 'NONE'`. */
+  tier: PremiumTier | null;
+  status: PremiumSubscriptionStatus;
+  priceRs: number | null;
+  currentPeriodEnd: string | null;
+  autoRenew: boolean;
+  features: PremiumFeatures;
 }

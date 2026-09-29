@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, ScrollView, Share, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Clock, LogOut, Mail, MapPin, Phone, Plus, Share2, ShieldCheck, Star, Trash2, X } from 'lucide-react-native';
+import { Clock, Crown, LogOut, Mail, MapPin, Phone, Plus, Share2, ShieldCheck, Star, Trash2, X } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { Badge, Button, Card, EmptyState, Input, Screen, Skeleton } from '@components/ui';
 import { KitchenApiError } from '../api/kitchenClient';
@@ -123,6 +123,18 @@ const KitchenProfile = () => {
             <View style={styles.fssaiTextWrap}>
               <Text style={styles.fssaiTitle}>Operating Hours</Text>
               <Text style={styles.fssaiSubtitle}>Weekly hours, holidays and emergency close.</Text>
+            </View>
+          </View>
+        </Card>
+
+        <Card style={styles.card} onPress={() => navigation.navigate('PremiumSubscriptionDetail')}>
+          <View style={styles.fssaiRow}>
+            <View style={styles.fssaiIconWrap}>
+              <Crown size={16} color={theme.colors.brand.primary} />
+            </View>
+            <View style={styles.fssaiTextWrap}>
+              <Text style={styles.fssaiTitle}>Kitchen Premium</Text>
+              <Text style={styles.fssaiSubtitle}>Unlock more reels, advanced analytics, AI tools and priority boost.</Text>
             </View>
           </View>
         </Card>

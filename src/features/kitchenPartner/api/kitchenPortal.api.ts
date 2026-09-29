@@ -5,6 +5,8 @@ import type {
   Campaign,
   CampaignEstimate,
   CampaignStatus,
+  CampaignSuggestion,
+  CampaignSuggestionStatus,
   DashboardSummary,
   FssaiAssistanceDocumentType,
   FssaiAssistanceStatusResponse,
@@ -30,10 +32,15 @@ import type {
   Paginated,
   PayoutSummary,
   PayoutTransaction,
+  PremiumSubscription,
+  PremiumTier,
+  PremiumTierCatalog,
   SubscriptionDelivery,
   SubscriptionDetail,
   SubscriptionsListResponse,
   SubscriptionStatus,
+  WalletSummary,
+  WalletTransaction,
 } from '../kitchenPartner.types';
 
 // ── Auth ──────────────────────────────────────────────────────────────────
@@ -250,6 +257,19 @@ export const kitchenPayoutsApi = {
   list: (params: { page?: number; limit?: number }) => kitchenClient.get<Paginated<PayoutTransaction>>('/partner/payouts', { query: params }),
 };
 
+// ── Kitchen Wallet ────────────────────────────────────────────────────────
+// Funds reel boosts and premium plan purchases. No payment gateway is
+// wired — `topup` completes immediately, same placeholder pattern as every
+// other payment-adjacent flow in this app.
+
+export const kitchenWalletApi = {
+  summary: () => kitchenClient.get<WalletSummary>('/partner/wallet'),
+  transactions: (params: { page?: number; limit?: number }) =>
+    kitchenClient.get<Paginated<WalletTransaction>>('/partner/wallet/transactions', { query: params }),
+  topup: (amountRs: number) =>
+    kitchenClient.post<{ wallet: WalletSummary; transaction: WalletTransaction }>('/partner/wallet/topup', { amountRs }),
+};
+
 // ── Operating Hours ───────────────────────────────────────────────────────
 
 export interface UpdateWeeklyHoursInput {
@@ -293,7 +313,13 @@ export const kitchenOrderChatApi = {
 export const kitchenAdsApi = {
   estimate: (dailyBudgetRs: number) =>
     kitchenClient.get<CampaignEstimate>('/partner/ads/campaigns/estimate', { query: { dailyBudgetRs } }),
-  create: (input: { reelId: string; dailyBudgetRs: number; endDate?: string }) =>
+  /**
+   * Boost creation — replaced the old free/indefinite campaign flow.
+   * `dailyBudgetRs × durationDays` is charged from the wallet immediately;
+   * a 400 "Insufficient wallet balance" comes back if short. No `endDate`
+   * input anymore — `durationDays` is mandatory.
+   */
+  create: (input: { reelId: string; dailyBudgetRs: number; durationDays: number }) =>
     kitchenClient.post<Campaign>('/partner/ads/campaigns', input),
   /** No `dailyStats` on list rows — fetch `get(id)` or `analytics([id])` for the chart. */
   list: (status?: CampaignStatus) => kitchenClient.get<Campaign[]>('/partner/ads/campaigns', { query: { status } }),
@@ -304,6 +330,33 @@ export const kitchenAdsApi = {
   pause: (id: string) => kitchenClient.post<Campaign>(`/partner/ads/campaigns/${id}/pause`),
   resume: (id: string) => kitchenClient.post<Campaign>(`/partner/ads/campaigns/${id}/resume`),
   stop: (id: string) => kitchenClient.post<Campaign>(`/partner/ads/campaigns/${id}/stop`),
+};
+
+// ── AI Optimization Suggestions ──────────────────────────────────────────
+
+export const kitchenSuggestionsApi = {
+  /**
+   * Capped to once per kitchen per IST day — calling again same-day just
+   * re-returns the same batch. 400 if there are zero ACTIVE campaigns.
+   * Can 503 ("AI suggestions are temporarily unavailable") when Gemini is
+   * under load — callers should treat that as a normal retry-able error.
+   */
+  generate: () => kitchenClient.post<CampaignSuggestion[]>('/partner/ads/suggestions/generate'),
+  list: (params: { status?: CampaignSuggestionStatus; q?: string; page?: number; limit?: number }) =>
+    kitchenClient.get<Paginated<CampaignSuggestion>>('/partner/ads/suggestions', { query: params }),
+  get: (id: string) => kitchenClient.get<CampaignSuggestion>(`/partner/ads/suggestions/${id}`),
+  /** 400 unless the suggestion is still `NEW`. */
+  apply: (id: string) => kitchenClient.post<CampaignSuggestion>(`/partner/ads/suggestions/${id}/apply`),
+  dismiss: (id: string) => kitchenClient.post<CampaignSuggestion>(`/partner/ads/suggestions/${id}/dismiss`),
+};
+
+// ── Kitchen Premium Plans ─────────────────────────────────────────────────
+
+export const kitchenPremiumApi = {
+  tiers: () => kitchenClient.get<PremiumTierCatalog[]>('/partner/premium/tiers'),
+  subscription: () => kitchenClient.get<PremiumSubscription>('/partner/premium/subscription'),
+  /** Same endpoint for a first purchase and an upgrade. Charges the wallet immediately; 400 if short. */
+  purchase: (tier: PremiumTier) => kitchenClient.post<PremiumSubscription>('/partner/premium/purchase', { tier }),
 };
 
 // ── Subscriptions (kitchen-facing) ────────────────────────────────────────

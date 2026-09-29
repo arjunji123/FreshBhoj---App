@@ -2,8 +2,10 @@ import React, { useState } from 'react';
 import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Clapperboard, Eye, Heart, Music, Pause, Pencil, Play, Scissors, ShoppingBag, Share2, SlidersHorizontal, Sparkles, Trash2 } from 'lucide-react-native';
+import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
 import { Badge, Button, Card, Chip, EmptyState, Screen, Skeleton } from '@components/ui';
+import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import {
   useArchiveReel,
@@ -11,6 +13,7 @@ import {
   useKitchenReels,
   useKitchenUpload,
   usePauseReel,
+  usePremiumSubscription,
   usePublishReel,
   useResumeReel,
   useUpdateReel,
@@ -18,6 +21,7 @@ import {
 import type { KitchenReel } from '../kitchenPartner.types';
 
 const KitchenReels = () => {
+  const navigation = useNavigation<KitchenPartnerNavigation>();
   const query = useKitchenReels();
   const menu = useKitchenMenu();
   const archive = useArchiveReel();
@@ -26,6 +30,26 @@ const KitchenReels = () => {
   const publish = usePublishReel();
   const pauseReel = usePauseReel();
   const resumeReel = useResumeReel();
+  const premium = usePremiumSubscription();
+
+  const isElite = premium.data?.tier === 'ELITE';
+
+  /**
+   * The Trim/Music/Filters pills have no real editing behind them yet for
+   * anyone, even Elite — only the messaging branches by tier. Elite sees the
+   * same "coming soon" every tier used to see; everyone else gets an upsell
+   * pointing at the Elite plan instead.
+   */
+  const handleEditToolPress = (comingSoonMessage: string) => {
+    if (isElite) {
+      Alert.alert('Coming soon', comingSoonMessage);
+      return;
+    }
+    Alert.alert('Elite plan feature', 'This tool is part of AI Video Editing Tools, included in the Elite plan.', [
+      { text: 'Not now', style: 'cancel' },
+      { text: 'View Elite plan', onPress: () => navigation.navigate('PremiumPlans') },
+    ]);
+  };
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [draftCaption, setDraftCaption] = useState('');
@@ -127,21 +151,21 @@ const KitchenReels = () => {
           <View style={styles.editToolsRow}>
             <TouchableOpacity
               style={styles.editToolPill}
-              onPress={() => Alert.alert('Coming soon', 'Trimming your reel right in the app is on the way.')}
+              onPress={() => handleEditToolPress('Trimming your reel right in the app is on the way.')}
             >
               <Scissors size={13} color={theme.colors.text.secondary} />
               <Text style={styles.editToolLabel}>Trim</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.editToolPill}
-              onPress={() => Alert.alert('Coming soon', 'Adding music to your reel is on the way.')}
+              onPress={() => handleEditToolPress('Adding music to your reel is on the way.')}
             >
               <Music size={13} color={theme.colors.text.secondary} />
               <Text style={styles.editToolLabel}>Music</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.editToolPill}
-              onPress={() => Alert.alert('Coming soon', 'Video filters are on the way.')}
+              onPress={() => handleEditToolPress('Video filters are on the way.')}
             >
               <SlidersHorizontal size={13} color={theme.colors.text.secondary} />
               <Text style={styles.editToolLabel}>Filters</Text>

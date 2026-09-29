@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Image, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import Slider from '@react-native-community/slider';
 import {
   Clapperboard,
   Eye,
@@ -10,10 +11,12 @@ import {
   Play,
   Square,
   TrendingUp,
+  TriangleAlert,
+  Wallet,
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
-import { AppBar, Badge, Button, Card, Chip, ChipRow, EmptyState, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
+import { AppBar, Badge, Button, Card, Chip, ChipRow, EmptyState, Screen, Sheet, Skeleton, Text } from '@components/ui';
 import type { SheetHandle } from '@components/ui';
 import type { BadgeTone } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
@@ -26,8 +29,16 @@ import {
   usePauseCampaign,
   useResumeCampaign,
   useStopCampaign,
+  useWalletSummary,
 } from '../hooks/useKitchenPortal';
 import type { Campaign, CampaignStatus, KitchenReel } from '../kitchenPartner.types';
+
+const MIN_DAILY_BUDGET_RS = 50;
+const MAX_DAILY_BUDGET_RS = 2000;
+const DEFAULT_DAILY_BUDGET_RS = 200;
+const MIN_DURATION_DAYS = 1;
+const MAX_DURATION_DAYS = 30;
+const DEFAULT_DURATION_DAYS = 7;
 
 type FilterTab = 'ALL' | CampaignStatus;
 
@@ -239,22 +250,21 @@ function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string
 }
 
 function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHandle | null> }) {
+  const navigation = useNavigation<KitchenPartnerNavigation>();
   const reels = useKitchenReels();
   const activeCampaigns = useCampaigns('ACTIVE');
   const createCampaign = useCreateCampaign();
+  const wallet = useWalletSummary();
 
   const [selectedReelId, setSelectedReelId] = useState<string | null>(null);
-  const [budgetInput, setBudgetInput] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [debouncedBudget, setDebouncedBudget] = useState<number | null>(null);
+  const [dailyBudgetRs, setDailyBudgetRs] = useState(DEFAULT_DAILY_BUDGET_RS);
+  const [durationDays, setDurationDays] = useState(DEFAULT_DURATION_DAYS);
+  const [debouncedBudget, setDebouncedBudget] = useState<number | null>(DEFAULT_DAILY_BUDGET_RS);
 
   useEffect(() => {
-    const parsed = Number(budgetInput);
-    const timer = setTimeout(() => {
-      setDebouncedBudget(budgetInput && Number.isFinite(parsed) && parsed > 0 ? parsed : null);
-    }, 400);
+    const timer = setTimeout(() => setDebouncedBudget(dailyBudgetRs), 400);
     return () => clearTimeout(timer);
-  }, [budgetInput]);
+  }, [dailyBudgetRs]);
 
   const estimate = useCampaignEstimate(debouncedBudget);
 
@@ -267,43 +277,36 @@ function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHand
     [reels.data, activeReelIds],
   );
 
+  const totalCostRs = dailyBudgetRs * durationDays;
+  const insufficientBalance = !!wallet.data && wallet.data.balanceRs < totalCostRs;
+
   const reset = () => {
     setSelectedReelId(null);
-    setBudgetInput('');
-    setEndDate('');
-    setDebouncedBudget(null);
+    setDailyBudgetRs(DEFAULT_DAILY_BUDGET_RS);
+    setDurationDays(DEFAULT_DURATION_DAYS);
+    setDebouncedBudget(DEFAULT_DAILY_BUDGET_RS);
   };
 
-  const canSubmit = !!selectedReelId && Number(budgetInput) > 0;
+  const canSubmit = !!selectedReelId && !insufficientBalance;
 
   const handleSubmit = () => {
     if (!selectedReelId) return;
-    const dailyBudgetRs = Number(budgetInput);
-    if (!Number.isFinite(dailyBudgetRs) || dailyBudgetRs <= 0) {
-      Alert.alert('Enter a daily budget', 'A daily budget greater than ₹0 is required.');
-      return;
-    }
-    const trimmedEndDate = endDate.trim();
-    if (trimmedEndDate && !/^\d{4}-\d{2}-\d{2}$/.test(trimmedEndDate)) {
-      Alert.alert('Invalid end date', 'Use the YYYY-MM-DD format, e.g. 2026-12-31.');
-      return;
-    }
 
     createCampaign.mutate(
-      { reelId: selectedReelId, dailyBudgetRs, endDate: trimmedEndDate || undefined },
+      { reelId: selectedReelId, dailyBudgetRs, durationDays },
       {
         onSuccess: () => {
           reset();
           sheetRef.current?.close();
         },
         onError: (error) =>
-          Alert.alert('Could not start campaign', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          Alert.alert('Could not start boost', error instanceof KitchenApiError ? error.message : 'Please try again.'),
       },
     );
   };
 
   return (
-    <Sheet ref={sheetRef} title="Promote a Reel" heightRatio={0.88} onClose={reset}>
+    <Sheet ref={sheetRef} title="Promote a Reel" heightRatio={0.92} onClose={reset}>
       <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Text variant="overline" color="tertiary" style={styles.sheetLabel}>
           CHOOSE A REEL
@@ -325,28 +328,90 @@ function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHand
         <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
           DAILY BUDGET
         </Text>
-        <Input
-          value={budgetInput}
-          onChangeText={setBudgetInput}
-          placeholder="e.g. 200"
-          keyboardType="number-pad"
-          prefix="₹"
-          helperText={
-            estimate.isFetching
-              ? 'Estimating reach…'
-              : estimate.data
-              ? `Estimated reach: ${estimate.data.min.toLocaleString('en-IN')}–${estimate.data.max.toLocaleString('en-IN')} people/day`
-              : 'Enter a daily budget to see estimated reach'
-          }
-        />
+        <View style={styles.sliderCard}>
+          <Slider
+            style={styles.slider}
+            minimumValue={MIN_DAILY_BUDGET_RS}
+            maximumValue={MAX_DAILY_BUDGET_RS}
+            step={50}
+            value={dailyBudgetRs}
+            onValueChange={setDailyBudgetRs}
+            minimumTrackTintColor={theme.colors.brand.primary}
+            maximumTrackTintColor={theme.colors.neutral[200]}
+            thumbTintColor={theme.colors.brand.primary}
+          />
+          <Text variant="bodyMedium" style={styles.sliderValue}>
+            {formatRupees(dailyBudgetRs)}
+          </Text>
+        </View>
+        <Text variant="caption" color="tertiary" style={styles.helperText}>
+          {estimate.isFetching
+            ? 'Estimating reach…'
+            : estimate.data
+            ? `Estimated reach: ${estimate.data.min.toLocaleString('en-IN')}–${estimate.data.max.toLocaleString('en-IN')} people/day`
+            : 'Estimated reach for this budget'}
+        </Text>
 
         <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-          END DATE (OPTIONAL)
+          DURATION
         </Text>
-        <Input value={endDate} onChangeText={setEndDate} placeholder="YYYY-MM-DD — leave blank to run indefinitely" autoCapitalize="none" />
+        <View style={styles.sliderCard}>
+          <Slider
+            style={styles.slider}
+            minimumValue={MIN_DURATION_DAYS}
+            maximumValue={MAX_DURATION_DAYS}
+            step={1}
+            value={durationDays}
+            onValueChange={setDurationDays}
+            minimumTrackTintColor={theme.colors.brand.primary}
+            maximumTrackTintColor={theme.colors.neutral[200]}
+            thumbTintColor={theme.colors.brand.primary}
+          />
+          <Text variant="bodyMedium" style={styles.sliderValue}>
+            {durationDays}d
+          </Text>
+        </View>
+
+        <Card style={styles.sheetSectionGap} padding="md">
+          <View style={styles.walletRow}>
+            <View style={styles.walletRowLeft}>
+              <Wallet size={14} color={theme.colors.text.tertiary} />
+              <Text variant="bodySmall" color="secondary">
+                Wallet Balance
+              </Text>
+            </View>
+            <Text variant="bodyMedium">{wallet.data ? formatRupees(wallet.data.balanceRs) : '—'}</Text>
+          </View>
+          <View style={[styles.walletRow, styles.walletRowLast]}>
+            <Text variant="bodySmall" color="secondary">
+              Total Cost
+            </Text>
+            <Text variant="bodyMedium" style={insufficientBalance ? styles.costDanger : undefined}>
+              {formatRupees(totalCostRs)}
+            </Text>
+          </View>
+          {insufficientBalance ? (
+            <View style={styles.insufficientWrap}>
+              <TriangleAlert size={13} color={theme.colors.state.error} />
+              <Text variant="caption" style={styles.insufficientText}>
+                Not enough balance to boost this reel.
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  sheetRef.current?.close();
+                  navigation.navigate('Wallet');
+                }}
+              >
+                <Text variant="caption" color="brand" style={styles.insufficientLink}>
+                  Add Money
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : null}
+        </Card>
 
         <Button
-          title={createCampaign.isPending ? 'Starting…' : 'Start campaign'}
+          title={createCampaign.isPending ? 'Starting…' : 'Confirm & Boost Now'}
           onPress={handleSubmit}
           loading={createCampaign.isPending}
           disabled={!canSubmit || createCampaign.isPending}
@@ -412,6 +477,42 @@ const styles = StyleSheet.create({
   sheetLabel: { marginBottom: theme.spacing.paddings.sm },
   sheetSectionGap: { marginTop: theme.spacing.paddings.lg },
   reelList: { gap: theme.spacing.paddings.xs },
+  sliderCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.paddings.md,
+    backgroundColor: theme.colors.surface.subtle,
+    borderRadius: theme.radius.card,
+    paddingHorizontal: theme.spacing.paddings.md,
+    paddingVertical: theme.spacing.paddings.sm,
+  },
+  slider: { flex: 1 },
+  sliderValue: { fontWeight: '700' as const, width: 64, textAlign: 'right' },
+  helperText: { marginTop: theme.spacing.paddings.xs },
+  walletRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingBottom: theme.spacing.paddings.xs,
+    marginBottom: theme.spacing.paddings.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: theme.colors.borders.subtle,
+  },
+  walletRowLeft: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  walletRowLast: { borderBottomWidth: 0, marginBottom: 0, paddingBottom: 0 },
+  costDanger: { color: theme.colors.state.error },
+  insufficientWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: theme.spacing.paddings.sm,
+    paddingTop: theme.spacing.paddings.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.colors.borders.subtle,
+  },
+  insufficientText: { color: theme.colors.state.error, flexShrink: 1 },
+  insufficientLink: { fontWeight: '700' as const, textDecorationLine: 'underline' },
   reelPickerRow: {
     flexDirection: 'row',
     alignItems: 'center',

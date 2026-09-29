@@ -240,6 +240,7 @@ function StatChip({ icon, label, value }: { icon: React.ReactNode; label: string
 
 function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHandle | null> }) {
   const reels = useKitchenReels();
+  const activeCampaigns = useCampaigns('ACTIVE');
   const createCampaign = useCreateCampaign();
 
   const [selectedReelId, setSelectedReelId] = useState<string | null>(null);
@@ -257,9 +258,13 @@ function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHand
 
   const estimate = useCampaignEstimate(debouncedBudget);
 
+  const activeReelIds = useMemo(
+    () => new Set((activeCampaigns.data ?? []).map((c) => c.reelId)),
+    [activeCampaigns.data],
+  );
   const eligibleReels = useMemo(
-    () => (reels.data ?? []).filter((reel) => reel.status === 'PUBLISHED' && !reel.isPaused),
-    [reels.data],
+    () => (reels.data ?? []).filter((reel) => reel.status === 'PUBLISHED' && !reel.isPaused && !activeReelIds.has(reel.id)),
+    [reels.data, activeReelIds],
   );
 
   const reset = () => {

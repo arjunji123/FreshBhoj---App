@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
 import { Search, Sparkles } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
-import { AppBar, Badge, Button, Card, ChipRow, Chip, EmptyState, Screen, Skeleton, Text } from '@components/ui';
+import { AppBar, Badge, Button, Card, ChipRow, Chip, EmptyState, Input, Screen, Skeleton, Text } from '@components/ui';
 import type { BadgeTone } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { useSuggestions } from '../hooks/useKitchenPortal';
@@ -71,22 +71,21 @@ const SuggestionHistory = () => {
     <Screen background="page">
       <AppBar title="Suggestion History" onBack={() => navigation.goBack()} />
 
-      <View style={styles.searchWrap}>
-        <Search size={16} color={theme.colors.text.tertiary} />
-        <TextInput
+      <View style={styles.header}>
+        <Input
           value={searchInput}
           onChangeText={setSearchInput}
           placeholder="Search suggestions…"
-          placeholderTextColor={theme.colors.text.tertiary}
-          style={styles.searchInput}
+          leftIcon={<Search size={16} color={theme.colors.text.tertiary} />}
+          size="md"
+          containerStyle={styles.searchInput}
         />
+        <ChipRow>
+          {(Object.keys(TAB_LABEL) as HistoryTab[]).map((key) => (
+            <Chip key={key} label={TAB_LABEL[key]} selected={tab === key} onPress={() => setTab(key)} />
+          ))}
+        </ChipRow>
       </View>
-
-      <ChipRow style={styles.tabRow}>
-        {(Object.keys(TAB_LABEL) as HistoryTab[]).map((key) => (
-          <Chip key={key} label={TAB_LABEL[key]} selected={tab === key} onPress={() => setTab(key)} />
-        ))}
-      </ChipRow>
 
       {query.isError ? (
         <View style={styles.emptyPadding}>
@@ -148,21 +147,8 @@ const SuggestionHistory = () => {
 export default SuggestionHistory;
 
 const styles = StyleSheet.create({
-  searchWrap: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.paddings.sm,
-    marginHorizontal: theme.layout.screenPadding,
-    marginBottom: theme.spacing.paddings.sm,
-    paddingHorizontal: theme.spacing.paddings.md,
-    height: 44,
-    borderRadius: theme.radius.control,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borders.subtle,
-    backgroundColor: theme.colors.neutral[50],
-  },
-  searchInput: { flex: 1, ...theme.text.bodySmall, color: theme.colors.text.primary, padding: 0 },
-  tabRow: { marginBottom: theme.spacing.paddings.sm },
+  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.sm, gap: theme.spacing.paddings.sm },
+  searchInput: { marginBottom: 0 },
   listPadding: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl },
   emptyPadding: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: theme.layout.screenPadding },
   row: { marginBottom: theme.spacing.paddings.sm },

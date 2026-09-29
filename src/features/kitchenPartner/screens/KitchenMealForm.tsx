@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { ArrowLeft, Plus, Sparkles, Trash2, X } from 'lucide-react-native';
+import { Plus, Sparkles, Trash2, X } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { Badge, Button, Card, Chip, ChipRow, Input, Screen } from '@components/ui';
+import { AppBar, Badge, Button, Card, Chip, ChipRow, Input, Screen } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import {
@@ -152,17 +152,7 @@ const KitchenMealForm = () => {
 
   return (
     <Screen background="page">
-      <View style={styles.header}>
-        <Button
-          title="Back"
-          variant="ghost"
-          size="sm"
-          fullWidth={false}
-          leftIcon={<ArrowLeft size={15} color={theme.colors.text.secondary} />}
-          onPress={() => navigation.goBack()}
-        />
-        <Text style={theme.text.h2}>{mealId ? 'Edit dish' : 'Add a dish'}</Text>
-      </View>
+      <AppBar title={mealId ? 'Edit dish' : 'Add a dish'} onBack={() => navigation.goBack()} />
 
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
@@ -330,11 +320,12 @@ function CustomizationGroupEditor({
   return (
     <Card style={styles.groupCard} padding="sm">
       <View style={styles.groupTopRow}>
-        <TextInput
+        <Input
           value={group.name}
           onChangeText={(value) => onChange({ ...group, name: value })}
           placeholder="Group name, e.g. Spice level"
-          style={styles.groupNameInput}
+          size="md"
+          containerStyle={styles.groupNameInput}
         />
         <TouchableOpacity onPress={onRemove} style={styles.groupRemoveButton} hitSlop={theme.layout.hitSlop}>
           <Trash2 size={15} color={theme.colors.text.danger} />
@@ -352,36 +343,42 @@ function CustomizationGroupEditor({
         </View>
         <View style={styles.minMaxRow}>
           <Text style={styles.smallLabel}>Min</Text>
-          <TextInput
+          <Input
             value={String(group.minSelect)}
             onChangeText={(value) => onChange({ ...group, minSelect: parseInt(value, 10) || 0 })}
             keyboardType="number-pad"
-            style={styles.miniInput}
+            size="md"
+            containerStyle={styles.miniInput}
+            inputStyle={styles.miniInputText}
           />
           <Text style={styles.smallLabel}>Max</Text>
-          <TextInput
+          <Input
             value={String(group.maxSelect)}
             onChangeText={(value) => onChange({ ...group, maxSelect: parseInt(value, 10) || 0 })}
             keyboardType="number-pad"
-            style={styles.miniInput}
+            size="md"
+            containerStyle={styles.miniInput}
+            inputStyle={styles.miniInputText}
           />
         </View>
       </View>
 
       {group.options.map((option, optionIndex) => (
         <View key={optionIndex} style={styles.optionRow}>
-          <TextInput
+          <Input
             value={option.name}
             onChangeText={(value) => updateOption(optionIndex, { name: value })}
             placeholder="Option name"
-            style={styles.optionNameInput}
+            size="md"
+            containerStyle={styles.optionNameInput}
           />
-          <TextInput
+          <Input
             value={String(option.priceDelta)}
             onChangeText={(value) => updateOption(optionIndex, { priceDelta: Number(value) || 0 })}
             placeholder="+₹0"
             keyboardType="numeric"
-            style={styles.optionPriceInput}
+            size="md"
+            containerStyle={styles.optionPriceInput}
           />
           <TouchableOpacity onPress={() => removeOption(optionIndex)} hitSlop={theme.layout.hitSlop}>
             <X size={14} color={theme.colors.text.tertiary} />
@@ -399,7 +396,6 @@ function CustomizationGroupEditor({
 export default KitchenMealForm;
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, gap: theme.spacing.paddings.xs },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl, paddingTop: theme.spacing.paddings.sm },
   photoCard: { alignItems: 'center', justifyContent: 'center', height: 120, marginBottom: theme.spacing.paddings.md, borderStyle: 'dashed', borderWidth: 1, borderColor: theme.colors.borders.default },
   photoHint: { ...theme.text.bodySmall, color: theme.colors.text.secondary },
@@ -430,16 +426,7 @@ const styles = StyleSheet.create({
   jainHint: { ...theme.text.caption, color: theme.colors.text.tertiary, marginTop: 2 },
   groupCard: { marginBottom: theme.spacing.paddings.sm },
   groupTopRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm },
-  groupNameInput: {
-    flex: 1,
-    ...theme.text.bodyMedium,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    paddingHorizontal: theme.spacing.paddings.sm,
-    paddingVertical: theme.spacing.paddings.xs,
-  },
+  groupNameInput: { flex: 1 },
   groupRemoveButton: { padding: 4 },
   groupMetaRow: {
     flexDirection: 'row',
@@ -450,37 +437,11 @@ const styles = StyleSheet.create({
   requiredToggle: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs },
   smallLabel: { ...theme.text.caption, color: theme.colors.text.secondary },
   minMaxRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs },
-  miniInput: {
-    width: 40,
-    textAlign: 'center',
-    ...theme.text.bodySmall,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    paddingVertical: 4,
-  },
+  miniInput: { width: 64 },
+  miniInputText: { textAlign: 'center' },
   optionRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm, marginTop: theme.spacing.paddings.sm },
-  optionNameInput: {
-    flex: 1,
-    ...theme.text.bodySmall,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    paddingHorizontal: theme.spacing.paddings.sm,
-    paddingVertical: theme.spacing.paddings.xs,
-  },
-  optionPriceInput: {
-    width: 70,
-    ...theme.text.bodySmall,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    paddingHorizontal: theme.spacing.paddings.sm,
-    paddingVertical: theme.spacing.paddings.xs,
-  },
+  optionNameInput: { flex: 1 },
+  optionPriceInput: { width: 92 },
   addOptionText: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const, marginTop: theme.spacing.paddings.sm },
   addGroupButton: {
     flexDirection: 'row',

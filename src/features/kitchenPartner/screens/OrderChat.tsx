@@ -176,10 +176,7 @@ function ChatBubble({ message }: { message: OrderMessage }) {
   return (
     <View style={[styles.bubbleRow, isKitchen ? styles.bubbleRowKitchen : styles.bubbleRowCustomer]}>
       <View style={[styles.bubble, isKitchen ? styles.bubbleKitchen : styles.bubbleCustomer]}>
-        <Text
-          variant="bodyMedium"
-          style={{ color: isKitchen ? theme.colors.text.inverse : theme.colors.text.primary }}
-        >
+        <Text variant="bodyMedium" style={isKitchen ? styles.bubbleTextKitchen : styles.bubbleTextCustomer}>
           {message.body}
         </Text>
       </View>
@@ -209,6 +206,8 @@ const styles = StyleSheet.create({
   bubble: { borderRadius: theme.radius.lg, paddingHorizontal: theme.spacing.paddings.md, paddingVertical: theme.spacing.paddings.sm },
   bubbleKitchen: { backgroundColor: theme.colors.brand.primary, borderBottomRightRadius: 4 },
   bubbleCustomer: { backgroundColor: theme.colors.neutral[100], borderBottomLeftRadius: 4 },
+  bubbleTextKitchen: { color: theme.colors.text.inverse },
+  bubbleTextCustomer: { color: theme.colors.text.primary },
   statusBadgeRight: { marginTop: 4 },
   statusBadgeLeft: { marginTop: 4 },
   suggestionRow: {

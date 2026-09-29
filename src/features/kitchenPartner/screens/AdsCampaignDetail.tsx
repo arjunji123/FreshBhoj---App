@@ -120,7 +120,7 @@ const AdsCampaignDetail = () => {
                 )}
                 <TouchableOpacity onPress={handleStop} disabled={isBusy} style={styles.actionButton}>
                   <Square size={14} color={theme.colors.state.error} />
-                  <Text variant="label" style={{ color: theme.colors.state.error }}>
+                  <Text variant="label" style={styles.stopLabel}>
                     Stop
                   </Text>
                 </TouchableOpacity>
@@ -228,6 +228,7 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.borders.subtle,
   },
   actionButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  stopLabel: { color: theme.colors.state.error },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.sm, marginBottom: theme.spacing.paddings.md },
   statCard: { width: '47%' },
   statIcon: {

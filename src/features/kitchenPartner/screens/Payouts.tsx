@@ -221,7 +221,7 @@ const Payouts = () => {
                   </Text>
                 </View>
                 <View style={styles.txRight}>
-                  <Text variant="bodyMedium" style={{ color: item.sign > 0 ? theme.colors.accent[600] : theme.colors.state.error }}>
+                  <Text variant="bodyMedium" style={item.sign > 0 ? styles.txAmountPositive : styles.txAmountNegative}>
                     {item.sign > 0 ? '+' : '−'}
                     {formatRupees(Math.abs(item.amount))}
                   </Text>
@@ -285,5 +285,7 @@ const styles = StyleSheet.create({
   txTextWrap: { flex: 1 },
   txRight: { alignItems: 'flex-end' },
   txBadge: { marginTop: 4 },
+  txAmountPositive: { color: theme.colors.accent[600] },
+  txAmountNegative: { color: theme.colors.state.error },
   loadMoreWrap: { alignItems: 'center', paddingVertical: theme.spacing.paddings.lg },
 });

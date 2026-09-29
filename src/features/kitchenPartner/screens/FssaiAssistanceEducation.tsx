@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BookOpen, CheckCircle2 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { Button, Card, Screen } from '@components/ui';
+import { AppBar, Button, Card, Screen } from '@components/ui';
 
 const POINTS = [
   'FSSAI (Food Safety and Standards Authority of India) registration is legally required for anyone selling food in India.',
@@ -23,9 +23,7 @@ const FssaiAssistanceEducation: React.FC<Props> = ({ onNext, onBack }) => {
 
   return (
     <Screen background="page">
-      <View style={styles.header}>
-        <Button title="Back" variant="ghost" size="sm" fullWidth={false} onPress={onBack} />
-      </View>
+      <AppBar onBack={onBack} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
         showsVerticalScrollIndicator={false}
@@ -53,7 +51,6 @@ const FssaiAssistanceEducation: React.FC<Props> = ({ onNext, onBack }) => {
 export default FssaiAssistanceEducation;
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, alignItems: 'center' },
   iconWrap: {
     width: 56,

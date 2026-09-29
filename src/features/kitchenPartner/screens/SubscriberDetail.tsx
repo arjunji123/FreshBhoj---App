@@ -249,7 +249,7 @@ const SubscriberDetail = () => {
                     {new Date(entry.date).toLocaleDateString('en-IN', { weekday: 'short' })}
                   </Text>
                   <View style={[styles.scheduleDot, { backgroundColor: DELIVERY_STATUS_COLOR[entry.status] }]}>
-                    <Text variant="label" style={{ color: theme.colors.text.inverse }}>
+                    <Text variant="label" style={styles.scheduleDotLabel}>
                       {new Date(entry.date).getDate()}
                     </Text>
                   </View>
@@ -399,6 +399,7 @@ const styles = StyleSheet.create({
   scheduleStrip: { flexDirection: 'row', justifyContent: 'space-between' },
   scheduleCell: { alignItems: 'center', gap: 4, flex: 1 },
   scheduleDot: { width: 30, height: 30, borderRadius: theme.radius.round, alignItems: 'center', justifyContent: 'center' },
+  scheduleDotLabel: { color: theme.colors.text.inverse },
   todayActionsRow: {
     flexDirection: 'row',
     gap: theme.spacing.paddings.sm,

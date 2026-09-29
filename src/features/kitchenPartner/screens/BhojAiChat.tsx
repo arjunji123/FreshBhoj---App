@@ -217,10 +217,7 @@ function ChatBubble({ message, navigation }: { message: BhojAiMessage; navigatio
     <View style={[styles.bubbleRow, isUser ? styles.bubbleRowUser : styles.bubbleRowAssistant]}>
       {message.text ? (
         <View style={[styles.bubble, isUser ? styles.bubbleUser : styles.bubbleAssistant]}>
-          <Text
-            variant="bodyMedium"
-            style={{ color: isUser ? theme.colors.text.inverse : theme.colors.text.primary }}
-          >
+          <Text variant="bodyMedium" style={isUser ? styles.bubbleTextUser : styles.bubbleTextAssistant}>
             {message.text}
           </Text>
         </View>
@@ -358,6 +355,8 @@ const styles = StyleSheet.create({
   bubble: { borderRadius: theme.radius.lg, paddingHorizontal: theme.spacing.paddings.md, paddingVertical: theme.spacing.paddings.sm },
   bubbleUser: { backgroundColor: theme.colors.brand.primary, borderBottomRightRadius: 4 },
   bubbleAssistant: { backgroundColor: theme.colors.neutral[100], borderBottomLeftRadius: 4 },
+  bubbleTextUser: { color: theme.colors.text.inverse },
+  bubbleTextAssistant: { color: theme.colors.text.primary },
   typingBubble: { paddingVertical: theme.spacing.paddings.md, paddingHorizontal: theme.spacing.paddings.lg },
   card: { marginTop: theme.spacing.paddings.xs, width: '100%' },
   cardHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.paddings.sm },

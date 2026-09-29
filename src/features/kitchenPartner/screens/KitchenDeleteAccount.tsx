@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { AlertTriangle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { Button, Card, Input, Screen } from '@components/ui';
+import { AppBar, Button, Card, Input, Screen } from '@components/ui';
 import { KitchenApiError } from '../api/kitchenClient';
 import { kitchenAuthApi } from '../api/kitchenPortal.api';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
@@ -67,9 +67,7 @@ const KitchenDeleteAccount = () => {
 
   return (
     <Screen background="page">
-      <View style={styles.header}>
-        <Button title="Back" variant="ghost" size="sm" fullWidth={false} onPress={() => navigation.goBack()} />
-      </View>
+      <AppBar title="Delete Account" onBack={() => navigation.goBack()} />
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
@@ -132,7 +130,6 @@ const KitchenDeleteAccount = () => {
 export default KitchenDeleteAccount;
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
   scroll: { padding: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl },
   warningBanner: {
     flexDirection: 'row',

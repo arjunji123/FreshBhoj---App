@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Clapperboard, Eye, Heart, Music, Pause, Pencil, Play, Scissors, ShoppingBag, Share2, SlidersHorizontal, Sparkles, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
-import { Badge, Button, Card, Chip, EmptyState, Screen, Skeleton } from '@components/ui';
+import { Badge, Button, Card, Chip, EmptyState, Input, Screen, Skeleton } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import {
@@ -172,19 +172,21 @@ const KitchenReels = () => {
             </TouchableOpacity>
           </View>
 
-          <TextInput
+          <Input
             value={caption}
             onChangeText={setCaption}
             placeholder="Caption…"
-            style={styles.captionInput}
+            containerStyle={styles.captionInput}
             maxLength={150}
             multiline
+            size="md"
           />
-          <TextInput
+          <Input
             value={hashtagsInput}
             onChangeText={setHashtagsInput}
             placeholder="Hashtags, comma or space separated"
-            style={styles.hashtagsInput}
+            containerStyle={styles.hashtagsInput}
+            size="md"
           />
           {menu.data?.length ? (
             <>
@@ -231,7 +233,7 @@ const KitchenReels = () => {
           data={query.data ?? []}
           keyExtractor={(item) => item.id}
           numColumns={2}
-          columnWrapperStyle={{ gap: theme.spacing.paddings.sm }}
+          columnWrapperStyle={styles.columnWrapper}
           contentContainerStyle={query.data?.length ? styles.listPadding : styles.emptyPadding}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={theme.colors.primary[600]} />}
@@ -277,13 +279,14 @@ const KitchenReels = () => {
 
               {editingId === item.id ? (
                 <View>
-                  <TextInput
+                  <Input
                     value={draftCaption}
                     onChangeText={setDraftCaption}
                     placeholder="Caption…"
-                    style={styles.captionInput}
+                    containerStyle={styles.captionInput}
                     maxLength={150}
                     multiline
+                    size="md"
                   />
                   <View style={styles.editActions}>
                     <TouchableOpacity onPress={() => setEditingId(null)}>
@@ -372,16 +375,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.paddings.lg,
     marginTop: theme.spacing.paddings.md,
   },
-  hashtagsInput: {
-    ...theme.text.caption,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    padding: theme.spacing.paddings.xs,
-    marginTop: theme.spacing.paddings.sm,
-  },
+  hashtagsInput: { marginTop: theme.spacing.paddings.sm },
   listPadding: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl, gap: theme.spacing.paddings.sm },
+  columnWrapper: { gap: theme.spacing.paddings.sm },
   emptyPadding: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: theme.layout.screenPadding },
   reelCard: { flex: 1, marginBottom: theme.spacing.paddings.sm },
   reelThumb: { width: '100%', height: 160, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface.subtle },
@@ -392,16 +388,7 @@ const styles = StyleSheet.create({
   statChip: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   statChipText: { ...theme.text.caption, color: theme.colors.text.tertiary },
   captionText: { ...theme.text.caption, color: theme.colors.text.secondary, marginTop: theme.spacing.paddings.xs },
-  captionInput: {
-    ...theme.text.caption,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    padding: theme.spacing.paddings.xs,
-    marginTop: theme.spacing.paddings.xs,
-    minHeight: 44,
-  },
+  captionInput: { marginTop: theme.spacing.paddings.xs },
   editActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: theme.spacing.paddings.md, marginTop: theme.spacing.paddings.xs },
   editCancel: { ...theme.text.caption, color: theme.colors.text.tertiary, fontWeight: '700' as const },
   editSave: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },

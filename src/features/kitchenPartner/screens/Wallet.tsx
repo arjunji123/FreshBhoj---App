@@ -151,10 +151,7 @@ const Wallet = () => {
                     </Text>
                   </View>
                 </View>
-                <Text
-                  variant="bodyMedium"
-                  style={{ color: item.type === 'CREDIT' ? theme.colors.accent[600] : theme.colors.state.error }}
-                >
+                <Text variant="bodyMedium" style={item.type === 'CREDIT' ? styles.txAmountPositive : styles.txAmountNegative}>
                   {item.type === 'CREDIT' ? '+' : '−'}
                   {formatRupees(item.amountRs)}
                 </Text>
@@ -272,6 +269,8 @@ const styles = StyleSheet.create({
   txRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.paddings.sm },
   txTextWrap: { flex: 1, marginRight: theme.spacing.paddings.sm },
   txMetaRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs, marginTop: 4 },
+  txAmountPositive: { color: theme.colors.accent[600] },
+  txAmountNegative: { color: theme.colors.state.error },
   loadMoreWrap: { alignItems: 'center', paddingVertical: theme.spacing.paddings.lg },
   sheetContent: { paddingHorizontal: theme.layout.screenPadding },
   sheetLabel: { marginBottom: theme.spacing.paddings.sm },

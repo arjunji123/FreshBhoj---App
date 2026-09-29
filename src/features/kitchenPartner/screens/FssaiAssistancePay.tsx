@@ -4,7 +4,7 @@ import { CreditCard, Info } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { Button, Card, Screen } from '@components/ui';
+import { AppBar, Button, Card, Screen } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useConfirmFssaiAssistancePayment } from '../hooks/useKitchenPortal';
@@ -32,9 +32,7 @@ const FssaiAssistancePay: React.FC<Props> = ({ request }) => {
 
   return (
     <Screen background="page">
-      <View style={styles.header}>
-        <Button title="Back" variant="ghost" size="sm" fullWidth={false} onPress={() => navigation.goBack()} />
-      </View>
+      <AppBar onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
         showsVerticalScrollIndicator={false}
@@ -80,7 +78,6 @@ const FssaiAssistancePay: React.FC<Props> = ({ request }) => {
 export default FssaiAssistancePay;
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, alignItems: 'center' },
   iconWrap: {
     width: 56,

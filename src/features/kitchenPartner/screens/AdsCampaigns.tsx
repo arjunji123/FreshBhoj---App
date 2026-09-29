@@ -9,6 +9,7 @@ import {
   MousePointerClick,
   Pause,
   Play,
+  Sparkles,
   Square,
   TrendingUp,
   TriangleAlert,
@@ -16,7 +17,7 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
-import { AppBar, Badge, Button, Card, Chip, ChipRow, EmptyState, Screen, Sheet, Skeleton, Text } from '@components/ui';
+import { AppBar, AppBarAction, Badge, Button, Card, Chip, ChipRow, EmptyState, Screen, Sheet, Skeleton, Text } from '@components/ui';
 import type { SheetHandle } from '@components/ui';
 import type { BadgeTone } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
@@ -97,7 +98,15 @@ const AdsCampaigns = () => {
 
   return (
     <Screen background="page">
-      <AppBar title="Promote Reels" onBack={() => navigation.goBack()} />
+      <AppBar
+        title="Promote Reels"
+        onBack={() => navigation.goBack()}
+        right={
+          <AppBarAction accessibilityLabel="AI Insights" onPress={() => navigation.navigate('AdsInsights')}>
+            <Sparkles size={18} color={theme.colors.text.primary} />
+          </AppBarAction>
+        }
+      />
 
       <View style={styles.header}>
         <Button
@@ -225,7 +234,7 @@ function CampaignRow({
           )}
           <TouchableOpacity onPress={onStop} disabled={isBusy} style={styles.actionButton}>
             <Square size={13} color={theme.colors.state.error} />
-            <Text variant="caption" style={[styles.actionLabel, { color: theme.colors.state.error }]}>
+            <Text variant="caption" style={[styles.actionLabel, styles.stopLabel]}>
               Stop
             </Text>
           </TouchableOpacity>
@@ -473,6 +482,7 @@ const styles = StyleSheet.create({
   },
   actionButton: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   actionLabel: { fontWeight: '700' as const },
+  stopLabel: { color: theme.colors.state.error },
   sheetContent: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl },
   sheetLabel: { marginBottom: theme.spacing.paddings.sm },
   sheetSectionGap: { marginTop: theme.spacing.paddings.lg },

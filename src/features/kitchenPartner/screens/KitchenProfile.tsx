@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, Share, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, Share, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Clock, Crown, LogOut, Mail, MapPin, Phone, Plus, Share2, ShieldCheck, Star, Trash2, X } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
@@ -219,11 +219,12 @@ function SpecialitiesCard({ profile }: { profile: KitchenProfileType }) {
         </View>
       ) : null}
       <View style={styles.addTagRow}>
-        <TextInput
+        <Input
           value={draftTag}
           onChangeText={setDraftTag}
           placeholder="e.g. No onion no garlic"
-          style={styles.tagInput}
+          containerStyle={styles.tagInput}
+          size="md"
           onSubmitEditing={addTag}
           returnKeyType="done"
         />
@@ -337,16 +338,7 @@ const styles = StyleSheet.create({
   },
   tagText: { ...theme.text.caption, color: theme.colors.text.brand, fontWeight: '700' as const },
   addTagRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm, marginTop: theme.spacing.paddings.sm },
-  tagInput: {
-    flex: 1,
-    ...theme.text.bodySmall,
-    color: theme.colors.text.primary,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.default,
-    borderRadius: theme.radius.sm,
-    paddingHorizontal: theme.spacing.paddings.sm,
-    paddingVertical: theme.spacing.paddings.xs,
-  },
+  tagInput: { flex: 1 },
   addTagButton: {
     width: 36,
     height: 36,

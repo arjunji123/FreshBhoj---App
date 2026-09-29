@@ -3,7 +3,7 @@ import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Landmark, Sparkles } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { Button, Card, Screen } from '@components/ui';
+import { AppBar, Button, Card, Screen } from '@components/ui';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useStartFssaiAssistance } from '../hooks/useKitchenPortal';
 
@@ -28,9 +28,7 @@ const FssaiAssistancePricing: React.FC<Props> = ({ onBack }) => {
 
   return (
     <Screen background="page">
-      <View style={styles.header}>
-        <Button title="Back" variant="ghost" size="sm" fullWidth={false} onPress={onBack} />
-      </View>
+      <AppBar onBack={onBack} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
         showsVerticalScrollIndicator={false}
@@ -75,7 +73,6 @@ const FssaiAssistancePricing: React.FC<Props> = ({ onBack }) => {
 export default FssaiAssistancePricing;
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, alignItems: 'center' },
   iconWrap: {
     width: 56,

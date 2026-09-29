@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import DocumentPicker, { types as DocumentPickerTypes } from 'react-native-document-picker';
-import { Camera, CreditCard, Home, UserSquare2 } from 'lucide-react-native';
+import { Camera, CreditCard, FileText, Home, UserSquare2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { Badge, Button, Card, Screen } from '@components/ui';
+import { AppBar, Badge, Button, Card, Screen } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useFssaiAssistanceStatus, useKitchenUpload, useUploadFssaiAssistanceDocument } from '../hooks/useKitchenPortal';
@@ -101,15 +101,18 @@ const FssaiAssistanceDocuments: React.FC<Props> = ({ documents }) => {
 
   return (
     <Screen background="page">
-      <View style={styles.header}>
-        <Button title="Back" variant="ghost" size="sm" fullWidth={false} onPress={() => navigation.goBack()} />
-      </View>
+      <AppBar onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={theme.text.h2}>Upload your documents</Text>
-        <Text style={styles.subtitle}>These go straight into the government application FreshBhoj files for you.</Text>
+        <View style={styles.headerBlock}>
+          <View style={styles.iconWrap}>
+            <FileText size={28} color={theme.colors.brand.primary} />
+          </View>
+          <Text style={styles.title}>Upload your documents</Text>
+          <Text style={styles.body}>These go straight into the government application FreshBhoj files for you.</Text>
+        </View>
 
         <DocumentSlot
           icon={<CreditCard size={20} color={theme.colors.brand.primary} />}
@@ -192,9 +195,19 @@ function DocumentSlot({
 export default FssaiAssistanceDocuments;
 
 const styles = StyleSheet.create({
-  header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
-  subtitle: { ...theme.text.bodySmall, color: theme.colors.text.secondary, marginTop: 4, marginBottom: theme.spacing.paddings.lg },
+  headerBlock: { alignItems: 'center', marginBottom: theme.spacing.paddings.lg },
+  iconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: theme.radius.round,
+    backgroundColor: theme.colors.brand.primarySubtle,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.paddings.lg,
+  },
+  title: { ...theme.text.h2, color: theme.colors.text.primary, textAlign: 'center' },
+  body: { ...theme.text.bodySmall, color: theme.colors.text.secondary, textAlign: 'center', marginTop: theme.spacing.paddings.sm },
   slotCard: {
     flexDirection: 'row',
     alignItems: 'center',

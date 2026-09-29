@@ -55,7 +55,7 @@ const KitchenDashboard = () => {
   return (
     <Screen background="page">
       <View style={styles.topBar}>
-        <Text style={theme.text.h2}>Dashboard</Text>
+        <Text style={theme.text.h1}>Dashboard</Text>
         <View style={styles.topBarActions}>
           <Pressable
             onPress={() => navigation.navigate('BhojAiChat')}
@@ -123,7 +123,7 @@ const KitchenDashboard = () => {
                   })
                 }
                 disabled={setAccepting.isPending}
-                trackColor={{ true: 'rgba(255,255,255,0.4)', false: 'rgba(0,0,0,0.25)' }}
+                trackColor={{ true: theme.colors.overlay.glassStrong }}
                 thumbColor={theme.colors.palette.white}
               />
             </View>
@@ -172,7 +172,6 @@ const KitchenDashboard = () => {
 
         {dashboard.isError ? (
           <EmptyState
-            icon={<Bell size={28} color={theme.colors.text.tertiary} />}
             title="Something went wrong"
             description="We couldn't load your dashboard."
             actionLabel="Retry"
@@ -356,16 +355,16 @@ const styles = StyleSheet.create({
   },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl, paddingTop: theme.spacing.paddings.sm },
   banner: { borderRadius: theme.radius.card, padding: theme.spacing.paddings.lg, marginBottom: theme.spacing.paddings.md },
-  bannerGreeting: { ...theme.text.bodySmall, color: 'rgba(255,255,255,0.85)' },
+  bannerGreeting: { ...theme.text.bodySmall, color: theme.colors.overlay.glassStrong },
   bannerName: { ...theme.text.h2, color: theme.colors.palette.white, marginTop: 2 },
-  bannerDate: { ...theme.text.bodySmall, color: 'rgba(255,255,255,0.85)', marginTop: 4 },
+  bannerDate: { ...theme.text.bodySmall, color: theme.colors.overlay.glassStrong, marginTop: 4 },
   statusBadgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.xs, marginTop: theme.spacing.paddings.sm },
   acceptingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: theme.spacing.paddings.md,
-    backgroundColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: theme.colors.overlay.glass,
     borderRadius: theme.radius.pill,
     paddingHorizontal: theme.spacing.paddings.md,
     paddingVertical: theme.spacing.paddings.xs,

@@ -62,6 +62,33 @@ export type PrivateStackParamList = {
   Referral: undefined;
   DeleteAccount: undefined;
 
+  // Subscriptions
+  ManageSubscription: { subscriptionId: string };
+
+  // Bespoke Setup Plan wizard — kitchen choice → plan details → delivery →
+  // review, each its own `Stack.Screen` (not one screen with internal step
+  // state). Cross-step state lives in `useSetupPlanStore`, not route params.
+  SetupPlanChooseKitchen: undefined;
+  SetupPlanDetails: undefined;
+  SetupPlanDelivery: undefined;
+  SetupPlanReview: undefined;
+
+  // Customer prepaid wallet — reachable from Profile, not a bottom tab.
+  Wallet: undefined;
+
+  // Saved cards, UPI IDs and the wallet balance in one place. Reachable from
+  // Profile and from Support's Help Center.
+  PaymentMethods: undefined;
+
+  // App-wide Appearance (System/Light/Dark) + a link-through to Notifications.
+  // Reachable from Profile.
+  Preferences: undefined;
+
+  // Static legal content — same copy as the signup consent sheet
+  // (`legalContent.ts`), rendered as a full page instead of a bottom sheet.
+  PrivacyPolicy: undefined;
+  TermsOfService: undefined;
+
   // Kitchen-partner registration entry point. A signed-in customer stays
   // signed in while doing this — kitchen auth is a wholly separate session
   // (see `kitchenAuthStore`) — so this pushes the *same* Login/OTP screens
@@ -101,6 +128,7 @@ export type KitchenPartnerStackParamList = {
   AdsCampaignDetail: { campaignId: string };
   Subscribers: undefined;
   SubscriberDetail: { subscriptionId: string };
+  ManagePlans: undefined;
   Wallet: undefined;
   AdsInsights: undefined;
   SuggestionDetail: { suggestionId: string };

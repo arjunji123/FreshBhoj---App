@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
-import { MessageCircle, Search, SquarePen, Users } from 'lucide-react-native';
+import { ListChecks, MessageCircle, Search, SquarePen, Users } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
-import { AppBar, Avatar, Badge, Button, Card, Chip, ChipRow, EmptyState, FoodTypeDot, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
+import { AppBar, AppBarAction, Avatar, Badge, Button, Card, Chip, ChipRow, EmptyState, FoodTypeDot, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
 import type { SheetHandle } from '@components/ui';
 import type { BadgeTone } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
@@ -102,7 +102,15 @@ const Subscribers = () => {
 
   return (
     <Screen background="page">
-      <AppBar title="Subscribers" onBack={() => navigation.goBack()} />
+      <AppBar
+        title="Subscribers"
+        onBack={() => navigation.goBack()}
+        right={
+          <AppBarAction accessibilityLabel="Manage subscription plans" onPress={() => navigation.navigate('ManagePlans')}>
+            <ListChecks size={18} color={theme.colors.text.primary} />
+          </AppBarAction>
+        }
+      />
       <View style={styles.header}>
         <Input
           value={searchInput}

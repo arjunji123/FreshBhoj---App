@@ -1,13 +1,24 @@
 import React, { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ChevronDown, ChevronUp, Mail, MessageCircle, Phone } from 'lucide-react-native';
+import {
+  CalendarClock,
+  ChevronDown,
+  ChevronUp,
+  CreditCard,
+  Mail,
+  MessageCircle,
+  Phone,
+  Receipt,
+  Send,
+} from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { AppBar, Card, Divider, Skeleton } from '@components/ui';
+import AppGradient from '@components/AppGradient';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useFaqs, useSupportContact } from '../hooks/useProfile';
 
-/** Support hub: one-tap WhatsApp, plus an FAQ accordion. */
+/** Support hub: quick-action tiles, a WhatsApp-backed "instant help" card, one-tap WhatsApp/call/email, and an FAQ accordion. */
 const Support = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const { data: contact, isLoading: isContactLoading } = useSupportContact();
@@ -16,6 +27,19 @@ const Support = () => {
 
   const open = (url: string) =>
     Linking.openURL(url).catch(() => Alert.alert('Could not open that link'));
+
+  const handleStartChat = () => {
+    if (contact) open(contact.whatsapp.url);
+  };
+
+  const handleTrackOrder = () => navigation.navigate('MainTabs', { screen: 'Orders' });
+
+  // OrdersAndSubscriptions has no route param to pre-select its internal
+  // Subscriptions segment, so this lands on the same screen as "Track Order"
+  // and the customer flips the in-screen toggle themselves.
+  const handleSubscription = () => navigation.navigate('MainTabs', { screen: 'Orders' });
+
+  const handlePayments = () => navigation.navigate('PaymentMethods');
 
   const grouped = (faqs ?? []).reduce<Record<string, typeof faqs>>((acc, faq) => {
     acc[faq.category] = [...(acc[faq.category] ?? []), faq];
@@ -27,6 +51,67 @@ const Support = () => {
       <AppBar title="Help & Support" onBack={navigation.goBack} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>QUICK SUPPORT</Text>
+        <View style={styles.quickRow}>
+          <QuickTile
+            icon={<Receipt size={20} color={theme.colors.primary[600]} strokeWidth={2.2} />}
+            label="Track Order"
+            onPress={handleTrackOrder}
+          />
+          <QuickTile
+            icon={<CreditCard size={20} color={theme.colors.primary[600]} strokeWidth={2.2} />}
+            label="Payments"
+            onPress={handlePayments}
+          />
+          <QuickTile
+            icon={<CalendarClock size={20} color={theme.colors.primary[600]} strokeWidth={2.2} />}
+            label="Subscription"
+            onPress={handleSubscription}
+          />
+        </View>
+
+        {/*
+         * There is no customer-facing AI chat today — BhojAI is a separate,
+         * kitchen-partner-only system. This card keeps the prominent,
+         * "instant help" visual treatment the design calls for, but the copy
+         * is deliberately honest about where "Start Chat" actually goes:
+         * the same real WhatsApp support channel as the card below, not a
+         * fabricated AI conversation.
+         */}
+        <Pressable
+          onPress={handleStartChat}
+          disabled={isContactLoading}
+          accessibilityRole="button"
+          accessibilityLabel="Start a WhatsApp chat with support"
+          style={({ pressed }) => [pressed ? styles.aiCardPressed : null]}
+        >
+          <AppGradient
+            colors={theme.colors.gradients.brand}
+            locations={theme.colors.gradients.brandLocations}
+            direction="diagonal"
+            style={styles.aiCard}
+          >
+            <View style={styles.aiCardTop}>
+              <View style={styles.aiIconWrap}>
+                <MessageCircle size={22} color={theme.colors.palette.white} strokeWidth={2.2} />
+              </View>
+              <View style={styles.aiBadge}>
+                <Text style={styles.aiBadgeText}>INSTANT</Text>
+              </View>
+            </View>
+
+            <Text style={styles.aiTitle}>Need help fast?</Text>
+            <Text style={styles.aiSubtitle}>
+              Message our support team directly on WhatsApp for order, delivery & payment help.
+            </Text>
+
+            <View style={styles.aiButton}>
+              <Send size={15} color={theme.colors.primary[700]} strokeWidth={2.4} />
+              <Text style={styles.aiButtonText}>Start Chat</Text>
+            </View>
+          </AppGradient>
+        </Pressable>
+
         <Card padding="lg" elevation="sm" style={styles.contactCard}>
           <Text style={theme.text.h3}>Talk to a human</Text>
           <Text style={[theme.text.bodySmall, styles.contactHours]}>
@@ -104,6 +189,24 @@ const Support = () => {
   );
 };
 
+const QuickTile: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  onPress: () => void;
+}> = ({ icon, label, onPress }) => (
+  <Pressable
+    onPress={onPress}
+    accessibilityRole="button"
+    accessibilityLabel={label}
+    style={({ pressed }) => [styles.quickTile, pressed ? styles.pressed : null]}
+  >
+    <View style={styles.quickTileIcon}>{icon}</View>
+    <Text style={[theme.text.label, styles.quickTileLabel]} numberOfLines={1}>
+      {label}
+    </Text>
+  </Pressable>
+);
+
 const ContactButton: React.FC<{
   icon: React.ReactNode;
   label: string;
@@ -144,6 +247,95 @@ const styles = StyleSheet.create({
     padding: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxxl,
   },
+  sectionLabel: {
+    color: theme.colors.text.tertiary,
+    marginBottom: theme.spacing.md,
+  },
+  quickRow: {
+    flexDirection: 'row',
+    gap: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
+  },
+  quickTile: {
+    flex: 1,
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    paddingVertical: theme.spacing.lg,
+    borderRadius: theme.radius.card,
+    backgroundColor: theme.colors.surface.raised,
+    borderWidth: 1,
+    borderColor: theme.colors.borders.subtle,
+  },
+  quickTileIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.primary[50],
+  },
+  quickTileLabel: {
+    color: theme.colors.text.secondary,
+  },
+  aiCardPressed: {
+    opacity: 0.94,
+  },
+  aiCard: {
+    borderRadius: theme.radius.card,
+    padding: theme.spacing.lg,
+    marginBottom: theme.spacing.lg,
+    ...theme.elevation.primary,
+  },
+  aiCardTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  aiIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.18)',
+  },
+  aiBadge: {
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+  },
+  aiBadgeText: {
+    ...theme.text.caption,
+    color: theme.colors.palette.white,
+    letterSpacing: 0.5,
+  },
+  aiTitle: {
+    ...theme.text.h3,
+    color: theme.colors.palette.white,
+    marginTop: theme.spacing.md,
+  },
+  aiSubtitle: {
+    ...theme.text.bodySmall,
+    color: 'rgba(255,255,255,0.88)',
+    marginTop: 4,
+  },
+  aiButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing.sm,
+    alignSelf: 'flex-start',
+    marginTop: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.palette.white,
+  },
+  aiButtonText: {
+    ...theme.text.label,
+    color: theme.colors.primary[700],
+  },
   contactCard: {
     marginBottom: theme.spacing.lg,
   },
@@ -177,10 +369,6 @@ const styles = StyleSheet.create({
   },
   pressed: {
     opacity: 0.8,
-  },
-  sectionLabel: {
-    color: theme.colors.text.tertiary,
-    marginBottom: theme.spacing.md,
   },
   loading: {
     gap: theme.spacing.sm,

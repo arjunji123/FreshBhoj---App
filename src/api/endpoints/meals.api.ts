@@ -17,6 +17,7 @@ export type MealSortBy =
   | 'price_high'
   | 'calories_low'
   | 'protein_high'
+  | 'prep_time_low'
   | 'newest';
 
 export interface MealListParams {

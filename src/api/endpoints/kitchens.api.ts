@@ -7,6 +7,7 @@ import type {
   Paginated,
   Review,
   ReviewSummary,
+  SubscriptionPlan,
 } from '../types';
 
 export interface KitchenListParams {
@@ -37,6 +38,9 @@ export const kitchensApi = {
     apiClient.get<Paginated<Review>>(`/kitchens/${id}/reviews`, { query: params }),
 
   reviewSummary: (id: string) => apiClient.get<ReviewSummary>(`/kitchens/${id}/reviews/summary`),
+
+  /** Only `isActive: true` plans — the public endpoint filters that server-side. */
+  subscriptionPlans: (id: string) => apiClient.get<SubscriptionPlan[]>(`/kitchens/${id}/subscription-plans`),
 
   toggleFollow: (id: string) =>
     apiClient.post<{ kitchenId: string; isFollowing: boolean; followerCount: number }>(

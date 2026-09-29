@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
+import { CalendarCheck, Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { formatCompact } from '@utils/format';
 import {
@@ -29,23 +29,26 @@ import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/n
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import KitchenFoodFeedSection from '../components/KitchenFoodFeedSection';
 import RatingSummary from '../components/RatingSummary';
+import SubscriptionPlanCard from '../components/SubscriptionPlanCard';
 import {
   useKitchen,
   useKitchenMedia,
   useKitchenMenu,
   useKitchenReviewSummary,
   useKitchenReviews,
+  useKitchenSubscriptionPlans,
   useToggleFollowKitchen,
 } from '../hooks/useKitchens';
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenProfile'>;
-type Tab = 'menu' | 'foodfeed' | 'reviews';
+type Tab = 'menu' | 'foodfeed' | 'reviews' | 'subscriptions';
 type VegFilter = 'ALL' | 'VEG' | 'NON_VEG';
 
 const TABS: Array<{ key: Tab; label: string }> = [
   { key: 'menu', label: 'Menu' },
   { key: 'foodfeed', label: 'Food Feed' },
   { key: 'reviews', label: 'Reviews' },
+  { key: 'subscriptions', label: 'Subscriptions' },
 ];
 
 const VEG_FILTERS: Array<{ key: VegFilter; label: string }> = [
@@ -73,6 +76,7 @@ const KitchenProfile = () => {
   const { data: menu, isLoading: isMenuLoading } = useKitchenMenu(params.kitchenId);
   const { data: reviews, isLoading: isReviewsLoading } = useKitchenReviews(params.kitchenId, 4);
   const { data: reviewSummary } = useKitchenReviewSummary(params.kitchenId);
+  const { data: subscriptionPlans, isLoading: isSubscriptionPlansLoading } = useKitchenSubscriptionPlans(params.kitchenId);
 
   const toggleFollow = useToggleFollowKitchen(params.kitchenId);
   const { addToCart, conflictDialog } = useAddToCartFlow();
@@ -406,6 +410,27 @@ const KitchenProfile = () => {
               />
             )}
           </View>
+        ) : null}
+
+        {tab === 'subscriptions' ? (
+          isSubscriptionPlansLoading ? (
+            <View style={styles.menuList}>
+              <Skeleton height={280} radius={theme.radius.card} />
+              <Skeleton height={280} radius={theme.radius.card} />
+            </View>
+          ) : subscriptionPlans?.length ? (
+            <View style={styles.menuList}>
+              {subscriptionPlans.map((plan) => (
+                <SubscriptionPlanCard key={plan.id} plan={plan} kitchenId={kitchen.id} />
+              ))}
+            </View>
+          ) : (
+            <EmptyState
+              icon={<CalendarCheck size={38} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+              title="No subscription plans yet"
+              description="This kitchen hasn't set up subscription plans yet — check back soon!"
+            />
+          )
         ) : null}
       </ScrollView>
 

@@ -2,7 +2,9 @@ import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Banknote, CheckCircle2, CreditCard, Smartphone, Wallet } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
+import { formatCurrency } from '@utils/format';
 import type { PaymentMethod } from '@api/types';
+import { useWalletSummary } from '@features/wallet/hooks/useWallet';
 
 interface PaymentMethodPickerProps {
   value: PaymentMethod;
@@ -25,50 +27,61 @@ const METHODS: Array<{
  * Icon-led selection cards rather than a bare radio list — payment is the step
  * where a cramped, utilitarian UI costs the most conversions.
  */
-const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChange }) => (
-  <View style={styles.container}>
-    {METHODS.map(({ key, label, hint, Icon }) => {
-      const isSelected = value === key;
+const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChange }) => {
+  // Same "balance: ₹450" idiom `SetupPlanReview.tsx` uses next to its own
+  // WALLET option — this picker previously showed a static "FreshBhoj
+  // balance" placeholder here instead of the real number.
+  const walletSummary = useWalletSummary();
+  const walletHint = walletSummary.data
+    ? `${formatCurrency(walletSummary.data.balanceRs)} available`
+    : 'FreshBhoj balance';
 
-      return (
-        <Pressable
-          key={key}
-          onPress={() => onChange(key)}
-          accessibilityRole="radio"
-          accessibilityState={{ selected: isSelected }}
-          style={({ pressed }) => [
-            styles.card,
-            isSelected ? styles.cardSelected : null,
-            pressed ? styles.pressed : null,
-          ]}
-        >
-          <View style={[styles.iconWrap, isSelected ? styles.iconWrapSelected : null]}>
-            <Icon
-              size={19}
-              color={isSelected ? theme.colors.primary[600] : theme.colors.text.secondary}
-              strokeWidth={2.2}
-            />
-          </View>
+  return (
+    <View style={styles.container}>
+      {METHODS.map(({ key, label, hint, Icon }) => {
+        const isSelected = value === key;
+        const displayHint = key === 'WALLET' ? walletHint : hint;
 
-          <View style={styles.text}>
-            <Text style={theme.text.h4}>{label}</Text>
-            <Text style={[theme.text.caption, styles.hint]}>{hint}</Text>
-          </View>
+        return (
+          <Pressable
+            key={key}
+            onPress={() => onChange(key)}
+            accessibilityRole="radio"
+            accessibilityState={{ selected: isSelected }}
+            style={({ pressed }) => [
+              styles.card,
+              isSelected ? styles.cardSelected : null,
+              pressed ? styles.pressed : null,
+            ]}
+          >
+            <View style={[styles.iconWrap, isSelected ? styles.iconWrapSelected : null]}>
+              <Icon
+                size={19}
+                color={isSelected ? theme.colors.primary[600] : theme.colors.text.secondary}
+                strokeWidth={2.2}
+              />
+            </View>
 
-          {isSelected ? (
-            <CheckCircle2
-              size={20}
-              color={theme.colors.primary[600]}
-              strokeWidth={2.4}
-            />
-          ) : (
-            <View style={styles.radio} />
-          )}
-        </Pressable>
-      );
-    })}
-  </View>
-);
+            <View style={styles.text}>
+              <Text style={theme.text.h4}>{label}</Text>
+              <Text style={[theme.text.caption, styles.hint]}>{displayHint}</Text>
+            </View>
+
+            {isSelected ? (
+              <CheckCircle2
+                size={20}
+                color={theme.colors.primary[600]}
+                strokeWidth={2.4}
+              />
+            ) : (
+              <View style={styles.radio} />
+            )}
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+};
 
 export default PaymentMethodPicker;
 

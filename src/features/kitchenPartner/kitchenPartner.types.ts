@@ -612,6 +612,48 @@ export interface SubscriptionDelivery {
   createdAt: string;
 }
 
+// ── Subscription Plans (kitchen-facing templates) ────────────────────────
+// Reusable plan templates a kitchen authors once; customers browse and
+// subscribe to them from the public kitchen profile. Separate from the
+// bespoke `Subscription` a customer can also request directly — subscribing
+// off a plan just pre-fills that same request with `planId`.
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  billingCycle: BillingCycle;
+  deliveryDays: DayOfWeek[];
+  mealsPerDay: number;
+  priceRs: number;
+  originalPriceRs: number | null;
+  discountPercent: number;
+  dietOptions: FoodType[];
+  jainAvailable: boolean;
+  slotOptions: SubscriptionDeliveryTime[];
+  includesDescription: string;
+  isPopular: boolean;
+  isActive: boolean;
+  subscriberCount: number;
+  createdAt: string;
+}
+
+export interface CreateSubscriptionPlanInput {
+  name: string;
+  billingCycle: BillingCycle;
+  deliveryDays: DayOfWeek[];
+  mealsPerDay: number;
+  priceRs: number;
+  originalPriceRs?: number;
+  dietOptions: FoodType[];
+  jainAvailable?: boolean;
+  slotOptions: SubscriptionDeliveryTime[];
+  includesDescription: string;
+  isPopular?: boolean;
+}
+
+/** Any subset of the create fields, plus `isActive` — the only way to hide a plan from browsing (no delete endpoint by design). */
+export type UpdateSubscriptionPlanInput = Partial<CreateSubscriptionPlanInput> & { isActive?: boolean };
+
 // ── Kitchen Wallet ────────────────────────────────────────────────────────
 // Funds a kitchen's reel boosts and premium plan purchases. No real payment
 // gateway is wired — `topup` completes immediately, same placeholder pattern

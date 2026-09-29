@@ -170,6 +170,256 @@ export interface KitchenMedia {
   createdAt: string;
 }
 
+// ── Subscription Plans ───────────────────────────────────────────────────────
+// Reusable plan templates a kitchen authors; customers browse them on the
+// kitchen profile's Subscriptions tab and request a subscription from one.
+// Separate from the bespoke customer-request subscription flow.
+
+export type DayOfWeek = 'MONDAY' | 'TUESDAY' | 'WEDNESDAY' | 'THURSDAY' | 'FRIDAY' | 'SATURDAY' | 'SUNDAY';
+export type BillingCycle = 'WEEKLY' | 'MONTHLY';
+
+/** Only ever `isActive: true` plans reach the customer — the public endpoint filters that server-side. */
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  billingCycle: BillingCycle;
+  deliveryDays: DayOfWeek[];
+  mealsPerDay: number;
+  priceRs: number;
+  originalPriceRs: number | null;
+  discountPercent: number;
+  dietOptions: FoodType[];
+  jainAvailable: boolean;
+  slotOptions: MealSlot[];
+  includesDescription: string;
+  isPopular: boolean;
+}
+
+/**
+ * Plan-based subscription request only. `planName`/`mealsPerDay`/
+ * `deliveryDays`/`billingCycle` are derived server-side from the plan and
+ * must be omitted here — the backend 400s on a `foodType`/`deliveryTime` not
+ * offered by the plan, or a `jainRequested: true` the plan doesn't allow.
+ */
+export interface CreateSubscriptionFromPlanInput {
+  kitchenId: string;
+  planId: string;
+  foodType: FoodType;
+  deliveryTime: MealSlot;
+  jainRequested?: boolean;
+  specialInstructions?: string;
+}
+
+export type CustomerSubscriptionStatus = 'PENDING' | 'ACTIVE' | 'PAUSED' | 'CANCELLED' | 'REJECTED';
+
+/** Always `PENDING` fresh off `createFromPlan` — it still needs kitchen approval, like every subscription request. */
+export interface CustomerSubscription {
+  id: string;
+  planName: string;
+  foodType: FoodType;
+  mealsPerDay: number;
+  deliveryDays: DayOfWeek[];
+  deliveryTime: MealSlot;
+  billingCycle: BillingCycle;
+  pricePerCycle: number;
+  status: CustomerSubscriptionStatus;
+  startDate: string;
+  specialInstructions: string | null;
+  createdAt: string;
+}
+
+/** The kitchen a subscription belongs to — just enough to render a row/header. */
+export interface SubscriptionKitchenRef {
+  id: string;
+  name: string;
+  logoUrl: string | null;
+  slug: string;
+}
+
+/** The subscriptions list/detail shape from `/customer/subscriptions`, distinct
+ * from `CustomerSubscription` above (the fresh-off-`createFromPlan` response). */
+export interface CustomerSubscriptionSummary {
+  id: string;
+  planName: string;
+  foodType: FoodType;
+  mealsPerDay: number;
+  deliveryDays: DayOfWeek[];
+  deliveryTime: MealSlot;
+  billingCycle: BillingCycle;
+  pricePerCycle: number;
+  paymentMethod: PaymentMethod;
+  status: CustomerSubscriptionStatus;
+  startDate: string;
+  approvedAt: string | null;
+  pausedAt: string | null;
+  pausedUntil: string | null;
+  cancelledAt: string | null;
+  createdAt: string;
+  kitchen: SubscriptionKitchenRef;
+}
+
+export type SubscriptionDeliveryStatus = 'SCHEDULED' | 'DISPATCHED' | 'SKIPPED';
+
+/** Only present once a delivery has a dish assigned — `null` reads as "kitchen's choice". */
+export interface SubscriptionDeliveryMeal {
+  id: string;
+  name: string;
+  images: string[];
+}
+
+export interface SubscriptionDeliveryEntry {
+  /** ISO datetime — slice to `YYYY-MM-DD` before sending back as a route param. */
+  date: string;
+  status: SubscriptionDeliveryStatus;
+  dispatchedAt: string | null;
+  skipReason: string | null;
+  meal: SubscriptionDeliveryMeal | null;
+}
+
+export interface SubscriptionBillingEntry {
+  cycleStart: string;
+  amount: number;
+  paymentStatus: PaymentStatus;
+}
+
+export interface CustomerSubscriptionDetail extends CustomerSubscriptionSummary {
+  specialInstructions: string | null;
+  rejectionReason: string | null;
+  deliverySchedule: SubscriptionDeliveryEntry[];
+  billingHistory: SubscriptionBillingEntry[];
+}
+
+/**
+ * The bespoke Setup Plan wizard's request — everything is freely chosen by
+ * the customer (no `planId`), unlike `CreateSubscriptionFromPlanInput`.
+ * Always comes back `PENDING`, same as the plan-based path.
+ */
+export interface CreateBespokeSubscriptionInput {
+  kitchenId: string;
+  planName: string;
+  foodType: FoodType;
+  mealsPerDay: number;
+  deliveryDays: DayOfWeek[];
+  deliveryTime: MealSlot;
+  billingCycle: BillingCycle;
+  specialInstructions?: string;
+  startDate?: string;
+  addressId: string;
+  paymentMethod: PaymentMethod;
+  requestedCoins?: number;
+}
+
+/**
+ * `POST /customer/subscriptions/quote` — POST despite being read-only, so the
+ * body can carry `deliveryDays` without query-string array encoding. Never
+ * trust a client-computed subscription price; this is the server-computed
+ * one shown on the wizard's Review step.
+ */
+export interface SubscriptionQuoteInput {
+  kitchenId: string;
+  planId?: string;
+  mealsPerDay?: number;
+  deliveryDays?: DayOfWeek[];
+  billingCycle?: BillingCycle;
+  paymentMethod?: PaymentMethod;
+  requestedCoins?: number;
+}
+
+/**
+ * Coins are only ever evaluated when `paymentMethod: 'WALLET'` (real charges
+ * only) — for any other method `coinsDiscount` is 0 and `firstCycleAmount`
+ * just equals `pricePerCycle`.
+ */
+export interface SubscriptionQuoteResult {
+  pricePerCycle: number;
+  coinsDiscount: number;
+  firstCycleAmount: number;
+  coinsBalance: number;
+  coinsEligible: boolean;
+  maxRedeemableCoins: number;
+}
+
+// ── Customer Wallet ─────────────────────────────────────────────────────────
+
+export type WalletTransactionType = 'CREDIT' | 'DEBIT';
+export type WalletTransactionReason =
+  | 'TOPUP'
+  | 'ORDER_PAYMENT'
+  | 'SUBSCRIPTION_PAYMENT'
+  | 'WITHDRAWAL'
+  | 'REFUND';
+
+export interface WalletSummary {
+  balanceRs: number;
+  totalCreditsRs: number;
+  thisMonthSpentRs: number;
+}
+
+export interface WalletTransaction {
+  id: string;
+  type: WalletTransactionType;
+  reason: WalletTransactionReason;
+  amountRs: number;
+  description: string | null;
+  createdAt: string;
+}
+
+export interface TopUpResult {
+  wallet: WalletSummary;
+  transaction: WalletTransaction;
+}
+
+export type WalletWithdrawalStatus = 'REQUESTED' | 'PROCESSING' | 'PAID' | 'FAILED';
+
+/**
+ * A withdrawal genuinely waits on ops to action it — unlike top-up, there is
+ * no instant-success path. `destination` is an ad-hoc snapshot (UPI id today,
+ * open-ended so it can carry bank details later without a schema change).
+ */
+export interface WalletWithdrawal {
+  id: string;
+  amountRs: number;
+  status: WalletWithdrawalStatus;
+  destination: Record<string, string>;
+  failureReason: string | null;
+  requestedAt: string;
+  processedAt: string | null;
+  paidAt: string | null;
+}
+
+// ── Saved payment methods ───────────────────────────────────────────────────
+
+export type CardBrand = 'VISA' | 'MASTERCARD' | 'RUPAY' | 'AMEX' | 'DINERS' | 'UNKNOWN';
+
+/**
+ * A tokenised card on file. There is no client-side gateway SDK wired up yet
+ * (no Razorpay/Stripe RN dependency), so nothing in the app can actually
+ * produce a `gatewayToken` today — this type exists for the read/select/remove
+ * flows only. See `PaymentMethods.tsx`'s "Add Card" honesty note.
+ */
+export interface SavedCard {
+  id: string;
+  brand: CardBrand;
+  last4: string;
+  /** Ready to render as-is, e.g. "•••• •••• •••• 4242". */
+  maskedNumber: string;
+  /** "MM/YY" */
+  expiry: string;
+  isExpired: boolean;
+  holderName: string | null;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+/** A saved UPI ID — fully real, unlike `SavedCard`. Stored exactly as typed, no NPCI verification. */
+export interface UpiPaymentMethod {
+  id: string;
+  vpa: string;
+  label: string | null;
+  isDefault: boolean;
+  createdAt: string;
+}
+
 // ── Kitchen Stories (city-scoped, 24h) ──────────────────────────────────────
 
 export interface StoryKitchenRef {
@@ -600,6 +850,10 @@ export interface NotificationPreferences {
   newKitchens: boolean;
   reelActivity: boolean;
   whatsappUpdates: boolean;
+  /** Renewal, pause & upcoming-delivery nudges for active subscriptions. Defaults true server-side. */
+  subscriptionReminders: boolean;
+  /** Daily personalized meal picks. Defaults true server-side. */
+  dailyAiRecommendations: boolean;
 }
 
 export interface ProfileStats {

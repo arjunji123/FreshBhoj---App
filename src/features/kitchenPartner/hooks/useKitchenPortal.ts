@@ -17,6 +17,7 @@ import {
   kitchenProfileApi,
   kitchenReelsApi,
   kitchenStoriesApi,
+  kitchenSubscriptionPlansApi,
   kitchenSubscriptionsApi,
   kitchenSuggestionsApi,
   kitchenUploadApi,
@@ -31,6 +32,7 @@ import {
 import type {
   CampaignStatus,
   CampaignSuggestionStatus,
+  CreateSubscriptionPlanInput,
   FssaiAssistanceDocumentType,
   KitchenProfile,
   NotificationCategory,
@@ -38,6 +40,7 @@ import type {
   OrderStatus,
   PremiumTier,
   SubscriptionStatus,
+  UpdateSubscriptionPlanInput,
 } from '../kitchenPartner.types';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
 
@@ -66,6 +69,7 @@ const kitchenKeys = {
   subscriptions: ['kitchen', 'subscriptions'] as const,
   subscriptionsList: (params: unknown) => ['kitchen', 'subscriptions', 'list', params] as const,
   subscriptionDetail: (id: string) => ['kitchen', 'subscriptions', 'detail', id] as const,
+  subscriptionPlans: ['kitchen', 'subscriptionPlans'] as const,
   walletSummary: ['kitchen', 'wallet', 'summary'] as const,
   walletTransactions: (params: unknown) => ['kitchen', 'wallet', 'transactions', params] as const,
   suggestions: ['kitchen', 'ads', 'suggestions'] as const,
@@ -701,6 +705,29 @@ export function useSkipDelivery() {
   return useMutation({
     mutationFn: ({ id, date, reason }: { id: string; date: string; reason?: string }) => kitchenSubscriptionsApi.skipDelivery(id, date, reason),
     onSuccess: (_result, variables) => queryClient.invalidateQueries({ queryKey: kitchenKeys.subscriptionDetail(variables.id) }),
+  });
+}
+
+// ── Subscription Plans (kitchen-facing templates) ────────────────────────
+
+export function useSubscriptionPlans() {
+  const enabled = useKitchenAuthed();
+  return useQuery({ queryKey: kitchenKeys.subscriptionPlans, queryFn: kitchenSubscriptionPlansApi.list, enabled });
+}
+
+export function useCreatePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (input: CreateSubscriptionPlanInput) => kitchenSubscriptionPlansApi.create(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.subscriptionPlans }),
+  });
+}
+
+export function useUpdatePlan() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateSubscriptionPlanInput }) => kitchenSubscriptionPlansApi.update(id, input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.subscriptionPlans }),
   });
 }
 

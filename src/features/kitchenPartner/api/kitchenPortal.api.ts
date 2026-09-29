@@ -7,6 +7,7 @@ import type {
   CampaignStatus,
   CampaignSuggestion,
   CampaignSuggestionStatus,
+  CreateSubscriptionPlanInput,
   DashboardSummary,
   FssaiAssistanceDocumentType,
   FssaiAssistanceStatusResponse,
@@ -37,8 +38,10 @@ import type {
   PremiumTierCatalog,
   SubscriptionDelivery,
   SubscriptionDetail,
+  SubscriptionPlan,
   SubscriptionsListResponse,
   SubscriptionStatus,
+  UpdateSubscriptionPlanInput,
   WalletSummary,
   WalletTransaction,
 } from '../kitchenPartner.types';
@@ -374,6 +377,14 @@ export const kitchenSubscriptionsApi = {
     kitchenClient.post<SubscriptionDelivery>(`/partner/subscriptions/${id}/deliveries/${date}/dispatch`),
   skipDelivery: (id: string, date: string, reason?: string) =>
     kitchenClient.post<SubscriptionDelivery>(`/partner/subscriptions/${id}/deliveries/${date}/skip`, { reason }),
+};
+
+// ── Subscription Plans (kitchen-facing templates) ────────────────────────
+
+export const kitchenSubscriptionPlansApi = {
+  list: () => kitchenClient.get<SubscriptionPlan[]>('/partner/subscription-plans'),
+  create: (input: CreateSubscriptionPlanInput) => kitchenClient.post<SubscriptionPlan>('/partner/subscription-plans', input),
+  update: (id: string, input: UpdateSubscriptionPlanInput) => kitchenClient.patch<SubscriptionPlan>(`/partner/subscription-plans/${id}`, input),
 };
 
 // ── Upload ────────────────────────────────────────────────────────────────

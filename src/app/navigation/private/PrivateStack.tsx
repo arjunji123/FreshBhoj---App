@@ -31,6 +31,20 @@ import Notifications from '@features/profile/screens/Notifications';
 import EditProfile from '@features/profile/screens/EditProfile';
 import DeleteAccount from '@features/profile/screens/DeleteAccount';
 import ReferralScreen from '@features/referral/screens/ReferralScreen';
+import PaymentMethods from '@features/profile/screens/PaymentMethods';
+import Preferences from '@features/profile/screens/Preferences';
+import PrivacyPolicy from '@features/profile/screens/PrivacyPolicy';
+import TermsOfService from '@features/profile/screens/TermsOfService';
+
+// Subscriptions
+import ManageSubscription from '@features/subscriptions/screens/ManageSubscription';
+import SetupPlanChooseKitchen from '@features/subscriptions/screens/SetupPlanChooseKitchen';
+import SetupPlanDetails from '@features/subscriptions/screens/SetupPlanDetails';
+import SetupPlanDelivery from '@features/subscriptions/screens/SetupPlanDelivery';
+import SetupPlanReview from '@features/subscriptions/screens/SetupPlanReview';
+
+// Wallet
+import Wallet from '@features/wallet/screens/Wallet';
 
 // Kitchen-partner registration entry point (see navigation.types.ts) — the
 // same screens the pre-login `PublicStack` uses, reused here so a signed-in
@@ -101,6 +115,18 @@ export function PrivateTabs() {
       <Stack.Screen name="EditProfile" component={EditProfile} />
       <Stack.Screen name="Referral" component={ReferralScreen} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccount} />
+      <Stack.Screen name="PaymentMethods" component={PaymentMethods} />
+      <Stack.Screen name="Preferences" component={Preferences} />
+      <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicy} />
+      <Stack.Screen name="TermsOfService" component={TermsOfService} />
+
+      <Stack.Screen name="ManageSubscription" component={ManageSubscription} />
+      <Stack.Screen name="SetupPlanChooseKitchen" component={SetupPlanChooseKitchen} />
+      <Stack.Screen name="SetupPlanDetails" component={SetupPlanDetails} />
+      <Stack.Screen name="SetupPlanDelivery" component={SetupPlanDelivery} />
+      <Stack.Screen name="SetupPlanReview" component={SetupPlanReview} />
+
+      <Stack.Screen name="Wallet" component={Wallet} />
 
       <Stack.Screen name="Login" component={Login} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
       <Stack.Screen name="OTP" component={OTPScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />

@@ -1,15 +1,16 @@
 import React from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Store, Trash2 } from 'lucide-react-native';
+import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Settings, Store, Trash2, Wallet as WalletIcon } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
-import { formatPhone } from '@utils/format';
+import { formatCurrency, formatPhone } from '@utils/format';
 import Logo from '@components/Logo';
 import { AppBarAction, Avatar, Card, Divider, ListItem, Screen, Skeleton } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { useReferralSummary } from '@features/referral/hooks/useReferral';
+import { useWalletSummary } from '@features/wallet/hooks/useWallet';
 import { useLogout, useProfile, useProfileStats } from '../hooks/useProfile';
 
 const ICON_PROPS = { size: 18, strokeWidth: 2.2 };
@@ -24,6 +25,7 @@ const Profile = () => {
   const { data: user } = useProfile();
   const { data: stats, isLoading: isStatsLoading } = useProfileStats();
   const { data: referral } = useReferralSummary();
+  const { data: wallet } = useWalletSummary();
   const logout = useLogout();
 
   // Render from the persisted copy first so the header never flashes empty.
@@ -111,6 +113,13 @@ const Profile = () => {
           />
           <Divider spacing={0} />
           <ListItem
+            title="Wallet"
+            subtitle={wallet ? `${formatCurrency(wallet.balanceRs)} balance` : 'Add money, pay faster'}
+            icon={<WalletIcon {...ICON_PROPS} color={theme.colors.primary[600]} />}
+            onPress={() => requireAuth(() => navigation.navigate('Wallet'))}
+          />
+          <Divider spacing={0} />
+          <ListItem
             title="Refer & Earn"
             subtitle={referral ? `${referral.coinsBalance} FreshBhoj Coins` : 'Invite friends, earn coins'}
             icon={<Gift {...ICON_PROPS} color={theme.colors.primary[600]} />}
@@ -130,6 +139,13 @@ const Profile = () => {
             title="Notifications"
             icon={<Bell {...ICON_PROPS} color={theme.colors.primary[600]} />}
             onPress={() => navigation.navigate('Notifications')}
+          />
+          <Divider spacing={0} />
+          <ListItem
+            title="App Preferences"
+            subtitle="Appearance & more"
+            icon={<Settings {...ICON_PROPS} color={theme.colors.primary[600]} />}
+            onPress={() => navigation.navigate('Preferences')}
           />
           <Divider spacing={0} />
           <ListItem

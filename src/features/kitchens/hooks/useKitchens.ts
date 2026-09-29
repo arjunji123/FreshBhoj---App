@@ -1,8 +1,8 @@
 import { useCallback } from 'react';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { kitchensApi, qk } from '@api';
+import { kitchensApi, qk, subscriptionsApi } from '@api';
 import type { KitchenListParams } from '@api/endpoints/kitchens.api';
-import type { KitchenCard, Paginated } from '@api/types';
+import type { CreateSubscriptionFromPlanInput, KitchenCard, Paginated } from '@api/types';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 
@@ -56,6 +56,41 @@ export function useKitchenReviewSummary(kitchenId: string) {
     queryFn: () => kitchensApi.reviewSummary(kitchenId),
     enabled: Boolean(kitchenId),
   });
+}
+
+/** Only `isActive: true` plans — the public endpoint filters that server-side. */
+export function useKitchenSubscriptionPlans(kitchenId: string) {
+  return useQuery({
+    queryKey: qk.kitchens.subscriptionPlans(kitchenId),
+    queryFn: () => kitchensApi.subscriptionPlans(kitchenId),
+    enabled: Boolean(kitchenId),
+  });
+}
+
+/**
+ * Requesting a subscription from a plan needs a real customer account — a
+ * guest sees the login sheet instead of a call that would just 401, same
+ * gating as `useToggleFollowKitchen`. Invalidates the customer's own
+ * "My Subscriptions" list on success so it shows up in the Subscriptions hub
+ * without a manual pull-to-refresh.
+ */
+export function useSubscribeToPlan() {
+  const requireAuth = useRequireAuth();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (input: CreateSubscriptionFromPlanInput) => subscriptionsApi.createFromPlan(input),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: qk.subscriptions.all });
+    },
+  });
+
+  const mutate: typeof mutation.mutate = useCallback(
+    (variables, options) => requireAuth(() => mutation.mutate(variables, options)),
+    [requireAuth, mutation],
+  );
+
+  return { ...mutation, mutate };
 }
 
 export function useFollowedKitchens() {

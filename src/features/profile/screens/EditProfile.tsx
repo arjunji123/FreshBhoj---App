@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { Camera } from 'lucide-react-native';
+import { Camera, ChevronRight, MapPin } from 'lucide-react-native';
 import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import { AppBar, Avatar, Button, Input, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
-import { useProfile, useUpdateProfile, useUpdateProfileImage } from '../hooks/useProfile';
+import { useDefaultAddress, useProfile, useUpdateProfile, useUpdateProfileImage } from '../hooks/useProfile';
 
 const EditProfile = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const storedUser = useAuthStore((s) => s.user);
   const { data: user } = useProfile();
   const profile = user ?? storedUser;
+  const { data: defaultAddress, isLoading: isAddressLoading } = useDefaultAddress();
 
   const [fullName, setFullName] = useState(profile?.fullName ?? '');
   const [email, setEmail] = useState(profile?.email ?? '');
@@ -139,6 +140,35 @@ const EditProfile = () => {
           helperText="Your phone number is your login and cannot be changed here."
           containerStyle={styles.field}
         />
+
+        <View style={styles.field}>
+          <Text style={[theme.text.label, styles.addressLabel]}>Primary Delivery Address</Text>
+          <Pressable
+            onPress={() => navigation.navigate('Addresses', { selectMode: false })}
+            accessibilityRole="button"
+            accessibilityLabel={
+              defaultAddress ? 'Primary delivery address, tap to change' : 'Add a delivery address'
+            }
+            style={({ pressed }) => [styles.addressBox, pressed ? styles.addressBoxPressed : null]}
+          >
+            <View style={styles.addressIconWrap}>
+              <MapPin size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+            </View>
+            <Text
+              style={[theme.text.body, defaultAddress ? styles.addressText : styles.addressPrompt]}
+              numberOfLines={2}
+            >
+              {isAddressLoading
+                ? 'Loading address…'
+                : defaultAddress
+                ? [defaultAddress.line1, defaultAddress.locality, defaultAddress.city]
+                    .filter(Boolean)
+                    .join(', ')
+                : 'Add a delivery address'}
+            </Text>
+            <ChevronRight size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />
+          </Pressable>
+        </View>
       </KeyboardAwareScrollView>
 
       <StickyBar>
@@ -193,5 +223,39 @@ const styles = StyleSheet.create({
   },
   field: {
     marginTop: theme.spacing.lg,
+  },
+  addressLabel: {
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.sm,
+  },
+  addressBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    borderWidth: 1.5,
+    borderRadius: theme.radius.control,
+    borderColor: theme.colors.borders.subtle,
+    backgroundColor: theme.colors.neutral[100],
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  addressBoxPressed: {
+    opacity: 0.85,
+  },
+  addressIconWrap: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: theme.colors.primary[50],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  addressText: {
+    flex: 1,
+    color: theme.colors.text.primary,
+  },
+  addressPrompt: {
+    flex: 1,
+    color: theme.colors.primary[600],
   },
 });

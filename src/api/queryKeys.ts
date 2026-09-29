@@ -37,6 +37,7 @@ export const qk = {
     reviews: (id: string) => ['kitchens', id, 'reviews'] as const,
     reviewSummary: (id: string) => ['kitchens', id, 'reviewSummary'] as const,
     following: ['kitchens', 'following'] as const,
+    subscriptionPlans: (id: string) => ['kitchens', id, 'subscriptionPlans'] as const,
   },
   cart: {
     all: ['cart'] as const,
@@ -81,5 +82,21 @@ export const qk = {
   },
   referral: {
     me: ['referral', 'me'] as const,
+  },
+  subscriptions: {
+    all: ['subscriptions'] as const,
+    list: ['subscriptions', 'list'] as const,
+    detail: (id: string) => ['subscriptions', 'detail', id] as const,
+    /** Setup Plan wizard's price preview. Params include kitchenId/mealsPerDay/deliveryDays/billingCycle/paymentMethod/requestedCoins. */
+    quote: (params: Record<string, unknown>) => ['subscriptions', 'quote', params] as const,
+  },
+  wallet: {
+    summary: ['wallet', 'summary'] as const,
+    transactions: ['wallet', 'transactions'] as const,
+    withdrawals: ['wallet', 'withdrawals'] as const,
+  },
+  paymentMethods: {
+    cards: ['paymentMethods', 'cards'] as const,
+    upi: ['paymentMethods', 'upi'] as const,
   },
 } as const;

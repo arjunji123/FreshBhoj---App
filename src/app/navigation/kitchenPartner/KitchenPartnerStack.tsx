@@ -24,6 +24,7 @@ import AdsCampaigns from '@features/kitchenPartner/screens/AdsCampaigns';
 import AdsCampaignDetail from '@features/kitchenPartner/screens/AdsCampaignDetail';
 import Subscribers from '@features/kitchenPartner/screens/Subscribers';
 import SubscriberDetail from '@features/kitchenPartner/screens/SubscriberDetail';
+import ManagePlans from '@features/kitchenPartner/screens/ManagePlans';
 import Wallet from '@features/kitchenPartner/screens/Wallet';
 import AdsInsights from '@features/kitchenPartner/screens/AdsInsights';
 import SuggestionDetail from '@features/kitchenPartner/screens/SuggestionDetail';
@@ -122,6 +123,7 @@ export function KitchenPartnerStack() {
       <Stack.Screen name="AdsCampaignDetail" component={AdsCampaignDetail} />
       <Stack.Screen name="Subscribers" component={Subscribers} />
       <Stack.Screen name="SubscriberDetail" component={SubscriberDetail} />
+      <Stack.Screen name="ManagePlans" component={ManagePlans} />
       <Stack.Screen name="Wallet" component={Wallet} />
       <Stack.Screen name="AdsInsights" component={AdsInsights} />
       <Stack.Screen name="SuggestionDetail" component={SuggestionDetail} />

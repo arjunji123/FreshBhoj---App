@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 type Elevation = 'none' | 'xs' | 'sm' | 'md' | 'lg';
 type Padding = 'none' | 'sm' | 'md' | 'lg';
@@ -20,9 +21,9 @@ export interface CardProps {
 
 const PADDING: Record<Padding, number> = {
   none: 0,
-  sm: theme.spacing.md,
-  md: theme.spacing.lg,
-  lg: theme.spacing.xl,
+  sm: staticTheme.spacing.md,
+  md: staticTheme.spacing.lg,
+  lg: staticTheme.spacing.xl,
 };
 
 /** The base surface for everything: rounded, soft-shadowed, generously padded. */
@@ -31,19 +32,26 @@ const Card: React.FC<CardProps> = ({
   elevation = 'sm',
   padding = 'md',
   bordered = false,
-  radius = theme.radius.card,
-  backgroundColor = theme.colors.surface.raised,
+  radius = staticTheme.radius.card,
+  backgroundColor,
   onPress,
   style,
   testID,
 }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  // `backgroundColor`'s default lives here, not in the destructure above —
+  // `theme.colors.surface.raised` differs between light/dark, and a default
+  // parameter value is evaluated once at the call site, before this
+  // component's own `useTheme()` line ever runs.
+  const resolvedBackgroundColor = backgroundColor ?? theme.colors.surface.raised;
   const cardStyle: StyleProp<ViewStyle> = [
     styles.base,
     theme.elevation[elevation],
     {
       padding: PADDING[padding],
       borderRadius: radius,
-      backgroundColor,
+      backgroundColor: resolvedBackgroundColor,
     },
     bordered ? styles.bordered : null,
     style,
@@ -70,7 +78,7 @@ const Card: React.FC<CardProps> = ({
 
 export default Card;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   base: {
     overflow: 'hidden',
   },

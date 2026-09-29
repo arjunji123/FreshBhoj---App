@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 interface StickyBarProps {
   children: React.ReactNode;
@@ -21,6 +21,8 @@ interface StickyBarProps {
 const MIN_BOTTOM_CLEARANCE = 24;
 
 const StickyBar: React.FC<StickyBarProps> = ({ children, style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
 
   return (
@@ -38,7 +40,7 @@ const StickyBar: React.FC<StickyBarProps> = ({ children, style }) => {
 
 export default StickyBar;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   bar: {
     backgroundColor: theme.colors.surface.base,
     paddingHorizontal: theme.layout.screenPadding,

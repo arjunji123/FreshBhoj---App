@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Eye, Play } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import SectionHeader from '@components/SectionHeader';
 import type { Reel } from '@api/types';
 import { HOME_COPY } from '../home.constants';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ReelsRailProps {
   reels: Reel[];
@@ -18,6 +18,8 @@ interface ReelsRailProps {
  * Tapping a card opens the full-screen vertical player at that reel.
  */
 const ReelsRail: React.FC<ReelsRailProps> = ({ reels, onPressReel, onSeeAll }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   if (!reels.length) return null;
 
   return (
@@ -90,7 +92,7 @@ const ReelsRail: React.FC<ReelsRailProps> = ({ reels, onPressReel, onSeeAll }) =
 
 export default ReelsRail;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.xl,
   },

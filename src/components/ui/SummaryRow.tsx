@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { formatCurrency } from '@utils/format';
 
 interface SummaryRowProps {
@@ -12,8 +13,20 @@ interface SummaryRowProps {
   style?: StyleProp<ViewStyle>;
 }
 
+const createValueColor = (
+  theme: ReturnType<typeof useTheme>,
+): Record<NonNullable<SummaryRowProps['tone']>, string> => ({
+  default: theme.colors.text.primary,
+  muted: theme.colors.text.secondary,
+  discount: theme.colors.accent[600],
+  free: theme.colors.accent[600],
+  total: theme.colors.text.primary,
+});
+
 /** One line of an order/price summary. Keeps every bill in the app identical. */
 const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, tone = 'default', icon, style }) => {
+  const theme = useTheme();
+  const valueColor = useMemo(() => createValueColor(theme), [theme]);
   const isTotal = tone === 'total';
 
   const displayValue =
@@ -40,21 +53,13 @@ const SummaryRow: React.FC<SummaryRowProps> = ({ label, value, tone = 'default',
       <Text
         style={[
           isTotal ? theme.text.numeric : theme.text.bodyMedium,
-          { color: VALUE_COLOR[tone] },
+          { color: valueColor[tone] },
         ]}
       >
         {displayValue}
       </Text>
     </View>
   );
-};
-
-const VALUE_COLOR: Record<NonNullable<SummaryRowProps['tone']>, string> = {
-  default: theme.colors.text.primary,
-  muted: theme.colors.text.secondary,
-  discount: theme.colors.accent[600],
-  free: theme.colors.accent[600],
-  total: theme.colors.text.primary,
 };
 
 export default SummaryRow;
@@ -64,7 +69,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: staticTheme.spacing.sm,
   },
   labelWrap: {
     flexDirection: 'row',

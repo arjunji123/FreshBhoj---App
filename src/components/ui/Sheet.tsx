@@ -1,9 +1,9 @@
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useMemo, useRef } from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ArrowLeft, X } from 'lucide-react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -43,6 +43,8 @@ const Sheet = forwardRef<SheetHandle, SheetProps>(
     },
     ref,
   ) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const sheetRef = useRef<any>(null);
     const insets = useSafeAreaInsets();
 
@@ -117,7 +119,7 @@ Sheet.displayName = 'Sheet';
 
 export default Sheet;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   wrapper: {
     backgroundColor: theme.colors.overlay.scrim,
   },

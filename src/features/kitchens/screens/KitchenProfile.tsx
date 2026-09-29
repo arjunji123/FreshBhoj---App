@@ -3,7 +3,6 @@ import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'rea
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { CalendarCheck, Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCompact } from '@utils/format';
 import {
   AppBar,
@@ -39,6 +38,7 @@ import {
   useKitchenSubscriptionPlans,
   useToggleFollowKitchen,
 } from '../hooks/useKitchens';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenProfile'>;
 type Tab = 'menu' | 'foodfeed' | 'reviews' | 'subscriptions';
@@ -65,6 +65,8 @@ const VEG_FILTERS: Array<{ key: VegFilter; label: string }> = [
  * feed: no follow-first social layer until content volume justifies it.
  */
 const KitchenProfile = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
   const [tab, setTab] = useState<Tab>('menu');
@@ -439,16 +441,22 @@ const KitchenProfile = () => {
   );
 };
 
-const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.stat}>
     <Text style={theme.text.h3}>{value}</Text>
     <Text style={[theme.text.caption, styles.statLabel]}>{label}</Text>
   </View>
-);
+)
+  );
+};
 
 export default KitchenProfile;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

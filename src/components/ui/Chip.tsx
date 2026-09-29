@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { theme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
+import { useTheme } from "@app/theme/useTheme";
 
 export interface ChipProps {
   label: string;
@@ -18,6 +18,8 @@ export interface ChipProps {
  * language instead of some screens going green and others red.
  */
 export const Chip: React.FC<ChipProps> = ({ label, selected = false, onPress, icon, style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const content = (
     <>
       {icon ? <View style={styles.icon}>{icon}</View> : null}
@@ -76,7 +78,11 @@ interface ChipRowProps {
 }
 
 /** Horizontally scrollable rail with the standard screen gutter. */
-export const ChipRow: React.FC<ChipRowProps> = ({ children, style }) => (
+export const ChipRow: React.FC<ChipRowProps> = ({ children, style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <ScrollView
     horizontal
     showsHorizontalScrollIndicator={false}
@@ -89,11 +95,13 @@ export const ChipRow: React.FC<ChipRowProps> = ({ children, style }) => (
   >
     {children}
   </ScrollView>
-);
+)
+  );
+};
 
 export default Chip;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -3,11 +3,11 @@ import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import { MapPin, Plus } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, Button, Card, Chip, ChipRow, Screen, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
 import { useSetupPlanStore } from '../store/setupPlanStore';
+import { useTheme } from "@app/theme/useTheme";
 
 const START_DATE_COUNT = 14;
 
@@ -17,6 +17,8 @@ function titleCase(value: string): string {
 
 /** Step 2 of 3 — address, start date, special instructions. */
 const SetupPlanDelivery = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
 
   const kitchenId = useSetupPlanStore((s) => s.kitchenId);
@@ -146,7 +148,7 @@ const SetupPlanDelivery = () => {
 
 export default SetupPlanDelivery;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scroll: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxl,

@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Bell, ChevronDown, Gift, MapPin, Search, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
-import { theme } from '@app/theme/index';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { HOME_COPY, SCROLL_THRESHOLD, TOP_ROW_HEIGHT } from '../home.constants';
 import type { HomeHeaderProps } from '../home.types';
+import { useTheme } from "@app/theme/useTheme";
 
 /** Deliberately not brand red — this icon needs to read as "reward", not another CTA. */
 const REFERRAL_ICON_GRADIENT = ['#FFD166', '#FF6B6B', '#8B5CF6'];
@@ -26,6 +26,8 @@ const HomeHeader = ({
   onPressCart,
   onPressReferral,
 }: HomeHeaderProps) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const location = useAuthStore((s) => s.location);
   const fullName = useAuthStore((s) => s.fullName);
@@ -146,7 +148,7 @@ const HomeHeader = ({
 
 export default HomeHeader;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingBottom: theme.spacing.lg,

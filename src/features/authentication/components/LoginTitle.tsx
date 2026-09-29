@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import GradientText from '@components/GradientText';
-import { theme } from '@app/theme/index';
 import { AUTH_COPY } from '../auth.constants';
+import { useTheme } from "@app/theme/useTheme";
 
 const LoginTitle = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     return (
         <>
             <View style={styles.titleContainer}>
@@ -26,7 +28,7 @@ const LoginTitle = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     titleContainer: {
         alignItems: 'center',
         marginBottom: theme.spacing.paddings.xl,

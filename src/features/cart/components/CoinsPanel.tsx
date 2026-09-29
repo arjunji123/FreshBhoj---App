@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Coins, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { Button, Card } from '@components/ui';
 import type { Cart } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface CoinsPanelProps {
   cart: Cart;
@@ -20,6 +20,8 @@ interface CoinsPanelProps {
  * line stays visible in every state so it never feels like a hidden condition.
  */
 const CoinsPanel: React.FC<CoinsPanelProps> = ({ cart, onApply, onRemove, isApplying, isRemoving }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const { coins } = cart;
   const isApplied = coins.applied > 0;
   const isEligible = cart.pricing.itemsTotal >= coins.minOrderValue;
@@ -92,7 +94,7 @@ const CoinsPanel: React.FC<CoinsPanelProps> = ({ cart, onApply, onRemove, isAppl
 
 export default CoinsPanel;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginTop: theme.spacing.md,
   },

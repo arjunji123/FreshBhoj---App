@@ -2,7 +2,6 @@ import React, { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowDownToLine, CircleAlert, CircleCheckBig, Clock, Plus, Wallet as WalletIcon } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { ApiError } from '@api';
 import {
@@ -24,6 +23,7 @@ import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages } from '@features/meals/hooks/useMeals';
 import type { WalletTransactionReason } from '@api/types';
 import { useRequestWithdrawal, useTopUpWallet, useWalletSummary, useWalletTransactions, useWalletWithdrawals } from '../hooks/useWallet';
+import { useTheme } from "@app/theme/useTheme";
 
 const PRESET_AMOUNTS = [200, 500, 1000, 2000];
 
@@ -63,6 +63,8 @@ function matchesTab(tab: FilterTab, reason: WalletTransactionReason): boolean {
  * separate FreshBhoj Coins ledger, which stays `ReferralScreen`'s territory.
  */
 const Wallet = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const summary = useWalletSummary();
   const transactions = useWalletTransactions();
@@ -218,6 +220,8 @@ const Wallet = () => {
 };
 
 function AddMoneySheet({ sheetRef }: { sheetRef: React.RefObject<SheetHandle | null> }) {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const topUp = useTopUpWallet();
   const [amountInput, setAmountInput] = useState('');
 
@@ -290,6 +294,8 @@ function WithdrawSheet({
   sheetRef: React.RefObject<SheetHandle | null>;
   balanceRs: number;
 }) {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const withdraw = useRequestWithdrawal();
   const [amountInput, setAmountInput] = useState('');
   const [upiId, setUpiId] = useState('');
@@ -378,7 +384,7 @@ function WithdrawSheet({
 
 export default Wallet;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scroll: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.sm,

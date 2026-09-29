@@ -3,7 +3,6 @@ import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { UtensilsCrossed } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import MealCard from '@components/MealCard';
 import SectionHeader from '@components/SectionHeader';
 import { EmptyState, MealCardSkeleton } from '@components/ui';
@@ -34,6 +33,7 @@ import ReelsRail from '../components/ReelsRail';
 import ActiveOrderStrip from '../components/ActiveOrderStrip';
 import { HOME_COPY } from '../home.constants';
 import { useCuisines, useHomeFeed, useKitchenStories } from '../hooks/useHomeFeed';
+import { useTheme } from "@app/theme/useTheme";
 
 /**
  * Discovery screen.
@@ -45,6 +45,8 @@ import { useCuisines, useHomeFeed, useKitchenStories } from '../hooks/useHomeFee
  * not part of the generic aggregated payload.
  */
 const Home = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const requireAuth = useRequireAuth();
   const scrollY = useSharedValue(0);
@@ -292,7 +294,7 @@ const Home = () => {
 
 export default Home;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

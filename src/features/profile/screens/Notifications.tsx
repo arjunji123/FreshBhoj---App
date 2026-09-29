@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -12,11 +12,11 @@ import {
   Tag,
   WandSparkles,
 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, Card, Divider, EmptyState, ListItem, Skeleton } from '@components/ui';
 import type { NotificationPreferences } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '../hooks/useProfile';
+import { useTheme } from "@app/theme/useTheme";
 
 type ToggleConfig = {
   key: keyof NotificationPreferences;
@@ -81,6 +81,8 @@ const SECTIONS: Array<{ title: string; toggles: ToggleConfig[] }> = [
 ];
 
 const Notifications = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { data: preferences, isLoading, isError, refetch } = useNotificationPreferences();
   const updatePreferences = useUpdateNotificationPreferences();
@@ -147,7 +149,7 @@ const Notifications = () => {
 
 export default Notifications;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Clock, MapPin } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { KitchenCard as KitchenCardType } from '@api/types';
 import { VerifiedBadge } from './ui/Badge';
 import { RatingPill } from './ui/Rating';
+import { useTheme } from "@app/theme/useTheme";
 
 interface KitchenCardProps {
   kitchen: KitchenCardType;
@@ -26,6 +26,8 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
   layout = 'rail',
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const isRail = layout === 'rail';
   const image = kitchen.signatureDish?.image ?? kitchen.coverImage;
 
@@ -111,7 +113,7 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
 
 export default KitchenCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface.raised,
     borderRadius: theme.radius.card,

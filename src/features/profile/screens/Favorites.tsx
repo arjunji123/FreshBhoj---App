@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Heart } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, EmptyState, MealCardSkeleton } from '@components/ui';
 import MealCard from '@components/MealCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -10,8 +9,11 @@ import { useFavorites, useToggleFavorite } from '@features/meals/hooks/useMeals'
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useCartQuantityControls } from '@features/cart/hooks/useCart';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
+import { useTheme } from "@app/theme/useTheme";
 
 const Favorites = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { data, isLoading } = useFavorites();
   const toggleFavorite = useToggleFavorite();
@@ -68,7 +70,7 @@ const Favorites = () => {
 
 export default Favorites;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

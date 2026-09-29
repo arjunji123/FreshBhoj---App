@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Alert,
   Image,
@@ -19,7 +19,6 @@ import {
   ShieldCheck,
   XCircle,
 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import {
   AppBar,
@@ -33,6 +32,7 @@ import {
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import OrderStatusStepper from '../components/OrderStatusStepper';
 import { useCancelOrder, useOrder, useOrderTracking } from '../hooks/useOrders';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'OrderTracking'>;
 
@@ -42,6 +42,8 @@ type Route = RouteProp<PrivateStackParamList, 'OrderTracking'>;
  * detail is a separate cached query so the two don't refetch in lockstep.
  */
 const OrderTracking = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
@@ -276,7 +278,7 @@ const OrderTracking = () => {
 
 export default OrderTracking;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

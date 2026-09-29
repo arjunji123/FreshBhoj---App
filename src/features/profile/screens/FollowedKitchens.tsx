@@ -2,13 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ChefHat, Search as SearchIcon, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, EmptyState, Input, KitchenCardSkeleton } from '@components/ui';
 import KitchenCard from '@components/KitchenCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useFollowedKitchens } from '@features/kitchens/hooks/useKitchens';
+import { useTheme } from "@app/theme/useTheme";
 
 const FollowedKitchens = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { data, isLoading } = useFollowedKitchens();
   const [query, setQuery] = useState('');
@@ -99,7 +101,7 @@ const FollowedKitchens = () => {
 
 export default FollowedKitchens;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

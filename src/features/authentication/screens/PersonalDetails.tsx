@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
@@ -8,19 +8,20 @@ import useAuthNavigation from '../hooks/useAuthNavigation';
 import { useAuthStore } from '../store/authStore';
 
 // Theme
-import { theme } from '@app/theme/index';
-
 // Components
 import PersonalDetailsHeader from '../components/PersonalDetailsHeader';
 import PersonalDetailsContent from '../components/PersonalDetailsContent';
 import ReferralCodeContent from '../components/ReferralCodeContent';
 import SelectLocationContent from '../components/SelectLocationContent';
 import AppGradient from '@components/AppGradient';
+import { useTheme } from "@app/theme/useTheme";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const SHEET_HEIGHT = SCREEN_HEIGHT * 0.82;
 
 const PersonalDetails = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useAuthNavigation();
   const insets = useSafeAreaInsets();
   const sheetRef = useRef<any>(null);
@@ -122,7 +123,7 @@ const PersonalDetails = () => {
 
 export default PersonalDetails;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
   },

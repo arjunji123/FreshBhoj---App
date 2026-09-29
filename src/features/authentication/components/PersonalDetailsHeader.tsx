@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { theme } from '@app/theme/index';
 import { AUTH_COPY } from '../auth.constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from "@app/theme/useTheme";
 
 const { height } = Dimensions.get('window');
 
 const PersonalDetailsHeader = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const insets = useSafeAreaInsets();
 
     return (
@@ -21,7 +23,7 @@ const PersonalDetailsHeader = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: {
         height: height * 0.18,
         width: '100%',

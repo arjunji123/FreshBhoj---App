@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   Easing,
@@ -13,8 +13,8 @@ import Animated, {
   ZoomIn,
 } from 'react-native-reanimated';
 import { Sparkles } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ReferralPrinterProps {
   code: string;
@@ -35,6 +35,8 @@ const BUTTON_GRADIENT = ['#FFD166', '#FF6B6B', '#8B5CF6'];
  * repeat taps are purely theatre, never a new network call.
  */
 const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [isPrinting, setIsPrinting] = useState(false);
   const [printKey, setPrintKey] = useState(0);
   const [hasPrinted, setHasPrinted] = useState(false);
@@ -182,7 +184,7 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
 
 export default ReferralPrinter;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     alignItems: 'center',
     paddingTop: theme.spacing.lg,

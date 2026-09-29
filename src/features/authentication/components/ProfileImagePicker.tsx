@@ -1,21 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { User, Camera } from 'lucide-react-native';
 import AppGradient from '@components/AppGradient';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 
 const AVATAR_SIZE = 128;
 const BADGE_SIZE = 33;
-const BRAND_RED_LIGHT = theme.colors.primary[50];
-const BRAND_RED_BORDER = theme.colors.overlay.primaryBorder;
-const BRAND_RED_ICON = theme.colors.primary[300];
 
 const ProfileImagePicker = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     return (
         <View style={styles.container}>
             {/* Avatar Circle */}
             <TouchableOpacity style={styles.avatarCircle} activeOpacity={0.7}>
-                <User size={24} color={BRAND_RED_ICON} strokeWidth={1.5} />
+                <User size={24} color={theme.colors.primary[300]} strokeWidth={1.5} />
             </TouchableOpacity>
 
             {/* Camera Badge */}
@@ -35,7 +34,7 @@ const ProfileImagePicker = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: {
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
@@ -47,10 +46,10 @@ const styles = StyleSheet.create({
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
         borderRadius: AVATAR_SIZE / 2,
-        backgroundColor: BRAND_RED_LIGHT,
+        backgroundColor: theme.colors.primary[50],
         borderWidth: 2,
         borderStyle: 'dashed',
-        borderColor: BRAND_RED_BORDER,
+        borderColor: theme.colors.overlay.primaryBorder,
         justifyContent: 'center',
         alignItems: 'center',
     },

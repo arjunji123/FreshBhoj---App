@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 import type { MealDetail } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface NutritionPanelProps {
   nutrition: MealDetail['nutrition'];
@@ -15,9 +16,9 @@ const RADIUS = (RING_SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
 
 const MACROS = [
-  { key: 'proteinPercent', label: 'Protein', gramKey: 'proteinG', color: theme.colors.accent[600] },
-  { key: 'carbsPercent', label: 'Carbs', gramKey: 'carbsG', color: theme.colors.amber[500] },
-  { key: 'fatPercent', label: 'Fat', gramKey: 'fatG', color: theme.colors.primary[500] },
+  { key: 'proteinPercent', label: 'Protein', gramKey: 'proteinG', color: staticTheme.colors.accent[600] },
+  { key: 'carbsPercent', label: 'Carbs', gramKey: 'carbsG', color: staticTheme.colors.amber[500] },
+  { key: 'fatPercent', label: 'Fat', gramKey: 'fatG', color: staticTheme.colors.primary[500] },
 ] as const;
 
 /**
@@ -28,6 +29,8 @@ const MACROS = [
  * (not the raw grams) is what people actually compare between meals.
  */
 const NutritionPanel: React.FC<NutritionPanelProps> = ({ nutrition, servingSize }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const { macroSplit } = nutrition;
   const hasMacros =
     macroSplit.proteinPercent + macroSplit.carbsPercent + macroSplit.fatPercent > 0;
@@ -131,7 +134,7 @@ function formatGrams(value: number | null | undefined): string {
 
 export default NutritionPanel;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingHorizontal: theme.layout.screenPadding,
     marginTop: theme.spacing.xl,

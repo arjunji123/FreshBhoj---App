@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -9,7 +9,8 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import AppGradient from '@components/AppGradient';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
@@ -32,9 +33,9 @@ export interface ButtonProps {
 }
 
 const SIZES: Record<ButtonSize, { height: number; paddingHorizontal: number; radius: number }> = {
-  sm: { height: 38, paddingHorizontal: theme.spacing.md, radius: theme.radius.control },
-  md: { height: 48, paddingHorizontal: theme.spacing.lg, radius: theme.radius.control },
-  lg: { height: 56, paddingHorizontal: theme.spacing.xl, radius: theme.radius.button },
+  sm: { height: 38, paddingHorizontal: staticTheme.spacing.md, radius: staticTheme.radius.control },
+  md: { height: 48, paddingHorizontal: staticTheme.spacing.lg, radius: staticTheme.radius.control },
+  lg: { height: 56, paddingHorizontal: staticTheme.spacing.xl, radius: staticTheme.radius.button },
 };
 
 /**
@@ -56,19 +57,22 @@ const Button: React.FC<ButtonProps> = ({
   textStyle,
   testID,
 }) => {
+  const theme = useTheme();
+  const contentColor = useMemo(() => createContentColor(theme), [theme]);
+  const variantStyles = useMemo(() => createVariantStyles(theme), [theme]);
   const isDisabled = disabled || loading;
   const dimensions = SIZES[size];
-  const textVariant = size === 'sm' ? theme.text.buttonSmall : theme.text.button;
+  const textVariant = size === 'sm' ? staticTheme.text.buttonSmall : staticTheme.text.button;
 
   const label = (
     <View style={styles.content}>
       {loading ? (
-        <ActivityIndicator size="small" color={CONTENT_COLOR[variant]} />
+        <ActivityIndicator size="small" color={contentColor[variant]} />
       ) : (
         <>
           {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
           <Text
-            style={[textVariant, { color: CONTENT_COLOR[variant] }, textStyle]}
+            style={[textVariant, { color: contentColor[variant] }, textStyle]}
             numberOfLines={1}
           >
             {title}
@@ -94,8 +98,8 @@ const Button: React.FC<ButtonProps> = ({
           borderRadius: dimensions.radius,
         },
         fullWidth ? styles.fullWidth : styles.autoWidth,
-        VARIANT_STYLES[variant],
-        variant === 'primary' && !isDisabled ? theme.elevation.primary : null,
+        variantStyles[variant],
+        variant === 'primary' && !isDisabled ? staticTheme.elevation.primary : null,
         pressed && !isDisabled ? styles.pressed : null,
         isDisabled ? styles.disabled : null,
         style,
@@ -114,15 +118,15 @@ const Button: React.FC<ButtonProps> = ({
   );
 };
 
-const CONTENT_COLOR: Record<ButtonVariant, string> = {
+const createContentColor = (theme: ReturnType<typeof useTheme>): Record<ButtonVariant, string> => ({
   primary: theme.colors.text.inverse,
   secondary: theme.colors.text.brand,
   ghost: theme.colors.text.brand,
   outline: theme.colors.text.primary,
   danger: theme.colors.text.inverse,
-};
+});
 
-const VARIANT_STYLES: Record<ButtonVariant, ViewStyle> = {
+const createVariantStyles = (theme: ReturnType<typeof useTheme>): Record<ButtonVariant, ViewStyle> => ({
   primary: {},
   secondary: { backgroundColor: theme.colors.surface.brandWash },
   ghost: { backgroundColor: 'transparent' },
@@ -132,7 +136,7 @@ const VARIANT_STYLES: Record<ButtonVariant, ViewStyle> = {
     borderColor: theme.colors.borders.subtle,
   },
   danger: { backgroundColor: theme.colors.state.error },
-};
+});
 
 export default Button;
 
@@ -152,8 +156,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconLeft: { marginRight: theme.spacing.sm },
-  iconRight: { marginLeft: theme.spacing.sm },
+  iconLeft: { marginRight: staticTheme.spacing.sm },
+  iconRight: { marginLeft: staticTheme.spacing.sm },
   pressed: {
     opacity: 0.9,
     transform: [{ scale: 0.985 }],

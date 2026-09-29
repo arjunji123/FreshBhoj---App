@@ -3,7 +3,6 @@ import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Lock, MapPin, Plus } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type { PaymentMethod } from '@api/types';
@@ -16,12 +15,15 @@ import BillSummary from '../components/BillSummary';
 import PaymentMethodPicker from '../components/PaymentMethodPicker';
 import DeliverySlotPicker, { type SlotChoice } from '../components/DeliverySlotPicker';
 import { useCart } from '../hooks/useCart';
+import { useTheme } from "@app/theme/useTheme";
 
 /**
  * Checkout. Address → time → payment → bill, in that order: each answer
  * narrows the next, and nothing competes with Place Order at the bottom.
  */
 const Checkout = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const requireAuth = useRequireAuth();
 
@@ -254,7 +256,7 @@ function titleCase(value: string): string {
 
 export default Checkout;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

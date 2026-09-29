@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ChefHat, ChevronRight, Clock } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
 import type { OrderDetail } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ActiveOrderStripProps {
   order: OrderDetail;
@@ -14,7 +14,11 @@ interface ActiveOrderStripProps {
  * Persistent reminder that food is on its way. Sits high on Home because
  * "where's my order?" is the single most common reason someone reopens the app.
  */
-const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) => (
+const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <Pressable
     onPress={onPress}
     accessibilityRole="button"
@@ -47,11 +51,13 @@ const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) =
       <ChevronRight size={20} color={theme.colors.text.inverse} strokeWidth={2.4} />
     </AppGradient>
   </Pressable>
-);
+)
+  );
+};
 
 export default ActiveOrderStrip;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   wrapper: {
     marginTop: theme.spacing.lg,
     marginHorizontal: theme.layout.screenPadding,

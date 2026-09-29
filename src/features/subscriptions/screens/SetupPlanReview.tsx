@@ -2,7 +2,6 @@ import React, { useEffect, useMemo } from 'react';
 import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Coins, Wallet as WalletIcon } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type {
@@ -19,6 +18,7 @@ import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProf
 import { useWalletSummary } from '@features/wallet/hooks/useWallet';
 import { useSetupPlanStore } from '../store/setupPlanStore';
 import { useCreateBespokeSubscription, useSubscriptionQuote } from '../hooks/useSetupPlan';
+import { useTheme } from "@app/theme/useTheme";
 
 const DIET_LABEL: Record<FoodType, string> = { VEG: 'Veg', EGG: 'Egg', NON_VEG: 'Non-Veg', VEGAN: 'Vegan' };
 const SLOT_LABEL: Record<MealSlot, string> = {
@@ -38,6 +38,8 @@ function titleCase(value: string): string {
 
 /** Step 3 of 3 — real, server-quoted price; "Confirm & Pay" is the only place this wizard actually writes anything. */
 const SetupPlanReview = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
 
   const kitchenId = useSetupPlanStore((s) => s.kitchenId);
@@ -280,7 +282,7 @@ const SetupPlanReview = () => {
 
 export default SetupPlanReview;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scroll: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxl,

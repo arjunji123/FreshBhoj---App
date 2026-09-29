@@ -5,14 +5,14 @@ import { theme as staticTheme } from './index';
 import { useThemeStore } from './themeStore';
 
 /**
- * For screens built from here on: returns a `theme`-shaped object whose
- * `colors` reactively tracks the CURRENT preference, live, no restart
- * needed — safe for a screen like Preferences itself that wants an instant
- * preview. Every screen built *before* this hook existed still reads the
- * static `theme` singleton from `./index` and only re-themes after the
- * restart triggered by `commitThemeMode()` below — this hook doesn't change
- * that, it only makes newly-written screens live-reactive to the choice
- * before the restart happens.
+ * Returns a `theme`-shaped object whose `colors` reactively tracks the
+ * current Appearance preference — call this instead of importing the static
+ * `theme` singleton from `./index` in any screen/component whose styling
+ * depends on color (put `StyleSheet.create` calls that use `theme.colors`
+ * inside the component, in a `useMemo(() => createStyles(theme), [theme])`,
+ * not at module scope, or they'll never see updates). The static `theme`
+ * import is still fine — and preferred — for genuinely mode-independent
+ * values (`spacing`, `radius`, `typography`) that never change either way.
  */
 export function useTheme() {
   const resolvedScheme = useThemeStore((s) => s.resolvedScheme);

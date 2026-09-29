@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Image,
   LayoutChangeEvent,
@@ -10,13 +10,13 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Bookmark, Heart, Share2, ShoppingBag } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import AddToCartControl from '@components/AddToCartControl';
 import AppGradient from '@components/AppGradient';
 import { VerifiedBadge } from '@components/ui';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { Reel } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ReelCardProps {
   reel: Reel;
@@ -60,6 +60,8 @@ const ReelCard: React.FC<ReelCardProps> = ({
   onChangeQuantity,
   onView,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   useEffect(() => {
     // Counted once per time the reel becomes the active page.
     if (isActive) onView(reel.id);
@@ -280,7 +282,11 @@ const Action: React.FC<{
   onPress: () => void;
   accessibilityLabel: string;
   gradient?: boolean;
-}> = ({ icon, label, onPress, accessibilityLabel, gradient = false }) => (
+}> = ({ icon, label, onPress, accessibilityLabel, gradient = false }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <Pressable
     onPress={onPress}
     hitSlop={theme.layout.hitSlop}
@@ -302,11 +308,13 @@ const Action: React.FC<{
     )}
     <Text style={styles.actionLabel}>{label}</Text>
   </Pressable>
-);
+)
+  );
+};
 
 export default ReelCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     width: '100%',
     backgroundColor: theme.colors.neutral[900],

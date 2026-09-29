@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AlertCircle, ShoppingBag, Trash2 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import {
@@ -32,8 +31,11 @@ import {
   useRemoveCoupon,
   useUpdateCartItem,
 } from '../hooks/useCart';
+import { useTheme } from "@app/theme/useTheme";
 
 const Cart = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const requireAuth = useRequireAuth();
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -193,7 +195,7 @@ const Cart = () => {
 
 export default Cart;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

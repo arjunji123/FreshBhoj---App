@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Camera, ChevronRight, MapPin } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import { AppBar, Avatar, Button, Input, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useDefaultAddress, useProfile, useUpdateProfile, useUpdateProfileImage } from '../hooks/useProfile';
+import { useTheme } from "@app/theme/useTheme";
 
 const EditProfile = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const storedUser = useAuthStore((s) => s.user);
   const { data: user } = useProfile();
@@ -180,7 +182,7 @@ const EditProfile = () => {
 
 export default EditProfile;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

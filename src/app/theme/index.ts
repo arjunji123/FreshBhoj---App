@@ -6,25 +6,19 @@ import { layoutTokens, spacing } from './spacing';
 import { getPersistedMode } from './themeStore';
 
 /**
- * Most screens in this app build their `StyleSheet.create({...})` at module
- * scope (evaluated once, the moment the file is first imported) rather than
- * inside the component — so `theme.colors.x` values get "baked in" the first
- * time each screen's module loads and never re-read after that. Reactively
- * live-updating every already-built screen the instant the user flips
- * Appearance would mean converting all of them to a `useTheme()` hook, which
- * is its own separate, much larger undertaking.
- *
- * The approach here instead: resolve the correct palette synchronously at
- * *app boot* (so a cold launch into dark mode is correct everywhere, since
- * every module reads the already-resolved `theme.colors` when it first
- * loads), and when the user changes the preference at runtime, mutate this
- * same `colors` reference in place via `applyThemeMode()` and then fully
- * restart the JS bundle (see `Preferences.tsx`) so every module re-evaluates
- * its `StyleSheet.create` calls fresh against the new values. This keeps the
- * static `import { theme } from '@app/theme'` pattern working unchanged for
- * every screen already built, at the cost of a brief restart when the
- * *preference itself* changes (a rare, deliberate action) rather than a
- * silent live re-theme.
+ * Every customer-facing screen reads live-reactive colors via `useTheme()`
+ * (`useTheme.ts`), which tracks `useThemeStore`'s `resolvedScheme` and
+ * re-renders instantly on a change — no restart, no remount. This static
+ * `theme` export still exists for two narrower cases: (1) the small number
+ * of customer-side files that only ever needed *mode-independent* tokens
+ * (`spacing`/`radius`/the brand gradient, which are identical in both
+ * palettes) and import this under a `staticTheme` alias rather than calling
+ * the hook, and (2) the kitchen-partner side of the app, which has its own,
+ * separate scope this round didn't touch — those screens still resolve
+ * whatever the palette was *at app boot* and won't live-update if the
+ * customer flips Appearance mid-session (acceptable: kitchen-partner and
+ * customer sessions are mutually exclusive per login, so this is never
+ * visible to the same person at the same time in practice).
  */
 function resolveInitialColors() {
     const mode = getPersistedMode();
@@ -42,11 +36,6 @@ export const theme = {
     elevation,
     Shadows,
 };
-
-/** Mutates `theme.colors` in place — call right before `RNRestart.restart()`, never expect a live re-render from this alone. */
-export function applyThemeMode(scheme: 'light' | 'dark') {
-    theme.colors = scheme === 'dark' ? darkColors : lightColors;
-}
 
 // Export types for use in styled components or helper functions
 export type Theme = typeof theme;

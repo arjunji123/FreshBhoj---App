@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { OtpInput } from 'react-native-otp-entry';
 import { AlertCircle } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { Button } from '@components/ui';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { OTPInputSectionProps } from '../auth.types';
 import { useResendCooldown } from '../hooks/useResendCooldown';
+import { useTheme } from "@app/theme/useTheme";
 
 const OTPInputSection: React.FC<OTPInputSectionProps> = ({
   onSubmit,
@@ -14,6 +14,8 @@ const OTPInputSection: React.FC<OTPInputSectionProps> = ({
   errorMessage,
   isSubmitting = false,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [otpValue, setOtpValue] = useState('');
   const { canResend, label, restart } = useResendCooldown();
 
@@ -74,7 +76,7 @@ const OTPInputSection: React.FC<OTPInputSectionProps> = ({
 
 export default OTPInputSection;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingHorizontal: theme.layout.screenPadding,
     alignItems: 'center',

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
@@ -10,7 +10,6 @@ import {
   ShoppingBag,
   UtensilsCrossed,
 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import {
   AppBar,
@@ -43,6 +42,7 @@ import MealHero from '../components/MealHero';
 import NutritionPanel from '../components/NutritionPanel';
 import CustomizationSheet from '../components/CustomizationSheet';
 import ReviewCard from '../components/ReviewCard';
+import { useTheme } from "@app/theme/useTheme";
 
 type MealDetailRoute = RouteProp<PrivateStackParamList, 'MealDetail'>;
 
@@ -52,6 +52,8 @@ type MealDetailRoute = RouteProp<PrivateStackParamList, 'MealDetail'>;
  * bar pinned so the decision is always one tap away.
  */
 const MealDetailScreen = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<MealDetailRoute>();
   const sheetRef = useRef<SheetHandle>(null);
@@ -356,7 +358,7 @@ const MealDetailScreen = () => {
 
 export default MealDetailScreen;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

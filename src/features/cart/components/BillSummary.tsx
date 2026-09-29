@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Coins, Info, Sparkles } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { Card, Divider, SummaryRow } from '@components/ui';
 import type { PriceBreakdown } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface BillSummaryProps {
   pricing: PriceBreakdown;
@@ -17,66 +17,72 @@ const BillSummary: React.FC<BillSummaryProps> = ({
   pricing,
   couponCode,
   title = 'Bill details',
-}) => (
-  <View style={styles.container}>
-    <Text style={[theme.text.h3, styles.title]}>{title}</Text>
+}) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+      return (
+    (
+      <View style={styles.container}>
+        <Text style={[theme.text.h3, styles.title]}>{title}</Text>
 
-    <Card padding="md" elevation="xs">
-      <SummaryRow label="Item total" value={pricing.itemsTotal} />
+        <Card padding="md" elevation="xs">
+          <SummaryRow label="Item total" value={pricing.itemsTotal} />
 
-      <SummaryRow
-        label="Delivery fee"
-        value={pricing.freeDeliveryApplied ? 'FREE' : pricing.deliveryFee}
-        tone={pricing.freeDeliveryApplied ? 'free' : 'default'}
-        icon={<Info size={13} color={theme.colors.text.tertiary} strokeWidth={2.2} />}
-      />
+          <SummaryRow
+            label="Delivery fee"
+            value={pricing.freeDeliveryApplied ? 'FREE' : pricing.deliveryFee}
+            tone={pricing.freeDeliveryApplied ? 'free' : 'default'}
+            icon={<Info size={13} color={theme.colors.text.tertiary} strokeWidth={2.2} />}
+          />
 
-      <SummaryRow label="Taxes & charges" value={pricing.taxes} tone="muted" />
+          <SummaryRow label="Taxes & charges" value={pricing.taxes} tone="muted" />
 
-      {pricing.couponDiscount > 0 ? (
-        <SummaryRow
-          label={couponCode ? `Coupon ${couponCode}` : 'Discount'}
-          value={pricing.couponDiscount}
-          tone="discount"
-          icon={<Sparkles size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
-        />
-      ) : null}
+          {pricing.couponDiscount > 0 ? (
+            <SummaryRow
+              label={couponCode ? `Coupon ${couponCode}` : 'Discount'}
+              value={pricing.couponDiscount}
+              tone="discount"
+              icon={<Sparkles size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
+            />
+          ) : null}
 
-      {pricing.coinDiscount > 0 ? (
-        <SummaryRow
-          label="FreshBhoj Coins"
-          value={pricing.coinDiscount}
-          tone="discount"
-          icon={<Coins size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
-        />
-      ) : null}
+          {pricing.coinDiscount > 0 ? (
+            <SummaryRow
+              label="FreshBhoj Coins"
+              value={pricing.coinDiscount}
+              tone="discount"
+              icon={<Coins size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
+            />
+          ) : null}
 
-      <Divider dashed spacing={theme.spacing.sm} />
+          <Divider dashed spacing={theme.spacing.sm} />
 
-      <SummaryRow label="Total amount" value={pricing.totalAmount} tone="total" />
+          <SummaryRow label="Total amount" value={pricing.totalAmount} tone="total" />
 
-      {pricing.discount > 0 ? (
-        <View style={styles.savingsBanner}>
-          <Text style={[theme.text.caption, styles.savingsText]}>
-            You saved {formatCurrency(pricing.discount)} on this order
-          </Text>
-        </View>
-      ) : null}
-    </Card>
+          {pricing.discount > 0 ? (
+            <View style={styles.savingsBanner}>
+              <Text style={[theme.text.caption, styles.savingsText]}>
+                You saved {formatCurrency(pricing.discount)} on this order
+              </Text>
+            </View>
+          ) : null}
+        </Card>
 
-    {!pricing.freeDeliveryApplied && pricing.amountToFreeDelivery > 0 ? (
-      <View style={styles.freeDeliveryHint}>
-        <Text style={[theme.text.caption, styles.freeDeliveryText]}>
-          Add {formatCurrency(pricing.amountToFreeDelivery)} more for free delivery
-        </Text>
+        {!pricing.freeDeliveryApplied && pricing.amountToFreeDelivery > 0 ? (
+          <View style={styles.freeDeliveryHint}>
+            <Text style={[theme.text.caption, styles.freeDeliveryText]}>
+              Add {formatCurrency(pricing.amountToFreeDelivery)} more for free delivery
+            </Text>
+          </View>
+        ) : null}
       </View>
-    ) : null}
-  </View>
-);
+    )
+      );
+    };
 
 export default BillSummary;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.xl,
   },

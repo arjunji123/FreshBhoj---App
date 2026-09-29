@@ -1,6 +1,6 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { Button, Sheet, type SheetHandle } from '@components/ui';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { FoodType, GoalTag, GoalTagOption } from '@api/types';
@@ -84,7 +84,10 @@ const SearchFiltersSheet = forwardRef<SheetHandle, SearchFiltersSheetProps>(
       resultCount,
     },
     ref,
-  ) => (
+  ) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+    return (
     <Sheet ref={ref} eyebrow="FILTER & SORT" title="Find your meal" heightRatio={0.88}>
       <ScrollView
         style={styles.scrollFlex}
@@ -188,45 +191,54 @@ const SearchFiltersSheet = forwardRef<SheetHandle, SearchFiltersSheetProps>(
         />
       </View>
     </Sheet>
-  ),
+    );
+  },
 );
 
 SearchFiltersSheet.displayName = 'SearchFiltersSheet';
 
 export default SearchFiltersSheet;
 
-const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
-  <View style={styles.section}>
-    <Text style={[theme.text.h4, styles.sectionTitle]}>{title}</Text>
-    {children}
-  </View>
-);
+const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+    <View style={styles.section}>
+      <Text style={[theme.text.h4, styles.sectionTitle]}>{title}</Text>
+      {children}
+    </View>
+  );
+};
 
 const FilterPill: React.FC<{
   label: string;
   selected: boolean;
   onPress: () => void;
   icon?: React.ReactNode;
-}> = ({ label, selected, onPress, icon }) => (
-  <Pressable
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityState={{ selected }}
-    style={[styles.pill, selected ? styles.pillSelected : null]}
-  >
-    {icon}
-    <Text
-      style={[
-        theme.text.label,
-        { color: selected ? theme.colors.primary[700] : theme.colors.text.secondary },
-      ]}
+}> = ({ label, selected, onPress, icon }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      style={[styles.pill, selected ? styles.pillSelected : null]}
     >
-      {label}
-    </Text>
-  </Pressable>
-);
+      {icon}
+      <Text
+        style={[
+          theme.text.label,
+          { color: selected ? theme.colors.primary[700] : theme.colors.text.secondary },
+        ]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+};
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scrollFlex: {
     flex: 1,
   },

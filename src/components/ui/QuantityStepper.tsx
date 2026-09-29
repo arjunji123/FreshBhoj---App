@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Minus, Plus, Trash2 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 interface QuantityStepperProps {
   value: number;
@@ -26,6 +26,8 @@ const QuantityStepper: React.FC<QuantityStepperProps> = ({
   disabled = false,
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const dimension = size === 'sm' ? 28 : 36;
   const iconSize = size === 'sm' ? 14 : 18;
   const atMin = value <= min;
@@ -90,7 +92,7 @@ const QuantityStepper: React.FC<QuantityStepperProps> = ({
 
 export default QuantityStepper;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

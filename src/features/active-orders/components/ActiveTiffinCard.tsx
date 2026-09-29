@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { CalendarCheck } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ActiveOrder } from '../active-orders.types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ActiveTiffinCardProps {
   order: ActiveOrder;
@@ -20,6 +20,8 @@ const ActiveTiffinCard: React.FC<ActiveTiffinCardProps> = ({
   order,
   onViewSchedule,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const statusColor = STATUS_COLORS[order.status] ?? STATUS_COLORS.scheduled;
 
   return (
@@ -68,7 +70,7 @@ const ActiveTiffinCard: React.FC<ActiveTiffinCardProps> = ({
 
 export default ActiveTiffinCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginHorizontal: 20,
     backgroundColor: '#FFF9F5',

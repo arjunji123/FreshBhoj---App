@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,10 +8,10 @@ import {
   Dimensions,
 } from 'react-native';
 import {Heart, Plus} from 'lucide-react-native';
-import {theme} from '@app/theme/index';
 import {Shadows} from '@app/theme/colors';
 import GradientText from '@components/GradientText';
 import AppGradient from '@components/AppGradient';
+import { useTheme } from "@app/theme/useTheme";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const CARD_GAP = 20;
@@ -36,6 +36,8 @@ interface FoodCardProps {
 }
 
 const FoodCard = ({item, onFavoritePress, onAddPress}: FoodCardProps) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <View style={styles.card}>
       {/* Image Section */}
@@ -100,7 +102,7 @@ const FoodCard = ({item, onFavoritePress, onAddPress}: FoodCardProps) => {
 
 export default FoodCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     height: 250,

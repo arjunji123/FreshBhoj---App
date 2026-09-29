@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,8 +8,8 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import { theme } from '@app/theme/index';
 import GradientText from './GradientText';
+import { useTheme } from "@app/theme/useTheme";
 
 interface SectionHeaderProps {
   title: string;
@@ -28,6 +28,8 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
   titleStyle,
   actionStyle,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <View style={[styles.container, style]}>
       <Text style={[styles.title, titleStyle]}>{title}</Text>
@@ -47,7 +49,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 
 export default SectionHeader;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',

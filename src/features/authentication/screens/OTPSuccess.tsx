@@ -1,8 +1,7 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 // theme
-import { theme } from '@app/theme/index';
 import { Check } from 'lucide-react-native';
 
 // Components
@@ -11,8 +10,11 @@ import RippleEffect from '../../../animations/RippleEffect';
 import AppButton from '@components/AppButton';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import useAuthNavigation from '../hooks/useAuthNavigation';
+import { useTheme } from "@app/theme/useTheme";
 
 const OTPSuccess = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const navigation = useAuthNavigation();
 
@@ -54,7 +56,7 @@ const OTPSuccess = () => {
 
 export default OTPSuccess;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',

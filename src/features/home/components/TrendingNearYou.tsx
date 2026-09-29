@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MapPinOff } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { Skeleton } from '@components/ui';
 import type { NearbyMealCard } from '@api/types';
 import NearbyMealTile, { CARD_WIDTH } from './NearbyMealTile';
+import { useTheme } from "@app/theme/useTheme";
 
 interface TrendingNearYouProps {
   meals: NearbyMealCard[];
@@ -19,16 +19,26 @@ interface TrendingNearYouProps {
   onSetLocation: () => void;
 }
 
-const Header = () => (
+const Header = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.header}>
     <Text style={theme.text.h2}>Trending Near You</Text>
     <Text style={[theme.text.bodySmall, styles.headerSubtitle]}>
       Popular dishes that others nearby are loving
     </Text>
   </View>
-);
+)
+  );
+};
 
-const TileSkeleton = () => (
+const TileSkeleton = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.tileSkeleton}>
     <Skeleton height={110} radius={theme.radius.card} />
     <View style={styles.tileSkeletonBody}>
@@ -40,7 +50,9 @@ const TileSkeleton = () => (
       </View>
     </View>
   </View>
-);
+)
+  );
+};
 
 /**
  * Real "near you" — ranked by order volume among kitchens within a radius of
@@ -58,6 +70,8 @@ const TrendingNearYou: React.FC<TrendingNearYouProps> = ({
   onToggleFavorite,
   onSetLocation,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   if (!hasLocation) {
     return (
       <View style={styles.container}>
@@ -103,7 +117,7 @@ const TrendingNearYou: React.FC<TrendingNearYouProps> = ({
 
 export default TrendingNearYou;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.xl,
   },

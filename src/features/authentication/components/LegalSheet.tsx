@@ -1,6 +1,6 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { Sheet, type SheetHandle } from '@components/ui';
 import type { LegalDoc } from '../constants/legalContent';
 
@@ -9,31 +9,35 @@ interface LegalSheetProps {
 }
 
 /** Bottom sheet for Terms / Privacy / Content policy — same shell as every other sheet in the app. */
-const LegalSheet = forwardRef<SheetHandle, LegalSheetProps>(({ doc }, ref) => (
-  <Sheet ref={ref} eyebrow={doc?.eyebrow ?? 'LEGAL'} title={doc?.title ?? ''} heightRatio={0.8}>
-    <ScrollView
-      style={styles.scrollFlex}
-      contentContainerStyle={styles.scroll}
-      showsVerticalScrollIndicator={false}
-    >
-      {doc?.sections.map((section) => (
-        <View key={section.heading} style={styles.section}>
-          <Text style={[theme.text.h4, styles.heading]}>{section.heading}</Text>
-          <Text style={[theme.text.body, styles.body]}>{section.body}</Text>
-        </View>
-      ))}
-      <Text style={[theme.text.caption, styles.footer]}>
-        FreshBhoj · Jaipur · Last updated 2026
-      </Text>
-    </ScrollView>
-  </Sheet>
-));
+const LegalSheet = forwardRef<SheetHandle, LegalSheetProps>(({ doc }, ref) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+    <Sheet ref={ref} eyebrow={doc?.eyebrow ?? 'LEGAL'} title={doc?.title ?? ''} heightRatio={0.8}>
+      <ScrollView
+        style={styles.scrollFlex}
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+      >
+        {doc?.sections.map((section) => (
+          <View key={section.heading} style={styles.section}>
+            <Text style={[theme.text.h4, styles.heading]}>{section.heading}</Text>
+            <Text style={[theme.text.body, styles.body]}>{section.body}</Text>
+          </View>
+        ))}
+        <Text style={[theme.text.caption, styles.footer]}>
+          FreshBhoj · Jaipur · Last updated 2026
+        </Text>
+      </ScrollView>
+    </Sheet>
+  );
+});
 
 LegalSheet.displayName = 'LegalSheet';
 
 export default LegalSheet;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scrollFlex: {
     flex: 1,
   },

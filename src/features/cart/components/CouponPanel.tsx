@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ChevronDown, ChevronUp, Tag, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { Button, Card, Input } from '@components/ui';
 import type { Cart, Coupon } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface CouponPanelProps {
   cart: Cart;
@@ -27,6 +27,8 @@ const CouponPanel: React.FC<CouponPanelProps> = ({
   isApplying,
   errorMessage,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [expanded, setExpanded] = useState(false);
   const [code, setCode] = useState('');
 
@@ -138,7 +140,7 @@ const CouponPanel: React.FC<CouponPanelProps> = ({
 
 export default CouponPanel;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginTop: theme.spacing.md,
   },

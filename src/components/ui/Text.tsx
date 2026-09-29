@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleProp, Text as RNText, TextProps as RNTextProps, TextStyle } from 'react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import type { TextStyleName } from '@app/theme/typography';
 
 type ColorToken =
@@ -35,18 +35,21 @@ const Text: React.FC<TextProps> = ({
   style,
   children,
   ...rest
-}) => (
-  <RNText
-    style={[
-      theme.text[variant],
-      { color: theme.colors.text[color] },
-      align ? { textAlign: align } : null,
-      style,
-    ]}
-    {...rest}
-  >
-    {children}
-  </RNText>
-);
+}) => {
+  const theme = useTheme();
+  return (
+    <RNText
+      style={[
+        theme.text[variant],
+        { color: theme.colors.text[color] },
+        align ? { textAlign: align } : null,
+        style,
+      ]}
+      {...rest}
+    >
+      {children}
+    </RNText>
+  );
+};
 
 export default Text;

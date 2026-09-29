@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from 'react-native';
 import { Plus } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import AppGradient from './AppGradient';
 import QuantityStepper from './ui/QuantityStepper';
+import { useTheme } from "@app/theme/useTheme";
 
 interface AddToCartControlProps {
   /** Current quantity of this meal already in the cart. 0 shows the add button. */
@@ -34,6 +34,8 @@ const AddToCartControl: React.FC<AddToCartControlProps> = ({
   variant = 'circle',
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   if (quantity > 0) {
     return (
       <QuantityStepper
@@ -103,7 +105,7 @@ const AddToCartControl: React.FC<AddToCartControlProps> = ({
 
 export default AddToCartControl;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   circle: {
     alignItems: 'center',
     justifyContent: 'center',

@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { FlatList, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { MessageSquare, PenLine } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, AppBarAction, Chip, ChipRow, EmptyState, Skeleton } from '@components/ui';
 import ReviewCard from '@features/meals/components/ReviewCard';
 import { useMarkReviewHelpful } from '@features/reviews/hooks/useReviews';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import RatingSummary from '../components/RatingSummary';
 import { useKitchenReviewSummary, useKitchenReviews } from '../hooks/useKitchens';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenReviews'>;
 
 const STAR_FILTERS = [0, 5, 4, 3, 2, 1];
 
 const KitchenReviews = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
   const [starFilter, setStarFilter] = useState(0);
@@ -99,7 +101,7 @@ const KitchenReviews = () => {
 
 export default KitchenReviews;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

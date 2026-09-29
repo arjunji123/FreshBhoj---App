@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 export interface AppBarProps {
   title?: string;
@@ -26,6 +26,8 @@ const AppBar: React.FC<AppBarProps> = ({
   centerTitle = true,
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const isTransparent = variant === 'transparent';
 
@@ -85,25 +87,29 @@ export const AppBarAction: React.FC<{
   onPress?: () => void;
   floating?: boolean;
   accessibilityLabel?: string;
-}> = ({ children, onPress, floating = false, accessibilityLabel }) => (
-  <Pressable
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityLabel={accessibilityLabel}
-    hitSlop={theme.layout.hitSlop}
-    style={({ pressed }) => [
-      styles.iconButton,
-      floating ? styles.iconButtonFloating : null,
-      pressed ? styles.pressed : null,
-    ]}
-  >
-    {children}
-  </Pressable>
-);
+}> = ({ children, onPress, floating = false, accessibilityLabel }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      hitSlop={theme.layout.hitSlop}
+      style={({ pressed }) => [
+        styles.iconButton,
+        floating ? styles.iconButtonFloating : null,
+        pressed ? styles.pressed : null,
+      ]}
+    >
+      {children}
+    </Pressable>
+  );
+};
 
 export default AppBar;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingBottom: theme.spacing.md,
     paddingHorizontal: theme.layout.screenPadding,

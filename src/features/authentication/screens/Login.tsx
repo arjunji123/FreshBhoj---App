@@ -8,7 +8,6 @@ import {
 import { useRoute } from '@react-navigation/native';
 import CheckBox from '@react-native-community/checkbox';
 import GlassButton from '@components/GlassButton';
-import { theme } from '@app/theme/index';
 import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import LoginTopSection from '../components/LoginTopSection';
 import LoginTitle from '../components/LoginTitle';
@@ -23,8 +22,11 @@ import { useAuthStore } from '../store/authStore';
 import { useSendOtp } from '../hooks/useAuth';
 import { useSendKitchenOtp } from '@features/kitchenPartner/hooks/useKitchenAuth';
 import { authApi, ApiError } from '@api';
+import { useTheme } from "@app/theme/useTheme";
 
 const Login = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const phoneNumber = useAuthStore((state) => state.phoneNumber);
   const rememberMe = useAuthStore((state) => state.rememberMe);
   const setPhoneNumber = useAuthStore((state) => state.setPhoneNumber);
@@ -161,7 +163,7 @@ const Login = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,

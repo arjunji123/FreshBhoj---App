@@ -1,20 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ChevronRight, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { useCart } from '@features/cart/hooks/useCart';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { getActiveRouteNames, navigationRef } from '@app/navigation/navigationRef';
 import AppGradient from './AppGradient';
+import { useTheme } from "@app/theme/useTheme";
 
-const GAP_ABOVE_BAR = theme.spacing.md;
+const GAP_ABOVE_BAR = staticTheme.spacing.md;
 const BAR_HEIGHT = 52;
 
 /** Extra bottom padding a scrollable screen should add so its own content
  * never sits behind the floating cart bar when the cart has items. */
-export const MINI_CART_BAR_CLEARANCE = BAR_HEIGHT + GAP_ABOVE_BAR + theme.spacing.lg;
+export const MINI_CART_BAR_CLEARANCE = BAR_HEIGHT + GAP_ABOVE_BAR + staticTheme.spacing.lg;
 
 // Screens that already own their own cart / checkout action at the bottom —
 // a second floating bar there would just duplicate the primary CTA.
@@ -35,6 +36,8 @@ const HIDDEN_ROUTES = new Set([
  * plain text and was easy to miss.
  */
 const MiniCartBar = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const isGuest = useAuthStore((s) => s.isGuest);
@@ -88,7 +91,7 @@ const MiniCartBar = () => {
 
 export default MiniCartBar;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   wrap: {
     position: 'absolute',
     left: theme.layout.screenPadding,

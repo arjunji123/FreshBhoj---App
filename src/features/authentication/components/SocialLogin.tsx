@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import { theme } from '@app/theme/index';
 import { AUTH_COPY } from '../auth.constants';
+import { useTheme } from "@app/theme/useTheme";
 
 const SocialLogin = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     return (
         <>
             <View style={styles.dividerRow}>
@@ -32,7 +34,7 @@ const SocialLogin = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     dividerRow: {
         flexDirection: 'row',
         alignItems: 'center',

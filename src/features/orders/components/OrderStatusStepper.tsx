@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Bike, Check, ChefHat, PartyPopper, Receipt } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatTime } from '@utils/format';
 import type { OrderStatus, TrackingStep } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface OrderStatusStepperProps {
   steps: TrackingStep[];
@@ -25,7 +25,11 @@ const STEP_ICONS: Partial<
  * one is brand red and pulsing-loud, and everything ahead stays grey — so the
  * order's position reads at a glance without any text.
  */
-const OrderStatusStepper: React.FC<OrderStatusStepperProps> = ({ steps, isCancelled }) => (
+const OrderStatusStepper: React.FC<OrderStatusStepperProps> = ({ steps, isCancelled }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.container}>
     {steps.map((step, index) => {
       const Icon = STEP_ICONS[step.status] ?? Check;
@@ -78,11 +82,13 @@ const OrderStatusStepper: React.FC<OrderStatusStepperProps> = ({ steps, isCancel
       );
     })}
   </View>
-);
+)
+  );
+};
 
 export default OrderStatusStepper;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingVertical: theme.spacing.xs,
   },

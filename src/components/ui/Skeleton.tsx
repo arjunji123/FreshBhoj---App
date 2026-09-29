@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, {
   Easing,
@@ -7,7 +7,8 @@ import Animated, {
   withRepeat,
   withTiming,
 } from 'react-native-reanimated';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 interface SkeletonProps {
   width?: number | string;
@@ -23,9 +24,11 @@ interface SkeletonProps {
 export const Skeleton: React.FC<SkeletonProps> = ({
   width = '100%',
   height = 16,
-  radius = theme.radius.md,
+  radius = staticTheme.radius.md,
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const opacity = useSharedValue(0.5);
 
   useEffect(() => {
@@ -51,7 +54,11 @@ export const Skeleton: React.FC<SkeletonProps> = ({
 };
 
 /** Placeholder shaped like the meal card in the Home feed. */
-export const MealCardSkeleton: React.FC<{ style?: StyleProp<ViewStyle> }> = ({ style }) => (
+export const MealCardSkeleton: React.FC<{ style?: StyleProp<ViewStyle> }> = ({ style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={[styles.card, style]}>
     <Skeleton height={140} radius={theme.radius.lg} />
     <View style={styles.cardBody}>
@@ -67,28 +74,42 @@ export const MealCardSkeleton: React.FC<{ style?: StyleProp<ViewStyle> }> = ({ s
       </View>
     </View>
   </View>
-);
+)
+  );
+};
 
 /** Placeholder shaped like the horizontal kitchen rail card. */
-export const KitchenCardSkeleton: React.FC = () => (
+export const KitchenCardSkeleton: React.FC = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.kitchenCard}>
     <Skeleton height={112} radius={theme.radius.lg} />
     <Skeleton width="70%" height={14} style={styles.gapTop} />
     <Skeleton width="45%" height={11} style={styles.gapTopSm} />
   </View>
-);
+)
+  );
+};
 
-export const SkeletonList: React.FC<{ count?: number }> = ({ count = 4 }) => (
+export const SkeletonList: React.FC<{ count?: number }> = ({ count = 4 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.list}>
     {Array.from({ length: count }).map((_, index) => (
       <MealCardSkeleton key={index} />
     ))}
   </View>
-);
+)
+  );
+};
 
 export default Skeleton;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   block: {
     backgroundColor: theme.colors.neutral[200],
   },

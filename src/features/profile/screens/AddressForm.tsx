@@ -3,13 +3,13 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Briefcase, Home, MapPin } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import type { AddressLabel } from '@api/types';
 import { AppBar, Button, Chip, Input, StickyBar } from '@components/ui';
 import LocationMapPicker, { type PickedLocation } from '@components/LocationMapPicker';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useAddresses, useCreateAddress, useUpdateAddress } from '../hooks/useProfile';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'AddressForm'>;
 
@@ -20,6 +20,8 @@ const LABELS: Array<{ key: AddressLabel; label: string; Icon: any }> = [
 ];
 
 const AddressForm = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
@@ -232,7 +234,7 @@ const AddressForm = () => {
 
 export default AddressForm;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

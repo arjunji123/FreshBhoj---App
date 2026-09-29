@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dimensions, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Play } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 import type { KitchenMedia } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const GUTTER = theme.layout.screenPadding;
-const REEL_GAP = theme.spacing.sm;
+const GUTTER = staticTheme.layout.screenPadding;
+const REEL_GAP = staticTheme.spacing.sm;
 const REEL_TILE = (SCREEN_WIDTH - GUTTER * 2 - REEL_GAP * 3) / 4;
 const POST_WIDTH = 140;
 
@@ -23,6 +24,8 @@ interface KitchenFoodFeedSectionProps {
  * actually reels.
  */
 const KitchenFoodFeedSection: React.FC<KitchenFoodFeedSectionProps> = ({ media, onPressItem }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   if (!media.length) return null;
 
   const posts = media.filter((item) => item.type === 'IMAGE');
@@ -96,7 +99,7 @@ const KitchenFoodFeedSection: React.FC<KitchenFoodFeedSectionProps> = ({ media, 
 
 export default KitchenFoodFeedSection;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     gap: theme.spacing.xl,
   },

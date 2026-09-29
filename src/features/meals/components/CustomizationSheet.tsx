@@ -2,10 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { Pressable } from 'react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { Button, Divider, QuantityStepper } from '@components/ui';
 import type { MealDetail } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface CustomizationSheetProps {
   meal: MealDetail;
@@ -29,6 +29,8 @@ const CustomizationSheet: React.FC<CustomizationSheetProps> = ({
   isSubmitting,
   onConfirm,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [quantity, setQuantity] = useState(1);
   const [selectedIds, setSelectedIds] = useState<string[]>(() =>
     meal.customizationGroups.flatMap((group) =>
@@ -170,7 +172,7 @@ const CustomizationSheet: React.FC<CustomizationSheetProps> = ({
 
 export default CustomizationSheet;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
   },

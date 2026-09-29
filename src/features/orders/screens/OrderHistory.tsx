@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Receipt } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import type { OrderCard, OrderStatus } from '@api/types';
 import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import OrderHistoryCard from '../components/OrderHistoryCard';
 import { useOrderHistory, useReorder } from '../hooks/useOrders';
+import { useTheme } from "@app/theme/useTheme";
 
 type Filter = { label: string; statuses?: OrderStatus[] };
 
@@ -24,6 +24,8 @@ const FILTERS: Filter[] = [
 
 /** Order history. Used quickly, so it stays a flat scannable list. */
 const OrderHistory = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const [filterIndex, setFilterIndex] = useState(0);
 
@@ -145,7 +147,7 @@ const OrderHistory = () => {
 
 export default OrderHistory;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   header: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.md,

@@ -1,17 +1,21 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
 import { formatCompact } from '@utils/format';
 import { Card } from '@components/ui';
 import { StarRow } from '@components/ui/Rating';
 import type { ReviewSummary } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface RatingSummaryProps {
   summary: ReviewSummary;
 }
 
 /** Average, count and the 5→1 histogram above a kitchen's review list. */
-const RatingSummary: React.FC<RatingSummaryProps> = ({ summary }) => (
+const RatingSummary: React.FC<RatingSummaryProps> = ({ summary }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <Card padding="lg" elevation="xs" style={styles.card}>
     <View style={styles.row}>
       <View style={styles.scoreBlock}>
@@ -35,11 +39,13 @@ const RatingSummary: React.FC<RatingSummaryProps> = ({ summary }) => (
       </View>
     </View>
   </Card>
-);
+)
+  );
+};
 
 export default RatingSummary;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginHorizontal: theme.layout.screenPadding,
   },

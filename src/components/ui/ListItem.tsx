@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { ChevronRight } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ListItemProps {
   title: string;
@@ -25,43 +25,49 @@ const ListItem: React.FC<ListItemProps> = ({
   showChevron = true,
   destructive = false,
   style,
-}) => (
-  <Pressable
-    onPress={onPress}
-    disabled={!onPress}
-    accessibilityRole={onPress ? 'button' : undefined}
-    style={({ pressed }) => [styles.row, pressed && onPress ? styles.pressed : null, style]}
-  >
-    {icon ? (
-      <View style={[styles.iconWrap, destructive ? styles.iconWrapDestructive : null]}>{icon}</View>
-    ) : null}
-
-    <View style={styles.textWrap}>
-      <Text
-        style={[
-          theme.text.h4,
-          { color: destructive ? theme.colors.state.error : theme.colors.text.primary },
-        ]}
-        numberOfLines={1}
+}) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+      return (
+    (
+      <Pressable
+        onPress={onPress}
+        disabled={!onPress}
+        accessibilityRole={onPress ? 'button' : undefined}
+        style={({ pressed }) => [styles.row, pressed && onPress ? styles.pressed : null, style]}
       >
-        {title}
-      </Text>
-      {subtitle ? (
-        <Text style={[theme.text.bodySmall, styles.subtitle]} numberOfLines={2}>
-          {subtitle}
-        </Text>
-      ) : null}
-    </View>
+        {icon ? (
+          <View style={[styles.iconWrap, destructive ? styles.iconWrapDestructive : null]}>{icon}</View>
+        ) : null}
 
-    {right ?? (showChevron && onPress ? (
-      <ChevronRight size={20} color={theme.colors.text.tertiary} strokeWidth={2.2} />
-    ) : null)}
-  </Pressable>
-);
+        <View style={styles.textWrap}>
+          <Text
+            style={[
+              theme.text.h4,
+              { color: destructive ? theme.colors.state.error : theme.colors.text.primary },
+            ]}
+            numberOfLines={1}
+          >
+            {title}
+          </Text>
+          {subtitle ? (
+            <Text style={[theme.text.bodySmall, styles.subtitle]} numberOfLines={2}>
+              {subtitle}
+            </Text>
+          ) : null}
+        </View>
+
+        {right ?? (showChevron && onPress ? (
+          <ChevronRight size={20} color={theme.colors.text.tertiary} strokeWidth={2.2} />
+        ) : null)}
+      </Pressable>
+    )
+      );
+    };
 
 export default ListItem;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',

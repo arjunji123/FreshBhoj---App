@@ -7,7 +7,8 @@ import {
   Leaf,
   TrendingDown,
 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { Chip, ChipRow, Skeleton } from '@components/ui';
 import type { GoalTag, GoalTagOption } from '@api/types';
 
@@ -32,11 +33,13 @@ const ICONS: Record<string, React.FC<{ size: number; color: string; strokeWidth:
  * *and* low calorie, and the API's `hasSome` filter handles the union.
  */
 const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onToggle, isLoading }) => {
+  const theme = useTheme();
+
   if (isLoading) {
     return (
       <View style={[styles.container, styles.skeletonRow]}>
         {Array.from({ length: 4 }).map((_, index) => (
-          <Skeleton key={index} width={index === 0 ? 92 : 80} height={32} radius={theme.radius.pill} />
+          <Skeleton key={index} width={index === 0 ? 92 : 80} height={32} radius={staticTheme.radius.pill} />
         ))}
       </View>
     );
@@ -76,11 +79,11 @@ export default GoalFilterRow;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: theme.spacing.sm,
+    marginTop: staticTheme.spacing.sm,
   },
   skeletonRow: {
     flexDirection: 'row',
-    gap: theme.spacing.sm,
-    paddingHorizontal: theme.layout.screenPadding,
+    gap: staticTheme.spacing.sm,
+    paddingHorizontal: staticTheme.layout.screenPadding,
   },
 });

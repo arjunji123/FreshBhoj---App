@@ -4,7 +4,6 @@ import { useNavigation, useRoute, type RouteProp } from '@react-navigation/nativ
 import { useQuery } from '@tanstack/react-query';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { Skeleton } from '@components/ui';
 import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
 import { qk, reelsApi } from '@api';
@@ -19,6 +18,7 @@ import {
   useToggleReelLike,
   useToggleReelSave,
 } from '../hooks/useReels';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'ReelViewer'>;
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -31,6 +31,8 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
  * rail lands you exactly there, still able to keep scrolling.
  */
 const ReelViewer = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
   const { params } = useRoute<Route>();
@@ -163,7 +165,7 @@ const ReelViewer = () => {
 
 export default ReelViewer;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.neutral[900],

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CalendarClock, Zap } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 export type SlotChoice = { type: 'NOW' } | { type: 'SCHEDULED'; isoTime: string; label: string };
 
@@ -34,6 +34,8 @@ const DeliverySlotPicker: React.FC<DeliverySlotPickerProps> = ({
   onChange,
   prepTimeMins,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const slots = buildSlots(prepTimeMins);
 
   return (
@@ -95,7 +97,7 @@ const DeliverySlotPicker: React.FC<DeliverySlotPickerProps> = ({
 
 export default DeliverySlotPicker;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.md,
     gap: theme.spacing.md,

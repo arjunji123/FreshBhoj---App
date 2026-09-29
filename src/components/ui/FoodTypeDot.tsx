@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 export type FoodTypeValue = 'VEG' | 'VEGAN' | 'EGG' | 'NON_VEG';
 
@@ -16,6 +16,8 @@ interface FoodTypeDotProps {
  * the colours come straight from `palette.foodType` and are never themed.
  */
 const FoodTypeDot: React.FC<FoodTypeDotProps> = ({ type, size = 14, style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const color = theme.colors.foodType[type] ?? theme.colors.foodType.VEG;
 
   return (
@@ -40,7 +42,7 @@ const FoodTypeDot: React.FC<FoodTypeDotProps> = ({ type, size = 14, style }) => 
 
 export default FoodTypeDot;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   square: {
     borderWidth: 1.5,
     alignItems: 'center',

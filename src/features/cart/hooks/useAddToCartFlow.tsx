@@ -1,7 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
 import { ShoppingBag } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { Button } from '@components/ui';
 import type { MealCard } from '@api/types';
 import type { AddCartItemInput } from '@api/endpoints/cart.api';
@@ -25,6 +25,8 @@ interface PendingAdd extends AddCartItemInput {
  * replays the add with `replaceCart`. Render `conflictDialog` once per screen.
  */
 export function useAddToCartFlow() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const addToCart = useAddToCart();
   const [pending, setPending] = useState<PendingAdd | null>(null);
 
@@ -128,7 +130,7 @@ export function useAddToCartFlow() {
   };
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: theme.colors.overlay.scrim,

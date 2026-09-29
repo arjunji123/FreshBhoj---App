@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
 import { Skeleton } from '@components/ui';
 import type { MealCategory } from '@api/types';
 import { CATEGORY_EMOJI } from '../home.constants';
+import { useTheme } from "@app/theme/useTheme";
 
 interface CategoryGridProps {
   categories: MealCategory[];
@@ -14,6 +14,8 @@ interface CategoryGridProps {
 
 /** Breakfast / Lunch / Dinner / Healthy Snacks — four tiles, one row. */
 const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onSelect, isLoading }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   if (isLoading) {
     return (
       <View style={styles.grid}>
@@ -72,7 +74,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onS
 
 export default CategoryGrid;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   grid: {
     flexDirection: 'row',
     paddingHorizontal: theme.layout.screenPadding,

@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Star } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCompact } from '@utils/format';
+import { useTheme } from '@app/theme/useTheme';
 
 interface RatingPillProps {
   value: number;
@@ -21,6 +21,8 @@ export const RatingPill: React.FC<RatingPillProps> = ({
   variant = 'plain',
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const isSolid = variant === 'solid';
   const iconSize = size === 'sm' ? 12 : 14;
   const textStyle = size === 'sm' ? theme.text.caption : theme.text.label;
@@ -63,7 +65,11 @@ interface StarRowProps {
 }
 
 /** Five stars. Interactive when `onChange` is supplied (the feedback screen). */
-export const StarRow: React.FC<StarRowProps> = ({ value, size = 20, onChange, style }) => (
+export const StarRow: React.FC<StarRowProps> = ({ value, size = 20, onChange, style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={[styles.starRow, style]}>
     {[1, 2, 3, 4, 5].map((star) => {
       const filled = star <= Math.round(value);
@@ -79,11 +85,13 @@ export const StarRow: React.FC<StarRowProps> = ({ value, size = 20, onChange, st
       );
     })}
   </View>
-);
+)
+  );
+};
 
 export default RatingPill;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   pill: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, Text, TextInput, View } from 'react-native';
 import { ArrowRight, Gift, PartyPopper } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import { Button } from '@components/ui';
 import { useRedeemReferral } from '@features/referral/hooks/useReferral';
 import { pendingReferralStore } from '@features/referral/pendingReferralStore';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ReferralCodeContentProps {
   onSaveAndContinue: () => void;
@@ -17,6 +17,8 @@ interface ReferralCodeContentProps {
  * nobody is blocked from continuing without one.
  */
 const ReferralCodeContent: React.FC<ReferralCodeContentProps> = ({ onSaveAndContinue }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   // If they arrived via a shared invite link, the code is already here.
   const [code, setCode] = useState(() => pendingReferralStore.consume() ?? '');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -99,7 +101,7 @@ const ReferralCodeContent: React.FC<ReferralCodeContentProps> = ({ onSaveAndCont
 
 export default ReferralCodeContent;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.lg,

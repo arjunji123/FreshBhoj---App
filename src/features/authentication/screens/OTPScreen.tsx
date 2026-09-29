@@ -1,8 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { Dimensions, Image, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { StatusBar } from 'react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import OTPHeader from '../components/OTPHeader';
 import OTPInputSection from '../components/OTPInputSection';
@@ -12,10 +11,13 @@ import { useSendOtp, useVerifyOtp } from '../hooks/useAuth';
 import { useSendKitchenOtp, useVerifyKitchenOtp } from '@features/kitchenPartner/hooks/useKitchenAuth';
 import { useAuthStore } from '../store/authStore';
 import type { PublicNavigation } from '@app/navigation/navigation.types';
+import { useTheme } from "@app/theme/useTheme";
 
 const { width, height } = Dimensions.get('window');
 
 const OTPScreen = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const route = useRoute<OTPScreenRouteProp>();
   const navigation = useNavigation<PublicNavigation>();
   const phoneNumber = route.params?.phoneNumber ?? '';
@@ -112,7 +114,7 @@ const OTPScreen = () => {
 
 export default OTPScreen;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.surface.base,

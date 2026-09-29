@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Heart, Share2, Volume2, VolumeX } from 'lucide-react-native';
 import { Badge, VerifiedBadge } from '@components/ui';
 import AddToCartControl from '@components/AddToCartControl';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { Reel } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const MEDIA_HEIGHT = SCREEN_WIDTH * 1.25;
@@ -47,6 +47,8 @@ const FoodFeedCard: React.FC<FoodFeedCardProps> = ({
   quantity = 0,
   onChangeQuantity,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const foodTypeColor = reel.meal ? theme.colors.foodType[reel.meal.foodType] ?? theme.colors.foodType.VEG : null;
   const title = reel.meal?.name ?? reel.caption ?? reel.kitchen.name;
 
@@ -137,7 +139,7 @@ const FoodFeedCard: React.FC<FoodFeedCardProps> = ({
 
 export default FoodFeedCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   wrapper: {
     marginBottom: theme.spacing.lg,
   },

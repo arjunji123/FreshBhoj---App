@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Alert, Image, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { MapPin, MessageSquare, RotateCcw } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { ApiError } from '@api';
 import {
@@ -18,6 +17,7 @@ import { StarRow } from '@components/ui/Rating';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import OrderStatusStepper from '../components/OrderStatusStepper';
 import { useOrder, useReorder } from '../hooks/useOrders';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'OrderDetail'>;
 
@@ -26,6 +26,8 @@ type Route = RouteProp<PrivateStackParamList, 'OrderDetail'>;
  * fully resolved and the primary actions become rate + reorder.
  */
 const OrderDetail = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
@@ -230,7 +232,7 @@ const OrderDetail = () => {
 
 export default OrderDetail;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

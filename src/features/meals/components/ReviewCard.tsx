@@ -1,18 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MessageCircle, ThumbsUp } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatRelativeTime } from '@utils/format';
 import { Avatar, Badge } from '@components/ui';
 import { StarRow } from '@components/ui/Rating';
 import type { Review } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface ReviewCardProps {
   review: Review;
   onHelpful?: () => void;
 }
 
-const ReviewCard: React.FC<ReviewCardProps> = ({ review, onHelpful }) => (
+const ReviewCard: React.FC<ReviewCardProps> = ({ review, onHelpful }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.card}>
     <View style={styles.header}>
       <Avatar uri={review.author.avatar} name={review.author.name} size={38} />
@@ -90,11 +94,13 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onHelpful }) => (
       ) : null}
     </View>
   </View>
-);
+)
+  );
+};
 
 export default ReviewCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface.raised,
     borderRadius: theme.radius.card,

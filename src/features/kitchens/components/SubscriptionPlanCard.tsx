@@ -1,12 +1,12 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type { CreateSubscriptionFromPlanInput, FoodType, MealSlot, SubscriptionPlan } from '@api/types';
 import { Badge, Button, Card, Chip, ChipRow, Sheet, SummaryRow } from '@components/ui';
 import type { SheetHandle } from '@components/ui';
 import { useSubscribeToPlan } from '../hooks/useKitchens';
+import { useTheme } from "@app/theme/useTheme";
 
 const DIET_LABEL: Record<FoodType, string> = { VEG: 'Veg', EGG: 'Egg', NON_VEG: 'Non-Veg', VEGAN: 'Vegan' };
 const SLOT_LABEL: Record<MealSlot, string> = { BREAKFAST: 'Breakfast', LUNCH: 'Lunch', DINNER: 'Dinner', SNACKS: 'Snacks' };
@@ -33,6 +33,8 @@ interface SubscriptionPlanCardProps {
  * decided when the plan offers it".
  */
 const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> = ({ plan, kitchenId }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [dietKey, setDietKey] = useState<FoodType | typeof JAIN_KEY | null>(null);
   const [slot, setSlot] = useState<MealSlot | null>(null);
   const sheetRef = useRef<SheetHandle>(null);
@@ -141,7 +143,7 @@ const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> = ({ plan, kitch
 
 export default SubscriptionPlanCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginBottom: theme.spacing.md,
   },

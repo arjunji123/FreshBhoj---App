@@ -1,7 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Dimensions, FlatList, Image, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const HERO_HEIGHT = 300;
@@ -12,6 +12,8 @@ interface MealHeroProps {
 
 /** Swipeable hero gallery with page dots and a scrim for the floating app bar. */
 const MealHero: React.FC<MealHeroProps> = ({ images }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [activeIndex, setActiveIndex] = useState(0);
   const listRef = useRef<FlatList<string>>(null);
   const photos = images.length ? images : [''];
@@ -60,7 +62,7 @@ const MealHero: React.FC<MealHeroProps> = ({ images }) => {
 
 export default MealHero;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     height: HERO_HEIGHT,
     backgroundColor: theme.colors.neutral[100],

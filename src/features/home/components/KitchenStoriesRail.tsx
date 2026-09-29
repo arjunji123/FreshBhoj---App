@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Play } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
 import SectionHeader from '@components/SectionHeader';
 import { Skeleton, VerifiedBadge } from '@components/ui';
 import type { KitchenStoryGroup } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface KitchenStoriesRailProps {
   groups: KitchenStoryGroup[];
@@ -20,6 +20,8 @@ interface KitchenStoriesRailProps {
  * kitchen has something the customer hasn't seen yet.
  */
 const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPressGroup, isLoading }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   if (isLoading) {
     return (
       <View style={styles.container}>
@@ -113,7 +115,7 @@ const CARD_WIDTH = 159;
 const CARD_HEIGHT = 239;
 const RING_PADDING = 3;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.xl,
   },

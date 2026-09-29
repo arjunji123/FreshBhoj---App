@@ -1,16 +1,17 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Heart } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import AddToCartControl from '@components/AddToCartControl';
 import { RatingPill } from '@components/ui/Rating';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { NearbyMealCard } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const CARD_GAP = theme.spacing.lg;
-const CARD_WIDTH = (SCREEN_WIDTH - theme.layout.screenPadding * 2 - CARD_GAP) / 2;
+const CARD_GAP = staticTheme.spacing.lg;
+const CARD_WIDTH = (SCREEN_WIDTH - staticTheme.layout.screenPadding * 2 - CARD_GAP) / 2;
 
 interface NearbyMealTileProps {
   meal: NearbyMealCard;
@@ -35,6 +36,8 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
   onChangeQuantity,
   onToggleFavorite,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const unavailable = !meal.isOrderable;
 
   return (
@@ -102,74 +105,74 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
 export default NearbyMealTile;
 export { CARD_WIDTH };
 
-const styles = StyleSheet.create({
-  card: {
-    width: CARD_WIDTH,
-    backgroundColor: theme.colors.surface.raised,
-    borderRadius: theme.radius.card,
-    overflow: 'hidden',
-    ...theme.elevation.sm,
-  },
-  pressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.99 }],
-  },
-  imageContainer: {
-    width: '100%',
-    height: 110,
-    backgroundColor: theme.colors.neutral[100],
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-  },
-  imageFallback: {
-    backgroundColor: theme.colors.neutral[200],
-  },
-  favoriteButton: {
-    position: 'absolute',
-    top: theme.spacing.sm,
-    right: theme.spacing.sm,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    backgroundColor: theme.colors.surface.base,
-    justifyContent: 'center',
-    alignItems: 'center',
-    ...theme.elevation.xs,
-  },
-  unavailableOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: theme.colors.overlay.scrim,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  unavailableText: {
-    ...theme.text.caption,
-    color: theme.colors.text.inverse,
-    textAlign: 'center',
-    paddingHorizontal: theme.spacing.sm,
-  },
-  content: {
-    padding: theme.spacing.sm,
-    gap: 4,
-  },
-  nameRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  name: {
-    flex: 1,
-    color: theme.colors.text.primary,
-  },
-  meta: {
-    color: theme.colors.text.secondary,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+      card: {
+        width: CARD_WIDTH,
+        backgroundColor: theme.colors.surface.raised,
+        borderRadius: theme.radius.card,
+        overflow: 'hidden',
+        ...theme.elevation.sm,
+      },
+      pressed: {
+        opacity: 0.94,
+        transform: [{ scale: 0.99 }],
+      },
+      imageContainer: {
+        width: '100%',
+        height: 110,
+        backgroundColor: theme.colors.neutral[100],
+      },
+      image: {
+        width: '100%',
+        height: '100%',
+      },
+      imageFallback: {
+        backgroundColor: theme.colors.neutral[200],
+      },
+      favoriteButton: {
+        position: 'absolute',
+        top: theme.spacing.sm,
+        right: theme.spacing.sm,
+        width: 26,
+        height: 26,
+        borderRadius: 13,
+        backgroundColor: theme.colors.surface.base,
+        justifyContent: 'center',
+        alignItems: 'center',
+        ...theme.elevation.xs,
+      },
+      unavailableOverlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: theme.colors.overlay.scrim,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
+      unavailableText: {
+        ...theme.text.caption,
+        color: theme.colors.text.inverse,
+        textAlign: 'center',
+        paddingHorizontal: theme.spacing.sm,
+      },
+      content: {
+        padding: theme.spacing.sm,
+        gap: 4,
+      },
+      nameRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+      },
+      name: {
+        flex: 1,
+        color: theme.colors.text.primary,
+      },
+      meta: {
+        color: theme.colors.text.secondary,
+      },
+      footer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 4,
+      },
+    });

@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 import { RotateCcw, Star } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { Badge, Button, Card, Divider, type BadgeTone } from '@components/ui';
 import type { OrderCard, OrderStatus } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface OrderHistoryCardProps {
   order: OrderCard;
@@ -31,82 +31,88 @@ const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({
   onReorder,
   onRate,
   isReordering,
-}) => (
-  <Card padding="md" elevation="sm" onPress={onPress} style={styles.card}>
-    <View style={styles.header}>
-      <View style={styles.thumbnails}>
-        {order.thumbnails.length ? (
-          order.thumbnails.slice(0, 2).map((uri, index) => (
-            <Image
-              key={`${uri}-${index}`}
-              source={{ uri }}
-              style={[styles.thumbnail, index > 0 ? styles.thumbnailStacked : null]}
-              resizeMode="cover"
-            />
-          ))
-        ) : (
-          <View style={[styles.thumbnail, styles.thumbnailFallback]} />
-        )}
-      </View>
+}) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+      return (
+    (
+      <Card padding="md" elevation="sm" onPress={onPress} style={styles.card}>
+        <View style={styles.header}>
+          <View style={styles.thumbnails}>
+            {order.thumbnails.length ? (
+              order.thumbnails.slice(0, 2).map((uri, index) => (
+                <Image
+                  key={`${uri}-${index}`}
+                  source={{ uri }}
+                  style={[styles.thumbnail, index > 0 ? styles.thumbnailStacked : null]}
+                  resizeMode="cover"
+                />
+              ))
+            ) : (
+              <View style={[styles.thumbnail, styles.thumbnailFallback]} />
+            )}
+          </View>
 
-      <View style={styles.headerText}>
-        <Text style={theme.text.h4} numberOfLines={1}>
-          {order.kitchen.name}
-        </Text>
-        <Text style={[theme.text.caption, styles.meta]} numberOfLines={1}>
-          {formatDateTime(order.placedAt)}
-        </Text>
-        <Text style={[theme.text.bodySmall, styles.items]} numberOfLines={2}>
-          {order.itemSummary}
-        </Text>
-      </View>
+          <View style={styles.headerText}>
+            <Text style={theme.text.h4} numberOfLines={1}>
+              {order.kitchen.name}
+            </Text>
+            <Text style={[theme.text.caption, styles.meta]} numberOfLines={1}>
+              {formatDateTime(order.placedAt)}
+            </Text>
+            <Text style={[theme.text.bodySmall, styles.items]} numberOfLines={2}>
+              {order.itemSummary}
+            </Text>
+          </View>
 
-      <View style={styles.headerRight}>
-        <Badge label={order.statusLabel} tone={STATUS_TONE[order.status]} />
-        <Text style={[theme.text.numeric, styles.amount]}>
-          {formatCurrency(order.totalAmount)}
-        </Text>
-      </View>
-    </View>
-
-    {onReorder || (order.status === 'DELIVERED' && !order.isRated && onRate) ? (
-      <>
-        <Divider spacing={theme.spacing.md} />
-        <View style={styles.actions}>
-          {order.status === 'DELIVERED' && !order.isRated && onRate ? (
-            <Button
-              title="Rate order"
-              variant="outline"
-              size="sm"
-              onPress={onRate}
-              leftIcon={<Star size={14} color={theme.colors.amber[500]} strokeWidth={2.4} />}
-              fullWidth={false}
-              style={styles.action}
-            />
-          ) : null}
-
-          {order.canReorder && onReorder ? (
-            <Button
-              title="Reorder"
-              size="sm"
-              onPress={onReorder}
-              loading={isReordering}
-              leftIcon={
-                <RotateCcw size={14} color={theme.colors.text.inverse} strokeWidth={2.6} />
-              }
-              fullWidth={false}
-              style={styles.action}
-            />
-          ) : null}
+          <View style={styles.headerRight}>
+            <Badge label={order.statusLabel} tone={STATUS_TONE[order.status]} />
+            <Text style={[theme.text.numeric, styles.amount]}>
+              {formatCurrency(order.totalAmount)}
+            </Text>
+          </View>
         </View>
-      </>
-    ) : null}
-  </Card>
-);
+
+        {onReorder || (order.status === 'DELIVERED' && !order.isRated && onRate) ? (
+          <>
+            <Divider spacing={theme.spacing.md} />
+            <View style={styles.actions}>
+              {order.status === 'DELIVERED' && !order.isRated && onRate ? (
+                <Button
+                  title="Rate order"
+                  variant="outline"
+                  size="sm"
+                  onPress={onRate}
+                  leftIcon={<Star size={14} color={theme.colors.amber[500]} strokeWidth={2.4} />}
+                  fullWidth={false}
+                  style={styles.action}
+                />
+              ) : null}
+
+              {order.canReorder && onReorder ? (
+                <Button
+                  title="Reorder"
+                  size="sm"
+                  onPress={onReorder}
+                  loading={isReordering}
+                  leftIcon={
+                    <RotateCcw size={14} color={theme.colors.text.inverse} strokeWidth={2.6} />
+                  }
+                  fullWidth={false}
+                  style={styles.action}
+                />
+              ) : null}
+            </View>
+          </>
+        ) : null}
+      </Card>
+    )
+      );
+    };
 
 export default OrderHistoryCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginBottom: theme.spacing.md,
   },

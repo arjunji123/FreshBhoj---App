@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Leaf, PackageCheck, Sparkles } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import { AppBar, Button, Card, StickyBar } from '@components/ui';
 import { StarRow } from '@components/ui/Rating';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useCreateReview } from '../hooks/useReviews';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'WriteReview'>;
 
@@ -28,6 +28,8 @@ const RATING_COPY: Record<number, string> = {
 
 /** Post-delivery feedback: taste rating, hygiene chips, and an optional note. */
 const WriteReview = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
@@ -169,7 +171,7 @@ const WriteReview = () => {
 
 export default WriteReview;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

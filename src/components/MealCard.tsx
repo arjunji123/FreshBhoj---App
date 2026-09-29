@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Clock, Heart } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { MealCard as MealCardType } from '@api/types';
 import AddToCartControl from './AddToCartControl';
@@ -9,6 +8,7 @@ import Badge from './ui/Badge';
 import FoodTypeDot from './ui/FoodTypeDot';
 import NutritionBadgeRow from './ui/NutritionBadge';
 import { GOAL_TAG_LABELS } from '@utils/labels';
+import { useTheme } from "@app/theme/useTheme";
 
 interface MealCardProps {
   meal: MealCardType;
@@ -40,6 +40,8 @@ const MealCard: React.FC<MealCardProps> = ({
   layout = 'list',
   style,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const isCompact = layout === 'compact';
   const unavailable = !meal.isOrderable;
 
@@ -154,7 +156,7 @@ const MealCard: React.FC<MealCardProps> = ({
 
 export default MealCard;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     flexDirection: 'row',
     backgroundColor: theme.colors.surface.raised,

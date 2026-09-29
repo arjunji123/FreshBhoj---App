@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CalendarClock, CalendarOff, Plus } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import type { CustomerSubscriptionStatus, CustomerSubscriptionSummary } from '@api/types';
 import { formatCurrency, humanizeEnum } from '@utils/format';
@@ -10,6 +9,7 @@ import { AppBarAction, Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton } 
 import type { BadgeTone, SheetHandle } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useBulkPauseSubscriptions, useCustomerSubscriptions } from '../hooks/useSubscriptions';
+import { useTheme } from "@app/theme/useTheme";
 
 const STATUS_TONE: Record<CustomerSubscriptionStatus, BadgeTone> = {
   PENDING: 'warning',
@@ -43,6 +43,8 @@ function nextDeliveryHint(subscription: CustomerSubscriptionSummary): string {
  * toggle screen owns the top chrome.
  */
 const Subscriptions = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { data, isLoading, isRefetching, refetch } = useCustomerSubscriptions();
   const bulkPause = useBulkPauseSubscriptions();
@@ -196,7 +198,7 @@ const Subscriptions = () => {
 
 export default Subscriptions;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Beef, Flame } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 interface NutritionBadgeRowProps {
   calories?: number | null;
@@ -22,6 +22,8 @@ export const NutritionBadgeRow: React.FC<NutritionBadgeRowProps> = ({
   style,
   size = 'compact',
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const hasCalories = typeof calories === 'number' && calories > 0;
   const hasProtein = typeof proteinG === 'number' && proteinG > 0;
   if (!hasCalories && !hasProtein) return null;
@@ -50,7 +52,7 @@ export const NutritionBadgeRow: React.FC<NutritionBadgeRowProps> = ({
 
 export default NutritionBadgeRow;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',

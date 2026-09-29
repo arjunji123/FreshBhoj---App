@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Home, Play, Receipt, Search, User } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import AppGradient from '@components/AppGradient';
-import { theme } from '@app/theme/index';
 import { useActiveOrders } from '@features/orders/hooks/useOrders';
+import { useTheme } from '@app/theme/useTheme';
 
 type IconProps = { color: string; size: number; strokeWidth: number };
 
@@ -16,15 +16,16 @@ const TABS: Record<string, { label: string; Icon: React.FC<IconProps> }> = {
   Profile: { label: 'Profile', Icon: User },
 };
 
-const ACTIVE_COLOR = theme.colors.primary[600];
-const INACTIVE_COLOR = theme.colors.neutral[400];
-
 /**
  * Five-slot tab bar with the Food Feed reels button raised into the centre.
  * Icons come from lucide so the whole bar shares one stroke weight and can be
  * tinted from theme tokens (the old PNG pairs couldn't change colour).
  */
 const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
+  const ACTIVE_COLOR = theme.colors.primary[600];
+  const INACTIVE_COLOR = theme.colors.neutral[400];
   const insets = useSafeAreaInsets();
   const { data: activeOrders } = useActiveOrders();
 
@@ -118,7 +119,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
 
 export default BottomTabBar;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     backgroundColor: theme.colors.surface.base,
   },

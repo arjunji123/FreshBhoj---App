@@ -8,19 +8,9 @@ import { queryClient } from '@api';
 import SplashScreen from '@components/SplashScreen';
 import { useCaptureReferralLink } from '@features/referral/useCaptureReferralLink';
 import { AppNavigator } from './navigation/AppNavigator';
-import { mmkv } from '@utils/mmkvStorage';
-import { THEME_RESTART_FLAG_KEY } from './theme/commitThemeMode';
 
-// A restart the user just triggered from Preferences (dark-mode toggle)
-// should feel like the app instantly "snapped" into the new look, not like a
-// fresh cold launch — so it skips the full brand moment and only plays the
-// same fade, much shorter, as a soft visual acknowledgement that something
-// just happened (masking the one JS-engine-restart frame, not re-branding).
-const isThemeTriggeredRestart = mmkv.getBoolean(THEME_RESTART_FLAG_KEY) ?? false;
-if (isThemeTriggeredRestart) mmkv.remove(THEME_RESTART_FLAG_KEY);
-
-const SPLASH_DURATION_MS = isThemeTriggeredRestart ? 60 : 2200;
-const SPLASH_FADE_MS = isThemeTriggeredRestart ? 180 : 320;
+const SPLASH_DURATION_MS = 2200;
+const SPLASH_FADE_MS = 320;
 
 const MainApp = () => {
   const [showSplashOverlay, setShowSplashOverlay] = useState(true);

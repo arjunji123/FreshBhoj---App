@@ -35,12 +35,8 @@ const Preferences = () => {
   const mode = useThemeStore((s) => s.mode);
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
-  // Changing the mode restarts the whole JS bundle (see `commitThemeMode`),
-  // so the tap itself commits — no separate "confirm" step. That's a
-  // deliberate call: this is an expected, obviously-triggered action from a
-  // settings screen (tap a different appearance option → app restarts to
-  // apply it), not a surprising side effect that needs an extra
-  // "Restart now?" dialog in the way.
+  // Every screen using useTheme() re-renders instantly — the tap itself
+  // commits, no separate "confirm"/"restart now?" step needed.
   const handleSelect = (next: ThemeMode) => {
     if (next === mode) return;
     commitThemeMode(next);

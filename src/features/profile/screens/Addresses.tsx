@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { Briefcase, Check, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, Badge, Button, Card, EmptyState, Skeleton } from '@components/ui';
 import type { Address } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useAddresses, useDeleteAddress, useSetDefaultAddress } from '../hooks/useProfile';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'Addresses'>;
 
@@ -17,6 +17,8 @@ const LABEL_ICONS = {
 } as const;
 
 const Addresses = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
@@ -148,7 +150,7 @@ function titleCase(value: string): string {
 
 export default Addresses;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

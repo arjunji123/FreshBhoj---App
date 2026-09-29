@@ -1,11 +1,11 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { theme } from '@app/theme/index';
 import { AppBar, Button, Chip, ChipRow, QuantityStepper, Screen, StickyBar } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import type { BillingCycle, DayOfWeek, FoodType, MealSlot } from '@api/types';
 import { useSetupPlanStore } from '../store/setupPlanStore';
+import { useTheme } from "@app/theme/useTheme";
 
 // Same labels/order as `SubscriptionPlanCard.tsx` — the two flows should feel related.
 const DIET_LABEL: Record<FoodType, string> = { VEG: 'Veg', EGG: 'Egg', NON_VEG: 'Non-Veg', VEGAN: 'Vegan' };
@@ -37,6 +37,8 @@ const CYCLES: Array<{ key: BillingCycle; label: string }> = [
 
 /** Step 1 of 3 — every term here is freely chosen by the customer, unlike the kitchen-authored plan flow. */
 const SetupPlanDetails = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
 
   const kitchenId = useSetupPlanStore((s) => s.kitchenId);
@@ -138,7 +140,7 @@ const SetupPlanDetails = () => {
 
 export default SetupPlanDetails;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scroll: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxl,

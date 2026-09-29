@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import { FoodTypeDot, QuantityStepper } from '@components/ui';
 import type { CartLine } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 interface CartItemRowProps {
   line: CartLine;
@@ -11,7 +11,11 @@ interface CartItemRowProps {
   isUpdating?: boolean;
 }
 
-const CartItemRow: React.FC<CartItemRowProps> = ({ line, onChangeQuantity, isUpdating }) => (
+const CartItemRow: React.FC<CartItemRowProps> = ({ line, onChangeQuantity, isUpdating }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={[styles.row, !line.meal.isAvailable ? styles.unavailable : null]}>
     {line.meal.image ? (
       <Image source={{ uri: line.meal.image }} style={styles.image} resizeMode="cover" />
@@ -59,11 +63,13 @@ const CartItemRow: React.FC<CartItemRowProps> = ({ line, onChangeQuantity, isUpd
       </View>
     </View>
   </View>
-);
+)
+  );
+};
 
 export default CartItemRow;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     gap: theme.spacing.md,

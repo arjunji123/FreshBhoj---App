@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import {
   ActivityIndicator,
   Dimensions,
@@ -12,15 +12,17 @@ import {
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Play, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useKitchenMedia } from '../hooks/useKitchens';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenGallery'>;
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 /** Full-screen, swipeable viewer for the kitchen gallery. */
 const KitchenGallery = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
   const { params } = useRoute<Route>();
@@ -104,7 +106,7 @@ const KitchenGallery = () => {
 
 export default KitchenGallery;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.neutral[900],

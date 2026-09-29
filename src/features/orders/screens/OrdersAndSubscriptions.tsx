@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { theme } from '@app/theme/index';
 import { Chip, ChipRow, Screen } from '@components/ui';
 import Subscriptions from '@features/subscriptions/screens/Subscriptions';
 import OrderHistory from './OrderHistory';
+import { useTheme } from "@app/theme/useTheme";
 
 type Tab = 'orders' | 'subscriptions';
 
@@ -24,6 +24,8 @@ const TABS: Array<{ key: Tab; label: string }> = [
  * below this one doesn't double the top inset.
  */
 const OrdersAndSubscriptions = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [tab, setTab] = useState<Tab>('orders');
 
   return (
@@ -43,7 +45,7 @@ const OrdersAndSubscriptions = () => {
 
 export default OrdersAndSubscriptions;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   toggleWrap: {
     paddingTop: theme.spacing.sm,
     paddingBottom: theme.spacing.sm,

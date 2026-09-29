@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 import KitchenCard from '@components/KitchenCard';
 import SectionHeader from '@components/SectionHeader';
 import { KitchenCardSkeleton } from '@components/ui';
@@ -53,11 +53,11 @@ export default FeaturedKitchens;
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: theme.spacing.xl,
+    marginTop: staticTheme.spacing.xl,
   },
   scroll: {
-    paddingHorizontal: theme.layout.screenPadding,
-    gap: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
+    paddingHorizontal: staticTheme.layout.screenPadding,
+    gap: staticTheme.spacing.md,
+    paddingVertical: staticTheme.spacing.xs,
   },
 });

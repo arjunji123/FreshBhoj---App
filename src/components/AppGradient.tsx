@@ -1,7 +1,7 @@
 import React from 'react';
 import { ViewStyle, StyleProp } from 'react-native';
 import LinearGradient, { LinearGradientProps } from 'react-native-linear-gradient';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 
 type GradientDirection = 'vertical' | 'horizontal' | 'diagonal';
 
@@ -13,7 +13,7 @@ interface AppGradientProps extends Omit<LinearGradientProps, 'colors'> {
 }
 
 // Default Colors of the gradient (can be overriden by props)
-const DEFAULT_COLORS = theme.colors.defaultColor;
+const DEFAULT_COLORS = staticTheme.colors.defaultColor;
 
 const AppGradient: React.FC<AppGradientProps> = ({ children, style, colors = DEFAULT_COLORS, direction = 'diagonal', ...props }) => {
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   StyleProp,
   StyleSheet,
@@ -9,7 +9,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from "@app/theme/useTheme";
 
 export interface InputProps extends TextInputProps {
   label?: string;
@@ -43,6 +43,8 @@ const Input: React.FC<InputProps> = ({
   editable = true,
   ...rest
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [isFocused, setIsFocused] = useState(false);
 
   const borderColor = error
@@ -105,7 +107,7 @@ const Input: React.FC<InputProps> = ({
 
 export default Input;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   label: {
     color: theme.colors.text.secondary,
     marginBottom: theme.spacing.sm,

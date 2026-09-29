@@ -1,12 +1,14 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import AppGradient from '@components/AppGradient';
-import { theme } from '@app/theme/index';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
+import { useTheme } from "@app/theme/useTheme";
 
 const { width, height } = Dimensions.get('window');
 
 const LoginTopSection = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     return (
         <AppGradient
             colors={[theme.colors.gradient1, theme.colors.gradient2]}
@@ -35,7 +37,7 @@ const LoginTopSection = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     topSection: {
         height: height * AUTH_VALUES.loginTopSectionHeightRatio,
         width: '100%',

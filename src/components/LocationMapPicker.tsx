@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { type Region } from 'react-native-maps';
 import { LocateFixed, MapPin } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { getCurrentPosition, requestLocationPermission } from '@utils/deviceLocation';
 import { reverseGeocode, type ReverseGeocodeResult } from '@utils/geocoding';
 import AppGradient from './AppGradient';
+import { useTheme } from "@app/theme/useTheme";
 
 const DEFAULT_REGION: Region = {
   // Jaipur — the app's single-city launch fallback.
@@ -39,6 +39,8 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
   onLocationChange,
   height = 300,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState<Region>(
     initialLatitude && initialLongitude
@@ -155,7 +157,7 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
 
 export default LocationMapPicker;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     width: '100%',
     borderRadius: theme.radius.card,

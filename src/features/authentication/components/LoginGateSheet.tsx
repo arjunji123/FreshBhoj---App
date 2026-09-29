@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { theme } from '@app/theme/index';
 import { Sheet, type SheetHandle } from '@components/ui';
 import GradientButton from '@components/GradientButton';
 import { ApiError } from '@api';
@@ -12,6 +11,7 @@ import { useAuthGateStore } from '../store/authGateStore';
 import LoginPhoneInput from './LoginPhoneInput';
 import OTPInputSection from './OTPInputSection';
 import SocialLogin from './SocialLogin';
+import { useTheme } from "@app/theme/useTheme";
 
 type Step = 'phone' | 'otp';
 
@@ -24,6 +24,8 @@ type Step = 'phone' | 'otp';
  * globally, and driven entirely by `useAuthGateStore` / `useRequireAuth`.
  */
 const LoginGateSheet = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const visible = useAuthGateStore((s) => s.visible);
   const close = useAuthGateStore((s) => s.close);
   const runPending = useAuthGateStore((s) => s.runPending);
@@ -143,7 +145,7 @@ const LoginGateSheet = () => {
 
 export default LoginGateSheet;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   phoneStep: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.sm,

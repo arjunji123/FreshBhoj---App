@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { BadgeCheck } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 
 export type BadgeTone = 'accent' | 'brand' | 'neutral' | 'warning' | 'danger' | 'info';
 export type BadgeSize = 'sm' | 'md';
@@ -16,7 +17,9 @@ export interface BadgeProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const TONES: Record<BadgeTone, { soft: string; solid: string; text: string; border: string }> = {
+const createTones = (
+  theme: ReturnType<typeof useTheme>,
+): Record<BadgeTone, { soft: string; solid: string; text: string; border: string }> => ({
   accent: {
     soft: theme.colors.accent[50],
     solid: theme.colors.accent[600],
@@ -53,7 +56,7 @@ const TONES: Record<BadgeTone, { soft: string; solid: string; text: string; bord
     text: theme.colors.state.info,
     border: theme.colors.neutral[200],
   },
-};
+});
 
 /** Dietary tags, nutrition chips, order-status pills — all the same primitive. */
 const Badge: React.FC<BadgeProps> = ({
@@ -64,7 +67,9 @@ const Badge: React.FC<BadgeProps> = ({
   variant = 'soft',
   style,
 }) => {
-  const palette = TONES[tone];
+  const theme = useTheme();
+  const tones = useMemo(() => createTones(theme), [theme]);
+  const palette = tones[tone];
   const isSolid = variant === 'solid';
 
   return (
@@ -86,7 +91,7 @@ const Badge: React.FC<BadgeProps> = ({
       {icon ? <View style={styles.icon}>{icon}</View> : null}
       <Text
         style={[
-          size === 'sm' ? theme.text.caption : theme.text.label,
+          size === 'sm' ? staticTheme.text.caption : staticTheme.text.label,
           { color: isSolid ? theme.colors.text.inverse : palette.text },
         ]}
         numberOfLines={1}
@@ -104,8 +109,9 @@ const Badge: React.FC<BadgeProps> = ({
 export const VerifiedBadge: React.FC<{ size?: number; showLabel?: boolean }> = ({
   size = 14,
   showLabel = true,
-}) =>
-  showLabel ? (
+}) => {
+  const theme = useTheme();
+  return showLabel ? (
     <Badge
       label="Verified"
       tone="accent"
@@ -116,6 +122,7 @@ export const VerifiedBadge: React.FC<{ size?: number; showLabel?: boolean }> = (
       <BadgeCheck size={size} color={theme.colors.neutral[0]} fill={theme.colors.accent[600]} strokeWidth={2} />
     </View>
   );
+};
 
 export default Badge;
 
@@ -124,15 +131,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    borderRadius: theme.radius.pill,
+    borderRadius: staticTheme.radius.pill,
   },
   sm: {
-    paddingHorizontal: theme.spacing.sm,
+    paddingHorizontal: staticTheme.spacing.sm,
     paddingVertical: 4,
     gap: 4,
   },
   md: {
-    paddingHorizontal: theme.spacing.md,
+    paddingHorizontal: staticTheme.spacing.md,
     paddingVertical: 6,
     gap: 6,
   },

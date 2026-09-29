@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AlertTriangle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { theme } from '@app/theme/index';
 import { AppBar, Button, Card, Input, Screen } from '@components/ui';
 import { ApiError, authApi } from '@api';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
+import { useTheme } from "@app/theme/useTheme";
 
 const DELETED_ITEMS = [
   'Your name, email, and profile photo',
@@ -24,6 +24,8 @@ const RETAINED_ITEMS = [
 type Step = 'confirm' | 'otp';
 
 const DeleteAccount = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
   const phone = useAuthStore((s) => s.user?.phone ?? s.phoneNumber);
@@ -135,7 +137,7 @@ const DeleteAccount = () => {
 
 export default DeleteAccount;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scroll: { padding: theme.layout.screenPadding, paddingBottom: theme.spacing.xxxl },
   warningBanner: {
     flexDirection: 'row',

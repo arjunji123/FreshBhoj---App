@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ChefHat, Search as SearchIcon, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { AppBar, EmptyState, Input, KitchenCardSkeleton, Screen } from '@components/ui';
 import KitchenCard from '@components/KitchenCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -17,6 +18,7 @@ import { useSetupPlanStore } from '../store/setupPlanStore';
  * already-capable `useKitchens` hook.
  */
 const SetupPlanChooseKitchen = () => {
+  const theme = useTheme();
   const navigation = useNavigation<PrivateNavigation>();
   const reset = useSetupPlanStore((s) => s.reset);
   const setKitchen = useSetupPlanStore((s) => s.setKitchen);
@@ -60,7 +62,7 @@ const SetupPlanChooseKitchen = () => {
           leftIcon={<SearchIcon size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />}
           rightIcon={
             query ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={theme.layout.hitSlop}>
+              <Pressable onPress={() => setQuery('')} hitSlop={staticTheme.layout.hitSlop}>
                 <X size={16} color={theme.colors.text.tertiary} strokeWidth={2.2} />
               </Pressable>
             ) : undefined
@@ -85,7 +87,7 @@ const SetupPlanChooseKitchen = () => {
           }}
           ListEmptyComponent={
             <EmptyState
-              icon={<ChefHat size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+              icon={<ChefHat size={34} color={staticTheme.colors.primary[600]} strokeWidth={1.8} />}
               title="No kitchens found"
               description="Try a different name or locality."
             />
@@ -101,7 +103,7 @@ const SetupPlanChooseKitchen = () => {
           ListFooterComponent={
             isFetchingNextPage ? (
               <View style={styles.footerLoading}>
-                <ActivityIndicator color={theme.colors.primary[600]} />
+                <ActivityIndicator color={staticTheme.colors.primary[600]} />
               </View>
             ) : null
           }
@@ -115,26 +117,26 @@ export default SetupPlanChooseKitchen;
 
 const styles = StyleSheet.create({
   searchWrap: {
-    paddingHorizontal: theme.layout.screenPadding,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: staticTheme.layout.screenPadding,
+    paddingBottom: staticTheme.spacing.md,
   },
   loading: {
-    padding: theme.layout.screenPadding,
-    gap: theme.spacing.md,
+    padding: staticTheme.layout.screenPadding,
+    gap: staticTheme.spacing.md,
   },
   list: {
-    padding: theme.layout.screenPadding,
-    paddingBottom: theme.spacing.xxxl,
+    padding: staticTheme.layout.screenPadding,
+    paddingBottom: staticTheme.spacing.xxxl,
   },
   listEmpty: {
     flexGrow: 1,
     justifyContent: 'center',
   },
   card: {
-    marginBottom: theme.spacing.md,
+    marginBottom: staticTheme.spacing.md,
   },
   footerLoading: {
-    paddingVertical: theme.spacing.lg,
+    paddingVertical: staticTheme.spacing.lg,
     alignItems: 'center',
   },
 });

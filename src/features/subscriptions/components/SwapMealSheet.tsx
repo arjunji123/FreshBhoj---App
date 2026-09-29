@@ -1,7 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import type { MealSortBy } from '@api/endpoints/meals.api';
 import type { MealCard } from '@api/types';
@@ -9,6 +8,7 @@ import { Button, Chip, ChipRow, EmptyState, Sheet, Skeleton } from '@components/
 import type { SheetHandle } from '@components/ui';
 import { flattenPages, useMealFeed } from '@features/meals/hooks/useMeals';
 import { useSwapDeliveryMeal } from '../hooks/useSubscriptions';
+import { useTheme } from "@app/theme/useTheme";
 
 const SORT_FILTERS: Array<{ key: MealSortBy; label: string }> = [
   { key: 'prep_time_low', label: 'Fastest' },
@@ -39,6 +39,8 @@ const SwapMealSheet: React.FC<SwapMealSheetProps> = ({
   date,
   initialMealId,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [sortBy, setSortBy] = useState<MealSortBy | undefined>(undefined);
   const [selectedMealId, setSelectedMealId] = useState<string | null>(initialMealId ?? null);
   const swapMeal = useSwapDeliveryMeal();
@@ -138,43 +140,49 @@ const MealRow: React.FC<{ meal: MealCard; selected: boolean; onPress: () => void
   meal,
   selected,
   onPress,
-}) => (
-  <Pressable
-    onPress={onPress}
-    accessibilityRole="button"
-    accessibilityState={{ selected }}
-    style={[styles.row, selected ? styles.rowSelected : null]}
-  >
-    {meal.image ? (
-      <Image source={{ uri: meal.image }} style={styles.rowImage} resizeMode="cover" />
-    ) : (
-      <View style={[styles.rowImage, styles.rowImageFallback]} />
-    )}
-    <View style={styles.rowText}>
-      <Text style={[theme.text.bodyMedium, styles.rowName]} numberOfLines={1}>
-        {meal.name}
-      </Text>
-      <Text style={[theme.text.caption, styles.rowMeta]} numberOfLines={1}>
-        {[
-          meal.nutrition.calories ? `${meal.nutrition.calories} kcal` : null,
-          meal.nutrition.proteinG ? `${meal.nutrition.proteinG}g protein` : null,
-          meal.prepTimeMins ? `${meal.prepTimeMins} min` : null,
-        ]
-          .filter(Boolean)
-          .join(' · ')}
-      </Text>
-    </View>
-    {selected ? (
-      <View style={styles.checkCircle}>
-        <Check size={14} color={theme.colors.text.inverse} strokeWidth={3} />
-      </View>
-    ) : null}
-  </Pressable>
-);
+}) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+      return (
+    (
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityState={{ selected }}
+        style={[styles.row, selected ? styles.rowSelected : null]}
+      >
+        {meal.image ? (
+          <Image source={{ uri: meal.image }} style={styles.rowImage} resizeMode="cover" />
+        ) : (
+          <View style={[styles.rowImage, styles.rowImageFallback]} />
+        )}
+        <View style={styles.rowText}>
+          <Text style={[theme.text.bodyMedium, styles.rowName]} numberOfLines={1}>
+            {meal.name}
+          </Text>
+          <Text style={[theme.text.caption, styles.rowMeta]} numberOfLines={1}>
+            {[
+              meal.nutrition.calories ? `${meal.nutrition.calories} kcal` : null,
+              meal.nutrition.proteinG ? `${meal.nutrition.proteinG}g protein` : null,
+              meal.prepTimeMins ? `${meal.prepTimeMins} min` : null,
+            ]
+              .filter(Boolean)
+              .join(' · ')}
+          </Text>
+        </View>
+        {selected ? (
+          <View style={styles.checkCircle}>
+            <Check size={14} color={theme.colors.text.inverse} strokeWidth={3} />
+          </View>
+        ) : null}
+      </Pressable>
+    )
+      );
+    };
 
 export default SwapMealSheet;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   filterWrap: {
     paddingBottom: theme.spacing.md,
   },

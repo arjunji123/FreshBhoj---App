@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Bell, ChefHat, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Settings, Store, Trash2, Wallet as WalletIcon } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { Bell, ChefHat, CreditCard, Gift, Heart, HelpCircle, LogOut, MapPin, Pencil, Receipt, Settings, Store, Trash2, Wallet as WalletIcon } from 'lucide-react-native';
 import { formatCurrency, formatPhone } from '@utils/format';
 import Logo from '@components/Logo';
 import { AppBarAction, Avatar, Card, Divider, ListItem, Screen, Skeleton } from '@components/ui';
@@ -12,11 +11,14 @@ import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { useReferralSummary } from '@features/referral/hooks/useReferral';
 import { useWalletSummary } from '@features/wallet/hooks/useWallet';
 import { useLogout, useProfile, useProfileStats } from '../hooks/useProfile';
+import { useTheme } from "@app/theme/useTheme";
 
 const ICON_PROPS = { size: 18, strokeWidth: 2.2 };
 
 /** Account home. Deliberately plain — this screen is a hub, not a destination. */
 const Profile = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const requireAuth = useRequireAuth();
   const storedUser = useAuthStore((s) => s.user);
@@ -120,6 +122,13 @@ const Profile = () => {
           />
           <Divider spacing={0} />
           <ListItem
+            title="Payment Methods"
+            subtitle="Cards & UPI"
+            icon={<CreditCard {...ICON_PROPS} color={theme.colors.primary[600]} />}
+            onPress={() => requireAuth(() => navigation.navigate('PaymentMethods'))}
+          />
+          <Divider spacing={0} />
+          <ListItem
             title="Refer & Earn"
             subtitle={referral ? `${referral.coinsBalance} FreshBhoj Coins` : 'Invite friends, earn coins'}
             icon={<Gift {...ICON_PROPS} color={theme.colors.primary[600]} />}
@@ -183,16 +192,22 @@ const Profile = () => {
   );
 };
 
-const Stat: React.FC<{ value: number; label: string }> = ({ value, label }) => (
+const Stat: React.FC<{ value: number; label: string }> = ({ value, label }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.stat}>
     <Text style={theme.text.h3}>{value}</Text>
     <Text style={[theme.text.caption, styles.statLabel]}>{label}</Text>
   </View>
-);
+)
+  );
+};
 
 export default Profile;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   scroll: {
     padding: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxxl,

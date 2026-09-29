@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import Animated, {
@@ -10,12 +10,12 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Check, Clock, Receipt, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import Logo from '@components/Logo';
 import { Button, Card, Skeleton } from '@components/ui';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useOrder } from '../hooks/useOrders';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'OrderConfirmation'>;
 
@@ -24,6 +24,8 @@ type Route = RouteProp<PrivateStackParamList, 'OrderConfirmation'>;
  * is the biggest thing on screen, and Track Order is the only primary action.
  */
 const OrderConfirmation = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
   const { data: order, isLoading } = useOrder(params.orderId);
@@ -128,7 +130,7 @@ const OrderConfirmation = () => {
 
 export default OrderConfirmation;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

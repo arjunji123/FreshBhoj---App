@@ -1,13 +1,15 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { theme } from '@app/theme/index';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SheetHandle } from '@components/ui';
 import { AUTH_COPY } from '../auth.constants';
 import { LEGAL_DOCS, type LegalDocKey } from '../constants/legalContent';
 import LegalSheet from './LegalSheet';
+import { useTheme } from "@app/theme/useTheme";
 
 const LoginFooter = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const { bottom } = useSafeAreaInsets();
     const sheetRef = useRef<SheetHandle>(null);
     const [activeDoc, setActiveDoc] = useState<LegalDocKey>('terms');
@@ -39,7 +41,7 @@ const LoginFooter = () => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     footerContainer: {
         alignItems: 'center',
         marginTop: 'auto',

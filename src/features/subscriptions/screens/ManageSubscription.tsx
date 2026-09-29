@@ -1,8 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { CalendarDays, Heart, Pause, Play, RefreshCw } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { ApiError } from '@api';
 import type { CustomerSubscriptionStatus, SubscriptionDeliveryStatus } from '@api/types';
 import { formatCurrency, humanizeEnum } from '@utils/format';
@@ -12,6 +11,7 @@ import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/n
 import { useFavorites } from '@features/meals/hooks/useMeals';
 import { usePauseSubscription, useResumeSubscription, useSubscriptionDetail } from '../hooks/useSubscriptions';
 import SwapMealSheet from '../components/SwapMealSheet';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'ManageSubscription'>;
 
@@ -23,11 +23,13 @@ const STATUS_TONE: Record<CustomerSubscriptionStatus, BadgeTone> = {
   REJECTED: 'danger',
 };
 
-const DELIVERY_STATUS_COLOR: Record<SubscriptionDeliveryStatus, string> = {
+const createDeliveryStatusColor = (
+  theme: ReturnType<typeof useTheme>,
+): Record<SubscriptionDeliveryStatus, string> => ({
   SCHEDULED: theme.colors.neutral[300],
   DISPATCHED: theme.colors.accent[600],
   SKIPPED: theme.colors.state.error,
-};
+});
 
 const PAUSE_DAY_OPTIONS = [7, 14, 30];
 
@@ -39,6 +41,9 @@ const PAUSE_DAY_OPTIONS = [7, 14, 30];
  * `theme.colors.primary[600]`), not its `Text variant=`/`theme.spacing.paddings.*` system.
  */
 const ManageSubscription = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+    const deliveryStatusColor = useMemo(() => createDeliveryStatusColor(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
   const { subscriptionId } = params;
@@ -169,7 +174,7 @@ const ManageSubscription = () => {
                     <Text style={[theme.text.caption, styles.scheduleDay]}>
                       {new Date(entry.date).toLocaleDateString('en-IN', { weekday: 'short' })}
                     </Text>
-                    <View style={[styles.scheduleDot, { backgroundColor: DELIVERY_STATUS_COLOR[entry.status] }]}>
+                    <View style={[styles.scheduleDot, { backgroundColor: deliveryStatusColor[entry.status] }]}>
                       <Text style={[theme.text.label, styles.scheduleDotLabel]}>
                         {new Date(entry.date).getDate()}
                       </Text>
@@ -287,7 +292,7 @@ const ManageSubscription = () => {
 
 export default ManageSubscription;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

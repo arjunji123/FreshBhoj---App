@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import Animated, {
   Easing,
@@ -7,11 +7,9 @@ import Animated, {
   withDelay,
   withTiming,
 } from 'react-native-reanimated';
-import { theme } from '@app/theme/index';
-
 // components
 import AppGradient from './AppGradient';
-
+import { useTheme } from "@app/theme/useTheme";
 
 const { width } = Dimensions.get('window');
 
@@ -33,6 +31,8 @@ const useCornerImageAnimation = (delay: number, fromOffset: number) => {
 };
 
 const SplashScreen = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const topImageStyle = useCornerImageAnimation(280, -40);
   const bottomImageStyle = useCornerImageAnimation(420, 40);
 
@@ -98,7 +98,7 @@ const SplashScreen = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',

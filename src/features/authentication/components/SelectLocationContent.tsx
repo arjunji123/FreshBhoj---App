@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ArrowRight, LocateFixed } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import LocationMapPicker, { type PickedLocation } from '@components/LocationMapPicker';
 import { Button } from '@components/ui';
 import { getCurrentPosition, requestLocationPermission } from '@utils/deviceLocation';
@@ -9,6 +8,7 @@ import { reverseGeocode } from '@utils/geocoding';
 import { AUTH_COPY } from '../auth.constants';
 import { useAuthStore } from '../store/authStore';
 import { useSaveOnboardingLocation } from '../hooks/useAuth';
+import { useTheme } from "@app/theme/useTheme";
 
 interface SelectLocationContentProps {
   onSaveAndContinue: () => void;
@@ -21,6 +21,8 @@ interface SelectLocationContentProps {
  * saved as their delivery location.
  */
 const SelectLocationContent: React.FC<SelectLocationContentProps> = ({ onSaveAndContinue }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const [picked, setPicked] = useState<PickedLocation | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [mapKey, setMapKey] = useState(0);
@@ -136,7 +138,7 @@ const SelectLocationContent: React.FC<SelectLocationContentProps> = ({ onSaveAnd
 
 export default SelectLocationContent;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.lg,

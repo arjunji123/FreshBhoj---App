@@ -1,14 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft } from 'lucide-react-native';
 import GradientText from '@components/GradientText';
-import { theme } from '@app/theme/index';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { OTPHeaderProps } from '../auth.types';
+import { useTheme } from "@app/theme/useTheme";
 
 const OTPHeader: React.FC<OTPHeaderProps> = ({ phoneNumber }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const navigation = useNavigation();
     const insets = useSafeAreaInsets();
     return (
@@ -40,7 +42,7 @@ const OTPHeader: React.FC<OTPHeaderProps> = ({ phoneNumber }) => {
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: {
         paddingHorizontal: theme.spacing.screenPadding,
         alignItems: 'center',

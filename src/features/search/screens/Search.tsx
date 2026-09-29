@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { Clock, Search as SearchIcon, SlidersHorizontal, TrendingUp, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import type { FoodType, GoalTag } from '@api/types';
 import {
   Chip,
@@ -25,6 +24,7 @@ import { useSearchHistory } from '../hooks/useSearchHistory';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import SearchFiltersSheet, { type PriceRange } from '../components/SearchFiltersSheet';
 import type { MealSortBy } from '@api/endpoints/meals.api';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<MainTabParamList, 'Search'>;
 
@@ -42,6 +42,8 @@ const SORTS: Array<{ key: MealSortBy; label: string }> = [
  * nutrition-first sorting options that a generic food app doesn't offer.
  */
 const Search = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
@@ -372,7 +374,7 @@ const Search = () => {
 
 export default Search;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   header: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.md,

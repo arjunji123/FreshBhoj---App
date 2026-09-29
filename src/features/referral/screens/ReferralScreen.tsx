@@ -1,17 +1,19 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Coins, Share2, Users } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, Card, EmptyState, Screen, Skeleton } from '@components/ui';
 import GradientButton from '@components/GradientButton';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import ReferralPrinter from '../components/ReferralPrinter';
 import { useReferralSummary } from '../hooks/useReferral';
+import { useTheme } from "@app/theme/useTheme";
 
 const REFERRAL_LINK_BASE = 'https://freshbhoj.com/refer';
 
 const ReferralScreen = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { data, isLoading, isError, refetch } = useReferralSummary();
 
@@ -93,18 +95,24 @@ const ReferralScreen = () => {
   );
 };
 
-const HowStep: React.FC<{ index: number; text: string }> = ({ index, text }) => (
+const HowStep: React.FC<{ index: number; text: string }> = ({ index, text }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <View style={styles.howStep}>
     <View style={styles.howBadge}>
       <Text style={styles.howBadgeText}>{index}</Text>
     </View>
     <Text style={[theme.text.bodySmall, styles.howText]}>{text}</Text>
   </View>
-);
+)
+  );
+};
 
 export default ReferralScreen;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   flex: {
     flex: 1,
   },

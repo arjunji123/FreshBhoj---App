@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { Animated, Image, Pressable, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Heart, Share2, ShoppingBag, X } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import FocusAwareStatusBar from '@components/FocusAwareStatusBar';
 import type { StoryItem } from '@api/types';
@@ -11,6 +10,7 @@ import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/n
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useMarkStorySeen, useRegisterStoryShare, useToggleStoryLike } from '../hooks/useHomeFeed';
+import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenStoryViewer'>;
 
@@ -23,6 +23,8 @@ type Route = RouteProp<PrivateStackParamList, 'KitchenStoryViewer'>;
  * anywhere in the app yet (FoodFeed/Reels have the same limitation).
  */
 const KitchenStoryViewer = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
   const { params } = useRoute<Route>();
@@ -254,7 +256,7 @@ const KitchenStoryViewer = () => {
 
 export default KitchenStoryViewer;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.neutral[900],

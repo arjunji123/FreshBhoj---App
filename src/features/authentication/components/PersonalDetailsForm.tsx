@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { User, Mail } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { theme as staticTheme } from '@app/theme/index';
 
 interface PersonalDetailsFormProps {
     fullName: string;
@@ -75,8 +75,8 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     label: {
-        fontSize: theme.typography.fontSizes.sm,
-        fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
+        fontSize: staticTheme.typography.fontSizes.sm,
+        fontFamily: staticTheme.typography.fontFamilies.plusJakartaSans.semibold,
         color: LABEL_COLOR,
         paddingLeft: 4,
     },
@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         height: '100%',
-        fontSize: theme.typography.fontSizes.md,
-        fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
+        fontSize: staticTheme.typography.fontSizes.md,
+        fontFamily: staticTheme.typography.fontFamilies.plusJakartaSans.regular,
         color: '#0F172A',
         padding: 0,
     },

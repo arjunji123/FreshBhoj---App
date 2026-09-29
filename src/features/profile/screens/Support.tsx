@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
@@ -12,14 +12,16 @@ import {
   Receipt,
   Send,
 } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { AppBar, Card, Divider, Skeleton } from '@components/ui';
 import AppGradient from '@components/AppGradient';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useFaqs, useSupportContact } from '../hooks/useProfile';
+import { useTheme } from "@app/theme/useTheme";
 
 /** Support hub: quick-action tiles, a WhatsApp-backed "instant help" card, one-tap WhatsApp/call/email, and an FAQ accordion. */
 const Support = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const { data: contact, isLoading: isContactLoading } = useSupportContact();
   const { data: faqs, isLoading } = useFaqs();
@@ -193,7 +195,11 @@ const QuickTile: React.FC<{
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
-}> = ({ icon, label, onPress }) => (
+}> = ({ icon, label, onPress }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <Pressable
     onPress={onPress}
     accessibilityRole="button"
@@ -205,7 +211,9 @@ const QuickTile: React.FC<{
       {label}
     </Text>
   </Pressable>
-);
+)
+  );
+};
 
 const ContactButton: React.FC<{
   icon: React.ReactNode;
@@ -213,7 +221,11 @@ const ContactButton: React.FC<{
   tone: 'accent' | 'brand';
   disabled?: boolean;
   onPress: () => void;
-}> = ({ icon, label, tone, disabled, onPress }) => (
+}> = ({ icon, label, tone, disabled, onPress }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+  return (
+(
   <Pressable
     onPress={onPress}
     disabled={disabled}
@@ -230,7 +242,9 @@ const ContactButton: React.FC<{
     {icon}
     <Text style={[theme.text.caption, styles.contactLabel]}>{label}</Text>
   </Pressable>
-);
+)
+  );
+};
 
 function titleCase(value: string): string {
   return value.charAt(0) + value.slice(1).toLowerCase();
@@ -238,7 +252,7 @@ function titleCase(value: string): string {
 
 export default Support;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: theme.colors.surface.page,

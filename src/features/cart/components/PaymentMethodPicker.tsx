@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Banknote, CheckCircle2, CreditCard, Smartphone, Wallet } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { PaymentMethod } from '@api/types';
 import { useWalletSummary } from '@features/wallet/hooks/useWallet';
+import { useTheme } from "@app/theme/useTheme";
 
 interface PaymentMethodPickerProps {
   value: PaymentMethod;
@@ -28,6 +28,8 @@ const METHODS: Array<{
  * where a cramped, utilitarian UI costs the most conversions.
  */
 const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChange }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   // Same "balance: ₹450" idiom `SetupPlanReview.tsx` uses next to its own
   // WALLET option — this picker previously showed a static "FreshBhoj
   // balance" placeholder here instead of the real number.
@@ -85,7 +87,7 @@ const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChan
 
 export default PaymentMethodPicker;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     gap: theme.spacing.sm,
     marginTop: theme.spacing.md,

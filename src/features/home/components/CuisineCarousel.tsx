@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Dimensions, Image, Pressable, StyleSheet, View } from 'react-native';
 import Animated, {
   useSharedValue,
@@ -6,10 +6,10 @@ import Animated, {
   type SharedValue,
 } from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
-import { theme } from '@app/theme/index';
 import { Skeleton } from '@components/ui';
 import { useCoverFlowAnimations } from '@animations/useCoverFlowAnimations';
 import type { Cuisine } from '@api/types';
+import { useTheme } from "@app/theme/useTheme";
 
 // ── Layout constants ──────────────────────────────────────────────
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -27,6 +27,8 @@ interface CarouselItemProps {
 }
 
 const CarouselItem: React.FC<CarouselItemProps> = ({ item, index, scrollX, onPress }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const {
     animatedScale,
     animatedOverlay,
@@ -89,6 +91,8 @@ interface CuisineCarouselProps {
 
 /** Cover-flow style carousel of cuisines — the centred item scales up and glows. */
 const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect, isLoading }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const scrollX = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -140,7 +144,7 @@ const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect, i
 
 export default CuisineCarousel;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.lg,
     paddingVertical: theme.spacing.md,

@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet, Image } from 'react-native';
-import { theme } from '@app/theme/index';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { LoginPhoneInputProps } from '../auth.types';
+import { useTheme } from "@app/theme/useTheme";
 
 const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     return (
         <View style={styles.inputWrapper}>
             <View style={styles.countryCodeContainer}>
@@ -29,7 +31,7 @@ const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',

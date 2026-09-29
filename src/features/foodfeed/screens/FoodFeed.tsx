@@ -3,7 +3,6 @@ import { FlatList, Pressable, Share, StyleSheet, Text, View } from 'react-native
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ArrowLeft, Clapperboard, Search } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
 import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
 import type { Reel } from '@api/types';
@@ -19,6 +18,7 @@ import {
   useReelFeed,
   useToggleReelLike,
 } from '../hooks/useReels';
+import { useTheme } from "@app/theme/useTheme";
 
 /**
  * Food Feed — a normal scrollable browse list, one reel preview per row.
@@ -29,6 +29,8 @@ import {
  * there — the split Instagram's own feed vs. Reels tab makes for the same reason.
  */
 const FoodFeed = () => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
   const [cuisineId, setCuisineId] = useState<string | undefined>(undefined);
@@ -181,7 +183,7 @@ const FoodFeed = () => {
 
 export default FoodFeed;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   header: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingBottom: theme.spacing.md,

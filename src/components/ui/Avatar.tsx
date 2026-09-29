@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Image, ImageStyle, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { theme } from '@app/theme/index';
 import { getInitials } from '@utils/format';
+import { useTheme } from "@app/theme/useTheme";
 
 interface AvatarProps {
   uri?: string | null;
@@ -12,6 +12,8 @@ interface AvatarProps {
 
 /** Profile picture with an initials fallback — never an empty grey circle. */
 const Avatar: React.FC<AvatarProps> = ({ uri, name, size = 44, style }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
   const dimension = { width: size, height: size, borderRadius: size / 2 };
 
   if (uri) {
@@ -29,7 +31,7 @@ const Avatar: React.FC<AvatarProps> = ({ uri, name, size = 44, style }) => {
 
 export default Avatar;
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   image: {
     backgroundColor: theme.colors.neutral[100],
   },

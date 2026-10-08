@@ -1,7 +1,6 @@
 import React from 'react';
 import { Alert, Image, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Clapperboard, Eye, IndianRupee, MousePointerClick, Pause, Play, ShoppingBag, Square, TrendingUp, Users } from 'lucide-react-native';
-import { LineChart } from 'react-native-gifted-charts';
+import { CalendarCheck, CalendarX, Clapperboard, Eye, IndianRupee, MousePointerClick, Pause, Play, ShoppingBag, Square, TrendingUp, Users } from 'lucide-react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
 import { AppBar, Badge, Card, EmptyState, Screen, Skeleton, Text } from '@components/ui';
@@ -10,6 +9,7 @@ import type { KitchenPartnerNavigation, KitchenPartnerStackParamList } from '@ap
 import { KitchenApiError } from '../api/kitchenClient';
 import { useCampaignDetail, usePauseCampaign, useResumeCampaign, useStopCampaign } from '../hooks/useKitchenPortal';
 import type { CampaignStatus } from '../kitchenPartner.types';
+import CampaignDailyChart from '../components/CampaignDailyChart';
 
 type AdsCampaignDetailRoute = RouteProp<KitchenPartnerStackParamList, 'AdsCampaignDetail'>;
 
@@ -18,6 +18,11 @@ const STATUS_TONE: Record<CampaignStatus, BadgeTone> = {
   PAUSED: 'warning',
   ENDED: 'neutral',
 };
+
+function formatDate(iso: string | null): string {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
 function formatRupees(value: number): string {
   return `₹${Math.round(value).toLocaleString('en-IN')}`;
@@ -136,7 +141,7 @@ const AdsCampaignDetail = () => {
             <StatCard icon={<IndianRupee size={16} color={theme.colors.brand.primary} />} label="Total spend" value={formatRupees(campaign.spendRs)} />
             <StatCard icon={<Eye size={16} color={theme.colors.brand.primary} />} label="Impressions" value={campaign.impressions.toLocaleString('en-IN')} />
             <StatCard icon={<MousePointerClick size={16} color={theme.colors.brand.primary} />} label="Clicks" value={campaign.clicks.toLocaleString('en-IN')} />
-            <StatCard icon={<TrendingUp size={16} color={theme.colors.brand.primary} />} label="CTR" value={`${campaign.ctr.toFixed(1)}%`} />
+            <StatCard icon={<TrendingUp size={16} color={theme.colors.brand.primary} />} label="CTR" value={`${campaign.ctr.toFixed(2)}%`} />
             <StatCard icon={<ShoppingBag size={16} color={theme.colors.brand.primary} />} label="Orders" value={campaign.ordersCount} />
             <StatCard icon={<IndianRupee size={16} color={theme.colors.brand.primary} />} label="Revenue" value={formatRupees(campaign.revenueRs)} />
           </View>
@@ -147,7 +152,10 @@ const AdsCampaignDetail = () => {
                 <Text variant="overline" color="tertiary">
                   ROI
                 </Text>
-                <Text variant="h2">{`${campaign.roi.toFixed(1)}×`}</Text>
+                <Text variant="h2">{`${campaign.roi.toFixed(2)}×`}</Text>
+                <Text variant="caption" color="tertiary">
+                  {formatRupees(campaign.revenueRs)} revenue / {formatRupees(campaign.spendRs)} spend
+                </Text>
               </View>
               <View style={styles.reachInfo}>
                 <View style={styles.reachRow}>
@@ -163,38 +171,40 @@ const AdsCampaignDetail = () => {
             </View>
           </Card>
 
-          {campaign.dailyStats && campaign.dailyStats.length > 0 ? (
-            <Card style={styles.chartCard}>
-              <Text variant="overline" color="tertiary" style={styles.chartLabel}>
-                DAILY IMPRESSIONS
+          <Card style={styles.chartCard}>
+            <Text variant="overline" color="tertiary" style={styles.chartLabel}>
+              DAILY TREND — IMPRESSIONS & CLICKS
+            </Text>
+            <CampaignDailyChart dailyStats={campaign.dailyStats ?? []} height={140} />
+          </Card>
+
+          <Card style={styles.chartCard}>
+            <Text variant="overline" color="tertiary" style={styles.chartLabel}>
+              TIMELINE
+            </Text>
+            <View style={styles.timelineRow}>
+              <CalendarCheck size={13} color={theme.colors.text.tertiary} />
+              <Text variant="bodySmall" color="secondary">
+                Created {formatDate(campaign.createdAt)}
               </Text>
-              <LineChart
-                data={campaign.dailyStats.map((stat) => ({
-                  value: stat.impressions,
-                  label: new Date(stat.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-                }))}
-                height={140}
-                thickness={3}
-                color={theme.colors.brand.primary}
-                dataPointsColor={theme.colors.brand.primary}
-                startFillColor={theme.colors.gradients.brand[0]}
-                endFillColor={theme.colors.gradients.brand[2]}
-                startOpacity={0.22}
-                endOpacity={0.02}
-                areaChart
-                curved
-                hideRules
-                hideYAxisText
-                xAxisColor={theme.colors.borders.subtle}
-                xAxisLabelTextStyle={styles.chartAxisLabel}
-                noOfSections={3}
-                spacing={40}
-                initialSpacing={12}
-                endSpacing={8}
-                adjustToWidth
-              />
-            </Card>
-          ) : null}
+            </View>
+            {campaign.pausedAt ? (
+              <View style={styles.timelineRow}>
+                <Pause size={13} color={theme.colors.amber[600]} />
+                <Text variant="bodySmall" color="secondary">
+                  Paused {formatDate(campaign.pausedAt)}
+                </Text>
+              </View>
+            ) : null}
+            {campaign.endedAt ? (
+              <View style={styles.timelineRow}>
+                <CalendarX size={13} color={theme.colors.text.tertiary} />
+                <Text variant="bodySmall" color="secondary">
+                  Ended {formatDate(campaign.endedAt)}
+                </Text>
+              </View>
+            ) : null}
+          </Card>
         </ScrollView>
       )}
     </Screen>
@@ -251,4 +261,5 @@ const styles = StyleSheet.create({
   chartCard: { marginBottom: theme.spacing.paddings.md },
   chartLabel: { marginBottom: theme.spacing.paddings.sm },
   chartAxisLabel: { color: theme.colors.text.tertiary, fontSize: 10 },
+  timelineRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs, marginBottom: theme.spacing.paddings.xs },
 });

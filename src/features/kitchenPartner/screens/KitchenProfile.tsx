@@ -75,8 +75,13 @@ const KitchenProfile = () => {
               <Text style={styles.kitchenName} numberOfLines={2}>
                 {profile.data.name}
               </Text>
-              {profile.data.isVerified ? <Badge label="Verified" tone="brand" size="sm" /> : null}
+              <Badge
+                label={profile.data.isVerified ? 'Verified' : 'Pending verification'}
+                tone={profile.data.isVerified ? 'brand' : 'warning'}
+                size="sm"
+              />
             </View>
+            <Text style={styles.slugText}>{profile.data.slug}</Text>
             {profile.data.tagline ? <Text style={styles.tagline}>{profile.data.tagline}</Text> : null}
 
             <View style={styles.metaRow}>
@@ -95,6 +100,12 @@ const KitchenProfile = () => {
               <MapPin size={13} color={theme.colors.text.tertiary} />
               <Text style={styles.metaText}>{profile.data.city}</Text>
             </View>
+            {profile.data.fssaiLicense ? (
+              <View style={styles.metaRow}>
+                <ShieldCheck size={13} color={theme.colors.text.tertiary} />
+                <Text style={styles.metaText}>FSSAI: {profile.data.fssaiLicense}</Text>
+              </View>
+            ) : null}
 
             <View style={styles.acceptingRow}>
               <Text style={styles.acceptingLabel}>Accepting orders</Text>
@@ -477,6 +488,7 @@ function PublicLinkCard({ slug }: { slug: string }) {
 export default KitchenProfile;
 
 const styles = StyleSheet.create({
+  slugText: { ...theme.text.caption, color: theme.colors.text.tertiary, marginTop: 2 },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.xxl },
   card: { marginTop: theme.spacing.paddings.md },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs },

@@ -62,6 +62,7 @@ const Payouts = () => {
         text: 'Request payout',
         onPress: () =>
           requestPayout.mutate(undefined, {
+            onSuccess: () => Alert.alert('Payout requested', 'Your payout request was submitted successfully.'),
             onError: (error) =>
               Alert.alert('Could not request payout', error instanceof KitchenApiError ? error.message : 'Please try again.'),
           }),
@@ -133,12 +134,20 @@ const Payouts = () => {
                 <Text variant="label" color="secondary">
                   Last payout
                 </Text>
-                <Text variant="bodyMedium">
-                  {data.lastPayout
-                    ? `${formatRupees(data.lastPayout.amount)} · ${new Date(data.lastPayout.paidAt ?? data.lastPayout.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`
-                    : 'No payouts yet'}
-                </Text>
+                <View style={styles.lastPayoutValue}>
+                  <Text variant="bodyMedium">
+                    {data.lastPayout
+                      ? `${formatRupees(data.lastPayout.amount)} · ${new Date(data.lastPayout.paidAt ?? data.lastPayout.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`
+                      : 'No payouts yet'}
+                  </Text>
+                  {data.lastPayout ? <Badge label={data.lastPayout.status} tone={statusTone(data.lastPayout.status)} size="sm" /> : null}
+                </View>
               </View>
+              {data.lastPayout?.failureReason ? (
+                <Text variant="caption" style={styles.failureText}>
+                  {data.lastPayout.failureReason}
+                </Text>
+              ) : null}
               <View style={[styles.infoRow, styles.infoRowLast]}>
                 <Text variant="label" color="secondary">
                   Next scheduled
@@ -161,7 +170,7 @@ const Payouts = () => {
                   <View style={styles.bankRow}>
                     <Building2 size={14} color={theme.colors.text.tertiary} />
                     <Text variant="bodySmall" color="secondary">
-                      {data.bankAccount.bankName || 'Bank'} · {data.bankAccount.accountNumberMasked}
+                      {data.bankAccount.bankName || 'Bank'} · {data.bankAccount.accountNumberMasked} · IFSC {data.bankAccount.ifsc}
                     </Text>
                   </View>
                   <View style={styles.bankRow}>
@@ -265,6 +274,8 @@ const Payouts = () => {
 export default Payouts;
 
 const styles = StyleSheet.create({
+  lastPayoutValue: { alignItems: 'flex-end', gap: 4 },
+  failureText: { color: theme.colors.state.error, marginBottom: theme.spacing.paddings.xs },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.xxl },
   statsRow: { flexDirection: 'row', gap: theme.spacing.paddings.sm, marginBottom: theme.spacing.paddings.md },
   statSkeleton: { flex: 1 },

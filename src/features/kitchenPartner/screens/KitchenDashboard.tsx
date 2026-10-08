@@ -1,15 +1,22 @@
 import React, { useCallback } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Image, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import {
+  BadgeCheck,
   Bell,
+  Camera,
+  ClipboardList,
   Clapperboard,
+  Eye,
+  Heart,
   IndianRupee,
   Megaphone,
   MessageCircle,
   Package,
+  Phone,
   Plus,
   Star,
   TrendingUp,
+  UserCog,
   UtensilsCrossed,
   Users,
   Wallet,
@@ -22,12 +29,22 @@ import AppGradient from '@components/AppGradient';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useKitchenAuthStore } from '../store/kitchenAuthStore';
+import { callPhone } from '../utils/contact';
 import {
   useKitchenDashboard,
   useKitchenIncomingOrders,
+  useKitchenProfile,
+  useKitchenStories,
   useKitchenUnreadNotificationCount,
   useSetAcceptingOrders,
 } from '../hooks/useKitchenPortal';
+
+const KITCHEN_STATUS_LABEL: Record<string, string> = {
+  PENDING: 'Pending',
+  ACTIVE: 'Active',
+  PAUSED: 'Paused',
+  SUSPENDED: 'Suspended',
+};
 
 function greeting() {
   const h = new Date().getHours();
@@ -43,11 +60,15 @@ const KitchenDashboard = () => {
   const incomingOrders = useKitchenIncomingOrders();
   const setAccepting = useSetAcceptingOrders();
   const unreadCount = useKitchenUnreadNotificationCount();
+  const profile = useKitchenProfile();
+  const stories = useKitchenStories();
 
   const onRefresh = useCallback(() => {
     dashboard.refetch();
     incomingOrders.refetch();
-  }, [dashboard, incomingOrders]);
+    profile.refetch();
+    stories.refetch();
+  }, [dashboard, incomingOrders, profile, stories]);
 
   const summary = dashboard.data;
   const isLive = !!summary && summary.isAcceptingOrders && summary.accountStatus === 'ACTIVE';
@@ -74,7 +95,11 @@ const KitchenDashboard = () => {
             style={({ pressed }) => [styles.topBarButton, pressed ? styles.topBarButtonPressed : null]}
           >
             <Bell size={20} color={theme.colors.text.primary} />
-            {unreadCount.data ? <View style={styles.unreadDot} /> : null}
+            {unreadCount.data ? (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadBadgeText}>{unreadCount.data > 9 ? '9+' : unreadCount.data}</Text>
+              </View>
+            ) : null}
           </Pressable>
         </View>
       </View>
@@ -86,9 +111,14 @@ const KitchenDashboard = () => {
       >
         <AppGradient colors={theme.colors.defaultColor} direction="diagonal" style={styles.banner}>
           <Text style={styles.bannerGreeting}>{greeting()},</Text>
-          <Text style={styles.bannerName} numberOfLines={1}>
-            {account?.ownerName ?? 'Partner'}
-          </Text>
+          <View style={styles.bannerNameRow}>
+            <Text style={styles.bannerName} numberOfLines={1}>
+              {profile.data?.name ?? account?.ownerName ?? 'Partner'}
+            </Text>
+            {profile.data?.isVerified ? (
+              <BadgeCheck size={20} color={theme.colors.palette.white} accessibilityLabel="Verified kitchen" />
+            ) : null}
+          </View>
           <Text style={styles.bannerDate}>
             {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}
           </Text>
@@ -97,14 +127,14 @@ const KitchenDashboard = () => {
             <View style={styles.statusBadgeRow}>
               {isLive ? <Badge label="LIVE" tone="accent" variant="solid" size="sm" /> : null}
               <Badge
-                label={`Status: ${summary.accountStatus === 'ACTIVE' ? 'Active' : summary.accountStatus}`}
-                tone="accent"
+                label={`Status: ${KITCHEN_STATUS_LABEL[profile.data?.status ?? 'ACTIVE'] ?? profile.data?.status ?? 'Active'}`}
+                tone={(profile.data?.status ?? 'ACTIVE') === 'ACTIVE' ? 'accent' : 'warning'}
                 variant="solid"
                 size="sm"
               />
               <Badge
-                label={`Visibility: ${summary.isAcceptingOrders ? 'Public' : 'Paused'}`}
-                tone={summary.isAcceptingOrders ? 'accent' : 'neutral'}
+                label={`Visibility: ${(profile.data?.status ?? 'ACTIVE') === 'ACTIVE' ? 'Public' : 'Private'}`}
+                tone={(profile.data?.status ?? 'ACTIVE') === 'ACTIVE' ? 'accent' : 'neutral'}
                 variant="solid"
                 size="sm"
               />
@@ -161,6 +191,21 @@ const KitchenDashboard = () => {
             label="Wallet"
             onPress={() => navigation.navigate('Wallet')}
           />
+          <QuickAction
+            icon={<Camera size={20} color={theme.colors.brand.primary} />}
+            label="Post a Story"
+            onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenStories' })}
+          />
+          <QuickAction
+            icon={<ClipboardList size={20} color={theme.colors.brand.primary} />}
+            label="View Orders"
+            onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' })}
+          />
+          <QuickAction
+            icon={<UserCog size={20} color={theme.colors.brand.primary} />}
+            label="Edit Profile"
+            onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenProfile' })}
+          />
         </View>
 
         {summary?.actionNeeded ? (
@@ -197,6 +242,7 @@ const KitchenDashboard = () => {
               icon={<Star size={16} color={theme.colors.brand.primary} />}
               label="Rating"
               value={summary.allTime.rating ? summary.allTime.rating.toFixed(1) : '—'}
+              sub={`${summary.allTime.ratingCount} reviews`}
             />
           </View>
         )}
@@ -230,22 +276,97 @@ const KitchenDashboard = () => {
           </Card>
         ) : null}
 
-        {incomingOrders.data && incomingOrders.data.length > 0 ? (
-          <Card style={styles.liveOrdersCard} onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' })}>
-            <Text style={styles.sectionLabel}>LIVE ORDERS</Text>
-            {incomingOrders.data.slice(0, 4).map((order) => (
-              <View key={order.id} style={styles.liveOrderRow}>
+        <Card style={styles.liveOrdersCard}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.sectionLabelInline}>LIVE ORDERS</Text>
+            <Pressable
+              onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' })}
+              hitSlop={theme.layout.hitSlop}
+              accessibilityRole="button"
+              accessibilityLabel="View the orders board"
+            >
+              <Text style={styles.linkText}>View board</Text>
+            </Pressable>
+          </View>
+          {incomingOrders.isError && !incomingOrders.data ? (
+            <Pressable onPress={() => incomingOrders.refetch()} accessibilityRole="button" style={styles.inlineRetry}>
+              <Text style={styles.liveOrderItems}>{"Couldn't load live orders. Tap to retry."}</Text>
+            </Pressable>
+          ) : !incomingOrders.data || incomingOrders.data.length === 0 ? (
+            <Text style={styles.liveOrderItems}>No live orders — new orders will land here the moment they come in.</Text>
+          ) : (
+            incomingOrders.data.slice(0, 5).map((order) => (
+              <Pressable
+                key={order.id}
+                style={styles.liveOrderRow}
+                onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' })}
+                accessibilityRole="button"
+                accessibilityLabel={`Open order ${order.orderNumber}`}
+              >
                 <View style={styles.liveOrderInfo}>
                   <Text style={styles.liveOrderNumber}>#{order.orderNumber}</Text>
                   <Text style={styles.liveOrderItems} numberOfLines={1}>
                     {order.customer.name} · {order.items.map((i) => `${i.quantity}× ${i.name}`).join(', ')}
                   </Text>
                 </View>
-                <Text style={styles.liveOrderTotal}>{`₹${order.totalAmount}`}</Text>
-              </View>
-            ))}
-          </Card>
-        ) : null}
+                <View style={styles.liveOrderRight}>
+                  <Text style={styles.liveOrderTotal}>{`₹${order.totalAmount}`}</Text>
+                  <Pressable
+                    onPress={() => callPhone(order.customer.phone)}
+                    hitSlop={theme.layout.hitSlop}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Call ${order.customer.name}`}
+                    style={styles.callLink}
+                  >
+                    <Phone size={11} color={theme.colors.brand.primary} />
+                    <Text style={styles.callLinkText}>Call</Text>
+                  </Pressable>
+                </View>
+              </Pressable>
+            ))
+          )}
+        </Card>
+
+        <Card style={styles.liveOrdersCard}>
+          <View style={styles.cardHeaderRow}>
+            <Text style={styles.sectionLabelInline}>YOUR STORIES</Text>
+            <Pressable
+              onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenStories' })}
+              hitSlop={theme.layout.hitSlop}
+              accessibilityRole="button"
+              accessibilityLabel="Manage stories"
+            >
+              <Text style={styles.linkText}>Manage</Text>
+            </Pressable>
+          </View>
+          {stories.isError && !stories.data ? (
+            <Pressable onPress={() => stories.refetch()} accessibilityRole="button" style={styles.inlineRetry}>
+              <Text style={styles.liveOrderItems}>{"Couldn't load stories. Tap to retry."}</Text>
+            </Pressable>
+          ) : !stories.data || stories.data.length === 0 ? (
+            <Text style={styles.liveOrderItems}>No stories posted yet — show off a dish today.</Text>
+          ) : (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.storyStrip}>
+              {stories.data.slice(0, 6).map((story) => (
+                <View key={story.id} style={styles.storyCell}>
+                  {story.thumbnailUrl || story.mediaType === 'IMAGE' ? (
+                    <Image source={{ uri: story.thumbnailUrl ?? story.mediaUrl }} style={styles.storyThumb} accessibilityLabel="Story thumbnail" />
+                  ) : (
+                    <View style={[styles.storyThumb, styles.storyThumbFallback]}>
+                      <Camera size={18} color={theme.colors.text.tertiary} />
+                    </View>
+                  )}
+                  <View style={styles.storyStats}>
+                    <Eye size={10} color={theme.colors.text.tertiary} />
+                    <Text style={styles.storyStatText}>{story.viewCount}</Text>
+                    <Heart size={10} color={theme.colors.text.tertiary} />
+                    <Text style={styles.storyStatText}>{story.likeCount}</Text>
+                  </View>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+        </Card>
       </ScrollView>
     </Screen>
   );
@@ -266,11 +387,13 @@ function StatCard({
   icon,
   label,
   value,
+  sub,
   onPress,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string | number;
+  sub?: string;
   onPress?: () => void;
 }) {
   return (
@@ -278,6 +401,7 @@ function StatCard({
       <View style={styles.statIcon}>{icon}</View>
       <Text style={styles.statValue}>{value}</Text>
       <Text style={styles.statLabel}>{label}</Text>
+      {sub ? <Text style={styles.statSub}>{sub}</Text> : null}
     </Card>
   );
 }
@@ -296,6 +420,9 @@ function WeeklyRevenueChart({ data }: { data: { date: string; revenue: number }[
         <Text style={styles.sectionLabel}>WEEKLY REVENUE</Text>
         <Text style={styles.chartTotal}>{`₹${totalRevenue.toLocaleString('en-IN')}`}</Text>
       </View>
+      {totalRevenue === 0 ? (
+        <Text style={styles.chartEmpty}>No revenue yet this week</Text>
+      ) : (
       <LineChart
         data={chartData}
         height={140}
@@ -318,6 +445,7 @@ function WeeklyRevenueChart({ data }: { data: { date: string; revenue: number }[
         endSpacing={8}
         adjustToWidth
       />
+      )}
     </Card>
   );
 }
@@ -353,7 +481,38 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: theme.colors.surface.base,
   },
+  unreadBadge: {
+    position: 'absolute',
+    top: 2,
+    right: 0,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.state.error,
+    borderWidth: 1.5,
+    borderColor: theme.colors.surface.base,
+  },
+  unreadBadgeText: { ...theme.text.caption, fontSize: 10, lineHeight: 12, color: theme.colors.palette.white, fontWeight: '800' as const },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl, paddingTop: theme.spacing.paddings.sm },
+  bannerNameRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs },
+  statSub: { ...theme.text.caption, color: theme.colors.text.tertiary, marginTop: 2 },
+  chartEmpty: { ...theme.text.caption, color: theme.colors.text.tertiary, textAlign: 'center', paddingVertical: theme.spacing.paddings.xl },
+  cardHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.paddings.sm },
+  sectionLabelInline: { ...theme.text.overline, color: theme.colors.text.tertiary },
+  linkText: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },
+  inlineRetry: { minHeight: 44, justifyContent: 'center' },
+  liveOrderRight: { alignItems: 'flex-end' },
+  callLink: { flexDirection: 'row', alignItems: 'center', gap: 3, minHeight: 28 },
+  callLinkText: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },
+  storyStrip: { gap: theme.spacing.paddings.sm },
+  storyCell: { width: 64, alignItems: 'center' },
+  storyThumb: { width: 64, height: 64, borderRadius: theme.radius.md, backgroundColor: theme.colors.neutral[100] },
+  storyThumbFallback: { alignItems: 'center', justifyContent: 'center' },
+  storyStats: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 },
+  storyStatText: { ...theme.text.caption, fontSize: 10, color: theme.colors.text.tertiary },
   banner: { borderRadius: theme.radius.card, padding: theme.spacing.paddings.lg, marginBottom: theme.spacing.paddings.md },
   bannerGreeting: { ...theme.text.bodySmall, color: theme.colors.overlay.glassStrong },
   bannerName: { ...theme.text.h2, color: theme.colors.palette.white, marginTop: 2 },

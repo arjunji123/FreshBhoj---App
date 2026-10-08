@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { FileCheck2, ShieldCheck } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
-import { AppBar, Card, Screen } from '@components/ui';
+import { AppBar, Card, Input, Screen } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useUploadFssaiLicenceDocument } from '../hooks/useKitchenPortal';
@@ -22,6 +22,7 @@ const FssaiAssistanceChoice: React.FC<Props> = ({ previousRequest, onGetAssistan
   const insets = useSafeAreaInsets();
   const fssaiUpload = useUploadFssaiLicenceDocument();
   const [isPicking, setIsPicking] = useState(false);
+  const [licenceNumber, setLicenceNumber] = useState('');
 
   const handleAlreadyHaveFssai = async () => {
     try {
@@ -30,6 +31,7 @@ const FssaiAssistanceChoice: React.FC<Props> = ({ previousRequest, onGetAssistan
       fssaiUpload.uploadAndRegister(
         { uri: result.uri, type: result.type ?? undefined, fileName: result.name ?? undefined, fileSize: result.size ?? undefined },
         {
+          number: licenceNumber.trim() || undefined,
           onSuccess: () => {
             setIsPicking(false);
             Alert.alert('Uploaded', 'Your FSSAI licence was submitted for verification.', [{ text: 'OK', onPress: () => navigation.goBack() }]);
@@ -82,6 +84,15 @@ const FssaiAssistanceChoice: React.FC<Props> = ({ previousRequest, onGetAssistan
           </View>
         </Card>
 
+        <Input
+          label="Licence / registration number (optional)"
+          value={licenceNumber}
+          onChangeText={setLicenceNumber}
+          placeholder="e.g. 12345678901234"
+          keyboardType="numeric"
+          editable={!isBusy}
+          containerStyle={styles.numberField}
+        />
         <Card style={styles.optionCard} onPress={isBusy ? undefined : handleAlreadyHaveFssai}>
           <View style={styles.optionRow}>
             <FileCheck2 size={18} color={theme.colors.brand.primary} />
@@ -114,6 +125,7 @@ const styles = StyleSheet.create({
   noticeCard: { width: '100%', marginTop: theme.spacing.paddings.lg, backgroundColor: theme.colors.state.errorBg },
   noticeTitle: { ...theme.text.label, color: theme.colors.state.error, marginBottom: 4 },
   noticeBody: { ...theme.text.bodySmall, color: theme.colors.text.secondary },
+  numberField: { width: '100%', marginTop: theme.spacing.paddings.lg },
   optionCard: { width: '100%', marginTop: theme.spacing.paddings.lg },
   optionRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm },
   optionTextWrap: { flex: 1 },

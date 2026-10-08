@@ -38,6 +38,7 @@ const KitchenRegisterDocuments = () => {
   const logout = useKitchenLogout();
 
   const [fssaiNumber, setFssaiNumber] = useState('');
+  const [optionalNumbers, setOptionalNumbers] = useState<Partial<Record<KitchenDocumentType, string>>>({});
   const [pendingSlot, setPendingSlot] = useState<KitchenDocumentType | null>(null);
 
   const documents = onboarding.data?.documents ?? [];
@@ -67,6 +68,39 @@ const KitchenRegisterDocuments = () => {
           onError: (error) => {
             setPendingSlot(null);
             Alert.alert('Could not upload file', error instanceof KitchenApiError ? error.message : 'Please try again.');
+          },
+        },
+      );
+    } catch (error) {
+      if (DocumentPicker.isCancel(error)) return;
+      Alert.alert('Could not select file', 'Please try again.');
+    }
+  };
+
+  const OPTIONAL_DOC_LABEL: Partial<Record<KitchenDocumentType, string>> = {
+    GST: 'GST certificate',
+    SHOP_LICENSE: 'Shop & Establishment licence',
+  };
+
+  /** Optional supporting documents (GST / shop licence) — PDF or photo, same upload path as the website. */
+  const handlePickOptionalDoc = async (type: 'GST' | 'SHOP_LICENSE') => {
+    try {
+      const result = await DocumentPicker.pickSingle({ type: [DocumentPickerTypes.pdf, DocumentPickerTypes.images] });
+      setPendingSlot(type);
+      upload.mutate(
+        {
+          asset: { uri: result.uri, type: result.type ?? undefined, fileName: result.name ?? undefined, fileSize: result.size ?? undefined },
+          purpose: 'DOCUMENT',
+          fallbackType: 'image/jpeg',
+        },
+        {
+          onSuccess: (uploaded) => registerAfterUpload(type, uploaded.url, optionalNumbers[type]?.trim() || undefined),
+          onError: (error) => {
+            setPendingSlot(null);
+            Alert.alert(
+              `Could not upload ${OPTIONAL_DOC_LABEL[type] ?? 'document'}`,
+              error instanceof KitchenApiError ? error.message : 'Please try again.',
+            );
           },
         },
       );
@@ -167,6 +201,40 @@ const KitchenRegisterDocuments = () => {
           onPress={() => handlePickPhoto('KITCHEN_PHOTO_MAIN')}
         />
 
+        <Text style={styles.optionalHeading}>Optional — these speed up approval</Text>
+        <DocumentSlot
+          icon={<FileText size={20} color={theme.colors.brand.primary} />}
+          title="GST certificate"
+          hint="PDF or photo, if you're GST registered"
+          doc={findDoc('GST')}
+          isUploading={pendingSlot === 'GST'}
+          onPress={() => handlePickOptionalDoc('GST')}
+        />
+        <Input
+          label="GST number (optional)"
+          value={optionalNumbers.GST ?? ''}
+          onChangeText={(value) => setOptionalNumbers((prev) => ({ ...prev, GST: value }))}
+          placeholder="Registration number"
+          autoCapitalize="characters"
+          containerStyle={styles.field}
+        />
+        <DocumentSlot
+          icon={<FileText size={20} color={theme.colors.brand.primary} />}
+          title="Shop & Establishment licence"
+          hint="PDF or photo of your shop licence"
+          doc={findDoc('SHOP_LICENSE')}
+          isUploading={pendingSlot === 'SHOP_LICENSE'}
+          onPress={() => handlePickOptionalDoc('SHOP_LICENSE')}
+        />
+        <Input
+          label="Licence number (optional)"
+          value={optionalNumbers.SHOP_LICENSE ?? ''}
+          onChangeText={(value) => setOptionalNumbers((prev) => ({ ...prev, SHOP_LICENSE: value }))}
+          placeholder="Registration number"
+          autoCapitalize="characters"
+          containerStyle={styles.field}
+        />
+
         <Button
           title={onboarding.isRefetching ? 'Checking…' : 'Continue'}
           onPress={handleContinue}
@@ -213,6 +281,7 @@ function DocumentSlot({
 export default KitchenRegisterDocuments;
 
 const styles = StyleSheet.create({
+  optionalHeading: { ...theme.text.label, color: theme.colors.text.secondary, marginTop: theme.spacing.paddings.md, marginBottom: theme.spacing.paddings.xs },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

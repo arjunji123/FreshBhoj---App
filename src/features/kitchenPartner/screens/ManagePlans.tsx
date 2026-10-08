@@ -176,7 +176,12 @@ function PlanCard({
 
       <View style={styles.priceWrap}>
         <Text variant="h3">{formatRupees(plan.priceRs)}</Text>
-        {plan.originalPriceRs && plan.originalPriceRs > plan.priceRs ? <Text style={styles.mrp}>{formatRupees(plan.originalPriceRs)}</Text> : null}
+        {plan.originalPriceRs && plan.originalPriceRs > plan.priceRs ? (
+          <>
+            <Text style={styles.mrp}>{formatRupees(plan.originalPriceRs)}</Text>
+            <Badge label={`${plan.discountPercent}% off`} tone="accent" size="sm" />
+          </>
+        ) : null}
       </View>
 
       <Text variant="caption" color="tertiary">

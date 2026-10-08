@@ -134,7 +134,11 @@ const Subscribers = () => {
           {(Object.keys(FILTER_LABEL) as FilterTab[]).map((key) => (
             <Chip
               key={key}
-              label={key === 'ALL' ? FILTER_LABEL[key] : `${FILTER_LABEL[key]}${counts ? ` (${counts[key]})` : ''}`}
+              label={
+                key === 'ALL'
+                  ? `${FILTER_LABEL[key]}${counts ? ` (${Object.values(counts).reduce((sum, n) => sum + n, 0)})` : ''}`
+                  : `${FILTER_LABEL[key]}${counts ? ` (${counts[key]})` : ''}`
+              }
               selected={tab === key}
               onPress={() => setTab(key)}
             />

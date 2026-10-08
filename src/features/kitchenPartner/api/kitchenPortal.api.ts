@@ -154,6 +154,9 @@ export interface UpsertMealInput {
   carbsG?: number;
   fatG?: number;
   fiberG?: number;
+  servingSize?: string;
+  ingredients?: string[];
+  allergens?: string[];
   isAvailable?: boolean;
   isJainAvailable?: boolean;
   prepTimeMins?: number;
@@ -202,6 +205,7 @@ export const kitchenMenuApi = {
 
 export const kitchenOrdersApi = {
   incoming: () => kitchenClient.get<KitchenOrderCard[]>('/partner/orders/incoming'),
+  detail: (id: string) => kitchenClient.get<KitchenOrderCard>(`/partner/orders/${id}`),
   advanceStatus: (id: string, status: OrderStatus, note?: string) =>
     kitchenClient.post<KitchenOrderCard>(`/partner/orders/${id}/status`, { status, note }),
   list: (params: { page?: number; limit?: number; status?: OrderStatus[]; dateFrom?: string; dateTo?: string }) =>

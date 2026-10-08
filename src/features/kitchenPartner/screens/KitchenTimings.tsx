@@ -37,6 +37,12 @@ function isRealCalendarDate(value: string): boolean {
   return check.getUTCFullYear() === year && check.getUTCMonth() === month - 1 && check.getUTCDate() === day;
 }
 
+/** Today's date in the device's local zone as YYYY-MM-DD (`toISOString()` is UTC, which is yesterday for part of every IST morning). */
+function localDateString(d = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 function summarizeDay(day: { isClosed: boolean; session1Start: string | null; session1End: string | null; session2Start: string | null; session2End: string | null }) {
   if (day.isClosed) return 'Closed';
   const parts: string[] = [];
@@ -266,6 +272,8 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
   const [isClosed, setIsClosed] = useState(true);
   const [s1Start, setS1Start] = useState('');
   const [s1End, setS1End] = useState('');
+  const [s2Start, setS2Start] = useState('');
+  const [s2End, setS2End] = useState('');
   const [note, setNote] = useState('');
 
   const handleAdd = () => {
@@ -274,11 +282,15 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
       Alert.alert('Invalid date', 'Use YYYY-MM-DD, e.g. 2026-10-02.');
       return;
     }
-    if ((s1Start && !s1End) || (!s1Start && s1End)) {
-      Alert.alert('Incomplete hours', 'Set both a start and end time, or leave both blank.');
+    if (dateValue < localDateString()) {
+      Alert.alert('Pick today or a future date', 'Holidays and overrides can only be added from today onwards.');
       return;
     }
-    if ((s1Start && !TIME_RE.test(s1Start)) || (s1End && !TIME_RE.test(s1End))) {
+    if ((s1Start && !s1End) || (!s1Start && s1End) || (s2Start && !s2End) || (!s2Start && s2End)) {
+      Alert.alert('Incomplete hours', 'Fill in both the start and end time for a session, or clear both.');
+      return;
+    }
+    if ([s1Start, s1End, s2Start, s2End].some((value) => value && !TIME_RE.test(value))) {
       Alert.alert('Invalid time', 'Use 24-hour HH:mm format, e.g. 09:00.');
       return;
     }
@@ -286,8 +298,10 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
       {
         date: dateValue,
         isClosed,
-        session1Start: s1Start || undefined,
-        session1End: s1End || undefined,
+        session1Start: !isClosed ? s1Start || undefined : undefined,
+        session1End: !isClosed ? s1End || undefined : undefined,
+        session2Start: !isClosed ? s2Start || undefined : undefined,
+        session2End: !isClosed ? s2End || undefined : undefined,
         note: note.trim() || undefined,
       },
       {
@@ -295,6 +309,8 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
           setDate('');
           setS1Start('');
           setS1End('');
+          setS2Start('');
+          setS2End('');
           setNote('');
           setIsClosed(true);
         },
@@ -352,12 +368,17 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
         <Text variant="label" style={styles.addHolidayTitle}>
           Add a holiday
         </Text>
-        <Input label="Date" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" containerStyle={styles.field} />
+        <Input label="Date" value={date} onChangeText={setDate} placeholder="YYYY-MM-DD" maxLength={10} containerStyle={styles.field} />
         <View style={styles.closedRow}>
           <Text variant="label">Closed all day</Text>
           <Switch value={isClosed} onValueChange={setIsClosed} trackColor={{ true: theme.colors.brand.primary }} />
         </View>
-        {!isClosed ? <SessionInputs label="Hours" start={s1Start} end={s1End} onStart={setS1Start} onEnd={setS1End} /> : null}
+        {!isClosed ? (
+          <>
+            <SessionInputs label="Session 1" start={s1Start} end={s1End} onStart={setS1Start} onEnd={setS1End} />
+            <SessionInputs label="Session 2 (optional)" start={s2Start} end={s2End} onStart={setS2Start} onEnd={setS2End} />
+          </>
+        ) : null}
         <Input label="Note (optional)" value={note} onChangeText={setNote} placeholder="e.g. Diwali" containerStyle={styles.field} />
         <Button title={addHoliday.isPending ? 'Adding…' : 'Add holiday'} size="sm" fullWidth={false} loading={addHoliday.isPending} onPress={handleAdd} />
       </Card>

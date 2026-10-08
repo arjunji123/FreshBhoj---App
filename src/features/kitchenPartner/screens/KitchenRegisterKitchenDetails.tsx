@@ -66,8 +66,9 @@ const KitchenRegisterKitchenDetails = () => {
   const [kitchenType, setKitchenType] = useState<KitchenType | null>(null);
   const [tagline, setTagline] = useState('');
   const [description, setDescription] = useState('');
-  const [opensAt, setOpensAt] = useState('');
-  const [closesAt, setClosesAt] = useState('');
+  const [prepTimeMins, setPrepTimeMins] = useState('25');
+  const [opensAt, setOpensAt] = useState('08:00');
+  const [closesAt, setClosesAt] = useState('22:00');
 
   const handleLogout = () => {
     Alert.alert('Log out?', 'You will need your phone number to sign back in.', [
@@ -90,9 +91,15 @@ const KitchenRegisterKitchenDetails = () => {
       Alert.alert('Check your timings', 'Use 24-hour time like 09:00 and 21:00.');
       return;
     }
+    const prep = prepTimeMins.trim() ? Number(prepTimeMins) : undefined;
+    if (prep !== undefined && (!Number.isInteger(prep) || prep < 5 || prep > 180)) {
+      Alert.alert('Check the prep time', 'Prep time must be a whole number of minutes between 5 and 180.');
+      return;
+    }
     saveKitchenDetails.mutate(
       {
         name: name.trim(),
+        prepTimeMins: prep,
         kitchenType,
         tagline: tagline.trim() || undefined,
         description: description.trim() || undefined,
@@ -150,6 +157,15 @@ const KitchenRegisterKitchenDetails = () => {
           containerStyle={styles.field}
         />
 
+        <Input
+          label="Prep time (mins)"
+          value={prepTimeMins}
+          onChangeText={(value) => setPrepTimeMins(value.replace(/\D/g, '').slice(0, 3))}
+          keyboardType="number-pad"
+          maxLength={3}
+          containerStyle={styles.field}
+        />
+
         <View style={styles.hoursRow}>
           <Input
             label="Opens at"
@@ -164,6 +180,7 @@ const KitchenRegisterKitchenDetails = () => {
             value={closesAt}
             onChangeText={setClosesAt}
             placeholder="21:00"
+            maxLength={5}
             containerStyle={[styles.field, styles.hoursField]}
           />
         </View>

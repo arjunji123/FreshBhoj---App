@@ -19,7 +19,7 @@ import { KitchenApiError } from '../api/kitchenClient';
 import { useBhojAiHistory, useResetBhojAi, useSendBhojAiMessage } from '../hooks/useKitchenPortal';
 import type { BhojAiCard, BhojAiMessage } from '../kitchenPartner.types';
 
-const SUGGESTIONS = ['Check my FSSAI status', 'What documents do I need?', 'How much does this cost?'];
+const SUGGESTIONS = ['Check my FSSAI status', 'What documents do I need?', 'How much does this cost?', 'Show my recent orders'];
 
 /**
  * The backend hands back `card` as an untyped record — this is the one place
@@ -235,6 +235,14 @@ function ChatBubble({ message, navigation }: { message: BhojAiMessage; navigatio
   );
 }
 
+function humanizeStage(stage: string): string {
+  return stage
+    .toLowerCase()
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+
 function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: KitchenPartnerNavigation }) {
   if (card.type === 'FSSAI_STATUS') {
     return (
@@ -262,7 +270,7 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
               color={stage.isComplete || stage.isCurrent ? 'primary' : 'tertiary'}
               style={styles.timelineLabel}
             >
-              {stage.stage.replace(/_/g, ' ')}
+              {humanizeStage(stage.stage)}
             </Text>
             {index === card.timeline.length - 1 && card.estimatedDaysLeft != null ? (
               <Text variant="caption" color="tertiary">
@@ -271,6 +279,20 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
             ) : null}
           </View>
         ))}
+        {card.estimatedDaysLeft != null ? (
+          <Text variant="caption" color="tertiary" style={styles.cardSpacing}>
+            {`~${card.estimatedDaysLeft} day${card.estimatedDaysLeft === 1 ? '' : 's'} left (estimate)`}
+          </Text>
+        ) : null}
+        <Pressable
+          onPress={() => navigation.navigate('FssaiAssistance')}
+          style={({ pressed }) => [styles.reuploadButton, pressed ? styles.pressed : null]}
+          accessibilityRole="button"
+        >
+          <Text variant="label" color="brand">
+            Open FSSAI Assistance
+          </Text>
+        </Pressable>
       </Card>
     );
   }
@@ -290,7 +312,7 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
         ) : null}
         {card.rejectedDocuments.map((doc, i) => (
           <View key={`${doc.type}-${i}`} style={styles.rejectedDocRow}>
-            <Text variant="label">{doc.type.replace(/_/g, ' ')}</Text>
+            <Text variant="label">{humanizeStage(doc.type)}</Text>
             {doc.remarks ? (
               <Text variant="caption" color="secondary">
                 {doc.remarks}
@@ -327,7 +349,7 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
 
   // ESCALATION_CREATED
   return (
-    <Badge label={`Escalated: ${card.reason}`} tone="warning" size="md" style={styles.card} />
+    <Badge label="Connected you with a FreshBhoj specialist" tone="brand" size="md" style={styles.card} />
   );
 }
 

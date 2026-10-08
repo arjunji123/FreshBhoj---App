@@ -1,26 +1,34 @@
 import React, { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, View } from 'react-native';
-import { Send, ShieldAlert } from 'lucide-react-native';
+import { Phone, Send, ShieldAlert } from 'lucide-react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { AppBar, Badge, EmptyState, Input, Screen, Text } from '@components/ui';
 import type { KitchenPartnerNavigation, KitchenPartnerStackParamList } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
-import { useOrderMessages, useSendOrderMessage } from '../hooks/useKitchenPortal';
+import { useKitchenOrderDetail, useOrderMessages, useSendOrderMessage } from '../hooks/useKitchenPortal';
+import { callPhone } from '../utils/contact';
 import type { OrderMessage, OrderStatus } from '../kitchenPartner.types';
 
 type OrderChatRoute = RouteProp<KitchenPartnerStackParamList, 'OrderChat'>;
 
 /**
- * Only "Out for delivery" has a sensible 1:1 status mapping — the other two
- * quick replies just send plain text, no `advanceToStatus`.
+ * Same quick replies (label + message body) as the website's chat page. Only
+ * "Out for delivery" has a 1:1 status mapping — the other two send plain text.
  */
-const QUICK_REPLIES: { label: string; advanceToStatus?: OrderStatus }[] = [
-  { label: 'Your order is ready' },
-  { label: '5 more minutes' },
-  { label: 'Out for delivery', advanceToStatus: 'OUT_FOR_DELIVERY' },
+const QUICK_REPLIES: { label: string; body: string; advanceToStatus?: OrderStatus }[] = [
+  { label: 'Order is ready', body: 'Your order is ready!' },
+  { label: '5 more minutes', body: 'Just need 5 more minutes, thanks for your patience!' },
+  { label: 'Out for delivery', body: 'Your order is out for delivery!', advanceToStatus: 'OUT_FOR_DELIVERY' },
 ];
+
+const TRIGGERED_STATUS_LABEL: Partial<Record<string, string>> = {
+  ACCEPTED: 'Order accepted',
+  PREPARING: 'Started preparing',
+  OUT_FOR_DELIVERY: 'Marked out for delivery',
+  CANCELLED: 'Order cancelled',
+};
 
 let localMessageSeq = 0;
 function localId() {
@@ -36,6 +44,8 @@ const OrderChat = () => {
 
   const messagesQuery = useOrderMessages(orderId);
   const sendMessage = useSendOrderMessage(orderId);
+  const orderQuery = useKitchenOrderDetail(orderId);
+  const order = orderQuery.data;
 
   const [draft, setDraft] = useState('');
   // Optimistic messages not yet confirmed by the send mutation — spliced out
@@ -87,7 +97,27 @@ const OrderChat = () => {
 
   return (
     <Screen background="page">
-      <AppBar title={orderNumber ? `Order #${orderNumber}` : 'Order Chat'} onBack={() => navigation.goBack()} />
+      <AppBar title={orderNumber ?? order?.orderNumber ? `Order #${orderNumber ?? order?.orderNumber}` : 'Order Chat'} onBack={() => navigation.goBack()} />
+
+      {order ? (
+        <View style={styles.customerBar}>
+          <Text variant="bodyMedium" numberOfLines={1} style={styles.customerName}>
+            {order.customer.name}
+          </Text>
+          <Pressable
+            onPress={() => callPhone(order.customer.phone)}
+            accessibilityRole="button"
+            accessibilityLabel={`Call ${order.customer.name}`}
+            hitSlop={theme.layout.hitSlop}
+            style={styles.callButton}
+          >
+            <Phone size={13} color={theme.colors.brand.primary} />
+            <Text variant="label" color="brand">
+              {order.customer.phone}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
 
       <KeyboardAvoidingView
         style={styles.flex}
@@ -132,7 +162,7 @@ const OrderChat = () => {
           {QUICK_REPLIES.map((reply) => (
             <Pressable
               key={reply.label}
-              onPress={() => handleSend(reply.label, reply.advanceToStatus)}
+              onPress={() => handleSend(reply.body, reply.advanceToStatus)}
               disabled={sendMessage.isPending}
               accessibilityRole="button"
               style={({ pressed }) => [styles.suggestionChip, pressed ? styles.pressed : null]}
@@ -187,7 +217,7 @@ function ChatBubble({ message }: { message: OrderMessage }) {
       </View>
       {message.triggeredStatus ? (
         <Badge
-          label={`Status → ${message.triggeredStatus.replace(/_/g, ' ')}`}
+          label={TRIGGERED_STATUS_LABEL[message.triggeredStatus] ?? `Status → ${message.triggeredStatus.replace(/_/g, ' ')}`}
           tone="info"
           size="sm"
           style={isKitchen ? styles.statusBadgeRight : styles.statusBadgeLeft}
@@ -202,6 +232,16 @@ export default OrderChat;
 const styles = StyleSheet.create({
   flex: { flex: 1 },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  customerBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: theme.spacing.paddings.sm,
+    paddingHorizontal: theme.layout.screenPadding,
+    paddingBottom: theme.spacing.paddings.sm,
+  },
+  customerName: { flex: 1 },
+  callButton: { flexDirection: 'row', alignItems: 'center', gap: 4, minHeight: 44, paddingHorizontal: theme.spacing.paddings.xs },
   listContent: { paddingHorizontal: theme.layout.screenPadding, paddingVertical: theme.spacing.paddings.md, flexGrow: 1 },
   emptyWrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingTop: theme.spacing.paddings.xxl },
   emptyBody: { marginTop: theme.spacing.paddings.xs, maxWidth: 280 },

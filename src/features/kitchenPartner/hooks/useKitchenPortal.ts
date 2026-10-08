@@ -51,6 +51,7 @@ const kitchenKeys = {
   profile: ['kitchen', 'profile'] as const,
   orders: ['kitchen', 'orders'] as const,
   ordersHistory: (params: unknown) => ['kitchen', 'orders', 'history', params] as const,
+  orderDetail: (id: string) => ['kitchen', 'orders', 'detail', id] as const,
   menu: ['kitchen', 'menu'] as const,
   cuisines: ['kitchen', 'cuisines'] as const,
   stories: ['kitchen', 'stories'] as const,
@@ -66,6 +67,7 @@ const kitchenKeys = {
   orderMessages: (orderId: string) => ['kitchen', 'orders', orderId, 'messages'] as const,
   campaigns: ['kitchen', 'ads', 'campaigns'] as const,
   campaignsList: (status: CampaignStatus | undefined) => ['kitchen', 'ads', 'campaigns', 'list', status ?? 'ALL'] as const,
+  campaignAnalytics: (ids: string[]) => ['kitchen', 'ads', 'campaigns', 'analytics', ids.join(',')] as const,
   campaignDetail: (id: string) => ['kitchen', 'ads', 'campaigns', 'detail', id] as const,
   campaignEstimate: (dailyBudgetRs: number) => ['kitchen', 'ads', 'campaigns', 'estimate', dailyBudgetRs] as const,
   subscriptions: ['kitchen', 'subscriptions'] as const,
@@ -197,6 +199,16 @@ export function useKitchenOrderHistory(params: { page: number; dateFrom?: string
     queryKey: kitchenKeys.ordersHistory(params),
     queryFn: () => kitchenOrdersApi.list({ ...params, limit: 20 }),
     enabled,
+  });
+}
+
+/** Single order (customer name/phone etc.) — the chat header reads this, same as the website's chat page. */
+export function useKitchenOrderDetail(id: string) {
+  const enabled = useKitchenAuthed();
+  return useQuery({
+    queryKey: kitchenKeys.orderDetail(id),
+    queryFn: () => kitchenOrdersApi.detail(id),
+    enabled: enabled && !!id,
   });
 }
 
@@ -605,6 +617,16 @@ export function useCampaigns(status?: CampaignStatus) {
     queryKey: kitchenKeys.campaignsList(status),
     queryFn: () => kitchenAdsApi.list(status),
     enabled,
+  });
+}
+
+/** Batch analytics (with `dailyStats`) for the Compare sheet; stays idle until `enabled`. */
+export function useCampaignAnalytics(ids: string[], enabled: boolean) {
+  const authed = useKitchenAuthed();
+  return useQuery({
+    queryKey: kitchenKeys.campaignAnalytics(ids),
+    queryFn: () => kitchenAdsApi.analytics(ids),
+    enabled: authed && enabled && ids.length >= 2,
   });
 }
 

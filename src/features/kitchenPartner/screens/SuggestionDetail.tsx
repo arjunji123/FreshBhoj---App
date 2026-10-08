@@ -9,6 +9,7 @@ import type { KitchenPartnerNavigation, KitchenPartnerStackParamList } from '@ap
 import { KitchenApiError } from '../api/kitchenClient';
 import { useApplySuggestion, useDismissSuggestion, useSuggestionDetail } from '../hooks/useKitchenPortal';
 import type { CampaignSuggestionEffort, CampaignSuggestionStatus } from '../kitchenPartner.types';
+import { formatFieldName, formatLongDate, formatSignedPct } from '../utils/format';
 
 type SuggestionDetailRoute = RouteProp<KitchenPartnerStackParamList, 'SuggestionDetail'>;
 
@@ -82,6 +83,7 @@ const SuggestionDetail = () => {
             <Card style={styles.headerCard}>
               <View style={styles.headerTopRow}>
                 <Badge label={TYPE_LABEL[suggestion.type] ?? suggestion.type} tone="brand" size="sm" />
+                <Badge label={suggestion.campaignId ? 'Campaign-specific' : 'Kitchen-wide'} tone="neutral" size="sm" />
                 <Badge label={suggestion.status} tone={STATUS_TONE[suggestion.status]} size="sm" />
               </View>
               <Text variant="h3" style={styles.title}>
@@ -103,13 +105,13 @@ const SuggestionDetail = () => {
             </Text>
             <View style={styles.statsGrid}>
               {suggestion.impact.reachDeltaPct != null ? (
-                <StatCard icon={<Radio size={16} color={theme.colors.brand.primary} />} label="Reach" value={`+${suggestion.impact.reachDeltaPct}%`} />
+                <StatCard icon={<Radio size={16} color={theme.colors.brand.primary} />} label="Reach" value={formatSignedPct(suggestion.impact.reachDeltaPct)} />
               ) : null}
               {suggestion.impact.ordersDeltaPct != null ? (
-                <StatCard icon={<ShoppingBag size={16} color={theme.colors.brand.primary} />} label="Orders" value={`+${suggestion.impact.ordersDeltaPct}%`} />
+                <StatCard icon={<ShoppingBag size={16} color={theme.colors.brand.primary} />} label="Orders" value={formatSignedPct(suggestion.impact.ordersDeltaPct)} />
               ) : null}
               {suggestion.impact.roiDeltaPct != null ? (
-                <StatCard icon={<TrendingUp size={16} color={theme.colors.brand.primary} />} label="ROI" value={`+${suggestion.impact.roiDeltaPct}%`} />
+                <StatCard icon={<TrendingUp size={16} color={theme.colors.brand.primary} />} label="ROI" value={formatSignedPct(suggestion.impact.roiDeltaPct)} />
               ) : null}
               {suggestion.impact.expectedOrders != null ? (
                 <StatCard icon={<Gauge size={16} color={theme.colors.brand.primary} />} label="Expected orders" value={suggestion.impact.expectedOrders} />
@@ -146,7 +148,7 @@ const SuggestionDetail = () => {
                 </Text>
                 <View style={styles.appliedRow}>
                   <Text variant="bodySmall" color="secondary">
-                    {suggestion.appliedChanges.field}
+                    {formatFieldName(suggestion.appliedChanges.field)}
                   </Text>
                   <View style={styles.appliedValuesRow}>
                     <Text variant="bodyMedium" color="tertiary" style={styles.strikethrough}>
@@ -159,6 +161,25 @@ const SuggestionDetail = () => {
                 </View>
               </Card>
             ) : null}
+
+            <Card style={styles.appliedCard}>
+              <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
+                TIMELINE
+              </Text>
+              <Text variant="bodySmall" color="secondary">
+                Generated {formatLongDate(suggestion.createdAt)}
+              </Text>
+              {suggestion.appliedAt ? (
+                <Text variant="bodySmall" color="brand">
+                  Applied {formatLongDate(suggestion.appliedAt)}
+                </Text>
+              ) : null}
+              {suggestion.dismissedAt ? (
+                <Text variant="bodySmall" color="tertiary">
+                  Dismissed {formatLongDate(suggestion.dismissedAt)}
+                </Text>
+              ) : null}
+            </Card>
           </ScrollView>
 
           {suggestion.status === 'NEW' ? (
@@ -205,7 +226,7 @@ export default SuggestionDetail;
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.xxl },
   headerCard: { marginBottom: theme.spacing.paddings.md },
-  headerTopRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  headerTopRow: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.xs, alignItems: 'center' },
   title: { marginTop: theme.spacing.paddings.sm },
   description: { marginTop: theme.spacing.paddings.xs },
   effortRow: {

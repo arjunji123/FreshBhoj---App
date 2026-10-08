@@ -2,6 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, FlatList, Image, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 import {
+  BarChart3,
+  Check,
+  ChevronDown,
+  ChevronUp,
   Clapperboard,
   Eye,
   IndianRupee,
@@ -23,6 +27,8 @@ import type { BadgeTone } from '@components/ui';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import {
+  useCampaignAnalytics,
+  useCampaignDetail,
   useCampaignEstimate,
   useCampaigns,
   useCreateCampaign,
@@ -33,6 +39,7 @@ import {
   useWalletSummary,
 } from '../hooks/useKitchenPortal';
 import type { Campaign, CampaignStatus, KitchenReel } from '../kitchenPartner.types';
+import CampaignDailyChart from '../components/CampaignDailyChart';
 
 const MIN_DAILY_BUDGET_RS = 50;
 const MAX_DAILY_BUDGET_RS = 2000;
@@ -63,7 +70,35 @@ function formatRupees(value: number): string {
 const AdsCampaigns = () => {
   const navigation = useNavigation<KitchenPartnerNavigation>();
   const [tab, setTab] = useState<FilterTab>('ALL');
-  const query = useCampaigns(tab === 'ALL' ? undefined : tab);
+  // Always fetch the full list and filter locally so every tab can show its count (same as the website).
+  const query = useCampaigns();
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const compareSheetRef = useRef<SheetHandle>(null);
+  const [compareOpen, setCompareOpen] = useState(false);
+
+  const allCampaigns = useMemo(
+    () => [...(query.data ?? [])].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
+    [query.data],
+  );
+  const counts: Record<FilterTab, number> = useMemo(
+    () => ({
+      ALL: allCampaigns.length,
+      ACTIVE: allCampaigns.filter((c) => c.status === 'ACTIVE').length,
+      PAUSED: allCampaigns.filter((c) => c.status === 'PAUSED').length,
+      ENDED: allCampaigns.filter((c) => c.status === 'ENDED').length,
+    }),
+    [allCampaigns],
+  );
+  const displayed = useMemo(() => (tab === 'ALL' ? allCampaigns : allCampaigns.filter((c) => c.status === tab)), [allCampaigns, tab]);
+
+  const toggleSelect = (id: string) =>
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  const openCompare = () => {
+    setCompareOpen(true);
+    compareSheetRef.current?.open();
+  };
   const pauseCampaign = usePauseCampaign();
   const resumeCampaign = useResumeCampaign();
   const stopCampaign = useStopCampaign();
@@ -120,9 +155,28 @@ const AdsCampaigns = () => {
 
       <ChipRow style={styles.tabRow}>
         {(Object.keys(FILTER_LABEL) as FilterTab[]).map((key) => (
-          <Chip key={key} label={FILTER_LABEL[key]} selected={tab === key} onPress={() => setTab(key)} />
+          <Chip key={key} label={`${FILTER_LABEL[key]} (${counts[key]})`} selected={tab === key} onPress={() => setTab(key)} />
         ))}
       </ChipRow>
+
+      {selectedIds.length > 0 ? (
+        <View style={styles.compareBar}>
+          <Button
+            title={`Compare (${selectedIds.length})`}
+            leftIcon={<BarChart3 size={15} color={theme.colors.brand.primary} />}
+            variant="outline"
+            size="sm"
+            fullWidth={false}
+            disabled={selectedIds.length < 2}
+            onPress={openCompare}
+          />
+          {selectedIds.length < 2 ? (
+            <Text variant="caption" color="tertiary">
+              Select at least 2 campaigns
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       {query.isLoading ? (
         <View style={styles.listPadding}>
@@ -136,23 +190,28 @@ const AdsCampaigns = () => {
         </View>
       ) : (
         <FlatList
-          data={query.data ?? []}
+          data={displayed}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={query.data?.length ? styles.listPadding : styles.emptyPadding}
+          extraData={`${selectedIds.join(',')}|${expandedId}`}
+          contentContainerStyle={displayed.length ? styles.listPadding : styles.emptyPadding}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={theme.colors.primary[600]} />}
           ListEmptyComponent={
             <EmptyState
               icon={<Megaphone size={28} color={theme.colors.text.tertiary} />}
-              title="No campaigns yet"
-              description="Promote a published reel to reach more customers nearby."
-              actionLabel="Promote a Reel"
-              onAction={() => createSheetRef.current?.open()}
+              title={tab === 'ALL' ? 'No campaigns yet' : `No ${FILTER_LABEL[tab].toLowerCase()} campaigns`}
+              description={tab === 'ALL' ? 'Promote a published reel to reach more customers nearby.' : undefined}
+              actionLabel={tab === 'ALL' ? 'Promote a Reel' : undefined}
+              onAction={tab === 'ALL' ? () => createSheetRef.current?.open() : undefined}
             />
           }
           renderItem={({ item }) => (
             <CampaignRow
               campaign={item}
+              isSelected={selectedIds.includes(item.id)}
+              onToggleSelect={() => toggleSelect(item.id)}
+              isExpanded={expandedId === item.id}
+              onToggleExpand={() => setExpandedId((current) => (current === item.id ? null : item.id))}
               onPress={() => navigation.navigate('AdsCampaignDetail', { campaignId: item.id })}
               onPause={() => handlePause(item)}
               onResume={() => handleResume(item)}
@@ -168,12 +227,17 @@ const AdsCampaigns = () => {
       )}
 
       <CreateCampaignSheet sheetRef={createSheetRef} />
+      <CompareSheet sheetRef={compareSheetRef} ids={selectedIds} isOpen={compareOpen} onClose={() => setCompareOpen(false)} />
     </Screen>
   );
 };
 
 function CampaignRow({
   campaign,
+  isSelected,
+  onToggleSelect,
+  isExpanded,
+  onToggleExpand,
   onPress,
   onPause,
   onResume,
@@ -181,6 +245,10 @@ function CampaignRow({
   isBusy,
 }: {
   campaign: Campaign;
+  isSelected: boolean;
+  onToggleSelect: () => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
   onPress: () => void;
   onPause: () => void;
   onResume: () => void;
@@ -190,6 +258,18 @@ function CampaignRow({
   return (
     <Card style={styles.campaignCard} onPress={onPress}>
       <View style={styles.campaignTopRow}>
+        <TouchableOpacity
+          onPress={onToggleSelect}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: isSelected }}
+          accessibilityLabel="Select for comparison"
+          hitSlop={theme.layout.hitSlop}
+          style={styles.selectHit}
+        >
+          <View style={[styles.selectBox, isSelected ? styles.selectBoxOn : null]}>
+            {isSelected ? <Check size={12} color={theme.colors.palette.white} /> : null}
+          </View>
+        </TouchableOpacity>
         {campaign.reel?.thumbnailUrl ? (
           <Image source={{ uri: campaign.reel.thumbnailUrl }} style={styles.thumb} />
         ) : (
@@ -211,9 +291,26 @@ function CampaignRow({
       <View style={styles.statsRow}>
         <StatChip icon={<IndianRupee size={12} color={theme.colors.text.tertiary} />} label="Spend" value={formatRupees(campaign.spendRs)} />
         <StatChip icon={<Eye size={12} color={theme.colors.text.tertiary} />} label="Impressions" value={campaign.impressions.toLocaleString('en-IN')} />
-        <StatChip icon={<MousePointerClick size={12} color={theme.colors.text.tertiary} />} label="CTR" value={`${campaign.ctr.toFixed(1)}%`} />
-        <StatChip icon={<TrendingUp size={12} color={theme.colors.text.tertiary} />} label="ROI" value={`${campaign.roi.toFixed(1)}×`} />
+        <StatChip icon={<MousePointerClick size={12} color={theme.colors.text.tertiary} />} label="Orders" value={String(campaign.ordersCount)} />
+        <StatChip icon={<TrendingUp size={12} color={theme.colors.text.tertiary} />} label="ROI" value={`${campaign.roi.toFixed(2)}×`} />
       </View>
+
+      <TouchableOpacity
+        onPress={onToggleExpand}
+        accessibilityRole="button"
+        accessibilityLabel={isExpanded ? 'Hide trend' : 'Show trend'}
+        style={styles.trendToggle}
+      >
+        <Text variant="caption" color="secondary" style={styles.actionLabel}>
+          Trend
+        </Text>
+        {isExpanded ? (
+          <ChevronUp size={14} color={theme.colors.text.secondary} />
+        ) : (
+          <ChevronDown size={14} color={theme.colors.text.secondary} />
+        )}
+      </TouchableOpacity>
+      {isExpanded ? <CampaignTrend campaignId={campaign.id} /> : null}
 
       {campaign.status !== 'ENDED' ? (
         <View style={styles.actionsRow}>
@@ -241,6 +338,84 @@ function CampaignRow({
         </View>
       ) : null}
     </Card>
+  );
+}
+
+/** Mounts only while expanded, so the per-campaign detail (with `dailyStats`) is fetched on demand. */
+function CampaignTrend({ campaignId }: { campaignId: string }) {
+  const detail = useCampaignDetail(campaignId);
+  return (
+    <View style={styles.trendPanel}>
+      {detail.isLoading ? (
+        <Skeleton height={140} radius={theme.radius.md} />
+      ) : detail.isError ? (
+        <TouchableOpacity onPress={() => detail.refetch()} accessibilityRole="button" style={styles.trendRetry}>
+          <Text variant="caption" color="secondary">
+            {"Couldn't load the trend. Tap to retry."}
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <CampaignDailyChart dailyStats={detail.data?.dailyStats ?? []} height={120} />
+      )}
+    </View>
+  );
+}
+
+function CompareSheet({
+  sheetRef,
+  ids,
+  isOpen,
+  onClose,
+}: {
+  sheetRef: React.RefObject<SheetHandle | null>;
+  ids: string[];
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  const analytics = useCampaignAnalytics(ids, isOpen);
+  return (
+    <Sheet ref={sheetRef} title="Compare campaigns" heightRatio={0.85} onClose={onClose}>
+      {analytics.isLoading ? (
+        <View style={styles.compareBody}>
+          <Skeleton height={180} radius={theme.radius.card} />
+        </View>
+      ) : analytics.isError ? (
+        <EmptyState title="Couldn't load comparison" description="Check your connection and try again." actionLabel="Retry" onAction={() => analytics.refetch()} />
+      ) : (
+        <ScrollView contentContainerStyle={styles.compareBody} showsVerticalScrollIndicator={false}>
+          {(analytics.data ?? []).map((c) => (
+            <Card key={c.id} style={styles.compareCard}>
+              <View style={styles.compareHeaderRow}>
+                <Text variant="bodyMedium" numberOfLines={1} style={styles.compareTitle}>
+                  {c.reel?.caption || 'Untitled reel'}
+                </Text>
+                <Badge label={c.status} tone={STATUS_TONE[c.status]} size="sm" />
+              </View>
+              <View style={styles.compareGrid}>
+                <CompareCell label="Spend" value={formatRupees(c.spendRs)} />
+                <CompareCell label="Impressions" value={c.impressions.toLocaleString('en-IN')} />
+                <CompareCell label="Clicks" value={c.clicks.toLocaleString('en-IN')} />
+                <CompareCell label="CTR" value={`${c.ctr.toFixed(2)}%`} />
+                <CompareCell label="Orders" value={String(c.ordersCount)} />
+                <CompareCell label="ROI" value={`${c.roi.toFixed(2)}×`} />
+              </View>
+              <CampaignDailyChart dailyStats={c.dailyStats ?? []} height={100} />
+            </Card>
+          ))}
+        </ScrollView>
+      )}
+    </Sheet>
+  );
+}
+
+function CompareCell({ label, value }: { label: string; value: string }) {
+  return (
+    <View style={styles.compareCell}>
+      <Text variant="label">{value}</Text>
+      <Text variant="caption" color="tertiary">
+        {label}
+      </Text>
+    </View>
   );
 }
 
@@ -451,6 +626,19 @@ function ReelPickerRow({ reel, selected, onPress }: { reel: KitchenReel; selecte
 export default AdsCampaigns;
 
 const styles = StyleSheet.create({
+  compareBar: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm, paddingHorizontal: theme.layout.screenPadding, marginBottom: theme.spacing.paddings.sm },
+  selectHit: { width: 32, height: 44, alignItems: 'center', justifyContent: 'center' },
+  selectBox: { width: 20, height: 20, borderRadius: 6, borderWidth: 2, borderColor: theme.colors.borders.default, alignItems: 'center', justifyContent: 'center' },
+  selectBoxOn: { backgroundColor: theme.colors.brand.primary, borderColor: theme.colors.brand.primary },
+  trendToggle: { flexDirection: 'row', alignItems: 'center', gap: 4, alignSelf: 'flex-end', minHeight: 44 },
+  trendPanel: { paddingTop: theme.spacing.paddings.xs },
+  trendRetry: { minHeight: 44, justifyContent: 'center', alignItems: 'center' },
+  compareBody: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl },
+  compareCard: { marginBottom: theme.spacing.paddings.sm },
+  compareHeaderRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.paddings.sm, marginBottom: theme.spacing.paddings.sm },
+  compareTitle: { flex: 1 },
+  compareGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.sm, marginBottom: theme.spacing.paddings.sm },
+  compareCell: { width: '30%' },
   header: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.sm },
   tabRow: { marginBottom: theme.spacing.paddings.sm },
   listPadding: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl },

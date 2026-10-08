@@ -24,6 +24,7 @@ import {
   useSuggestions,
 } from '../hooks/useKitchenPortal';
 import type { CampaignSuggestion, CampaignSuggestionEffort } from '../kitchenPartner.types';
+import { formatSignedPct } from '../utils/format';
 
 const MECHANICAL_TYPES = new Set(['BUDGET_INCREASE', 'DELIVERY_RADIUS']);
 
@@ -79,6 +80,21 @@ const AdsInsights = () => {
     });
   };
 
+  const [applySelectedPending, setApplySelectedPending] = useState(false);
+
+  const handleApplySelected = async () => {
+    setApplySelectedPending(true);
+    try {
+      await Promise.all(selectedSuggestions.map((suggestion) => applySuggestion.mutateAsync(suggestion.id)));
+      setSelectedIds(new Set());
+      compareSheetRef.current?.close();
+    } catch (error) {
+      Alert.alert('Could not apply the selected suggestions', error instanceof KitchenApiError ? error.message : 'Please try again.');
+    } finally {
+      setApplySelectedPending(false);
+    }
+  };
+
   const handleDismiss = (suggestion: CampaignSuggestion) => {
     dismissSuggestion.mutate(suggestion.id, {
       onError: (error) =>
@@ -128,10 +144,16 @@ const AdsInsights = () => {
       ) : null}
 
       {selectedIds.size > 0 ? (
-        <TouchableOpacity style={styles.compareBar} onPress={() => compareSheetRef.current?.open()}>
+        <TouchableOpacity
+          style={[styles.compareBar, selectedIds.size < 2 ? styles.compareBarDisabled : null]}
+          onPress={() => compareSheetRef.current?.open()}
+          disabled={selectedIds.size < 2}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: selectedIds.size < 2 }}
+        >
           <Gauge size={14} color={theme.colors.brand.primary} />
           <Text variant="label" color="brand" style={styles.compareBarText}>
-            Compare {selectedIds.size} suggestion{selectedIds.size > 1 ? 's' : ''}
+            {selectedIds.size < 2 ? 'Select at least 2 suggestions to compare' : `Compare ${selectedIds.size} suggestions`}
           </Text>
         </TouchableOpacity>
       ) : null}
@@ -179,7 +201,12 @@ const AdsInsights = () => {
         />
       )}
 
-      <CompareSheet sheetRef={compareSheetRef} suggestions={selectedSuggestions} />
+      <CompareSheet
+        sheetRef={compareSheetRef}
+        suggestions={selectedSuggestions}
+        isApplying={applySelectedPending}
+        onApplySelected={handleApplySelected}
+      />
     </Screen>
   );
 };
@@ -239,10 +266,17 @@ function SuggestionCard({
         <Badge label={impact.effort} tone={EFFORT_TONE[impact.effort]} size="sm" />
       </View>
 
+      <Badge
+        label={suggestion.campaignId ? 'Campaign-specific' : 'Kitchen-wide'}
+        tone="neutral"
+        size="sm"
+        style={styles.scopeBadge}
+      />
+
       <View style={styles.impactRow}>
-        {impact.reachDeltaPct != null ? <ImpactChip label="Reach" value={`+${impact.reachDeltaPct}%`} /> : null}
-        {impact.ordersDeltaPct != null ? <ImpactChip label="Orders" value={`+${impact.ordersDeltaPct}%`} /> : null}
-        {impact.roiDeltaPct != null ? <ImpactChip label="ROI" value={`+${impact.roiDeltaPct}%`} /> : null}
+        {impact.reachDeltaPct != null ? <ImpactChip label="Reach" value={formatSignedPct(impact.reachDeltaPct)} /> : null}
+        {impact.ordersDeltaPct != null ? <ImpactChip label="Orders" value={formatSignedPct(impact.ordersDeltaPct)} /> : null}
+        {impact.roiDeltaPct != null ? <ImpactChip label="ROI" value={formatSignedPct(impact.roiDeltaPct)} /> : null}
         {impact.costRs > 0 ? <ImpactChip label="Cost" value={formatRupees(impact.costRs)} /> : null}
       </View>
 
@@ -269,9 +303,13 @@ function SuggestionCard({
 function CompareSheet({
   sheetRef,
   suggestions,
+  isApplying,
+  onApplySelected,
 }: {
   sheetRef: React.RefObject<SheetHandle | null>;
   suggestions: CampaignSuggestion[];
+  isApplying: boolean;
+  onApplySelected: () => void;
 }) {
   return (
     <Sheet ref={sheetRef} title="Compare Suggestions" heightRatio={0.8}>
@@ -283,14 +321,22 @@ function CompareSheet({
               {suggestion.title}
             </Text>
             <CompareRow label="Effort" value={suggestion.impact.effort} />
-            <CompareRow label="Reach" value={suggestion.impact.reachDeltaPct != null ? `+${suggestion.impact.reachDeltaPct}%` : '—'} />
-            <CompareRow label="Orders" value={suggestion.impact.ordersDeltaPct != null ? `+${suggestion.impact.ordersDeltaPct}%` : '—'} />
-            <CompareRow label="ROI" value={suggestion.impact.roiDeltaPct != null ? `+${suggestion.impact.roiDeltaPct}%` : '—'} />
+            <CompareRow label="Reach" value={formatSignedPct(suggestion.impact.reachDeltaPct)} />
+            <CompareRow label="Orders" value={formatSignedPct(suggestion.impact.ordersDeltaPct)} />
+            <CompareRow label="ROI" value={formatSignedPct(suggestion.impact.roiDeltaPct)} />
             <CompareRow label="Expected orders" value={suggestion.impact.expectedOrders != null ? String(suggestion.impact.expectedOrders) : '—'} />
             <CompareRow label="Cost" value={formatRupees(suggestion.impact.costRs)} />
           </Card>
         ))}
       </ScrollView>
+      <View style={styles.applySelectedWrap}>
+        <Button
+          title={isApplying ? 'Applying…' : 'Apply Selected Suggestion'}
+          onPress={onApplySelected}
+          loading={isApplying}
+          disabled={isApplying || suggestions.length === 0}
+        />
+      </View>
     </Sheet>
   );
 }
@@ -309,6 +355,9 @@ function CompareRow({ label, value }: { label: string; value: string }) {
 export default AdsInsights;
 
 const styles = StyleSheet.create({
+  scopeBadge: { alignSelf: 'flex-start', marginTop: theme.spacing.paddings.xs },
+  compareBarDisabled: { opacity: 0.6 },
+  applySelectedWrap: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.lg },
   header: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.md },
   headerEyebrow: { marginBottom: theme.spacing.paddings.xs },
   headerSub: { marginBottom: theme.spacing.paddings.md },

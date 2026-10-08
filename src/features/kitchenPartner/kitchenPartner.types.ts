@@ -185,6 +185,9 @@ export interface MealDetail {
   cuisineSlug?: string | null;
   isJainAvailable?: boolean;
   customizationGroups?: MealCustomizationGroup[];
+  servingSize?: string | null;
+  ingredients?: string[];
+  allergens?: string[];
 }
 
 /** Public catalog entry (`GET /catalog/cuisines`) — used to tag a dish with its cuisine. */
@@ -247,6 +250,14 @@ export interface KitchenReel {
   orderCount: number;
 }
 
+export interface KitchenOrderItem {
+  name: string;
+  quantity: number;
+  /** On the wire this is `{ name, priceDelta }[]`; typed loosely because older orders may omit it. */
+  customizations?: unknown;
+  specialInstructions?: string | null;
+}
+
 export interface KitchenOrderCard {
   id: string;
   orderNumber: string;
@@ -254,7 +265,7 @@ export interface KitchenOrderCard {
   paymentStatus: PaymentStatus;
   totalAmount: number;
   customer: { name: string; phone: string };
-  items: { name: string; quantity: number }[];
+  items: KitchenOrderItem[];
   orderNotes: string | null;
   placedAt: string;
   etaMinutes: number;

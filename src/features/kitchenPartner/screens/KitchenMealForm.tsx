@@ -21,10 +21,31 @@ import type { MealCustomizationGroup, NutritionAnalysisResult } from '../kitchen
 
 const FOOD_TYPES = ['VEG', 'EGG', 'NON_VEG', 'VEGAN'];
 const JAIN_ELIGIBLE_FOOD_TYPES = ['VEG', 'VEGAN'];
-/** Mirrors the backend's UpsertMealDto limits. */
+const SLOTS = ['BREAKFAST', 'LUNCH', 'DINNER', 'SNACKS'];
+const GOAL_TAGS = ['HIGH_PROTEIN', 'LOW_CALORIE', 'WEIGHT_LOSS', 'MUSCLE_GAIN', 'HEALTHY_LIFESTYLE'];
+/** Mirrors the backend's UpsertMealDto limits (and the website's meal form). */
 const MAX_PHOTOS = 6;
 const MAX_NAME = 80;
 const MAX_DESCRIPTION = 500;
+const MAX_GROUPS = 6;
+const MAX_OPTIONS_PER_GROUP = 20;
+const MAX_GROUP_NAME = 40;
+const MAX_OPTION_NAME = 60;
+
+const labelize = (value: string) =>
+  value
+    .toLowerCase()
+    .split('_')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+
+const toggleIn = (list: string[], value: string) => (list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
+const digitsOnly = (value: string) => value.replace(/\D/g, '');
+const splitList = (value: string) =>
+  value
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
 
 function emptyGroup(): MealCustomizationGroup {
   return { name: '', isRequired: false, minSelect: 0, maxSelect: 1, options: [] };
@@ -43,8 +64,19 @@ const KitchenMealForm = () => {
   const [price, setPrice] = useState('');
   const [foodType, setFoodType] = useState('VEG');
   const [images, setImages] = useState<string[]>([]);
-  const [isAvailable, setIsAvailable] = useState(true);
-  const [nutrition, setNutrition] = useState<NutritionAnalysisResult | null>(null);
+  const [isAvailable, setIsAvailable] = useState(false);
+  const [mrp, setMrp] = useState('');
+  const [slots, setSlots] = useState<string[]>([]);
+  const [goalTags, setGoalTags] = useState<string[]>([]);
+  const [calories, setCalories] = useState('');
+  const [proteinG, setProteinG] = useState('');
+  const [carbsG, setCarbsG] = useState('');
+  const [fatG, setFatG] = useState('');
+  const [fiberG, setFiberG] = useState('');
+  const [servingSize, setServingSize] = useState('');
+  const [ingredientsText, setIngredientsText] = useState('');
+  const [allergensText, setAllergensText] = useState('');
+  const [analysis, setAnalysis] = useState<NutritionAnalysisResult | null>(null);
   const [prepTimeMins, setPrepTimeMins] = useState('25');
   const [cuisineSlug, setCuisineSlug] = useState('');
   const [isJainAvailable, setIsJainAvailable] = useState(false);
@@ -58,19 +90,18 @@ const KitchenMealForm = () => {
       setFoodType(existing.foodType);
       setImages(existing.images ?? []);
       setIsAvailable(existing.isAvailable);
-      setNutrition({
-        // Older dishes can have carbs/fat/fibre unset (null) — fall back to 0
-        // so the form never shows "nullg" or sends null to the backend.
-        calories: existing.nutrition.calories ?? 0,
-        proteinG: existing.nutrition.proteinG ?? 0,
-        carbsG: existing.nutrition.carbsG ?? 0,
-        fatG: existing.nutrition.fatG ?? 0,
-        fiberG: existing.nutrition.fiberG ?? 0,
-        healthScore: 0,
-        isJunkFood: false,
-        reason: 'Previously saved nutrition — run AI again to refresh it.',
-        suggestedGoalTags: [],
-      });
+      // Older dishes can have carbs/fat/fibre unset (null) — leave those fields blank.
+      setCalories(existing.nutrition.calories != null ? String(existing.nutrition.calories) : '');
+      setProteinG(existing.nutrition.proteinG != null ? String(existing.nutrition.proteinG) : '');
+      setCarbsG(existing.nutrition.carbsG ? String(existing.nutrition.carbsG) : '');
+      setFatG(existing.nutrition.fatG ? String(existing.nutrition.fatG) : '');
+      setFiberG(existing.nutrition.fiberG ? String(existing.nutrition.fiberG) : '');
+      setMrp(existing.mrp ? String(existing.mrp) : '');
+      setSlots(existing.slots ?? []);
+      setGoalTags(existing.goalTags ?? []);
+      setServingSize(existing.servingSize ?? '');
+      setIngredientsText((existing.ingredients ?? []).join(', '));
+      setAllergensText((existing.allergens ?? []).join(', '));
       setPrepTimeMins(existing.prepTimeMins != null ? String(existing.prepTimeMins) : '25');
       setCuisineSlug(existing.cuisineSlug ?? '');
       setIsJainAvailable(existing.isJainAvailable ?? false);
@@ -113,14 +144,21 @@ const KitchenMealForm = () => {
   };
 
   const handleAnalyze = () => {
-    if (!name.trim()) {
-      Alert.alert('Add a dish name first', 'AI needs at least the name to estimate nutrition.');
+    if (name.trim().length < 3) {
+      Alert.alert('Add a dish name first', 'AI needs at least the name (3+ characters) to estimate nutrition.');
       return;
     }
     analyze.mutate(
-      { name, description },
+      { name: name.trim(), description: description.trim() || undefined, ingredients: splitList(ingredientsText) },
       {
-        onSuccess: (result) => setNutrition(result),
+        onSuccess: (result) => {
+          setAnalysis(result);
+          setCalories(String(result.calories));
+          setProteinG(String(result.proteinG));
+          setCarbsG(String(result.carbsG));
+          setFatG(String(result.fatG));
+          setFiberG(String(result.fiberG));
+        },
         onError: (error) =>
           Alert.alert('AI analysis unavailable', error instanceof KitchenApiError ? error.message : 'Please try again later.'),
       },
@@ -149,18 +187,22 @@ const KitchenMealForm = () => {
       Alert.alert('Add a dish name', 'The dish name needs to be at least 3 characters.');
       return;
     }
+    if (images.length === 0) {
+      Alert.alert('Add a photo', 'Add at least one photo of the dish.');
+      return;
+    }
     const priceValue = Number(price);
     if (!price.trim() || !Number.isInteger(priceValue) || priceValue < 1) {
       Alert.alert('Check the price', 'Enter the price as a whole number of rupees, e.g. 199.');
       return;
     }
+    if (mrp.trim() && (!Number.isInteger(Number(mrp)) || Number(mrp) < 1)) {
+      Alert.alert('Check the MRP', 'Enter the MRP as a whole number of rupees, or leave it blank.');
+      return;
+    }
     const prepValue = prepTimeMins.trim() ? Number(prepTimeMins) : undefined;
     if (prepValue !== undefined && (!Number.isInteger(prepValue) || prepValue < 1 || prepValue > 180)) {
       Alert.alert('Check the prep time', 'Prep time must be a whole number of minutes between 1 and 180.');
-      return;
-    }
-    if (!nutrition) {
-      Alert.alert('Run AI analysis first', 'Tap "Analyze with AI" so the dish has calories and protein before it goes live.');
       return;
     }
     const cleanGroups = customizationGroups
@@ -186,12 +228,18 @@ const KitchenMealForm = () => {
       description: description.trim(),
       images,
       price: priceValue,
+      mrp: mrp.trim() ? Number(mrp) : undefined,
       foodType,
-      calories: nutrition.calories,
-      proteinG: nutrition.proteinG,
-      carbsG: nutrition.carbsG,
-      fatG: nutrition.fatG,
-      fiberG: nutrition.fiberG,
+      slots,
+      goalTags,
+      calories: Number(calories) || 0,
+      proteinG: Number(proteinG) || 0,
+      carbsG: carbsG ? Number(carbsG) : undefined,
+      fatG: fatG ? Number(fatG) : undefined,
+      fiberG: fiberG ? Number(fiberG) : undefined,
+      servingSize: servingSize.trim() || undefined,
+      ingredients: splitList(ingredientsText),
+      allergens: splitList(allergensText),
       isAvailable,
       isJainAvailable: JAIN_ELIGIBLE_FOOD_TYPES.includes(foodType) ? isJainAvailable : false,
       prepTimeMins: prepValue,
@@ -246,7 +294,7 @@ const KitchenMealForm = () => {
               ? 'Tap to add a photo'
               : images.length >= MAX_PHOTOS
               ? `Photo limit reached (${MAX_PHOTOS})`
-              : `${images.length} of ${MAX_PHOTOS} added — tap to add another`}
+              : `${images.length} of ${MAX_PHOTOS} added · up to 20 MB each — tap to add another`}
           </Text>
         </Card>
         <TouchableOpacity onPress={() => navigation.navigate('UploadGuide')} style={styles.uploadTipsLink} accessibilityRole="link">
@@ -275,15 +323,25 @@ const KitchenMealForm = () => {
           <Input
             label="Price (₹)"
             value={price}
-            onChangeText={setPrice}
+            onChangeText={(v) => setPrice(digitsOnly(v))}
             keyboardType="number-pad"
             placeholder="199"
             containerStyle={[styles.field, styles.halfField]}
           />
           <Input
+            label="MRP (optional)"
+            value={mrp}
+            onChangeText={(v) => setMrp(digitsOnly(v))}
+            keyboardType="number-pad"
+            placeholder="249"
+            containerStyle={[styles.field, styles.halfField]}
+          />
+        </View>
+        <View style={styles.rowFields}>
+          <Input
             label="Prep time (mins)"
             value={prepTimeMins}
-            onChangeText={setPrepTimeMins}
+            onChangeText={(v) => setPrepTimeMins(digitsOnly(v))}
             keyboardType="number-pad"
             placeholder="25"
             containerStyle={[styles.field, styles.halfField]}
@@ -327,6 +385,13 @@ const KitchenMealForm = () => {
           />
         </View>
 
+        <Text style={styles.label}>Meal slots</Text>
+        <ChipRow style={styles.foodTypeRow}>
+          {SLOTS.map((slot) => (
+            <Chip key={slot} label={labelize(slot)} selected={slots.includes(slot)} onPress={() => setSlots((prev) => toggleIn(prev, slot))} />
+          ))}
+        </ChipRow>
+
         <Text style={styles.label}>Customizations (optional)</Text>
         {customizationGroups.map((group, groupIndex) => (
           <CustomizationGroupEditor
@@ -338,41 +403,115 @@ const KitchenMealForm = () => {
             onRemove={() => setCustomizationGroups((prev) => prev.filter((_, i) => i !== groupIndex))}
           />
         ))}
-        <TouchableOpacity
-          onPress={() => setCustomizationGroups((prev) => [...prev, emptyGroup()])}
-          style={styles.addGroupButton}
-        >
-          <Plus size={14} color={theme.colors.brand.primary} />
-          <Text style={styles.addGroupText}>Add customization group</Text>
-        </TouchableOpacity>
-
-        <Button
-          title={analyze.isPending ? 'Analyzing…' : 'Analyze with AI'}
-          variant="secondary"
-          leftIcon={<Sparkles size={16} color={theme.colors.brand.primary} />}
-          onPress={handleAnalyze}
-          loading={analyze.isPending}
-          style={styles.field}
-        />
-
-        {nutrition ? (
-          <Card style={styles.field}>
-            <View style={styles.nutritionHeader}>
-              <Badge label="AI-estimated — review before publishing" tone="info" size="sm" />
-              {nutrition.isJunkFood ? <Badge label="Junk food" tone="danger" size="sm" /> : <Badge label={`Health ${nutrition.healthScore}/100`} tone="accent" size="sm" />}
-            </View>
-            <Text style={styles.nutritionReason}>{nutrition.reason}</Text>
-            <View style={styles.nutritionGrid}>
-              <NutritionStat label="Calories" value={nutrition.calories} />
-              <NutritionStat label="Protein" value={`${nutrition.proteinG}g`} />
-              <NutritionStat label="Carbs" value={`${nutrition.carbsG}g`} />
-              <NutritionStat label="Fat" value={`${nutrition.fatG}g`} />
-            </View>
-          </Card>
+        {customizationGroups.length < MAX_GROUPS ? (
+          <TouchableOpacity
+            onPress={() => setCustomizationGroups((prev) => [...prev, emptyGroup()])}
+            style={styles.addGroupButton}
+            accessibilityRole="button"
+          >
+            <Plus size={14} color={theme.colors.brand.primary} />
+            <Text style={styles.addGroupText}>Add customization group</Text>
+          </TouchableOpacity>
         ) : null}
 
+        <Card style={styles.field}>
+          <View style={styles.nutritionHeader}>
+            <Sparkles size={16} color={theme.colors.brand.primary} />
+            <Text style={styles.aiTitle}>AI nutrition & health assist</Text>
+          </View>
+          <Button
+            title={analyze.isPending ? 'Analyzing…' : 'Analyze with AI'}
+            variant="secondary"
+            leftIcon={<Sparkles size={16} color={theme.colors.brand.primary} />}
+            onPress={handleAnalyze}
+            loading={analyze.isPending}
+            disabled={name.trim().length < 3}
+          />
+          {analysis ? (
+            <View style={styles.analysisBlock}>
+              <View style={styles.nutritionHeader}>
+                <Badge label="AI-estimated — review before publishing" tone="info" size="sm" />
+                <Badge
+                  label={`Health score ${analysis.healthScore}/100`}
+                  tone={analysis.healthScore >= 60 ? 'accent' : analysis.healthScore >= 35 ? 'warning' : 'danger'}
+                  size="sm"
+                />
+                <Badge
+                  label={analysis.isJunkFood ? 'Flagged as junk food' : 'Not junk food'}
+                  tone={analysis.isJunkFood ? 'danger' : 'accent'}
+                  size="sm"
+                />
+              </View>
+              <Text style={styles.nutritionReason}>{analysis.reason}</Text>
+              {analysis.suggestedGoalTags.length > 0 ? (
+                <TouchableOpacity
+                  onPress={() => setGoalTags((prev) => Array.from(new Set([...prev, ...analysis.suggestedGoalTags])))}
+                  style={styles.applyTagsButton}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.addGroupText}>
+                    Apply suggested tags: {analysis.suggestedGoalTags.map(labelize).join(', ')}
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          ) : (
+            <Text style={styles.nutritionReason}>
+              Fill in the name (and description for better accuracy), then let AI estimate calories, protein and whether this counts as junk
+              food — you can edit every number below before publishing.
+            </Text>
+          )}
+        </Card>
+
+        <View style={styles.rowFields}>
+          <Input label="Calories (kcal)" value={calories} onChangeText={(v) => setCalories(digitsOnly(v))} keyboardType="number-pad" containerStyle={[styles.field, styles.halfField]} />
+          <Input label="Protein (g)" value={proteinG} onChangeText={(v) => setProteinG(digitsOnly(v))} keyboardType="number-pad" containerStyle={[styles.field, styles.halfField]} />
+        </View>
+        <View style={styles.rowFields}>
+          <Input label="Carbs (g)" value={carbsG} onChangeText={(v) => setCarbsG(digitsOnly(v))} keyboardType="number-pad" containerStyle={[styles.field, styles.halfField]} />
+          <Input label="Fat (g)" value={fatG} onChangeText={(v) => setFatG(digitsOnly(v))} keyboardType="number-pad" containerStyle={[styles.field, styles.halfField]} />
+        </View>
+        <View style={styles.rowFields}>
+          <Input label="Fiber (g)" value={fiberG} onChangeText={(v) => setFiberG(digitsOnly(v))} keyboardType="number-pad" containerStyle={[styles.field, styles.halfField]} />
+          <Input label="Serving size" value={servingSize} onChangeText={setServingSize} placeholder="1 bowl (350g)" maxLength={80} containerStyle={[styles.field, styles.halfField]} />
+        </View>
+
+        <Text style={styles.label}>Goal tags</Text>
+        <ChipRow style={styles.foodTypeRow}>
+          {GOAL_TAGS.map((tag) => (
+            <Chip key={tag} label={labelize(tag)} selected={goalTags.includes(tag)} onPress={() => setGoalTags((prev) => toggleIn(prev, tag))} />
+          ))}
+        </ChipRow>
+
+        <Input
+          label="Ingredients (comma-separated)"
+          value={ingredientsText}
+          onChangeText={setIngredientsText}
+          placeholder="paneer, butter, tomato, cream"
+          containerStyle={styles.field}
+        />
+        <Input
+          label="Allergens (comma-separated)"
+          value={allergensText}
+          onChangeText={setAllergensText}
+          placeholder="dairy, nuts"
+          containerStyle={styles.field}
+        />
+
+        <View style={[styles.jainRow, styles.field]}>
+          <View style={styles.jainTextWrap}>
+            <Text style={styles.jainLabel}>Publish immediately</Text>
+            <Text style={styles.jainHint}>
+              {!isAvailable && !(Number(calories) > 0 && Number(proteinG) > 0)
+                ? 'Calories and protein are required before you can publish.'
+                : 'Visible to customers as soon as you save.'}
+            </Text>
+          </View>
+          <Switch value={isAvailable} onValueChange={setIsAvailable} trackColor={{ true: theme.colors.brand.primary }} />
+        </View>
+
         <Button
-          title={isSaving ? 'Saving…' : upload.isPending ? 'Waiting for photo…' : mealId ? 'Save changes' : 'Publish dish'}
+          title={isSaving ? 'Saving…' : upload.isPending ? 'Waiting for photo…' : mealId ? 'Save changes' : 'Add dish'}
           onPress={handleSave}
           loading={isSaving}
           disabled={isSaveBlocked}
@@ -394,15 +533,6 @@ const KitchenMealForm = () => {
     </Screen>
   );
 };
-
-function NutritionStat({ label, value }: { label: string; value: string | number }) {
-  return (
-    <View style={styles.nutritionStat}>
-      <Text style={styles.nutritionValue}>{value}</Text>
-      <Text style={styles.nutritionLabel}>{label}</Text>
-    </View>
-  );
-}
 
 /**
  * One customization group (e.g. "Spice level") with its nested list of
@@ -433,6 +563,7 @@ function CustomizationGroupEditor({
           value={group.name}
           onChangeText={(value) => onChange({ ...group, name: value })}
           placeholder="Group name, e.g. Spice level"
+          maxLength={MAX_GROUP_NAME}
           size="md"
           containerStyle={styles.groupNameInput}
         />
@@ -484,6 +615,7 @@ function CustomizationGroupEditor({
             value={option.name}
             onChangeText={(value) => updateOption(optionIndex, { name: value })}
             placeholder="Option name"
+            maxLength={MAX_OPTION_NAME}
             size="md"
             containerStyle={styles.optionNameInput}
           />
@@ -506,13 +638,15 @@ function CustomizationGroupEditor({
         </View>
       ))}
 
-      <TouchableOpacity
-        onPress={() => onChange({ ...group, options: [...group.options, { name: '', priceDelta: 0 }] })}
-        style={styles.addOptionButton}
-        accessibilityRole="button"
-      >
-        <Text style={styles.addOptionText}>+ Add option</Text>
-      </TouchableOpacity>
+      {group.options.length < MAX_OPTIONS_PER_GROUP ? (
+        <TouchableOpacity
+          onPress={() => onChange({ ...group, options: [...group.options, { name: '', priceDelta: 0 }] })}
+          style={styles.addOptionButton}
+          accessibilityRole="button"
+        >
+          <Text style={styles.addOptionText}>+ Add option</Text>
+        </TouchableOpacity>
+      ) : null}
     </Card>
   );
 }
@@ -543,10 +677,9 @@ const styles = StyleSheet.create({
   label: { ...theme.text.label, color: theme.colors.text.primary, marginBottom: theme.spacing.paddings.xs },
   nutritionHeader: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: theme.spacing.paddings.sm },
   nutritionReason: { ...theme.text.bodySmall, color: theme.colors.text.secondary, marginBottom: theme.spacing.paddings.sm },
-  nutritionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.md },
-  nutritionStat: { width: '22%' },
-  nutritionValue: { ...theme.text.bodyMedium, color: theme.colors.text.primary, fontWeight: '700' as const },
-  nutritionLabel: { ...theme.text.caption, color: theme.colors.text.tertiary },
+  aiTitle: { ...theme.text.label, color: theme.colors.text.primary },
+  analysisBlock: { marginTop: theme.spacing.paddings.sm },
+  applyTagsButton: { minHeight: 44, justifyContent: 'center' },
   uploadTipsLink: { alignSelf: 'flex-start', marginBottom: theme.spacing.paddings.md },
   uploadTipsText: { ...theme.text.caption, color: theme.colors.text.brand, fontWeight: '700' as const },
   rowFields: { flexDirection: 'row', gap: theme.spacing.paddings.sm },

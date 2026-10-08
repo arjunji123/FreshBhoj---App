@@ -67,13 +67,21 @@ const PremiumSubscriptionDetail = () => {
     <Screen background="page">
       <AppBar title="My Premium Plan" onBack={() => navigation.goBack()} />
 
-      {subscription.isLoading || (data && data.status === 'NONE') ? (
+      {subscription.isLoading ? (
         <View style={styles.scroll}>
           <Skeleton height={140} radius={theme.radius.card} style={{ marginBottom: theme.spacing.paddings.md }} />
           <Skeleton height={220} radius={theme.radius.card} />
         </View>
       ) : subscription.isError || !data ? (
         <EmptyState title="Something went wrong" description="We couldn't load your subscription." actionLabel="Retry" onAction={() => subscription.refetch()} />
+      ) : data.status === 'NONE' ? (
+        <EmptyState
+          icon={<Crown size={28} color={theme.colors.text.tertiary} />}
+          title="No active subscription"
+          description="Pick a Kitchen Premium plan to unlock more reels, advanced analytics and priority boosts."
+          actionLabel="View plans"
+          onAction={() => navigation.navigate('PremiumPlans')}
+        />
       ) : (
         <View style={styles.scroll}>
           <Card style={styles.planCard}>
@@ -102,9 +110,23 @@ const PremiumSubscriptionDetail = () => {
               <RefreshCw size={13} color={theme.colors.text.tertiary} />
               <Text variant="bodySmall" color="secondary">
                 Auto-renew: {data.autoRenew ? 'On' : 'Off'}
+                {data.autoRenew && data.currentPeriodEnd
+                  ? ` — renews from your wallet on ${new Date(data.currentPeriodEnd).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`
+                  : !data.autoRenew
+                  ? ' — your plan will not renew automatically'
+                  : ''}
               </Text>
             </View>
           </Card>
+
+          {data.status === 'EXPIRED' ? (
+            <Card style={styles.planCard}>
+              <Text variant="bodyMedium">Your plan has expired</Text>
+              <Text variant="bodySmall" color="secondary">
+                Renew or upgrade to keep your Premium benefits active.
+              </Text>
+            </Card>
+          ) : null}
 
           <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
             FEATURES

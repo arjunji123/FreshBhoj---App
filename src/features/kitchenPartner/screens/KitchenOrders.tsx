@@ -12,18 +12,34 @@ import {
   useKitchenIncomingOrders,
   useKitchenOrderHistory,
 } from '../hooks/useKitchenPortal';
-import type { KitchenOrderCard, OrderStatus } from '../kitchenPartner.types';
+import type { KitchenOrderCard, KitchenOrderItem, OrderStatus } from '../kitchenPartner.types';
 import { callPhone } from '../utils/contact';
 
-/** There's no order-detail screen yet and chat only makes sense once the
- * kitchen has actually taken the order — a still-`PLACED` order can still be
- * rejected outright, so no thread exists for it server-side either. */
-const CHAT_ENABLED_STATUSES: OrderStatus[] = ['ACCEPTED', 'PREPARING', 'OUT_FOR_DELIVERY', 'DELIVERED'];
+/** Chat only makes sense once the kitchen has actually taken the order — a
+ * still-`PLACED` order can still be rejected outright, so no thread exists
+ * for it server-side either (same rule as the website's order board). */
+const CHAT_DISABLED_STATUSES: string[] = ['PLACED', 'PENDING_PAYMENT'];
+const canChatFor = (status: OrderStatus) => !CHAT_DISABLED_STATUSES.includes(status);
+
+/** `item.customizations` is typed `unknown` on the wire — the backend populates it as `{ name, priceDelta }[]`. */
+function customizationNames(customizations: unknown): string[] {
+  if (!Array.isArray(customizations)) return [];
+  return customizations
+    .map((c) => (c && typeof c === 'object' && 'name' in c ? String((c as { name: unknown }).name) : null))
+    .filter((name): name is string => Boolean(name));
+}
+
+function itemNote(item: KitchenOrderItem): string | null {
+  const parts = [...customizationNames(item.customizations)];
+  if (item.specialInstructions) parts.push(item.specialInstructions);
+  return parts.length > 0 ? `${item.name}: ${parts.join(', ')}` : null;
+}
 
 const ACTION_LABEL: Partial<Record<OrderStatus, string>> = {
   ACCEPTED: 'Accept order',
   PREPARING: 'Start preparing',
   OUT_FOR_DELIVERY: 'Mark out for delivery',
+  DELIVERED: 'Mark delivered',
   CANCELLED: 'Cancel order',
 };
 
@@ -45,7 +61,7 @@ const STATUS_BUCKET: Partial<Record<OrderStatus, OrderTab>> = {
 };
 
 type OrderTab = 'new' | 'preparing' | 'outForDelivery' | 'completed';
-type Period = 'today' | 'month' | 'year';
+type Period = 'today' | 'month' | 'year' | 'custom';
 
 const TAB_LABEL: Record<OrderTab, string> = {
   new: 'New',
@@ -54,11 +70,30 @@ const TAB_LABEL: Record<OrderTab, string> = {
   completed: 'Completed',
 };
 
-function periodToRange(period: Period): { dateFrom?: string } {
+/** Parses a `YYYY-MM-DD` value into local date parts; null for anything that isn't a real calendar day. */
+function parseDateInput(value: string): { year: number; month: number; day: number } | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) return null;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const check = new Date(year, month - 1, day);
+  if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+  return { year, month, day };
+}
+
+function periodToRange(period: Period, customFrom: string, customTo: string): { dateFrom?: string; dateTo?: string } {
   const now = new Date();
   if (period === 'today') return { dateFrom: new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString() };
   if (period === 'month') return { dateFrom: new Date(now.getFullYear(), now.getMonth(), 1).toISOString() };
-  return { dateFrom: new Date(now.getFullYear(), 0, 1).toISOString() };
+  if (period === 'year') return { dateFrom: new Date(now.getFullYear(), 0, 1).toISOString() };
+  // Built from local date parts (same as the website) so the boundary doesn't shift by the UTC offset.
+  const from = parseDateInput(customFrom);
+  const to = parseDateInput(customTo);
+  return {
+    dateFrom: from ? new Date(from.year, from.month - 1, from.day).toISOString() : undefined,
+    dateTo: to ? new Date(to.year, to.month - 1, to.day, 23, 59, 59, 999).toISOString() : undefined,
+  };
 }
 
 const KitchenOrders = () => {
@@ -215,7 +250,7 @@ function OrderRow({
   const navigation = useNavigation<KitchenPartnerNavigation>();
   const forwardAction = order.allowedNextStatuses.find((s) => s !== 'CANCELLED');
   const canCancel = order.allowedNextStatuses.includes('CANCELLED');
-  const canChat = CHAT_ENABLED_STATUSES.includes(order.status);
+  const canChat = canChatFor(order.status);
 
   return (
     <Card style={styles.orderCard}>
@@ -247,11 +282,18 @@ function OrderRow({
         <Phone size={11} color={theme.colors.brand.primary} />
         <Text style={styles.phoneText}>{order.customer.phone}</Text>
       </TouchableOpacity>
-      {order.items.map((item, i) => (
-        <Text key={i} style={styles.itemText}>
-          {item.quantity}× {item.name}
-        </Text>
-      ))}
+      {order.items.map((item, i) => {
+        const names = customizationNames(item.customizations);
+        return (
+          <View key={i}>
+            <Text style={styles.itemText}>
+              {item.quantity}× {item.name}
+            </Text>
+            {names.length > 0 ? <Text style={styles.itemExtra}>{names.join(', ')}</Text> : null}
+            {item.specialInstructions ? <Text style={styles.itemInstruction}>{`"${item.specialInstructions}"`}</Text> : null}
+          </View>
+        );
+      })}
       {order.orderNotes ? (
         <View style={styles.notesRow}>
           <StickyNote size={11} color={theme.colors.text.tertiary} />
@@ -288,13 +330,15 @@ function OrderHistoryList() {
   const [period, setPeriod] = useState<Period>('month');
   const [page, setPage] = useState(1);
   const [pagesMap, setPagesMap] = useState<Record<number, KitchenOrderCard[]>>({});
-  const range = useMemo(() => periodToRange(period), [period]);
+  const [customFrom, setCustomFrom] = useState('');
+  const [customTo, setCustomTo] = useState('');
+  const range = useMemo(() => periodToRange(period, customFrom, customTo), [period, customFrom, customTo]);
   const query = useKitchenOrderHistory({ page, ...range, status: ['DELIVERED', 'CANCELLED'] });
 
   useEffect(() => {
     setPage(1);
     setPagesMap({});
-  }, [period]);
+  }, [period, customFrom, customTo]);
 
   useEffect(() => {
     if (!query.data) return;
@@ -321,7 +365,33 @@ function OrderHistoryList() {
         <Chip label="Today" selected={period === 'today'} onPress={() => setPeriod('today')} />
         <Chip label="This month" selected={period === 'month'} onPress={() => setPeriod('month')} />
         <Chip label="This year" selected={period === 'year'} onPress={() => setPeriod('year')} />
+        <Chip label="Custom range" selected={period === 'custom'} onPress={() => setPeriod('custom')} />
       </ChipRow>
+
+      {period === 'custom' ? (
+        <View style={styles.customRangeRow}>
+          <Input
+            label="From"
+            value={customFrom}
+            onChangeText={setCustomFrom}
+            placeholder="YYYY-MM-DD"
+            maxLength={10}
+            size="md"
+            keyboardType="numbers-and-punctuation"
+            containerStyle={styles.customRangeField}
+          />
+          <Input
+            label="To"
+            value={customTo}
+            onChangeText={setCustomTo}
+            placeholder="YYYY-MM-DD"
+            maxLength={10}
+            size="md"
+            keyboardType="numbers-and-punctuation"
+            containerStyle={styles.customRangeField}
+          />
+        </View>
+      ) : null}
 
       {query.isError && items.length === 0 ? (
         <View style={styles.emptyPadding}>
@@ -357,7 +427,7 @@ function OrderHistoryList() {
               <View style={styles.orderTopRow}>
                 <Text style={styles.orderNumber}>#{item.orderNumber}</Text>
                 <View style={styles.orderTopRowActions}>
-                  {CHAT_ENABLED_STATUSES.includes(item.status) ? (
+                  {canChatFor(item.status) ? (
                     <TouchableOpacity
                       onPress={() => navigation.navigate('OrderChat', { orderId: item.id, orderNumber: item.orderNumber })}
                       hitSlop={theme.layout.hitSlop}
@@ -383,6 +453,11 @@ function OrderHistoryList() {
                   </Text>
                 </View>
               ) : null}
+              {item.items.map(itemNote).filter((n): n is string => Boolean(n)).map((note) => (
+                <Text key={note} style={styles.itemExtra} numberOfLines={2}>
+                  {note}
+                </Text>
+              ))}
               <View style={styles.historyFooter}>
                 <Text style={styles.historyDate}>{new Date(item.placedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</Text>
                 <Text style={styles.orderTotal}>{`₹${item.totalAmount}`}</Text>
@@ -421,6 +496,10 @@ const styles = StyleSheet.create({
   phoneRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, minHeight: 28, marginBottom: theme.spacing.paddings.xs },
   phoneText: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },
   itemText: { ...theme.text.caption, color: theme.colors.text.secondary },
+  itemExtra: { ...theme.text.caption, color: theme.colors.text.tertiary, marginLeft: theme.spacing.paddings.sm },
+  itemInstruction: { ...theme.text.caption, color: theme.colors.text.secondary, fontStyle: 'italic' as const, marginLeft: theme.spacing.paddings.sm },
+  customRangeRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm, paddingHorizontal: theme.layout.screenPadding, marginBottom: theme.spacing.paddings.sm },
+  customRangeField: { flex: 1 },
   notesRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',

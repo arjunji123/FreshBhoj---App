@@ -20,6 +20,7 @@ import {
 } from '../hooks/useKitchenPortal';
 import type { DeliveryScheduleEntry, SubscriptionStatus } from '../kitchenPartner.types';
 import { callPhone } from '../utils/contact';
+import { formatLongDate } from '../utils/format';
 
 type SubscriberDetailRoute = RouteProp<KitchenPartnerStackParamList, 'SubscriberDetail'>;
 
@@ -67,9 +68,16 @@ const SubscriberDetail = () => {
   const today = subscription?.deliverySchedule?.[0];
 
   const handleApprove = () => {
-    approveSubscription.mutate(subscriptionId, {
-      onError: (error) => Alert.alert('Could not approve', error instanceof KitchenApiError ? error.message : 'Please try again.'),
-    });
+    Alert.alert('Approve this subscriber?', 'This starts their subscription — deliveries begin on schedule.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Approve',
+        onPress: () =>
+          approveSubscription.mutate(subscriptionId, {
+            onError: (error) => Alert.alert('Could not approve', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
+    ]);
   };
 
   const submitReject = () => {
@@ -101,19 +109,33 @@ const SubscriberDetail = () => {
   };
 
   const handleResume = () => {
-    resumeSubscription.mutate(subscriptionId, {
-      onError: (error) => Alert.alert('Could not resume', error instanceof KitchenApiError ? error.message : 'Please try again.'),
-    });
+    Alert.alert('Resume this subscription?', 'Deliveries will be scheduled again from here on.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Resume',
+        onPress: () =>
+          resumeSubscription.mutate(subscriptionId, {
+            onError: (error) => Alert.alert('Could not resume', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
+    ]);
   };
 
   const handleDispatch = () => {
     if (!today) return;
-    dispatchDelivery.mutate(
-      { id: subscriptionId, date: today.date },
+    Alert.alert("Mark today's delivery as dispatched?", 'The customer is told their meal is on its way.', [
+      { text: 'Cancel', style: 'cancel' },
       {
-        onError: (error) => Alert.alert('Could not dispatch', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+        text: 'Mark dispatched',
+        onPress: () =>
+          dispatchDelivery.mutate(
+            { id: subscriptionId, date: today.date },
+            {
+              onError: (error) => Alert.alert('Could not dispatch', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+            },
+          ),
       },
-    );
+    ]);
   };
 
   const submitSkip = () => {
@@ -270,7 +292,7 @@ const SubscriberDetail = () => {
             {today && today.status === 'SCHEDULED' ? (
               <View style={styles.todayActionsRow}>
                 <Button
-                  title="Dispatch today"
+                  title="Mark dispatched"
                   size="sm"
                   style={styles.actionButton}
                   leftIcon={<CheckCircle2 size={14} color={theme.colors.palette.white} />}
@@ -278,7 +300,7 @@ const SubscriberDetail = () => {
                   loading={dispatchDelivery.isPending}
                 />
                 <Button
-                  title="Skip"
+                  title="Skip today"
                   size="sm"
                   variant="outline"
                   style={styles.actionButton}
@@ -292,6 +314,33 @@ const SubscriberDetail = () => {
                 {today.skipReason ? ` — ${today.skipReason}` : ''}.
               </Text>
             ) : null}
+          </Card>
+
+          <Card style={styles.chartCard}>
+            <Text variant="overline" color="tertiary" style={styles.chartLabel}>
+              TIMELINE
+            </Text>
+            <Text variant="bodySmall" color="secondary">
+              Started {formatLongDate(subscription.startDate)}
+            </Text>
+            {subscription.approvedAt ? (
+              <Text variant="bodySmall" color="secondary">
+                Approved {formatLongDate(subscription.approvedAt)}
+              </Text>
+            ) : null}
+            {subscription.pausedAt ? (
+              <Text variant="bodySmall" color="secondary">
+                Paused {formatLongDate(subscription.pausedAt)}
+              </Text>
+            ) : null}
+            {subscription.cancelledAt ? (
+              <Text variant="bodySmall" color="secondary">
+                Cancelled {formatLongDate(subscription.cancelledAt)}
+              </Text>
+            ) : null}
+            <Text variant="caption" color="tertiary">
+              Created {formatLongDate(subscription.createdAt)}
+            </Text>
           </Card>
 
           {subscription.billingHistory.length > 0 ? (
@@ -320,6 +369,31 @@ const SubscriberDetail = () => {
               />
             </Card>
           ) : null}
+
+          <Card style={styles.chartCard}>
+            <Text variant="overline" color="tertiary" style={styles.chartLabel}>
+              BILLING HISTORY
+            </Text>
+            {subscription.billingHistory.length === 0 ? (
+              <Text variant="bodySmall" color="secondary">
+                No billing cycles yet.
+              </Text>
+            ) : (
+              subscription.billingHistory.map((entry, index) => (
+                <View key={`${entry.cycleStart}-${index}`} style={styles.billingRow}>
+                  <Text variant="bodySmall" color="secondary" style={styles.billingDate}>
+                    {formatLongDate(entry.cycleStart)}
+                  </Text>
+                  <Text variant="label">{formatRupees(entry.amount)}</Text>
+                  <Badge
+                    label={entry.paymentStatus}
+                    tone={entry.paymentStatus === 'PAID' ? 'accent' : entry.paymentStatus === 'FAILED' ? 'danger' : 'warning'}
+                    size="sm"
+                  />
+                </View>
+              ))
+            )}
+          </Card>
         </ScrollView>
       )}
 
@@ -359,6 +433,8 @@ const SubscriberDetail = () => {
 export default SubscriberDetail;
 
 const styles = StyleSheet.create({
+  billingRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm, paddingVertical: theme.spacing.paddings.xs },
+  billingDate: { flex: 1 },
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.xxl },
   headerCard: { marginBottom: theme.spacing.paddings.md },
   customerRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm },

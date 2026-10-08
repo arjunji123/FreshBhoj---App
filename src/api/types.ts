@@ -868,8 +868,61 @@ export interface ReferralSummary {
   coinsBalance: number;
   invitesCount: number;
   hasRedeemed: boolean;
+  /** Coins the code owner earns per redemption — copy on the Refer & Earn screen reads this. */
+  referrerBonusCoins: number;
+  /** Coins a new user earns for redeeming a code. */
+  refereeBonusCoins: number;
 }
 
 export interface RedeemReferralResult extends ReferralSummary {
   coinsEarned: number;
+}
+
+// ── Notification inbox ──────────────────────────────────────────────────────
+
+export type CustomerNotificationCategory = 'ORDER' | 'SUBSCRIPTION' | 'WALLET';
+
+export interface CustomerNotification {
+  /** Prefixed with its source, e.g. `order-event:<uuid>`. */
+  id: string;
+  category: CustomerNotificationCategory;
+  title: string;
+  body: string;
+  /** Deep-link hints: `orderId`, `subscriptionId` or `walletTransactionId`. */
+  data: { orderId?: string; subscriptionId?: string; walletTransactionId?: string; status?: string } | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+/** `Paginated<CustomerNotification>` plus the unread count across every category. */
+export interface NotificationInbox extends Paginated<CustomerNotification> {
+  unreadCount: number;
+}
+
+// ── Order chat (customer <-> kitchen) ───────────────────────────────────────
+
+export interface OrderChatMessage {
+  id: string;
+  sender: 'KITCHEN' | 'CUSTOMER';
+  body: string;
+  triggeredStatus: OrderStatus | null;
+  isRead: boolean;
+  createdAt: string;
+}
+
+// ── Legal documents ─────────────────────────────────────────────────────────
+
+export type LegalDocumentKey = 'terms' | 'privacy' | 'content';
+
+export interface LegalDocumentSection {
+  heading: string;
+  body: string;
+}
+
+export interface LegalDocumentData {
+  key: LegalDocumentKey;
+  title: string;
+  /** `YYYY-MM-DD` of the last wording change. */
+  updatedAt: string;
+  sections: LegalDocumentSection[];
 }

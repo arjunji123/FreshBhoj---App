@@ -85,6 +85,11 @@ const KitchenRegisterKitchenDetails = () => {
       Alert.alert('Pick a kitchen type', 'Choose the option that best describes your kitchen.');
       return;
     }
+    const hhmm = /^([01]\d|2[0-3]):[0-5]\d$/;
+    if ((opensAt.trim() && !hhmm.test(opensAt.trim())) || (closesAt.trim() && !hhmm.test(closesAt.trim()))) {
+      Alert.alert('Check your timings', 'Use 24-hour time like 09:00 and 21:00.');
+      return;
+    }
     saveKitchenDetails.mutate(
       {
         name: name.trim(),
@@ -151,6 +156,7 @@ const KitchenRegisterKitchenDetails = () => {
             value={opensAt}
             onChangeText={setOpensAt}
             placeholder="09:00"
+            maxLength={5}
             containerStyle={[styles.field, styles.hoursField]}
           />
           <Input

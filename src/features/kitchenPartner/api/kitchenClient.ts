@@ -56,35 +56,53 @@ function buildQueryString(query?: Record<string, unknown>): string {
   return serialised ? `?${serialised}` : '';
 }
 
-let refreshPromise: Promise<boolean> | null = null;
+/**
+ * `ok`        — new tokens stored, retry the request.
+ * `rejected`  — the server said the refresh token is no good (or there is none):
+ *               the session is genuinely over.
+ * `unreachable` — network failure / 5xx: say nothing about the session, so the
+ *               caller must NOT sign the partner out over a flaky connection.
+ */
+type RefreshOutcome = 'ok' | 'rejected' | 'unreachable';
+
+let refreshPromise: Promise<RefreshOutcome> | null = null;
 let onKitchenSessionExpired: (() => void) | null = null;
 
 export function setKitchenSessionExpiredHandler(handler: (() => void) | null): void {
   onKitchenSessionExpired = handler;
 }
 
-async function refreshAccessToken(): Promise<boolean> {
+async function refreshAccessToken(): Promise<RefreshOutcome> {
   if (refreshPromise) return refreshPromise;
 
-  refreshPromise = (async () => {
+  refreshPromise = (async (): Promise<RefreshOutcome> => {
     const refreshToken = kitchenTokenStore.getRefreshToken();
-    if (!refreshToken) return false;
+    if (!refreshToken) return 'rejected';
 
     try {
-      const response = await fetch(`${BASE_URL}/partner/auth/token/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
-      if (!response.ok) return false;
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
+      let response: Response;
+      try {
+        response = await fetch(`${BASE_URL}/partner/auth/token/refresh`, {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+      } finally {
+        clearTimeout(timeout);
+      }
+      if (response.status >= 500) return 'unreachable';
+      if (!response.ok) return 'rejected';
 
       const json = (await response.json()) as ApiEnvelope<{ accessToken: string; refreshToken: string }>;
-      if (!json?.data?.accessToken) return false;
+      if (!json?.data?.accessToken) return 'rejected';
 
       kitchenTokenStore.setTokens(json.data.accessToken, json.data.refreshToken ?? refreshToken);
-      return true;
+      return 'ok';
     } catch {
-      return false;
+      return 'unreachable';
     } finally {
       setTimeout(() => {
         refreshPromise = null;
@@ -136,8 +154,11 @@ async function executeRequest<T>(path: string, options: RequestOptions, isRetry 
   }
 
   if (response.status === 401 && !skipAuth && !isRetry) {
-    const refreshed = await refreshAccessToken();
-    if (refreshed) return executeRequest<T>(path, options, true);
+    const outcome = await refreshAccessToken();
+    if (outcome === 'ok') return executeRequest<T>(path, options, true);
+    if (outcome === 'unreachable') {
+      throw new KitchenApiError('No internet connection. Please try again.', 0);
+    }
     if (accessToken) {
       kitchenTokenStore.clear();
       onKitchenSessionExpired?.();

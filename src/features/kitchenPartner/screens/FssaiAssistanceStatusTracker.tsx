@@ -66,14 +66,16 @@ const FssaiAssistanceStatusTracker: React.FC<Props> = ({ request }) => {
           ))}
         </Card>
 
-        <Button
-          title={simulateAdvance.isPending ? 'Advancing…' : 'Simulate advance (dev only)'}
-          variant="outline"
-          leftIcon={<Rocket size={16} color={theme.colors.text.primary} />}
-          onPress={handleSimulate}
-          loading={simulateAdvance.isPending}
-          style={styles.button}
-        />
+        {__DEV__ ? (
+          <Button
+            title={simulateAdvance.isPending ? 'Advancing…' : 'Simulate advance (dev only)'}
+            variant="outline"
+            leftIcon={<Rocket size={16} color={theme.colors.text.primary} />}
+            onPress={handleSimulate}
+            loading={simulateAdvance.isPending}
+            style={styles.button}
+          />
+        ) : null}
       </ScrollView>
     </Screen>
   );

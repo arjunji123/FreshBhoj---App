@@ -1,3 +1,7 @@
+/**
+ * Offline fallback only. The live copy is served by `GET /legal/:key` (see
+ * `useLegalDoc`); this is what renders until it arrives, or if it never does.
+ */
 export type LegalDocKey = 'terms' | 'privacy' | 'content';
 
 export interface LegalSection {
@@ -9,6 +13,8 @@ export interface LegalDoc {
   key: LegalDocKey;
   eyebrow: string;
   title: string;
+  /** `YYYY-MM-DD` of the last wording change — only present once the server copy has loaded. */
+  updatedAt?: string;
   sections: LegalSection[];
 }
 

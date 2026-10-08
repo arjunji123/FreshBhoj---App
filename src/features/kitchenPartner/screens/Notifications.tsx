@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, SectionList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, SectionList, StyleSheet, View } from 'react-native';
 import { Bell, CheckCheck, Clapperboard, Package, RotateCw } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
@@ -95,8 +95,31 @@ const Notifications = () => {
     setPagesMap({});
   };
 
+  /** Marks the notification read and opens whatever it is about, when the payload says what that is. */
   const handlePress = (item: KitchenNotification) => {
     if (!item.isRead) markRead.mutate(item.id);
+
+    const data = item.data;
+    const orderId = typeof data?.orderId === 'string' ? data.orderId : null;
+    const subscriptionId = typeof data?.subscriptionId === 'string' ? data.subscriptionId : null;
+    if (subscriptionId) {
+      navigation.navigate('SubscriberDetail', { subscriptionId });
+    } else if (data?.type === 'SUGGESTIONS_READY') {
+      navigation.navigate('AdsInsights');
+    } else if (orderId && data?.action === 'ACCEPT_ORDER') {
+      navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' });
+    } else if (orderId) {
+      navigation.navigate('OrderChat', { orderId });
+    }
+  };
+
+  const handleRefresh = () => {
+    if (page === 1) {
+      query.refetch();
+    } else {
+      setPage(1);
+      setPagesMap({});
+    }
   };
 
   const handleAccept = (item: KitchenNotification, orderId: string) => {
@@ -161,6 +184,7 @@ const Notifications = () => {
           contentContainerStyle={items.length ? styles.listPadding : styles.emptyPadding}
           showsVerticalScrollIndicator={false}
           stickySectionHeadersEnabled={false}
+          refreshControl={<RefreshControl refreshing={query.isRefetching && page === 1} onRefresh={handleRefresh} tintColor={theme.colors.primary[600]} />}
           ListEmptyComponent={
             <EmptyState
               icon={<Bell size={28} color={theme.colors.text.tertiary} />}

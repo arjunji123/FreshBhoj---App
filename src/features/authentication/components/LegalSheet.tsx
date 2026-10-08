@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@app/theme/useTheme';
 import { Sheet, type SheetHandle } from '@components/ui';
 import type { LegalDoc } from '../constants/legalContent';
+import { formatLegalUpdatedAt } from '../hooks/useLegalDoc';
 
 interface LegalSheetProps {
   doc: LegalDoc | null;
@@ -26,7 +27,7 @@ const LegalSheet = forwardRef<SheetHandle, LegalSheetProps>(({ doc }, ref) => {
           </View>
         ))}
         <Text style={[theme.text.caption, styles.footer]}>
-          FreshBhoj · Jaipur · Last updated 2026
+          {`FreshBhoj · Jaipur${doc?.updatedAt ? ` · Last updated ${formatLegalUpdatedAt(doc.updatedAt)}` : ''}`}
         </Text>
       </ScrollView>
     </Sheet>

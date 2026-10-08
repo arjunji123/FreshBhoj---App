@@ -3,7 +3,8 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { SheetHandle } from '@components/ui';
 import { AUTH_COPY } from '../auth.constants';
-import { LEGAL_DOCS, type LegalDocKey } from '../constants/legalContent';
+import type { LegalDocKey } from '../constants/legalContent';
+import { useLegalDoc } from '../hooks/useLegalDoc';
 import LegalSheet from './LegalSheet';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -13,6 +14,7 @@ const LoginFooter = () => {
     const { bottom } = useSafeAreaInsets();
     const sheetRef = useRef<SheetHandle>(null);
     const [activeDoc, setActiveDoc] = useState<LegalDocKey>('terms');
+    const doc = useLegalDoc(activeDoc);
 
     const openDoc = (key: LegalDocKey) => {
         setActiveDoc(key);
@@ -23,20 +25,32 @@ const LoginFooter = () => {
         <View style={[styles.footerContainer, { paddingBottom: Math.max(bottom, 24) }]}>
             <Text style={styles.footerText}>{AUTH_COPY.loginFooterPrefix}</Text>
             <View style={styles.footerLinksRow}>
-                <TouchableOpacity onPress={() => openDoc('terms')}>
+                <TouchableOpacity
+                    onPress={() => openDoc('terms')}
+                    accessibilityRole="link"
+                    hitSlop={theme.layout.hitSlop}
+                >
                     <Text style={styles.footerLink}>{AUTH_COPY.termsOfService}</Text>
                 </TouchableOpacity>
                 <Text style={styles.footerDot}> • </Text>
-                <TouchableOpacity onPress={() => openDoc('privacy')}>
+                <TouchableOpacity
+                    onPress={() => openDoc('privacy')}
+                    accessibilityRole="link"
+                    hitSlop={theme.layout.hitSlop}
+                >
                     <Text style={styles.footerLink}>{AUTH_COPY.privacyPolicy}</Text>
                 </TouchableOpacity>
                 <Text style={styles.footerDot}> • </Text>
-                <TouchableOpacity onPress={() => openDoc('content')}>
+                <TouchableOpacity
+                    onPress={() => openDoc('content')}
+                    accessibilityRole="link"
+                    hitSlop={theme.layout.hitSlop}
+                >
                     <Text style={styles.footerLink}>{AUTH_COPY.contentPolicy}</Text>
                 </TouchableOpacity>
             </View>
 
-            <LegalSheet ref={sheetRef} doc={LEGAL_DOCS[activeDoc]} />
+            <LegalSheet ref={sheetRef} doc={doc} />
         </View>
     );
 };

@@ -20,10 +20,9 @@ export function useSubscriptionQuote(input: SubscriptionQuoteInput, enabled: boo
 
 /**
  * "Confirm & Pay" on the wizard's Review step. Requires a real account, same
- * gating as `useSubscribeToPlan`. The hub screen's own list query picks up
- * the new subscription through its own invalidation — this only needs to
- * refresh the wallet balance, since a WALLET-paid request debits it
- * server-side as part of creation.
+ * gating as `useSubscribeToPlan`. Refreshes the hub list, and — since a
+ * WALLET-paid request debits the wallet (and any coins) server-side as part
+ * of creation — the wallet balance and coin balance too.
  */
 export function useCreateBespokeSubscription() {
   const queryClient = useQueryClient();
@@ -31,9 +30,14 @@ export function useCreateBespokeSubscription() {
   const mutation = useMutation({
     mutationFn: (input: CreateBespokeSubscriptionInput) => subscriptionsApi.createBespoke(input),
     onSuccess: (_subscription, variables) => {
+      // The new request must show up in the My Subscriptions hub straight away.
+      queryClient.invalidateQueries({ queryKey: qk.subscriptions.all });
       if (variables.paymentMethod === 'WALLET') {
-        queryClient.invalidateQueries({ queryKey: qk.wallet.summary });
-        queryClient.invalidateQueries({ queryKey: qk.wallet.transactions });
+        queryClient.invalidateQueries({ queryKey: qk.wallet.all });
+        // Coins spent against the first cycle leave the balance.
+        if (variables.requestedCoins) {
+          queryClient.invalidateQueries({ queryKey: qk.referral.me });
+        }
       }
     },
   });

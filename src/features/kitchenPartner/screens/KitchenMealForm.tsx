@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Plus, Sparkles, Trash2, X } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -11,6 +11,8 @@ import { KitchenApiError } from '../api/kitchenClient';
 import {
   useAnalyzeMeal,
   useCreateMeal,
+  useCuisineOptions,
+  useDeleteMeal,
   useKitchenMenu,
   useKitchenUpload,
   useUpdateMeal,
@@ -19,6 +21,10 @@ import type { MealCustomizationGroup, NutritionAnalysisResult } from '../kitchen
 
 const FOOD_TYPES = ['VEG', 'EGG', 'NON_VEG', 'VEGAN'];
 const JAIN_ELIGIBLE_FOOD_TYPES = ['VEG', 'VEGAN'];
+/** Mirrors the backend's UpsertMealDto limits. */
+const MAX_PHOTOS = 6;
+const MAX_NAME = 80;
+const MAX_DESCRIPTION = 500;
 
 function emptyGroup(): MealCustomizationGroup {
   return { name: '', isRequired: false, minSelect: 0, maxSelect: 1, options: [] };
@@ -53,11 +59,13 @@ const KitchenMealForm = () => {
       setImages(existing.images ?? []);
       setIsAvailable(existing.isAvailable);
       setNutrition({
-        calories: existing.nutrition.calories,
-        proteinG: existing.nutrition.proteinG,
-        carbsG: existing.nutrition.carbsG,
-        fatG: existing.nutrition.fatG,
-        fiberG: existing.nutrition.fiberG,
+        // Older dishes can have carbs/fat/fibre unset (null) — fall back to 0
+        // so the form never shows "nullg" or sends null to the backend.
+        calories: existing.nutrition.calories ?? 0,
+        proteinG: existing.nutrition.proteinG ?? 0,
+        carbsG: existing.nutrition.carbsG ?? 0,
+        fatG: existing.nutrition.fatG ?? 0,
+        fiberG: existing.nutrition.fiberG ?? 0,
         healthScore: 0,
         isJunkFood: false,
         reason: 'Previously saved nutrition — run AI again to refresh it.',
@@ -81,15 +89,21 @@ const KitchenMealForm = () => {
   const upload = useKitchenUpload();
   const create = useCreateMeal();
   const update = useUpdateMeal();
+  const deleteMeal = useDeleteMeal();
+  const cuisines = useCuisineOptions();
   const isSaving = create.isPending || update.isPending;
-  const isSaveBlocked = isSaving || upload.isPending;
+  const isSaveBlocked = isSaving || upload.isPending || deleteMeal.isPending;
 
   const handlePickPhoto = async () => {
+    if (images.length >= MAX_PHOTOS) {
+      Alert.alert('Photo limit reached', `You can add up to ${MAX_PHOTOS} photos per dish.`);
+      return;
+    }
     const result = await launchImageLibrary({ mediaType: 'photo', quality: 0.8, selectionLimit: 1 });
     if (result.didCancel || !result.assets?.[0]?.uri) return;
     const asset = result.assets[0];
     upload.mutate(
-      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName }, purpose: 'MENU_IMAGE', fallbackType: 'image/jpeg' },
+      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName, fileSize: asset.fileSize }, purpose: 'MENU_IMAGE', fallbackType: 'image/jpeg' },
       {
         onSuccess: (res) => setImages((prev) => [...prev, res.url]),
         onError: (error) =>
@@ -113,20 +127,65 @@ const KitchenMealForm = () => {
     );
   };
 
+  const handleDelete = () => {
+    if (!mealId) return;
+    Alert.alert('Delete this dish?', 'It will be removed from your menu and from customers\' feeds. Past orders are not affected.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          deleteMeal.mutate(mealId, {
+            onSuccess: () => navigation.goBack(),
+            onError: (error) =>
+              Alert.alert('Could not delete dish', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
+    ]);
+  };
+
   const handleSave = () => {
-    if (!name.trim() || !price.trim() || !nutrition) {
-      Alert.alert('Almost there', 'Add a name, price, and run AI analysis before publishing.');
+    if (name.trim().length < 3) {
+      Alert.alert('Add a dish name', 'The dish name needs to be at least 3 characters.');
+      return;
+    }
+    const priceValue = Number(price);
+    if (!price.trim() || !Number.isInteger(priceValue) || priceValue < 1) {
+      Alert.alert('Check the price', 'Enter the price as a whole number of rupees, e.g. 199.');
+      return;
+    }
+    const prepValue = prepTimeMins.trim() ? Number(prepTimeMins) : undefined;
+    if (prepValue !== undefined && (!Number.isInteger(prepValue) || prepValue < 1 || prepValue > 180)) {
+      Alert.alert('Check the prep time', 'Prep time must be a whole number of minutes between 1 and 180.');
+      return;
+    }
+    if (!nutrition) {
+      Alert.alert('Run AI analysis first', 'Tap "Analyze with AI" so the dish has calories and protein before it goes live.');
       return;
     }
     const cleanGroups = customizationGroups
       .filter((group) => group.name.trim())
-      .map((group) => ({ ...group, options: group.options.filter((option) => option.name.trim()) }));
+      .map((group) => ({
+        ...group,
+        name: group.name.trim(),
+        options: group.options.filter((option) => option.name.trim()).map((option) => ({ ...option, name: option.name.trim() })),
+      }));
+    const badGroup = cleanGroups.find(
+      (group) => group.options.length === 0 || group.maxSelect < 1 || group.minSelect > group.maxSelect,
+    );
+    if (badGroup) {
+      Alert.alert(
+        'Check "' + badGroup.name + '"',
+        'Each customization group needs at least one option, a max of 1 or more, and a min that is not above the max.',
+      );
+      return;
+    }
 
     const input = {
-      name,
-      description,
+      name: name.trim(),
+      description: description.trim(),
       images,
-      price: Number(price),
+      price: priceValue,
       foodType,
       calories: nutrition.calories,
       proteinG: nutrition.proteinG,
@@ -135,9 +194,10 @@ const KitchenMealForm = () => {
       fiberG: nutrition.fiberG,
       isAvailable,
       isJainAvailable: JAIN_ELIGIBLE_FOOD_TYPES.includes(foodType) ? isJainAvailable : false,
-      prepTimeMins: prepTimeMins.trim() ? Number(prepTimeMins) : undefined,
+      prepTimeMins: prepValue,
       cuisineSlug: cuisineSlug.trim() || undefined,
-      customizationGroups: cleanGroups.length ? cleanGroups : undefined,
+      // On edit, always send the array (even empty) so removing every group actually clears them server-side.
+      customizationGroups: mealId ? cleanGroups : cleanGroups.length ? cleanGroups : undefined,
     };
     const onSuccess = () => navigation.goBack();
     const onError = (error: unknown) =>
@@ -157,26 +217,56 @@ const KitchenMealForm = () => {
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
       >
+        {images.length > 0 ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoStrip}>
+            {images.map((uri, index) => (
+              <View key={`${uri}-${index}`} style={styles.photoThumbWrap}>
+                <Image source={{ uri }} style={styles.photoThumb} />
+                <TouchableOpacity
+                  onPress={() => setImages((prev) => prev.filter((_, i) => i !== index))}
+                  style={styles.photoRemove}
+                  hitSlop={theme.layout.hitSlop}
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove photo"
+                >
+                  <X size={12} color={theme.colors.text.inverse} />
+                </TouchableOpacity>
+              </View>
+            ))}
+          </ScrollView>
+        ) : null}
         <Card style={styles.photoCard} onPress={handlePickPhoto}>
-          {upload.isPending ? (
-            <Text style={styles.photoHint}>Uploading…</Text>
-          ) : images.length > 0 ? (
-            <Text style={styles.photoHint}>{images.length > 1 ? `${images.length} photos added — tap to add another` : 'Photo added — tap to add another'}</Text>
-          ) : (
-            <Text style={styles.photoHint}>Tap to add a photo</Text>
-          )}
+          <Text style={styles.photoHint}>
+            {upload.isPending
+              ? 'Uploading…'
+              : images.length === 0
+              ? 'Tap to add a photo'
+              : images.length >= MAX_PHOTOS
+              ? `Photo limit reached (${MAX_PHOTOS})`
+              : `${images.length} of ${MAX_PHOTOS} added — tap to add another`}
+          </Text>
         </Card>
-        <TouchableOpacity onPress={() => navigation.navigate('UploadGuide')} style={styles.uploadTipsLink}>
+        <TouchableOpacity onPress={() => navigation.navigate('UploadGuide')} style={styles.uploadTipsLink} accessibilityRole="link">
           <Text style={styles.uploadTipsText}>See upload tips</Text>
         </TouchableOpacity>
 
-        <Input label="Dish name" value={name} onChangeText={setName} placeholder="e.g. Paneer Tikka Salad" containerStyle={styles.field} />
+        <Input
+          label="Dish name"
+          value={name}
+          onChangeText={setName}
+          placeholder="e.g. Paneer Tikka Salad"
+          maxLength={MAX_NAME}
+          containerStyle={styles.field}
+        />
         <Input
           label="Description"
           value={description}
           onChangeText={setDescription}
           placeholder="What goes into this dish?"
+          maxLength={MAX_DESCRIPTION}
           multiline
           numberOfLines={3}
           containerStyle={styles.field}
@@ -186,7 +276,7 @@ const KitchenMealForm = () => {
             label="Price (₹)"
             value={price}
             onChangeText={setPrice}
-            keyboardType="numeric"
+            keyboardType="number-pad"
             placeholder="199"
             containerStyle={[styles.field, styles.halfField]}
           />
@@ -194,19 +284,26 @@ const KitchenMealForm = () => {
             label="Prep time (mins)"
             value={prepTimeMins}
             onChangeText={setPrepTimeMins}
-            keyboardType="numeric"
+            keyboardType="number-pad"
             placeholder="25"
             containerStyle={[styles.field, styles.halfField]}
           />
         </View>
-        <Input
-          label="Cuisine (slug)"
-          value={cuisineSlug}
-          onChangeText={setCuisineSlug}
-          placeholder="e.g. north-indian"
-          autoCapitalize="none"
-          containerStyle={styles.field}
-        />
+        {cuisines.data && cuisines.data.length > 0 ? (
+          <>
+            <Text style={styles.label}>Cuisine (optional)</Text>
+            <ChipRow style={styles.foodTypeRow}>
+              {cuisines.data.map((cuisine) => (
+                <Chip
+                  key={cuisine.slug}
+                  label={cuisine.name}
+                  selected={cuisineSlug === cuisine.slug}
+                  onPress={() => setCuisineSlug((current) => (current === cuisine.slug ? '' : cuisine.slug))}
+                />
+              ))}
+            </ChipRow>
+          </>
+        ) : null}
 
         <Text style={styles.label}>Food type</Text>
         <ChipRow style={styles.foodTypeRow}>
@@ -252,7 +349,7 @@ const KitchenMealForm = () => {
         <Button
           title={analyze.isPending ? 'Analyzing…' : 'Analyze with AI'}
           variant="secondary"
-          leftIcon={<Sparkles size={16} color={theme.colors.palette.white} />}
+          leftIcon={<Sparkles size={16} color={theme.colors.brand.primary} />}
           onPress={handleAnalyze}
           loading={analyze.isPending}
           style={styles.field}
@@ -281,6 +378,18 @@ const KitchenMealForm = () => {
           disabled={isSaveBlocked}
           style={styles.field}
         />
+        {mealId ? (
+          <Button
+            title={deleteMeal.isPending ? 'Deleting…' : 'Delete dish'}
+            variant="outline"
+            leftIcon={<Trash2 size={16} color={theme.colors.state.error} />}
+            textStyle={styles.deleteText}
+            onPress={handleDelete}
+            loading={deleteMeal.isPending}
+            disabled={isSaveBlocked}
+            style={styles.field}
+          />
+        ) : null}
       </ScrollView>
     </Screen>
   );
@@ -327,7 +436,13 @@ function CustomizationGroupEditor({
           size="md"
           containerStyle={styles.groupNameInput}
         />
-        <TouchableOpacity onPress={onRemove} style={styles.groupRemoveButton} hitSlop={theme.layout.hitSlop}>
+        <TouchableOpacity
+          onPress={onRemove}
+          style={styles.groupRemoveButton}
+          hitSlop={theme.layout.hitSlop}
+          accessibilityRole="button"
+          accessibilityLabel="Remove customization group"
+        >
           <Trash2 size={15} color={theme.colors.text.danger} />
         </TouchableOpacity>
       </View>
@@ -374,19 +489,28 @@ function CustomizationGroupEditor({
           />
           <Input
             value={String(option.priceDelta)}
-            onChangeText={(value) => updateOption(optionIndex, { priceDelta: Number(value) || 0 })}
+            onChangeText={(value) => updateOption(optionIndex, { priceDelta: Math.max(0, parseInt(value.replace(/\D/g, ''), 10) || 0) })}
             placeholder="+₹0"
-            keyboardType="numeric"
+            keyboardType="number-pad"
             size="md"
             containerStyle={styles.optionPriceInput}
           />
-          <TouchableOpacity onPress={() => removeOption(optionIndex)} hitSlop={theme.layout.hitSlop}>
+          <TouchableOpacity
+            onPress={() => removeOption(optionIndex)}
+            hitSlop={theme.layout.hitSlop}
+            accessibilityRole="button"
+            accessibilityLabel="Remove option"
+          >
             <X size={14} color={theme.colors.text.tertiary} />
           </TouchableOpacity>
         </View>
       ))}
 
-      <TouchableOpacity onPress={() => onChange({ ...group, options: [...group.options, { name: '', priceDelta: 0 }] })}>
+      <TouchableOpacity
+        onPress={() => onChange({ ...group, options: [...group.options, { name: '', priceDelta: 0 }] })}
+        style={styles.addOptionButton}
+        accessibilityRole="button"
+      >
         <Text style={styles.addOptionText}>+ Add option</Text>
       </TouchableOpacity>
     </Card>
@@ -397,6 +521,22 @@ export default KitchenMealForm;
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl, paddingTop: theme.spacing.paddings.sm },
+  photoStrip: { gap: theme.spacing.paddings.sm, paddingTop: 8, paddingBottom: theme.spacing.paddings.sm, paddingRight: 8 },
+  photoThumbWrap: { width: 88, height: 88 },
+  photoThumb: { width: 88, height: 88, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface.subtle },
+  photoRemove: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.state.error,
+  },
+  addOptionButton: { minHeight: 44, justifyContent: 'center' },
+  deleteText: { color: theme.colors.state.error },
   photoCard: { alignItems: 'center', justifyContent: 'center', height: 120, marginBottom: theme.spacing.paddings.md, borderStyle: 'dashed', borderWidth: 1, borderColor: theme.colors.borders.default },
   photoHint: { ...theme.text.bodySmall, color: theme.colors.text.secondary },
   field: { marginBottom: theme.spacing.paddings.md },

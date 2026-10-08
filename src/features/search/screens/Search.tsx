@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { Clock, Search as SearchIcon, SlidersHorizontal, TrendingUp, X } from 'lucide-react-native';
+import { AlertCircle, Clock, Search as SearchIcon, SlidersHorizontal, TrendingUp, X } from 'lucide-react-native';
 import type { FoodType, GoalTag } from '@api/types';
 import {
   Chip,
@@ -142,7 +142,12 @@ const Search = () => {
           leftIcon={<SearchIcon size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />}
           rightIcon={
             query ? (
-              <Pressable onPress={() => setQuery('')} hitSlop={theme.layout.hitSlop}>
+              <Pressable
+                onPress={() => setQuery('')}
+                hitSlop={theme.layout.hitSlop}
+                accessibilityRole="button"
+                accessibilityLabel="Clear search"
+              >
                 <X size={17} color={theme.colors.text.tertiary} strokeWidth={2.4} />
               </Pressable>
             ) : undefined
@@ -206,15 +211,25 @@ const Search = () => {
                 }
               }}
               ListEmptyComponent={
-                <EmptyState
-                  icon={
-                    <SearchIcon size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />
-                  }
-                  title={`No results for "${debounced}"`}
-                  description="Try a different dish, or drop one of the filters."
-                  actionLabel={hasActiveFilters ? 'Clear filters' : undefined}
-                  onAction={resetFilters}
-                />
+                feedQuery.isError ? (
+                  <EmptyState
+                    icon={<AlertCircle size={34} color={theme.colors.state.error} strokeWidth={1.8} />}
+                    title="Could not load results"
+                    description="Check your connection and try again."
+                    actionLabel="Retry"
+                    onAction={() => feedQuery.refetch()}
+                  />
+                ) : (
+                  <EmptyState
+                    icon={
+                      <SearchIcon size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />
+                    }
+                    title={debounced ? `No results for "${debounced}"` : 'No meals match these filters'}
+                    description="Try a different dish, or drop one of the filters."
+                    actionLabel={hasActiveFilters ? 'Clear filters' : undefined}
+                    onAction={resetFilters}
+                  />
+                )
               }
               ListFooterComponent={
                 feedQuery.isFetchingNextPage ? <MealCardSkeleton /> : null

@@ -79,7 +79,8 @@ function buildQueryString(query?: Record<string, unknown>): string {
 // Several queries can 401 at the same moment (Home fires five in parallel).
 // Without this, each would kick off its own refresh and the rotating refresh
 // token would invalidate the others. One in-flight refresh, shared by all.
-let refreshPromise: Promise<boolean> | null = null;
+type RefreshResult = 'ok' | 'rejected' | 'unavailable';
+let refreshPromise: Promise<RefreshResult> | null = null;
 
 /** Set by the auth store so a dead session can bounce the user to Login. */
 let onSessionExpired: (() => void) | null = null;
@@ -88,34 +89,46 @@ export function setSessionExpiredHandler(handler: (() => void) | null): void {
   onSessionExpired = handler;
 }
 
-async function refreshAccessToken(): Promise<boolean> {
+/**
+ * `rejected` means the server told us the refresh token is dead (sign the user
+ * out). `unavailable` means we could not find out — offline, timed out or a 5xx
+ * — and the session must be kept, otherwise a tunnel or a bad signal would log
+ * people out.
+ */
+async function refreshAccessToken(): Promise<RefreshResult> {
   if (refreshPromise) return refreshPromise;
 
-  refreshPromise = (async () => {
+  refreshPromise = (async (): Promise<RefreshResult> => {
     const refreshToken = tokenStore.getRefreshToken();
-    if (!refreshToken) return false;
+    if (!refreshToken) return 'rejected';
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), DEFAULT_TIMEOUT_MS);
 
     try {
       const response = await fetch(`${BASE_URL}/auth/token/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ refreshToken }),
+        signal: controller.signal,
       });
 
-      if (!response.ok) return false;
+      if (response.status >= 500) return 'unavailable';
+      if (!response.ok) return 'rejected';
 
       const json = (await response.json()) as ApiEnvelope<{
         accessToken: string;
         refreshToken: string;
       }>;
 
-      if (!json?.data?.accessToken) return false;
+      if (!json?.data?.accessToken) return 'rejected';
 
       tokenStore.setTokens(json.data.accessToken, json.data.refreshToken ?? refreshToken);
-      return true;
+      return 'ok';
     } catch {
-      return false;
+      return 'unavailable';
     } finally {
+      clearTimeout(timeout);
       // Cleared on the next tick so concurrent callers all read the same result.
       setTimeout(() => {
         refreshPromise = null;
@@ -173,32 +186,43 @@ async function executeRequest<T>(
 
   if (response.status === 401 && !skipAuth && !isRetry) {
     const refreshed = await refreshAccessToken();
-    if (refreshed) {
+    if (refreshed === 'ok') {
       return executeRequest<T>(path, options, true);
     }
     // A guest never had a session to expire — only force sign-out when there
-    // was an actual access token that just went bad. Guest-triggered 401s are
-    // meant to be caught before they get here (see useRequireAuth), but this
-    // keeps a guest from being kicked to the logged-out screen if one slips
-    // through.
-    if (accessToken) {
+    // was an actual access token that just went bad AND the server confirmed
+    // the refresh token is dead. Guest-triggered 401s are meant to be caught
+    // before they get here (see useRequireAuth), but this keeps a guest from
+    // being kicked to the logged-out screen if one slips through.
+    if (refreshed === 'rejected' && accessToken) {
       tokenStore.clear();
       onSessionExpired?.();
     }
   }
 
-  throw new ApiError(
-    json?.message ?? `Something went wrong (${response.status})`,
-    response.status,
-    json,
-  );
+  throw new ApiError(errorMessage(json, response.status), response.status, json);
+}
+
+/**
+ * Prefers the specific per-field reasons over the generic "Validation failed"
+ * the backend sends alongside them, so an Alert can say what to fix.
+ */
+function errorMessage(json: any, status: number): string {
+  if (Array.isArray(json?.errors) && json.errors.length > 0) {
+    return json.errors.slice(0, 2).join('. ');
+  }
+  if (typeof json?.message === 'string' && json.message) return json.message;
+  return status >= 500
+    ? 'Something went wrong on our side. Please try again.'
+    : `Something went wrong (${status})`;
 }
 
 function safeParse(text: string): any {
   try {
     return JSON.parse(text);
   } catch {
-    return { message: text };
+    // A gateway error page (HTML) is not something to show a customer.
+    return null;
   }
 }
 

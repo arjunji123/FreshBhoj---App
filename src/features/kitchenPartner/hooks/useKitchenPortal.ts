@@ -33,6 +33,7 @@ import type {
   CampaignStatus,
   CampaignSuggestionStatus,
   CreateSubscriptionPlanInput,
+  DayOfWeek,
   FssaiAssistanceDocumentType,
   KitchenProfile,
   NotificationCategory,
@@ -51,6 +52,7 @@ const kitchenKeys = {
   orders: ['kitchen', 'orders'] as const,
   ordersHistory: (params: unknown) => ['kitchen', 'orders', 'history', params] as const,
   menu: ['kitchen', 'menu'] as const,
+  cuisines: ['kitchen', 'cuisines'] as const,
   stories: ['kitchen', 'stories'] as const,
   reels: ['kitchen', 'reels'] as const,
   fssaiAssistance: ['kitchen', 'fssaiAssistance'] as const,
@@ -70,6 +72,7 @@ const kitchenKeys = {
   subscriptionsList: (params: unknown) => ['kitchen', 'subscriptions', 'list', params] as const,
   subscriptionDetail: (id: string) => ['kitchen', 'subscriptions', 'detail', id] as const,
   subscriptionPlans: ['kitchen', 'subscriptionPlans'] as const,
+  wallet: ['kitchen', 'wallet'] as const,
   walletSummary: ['kitchen', 'wallet', 'summary'] as const,
   walletTransactions: (params: unknown) => ['kitchen', 'wallet', 'transactions', params] as const,
   suggestions: ['kitchen', 'ads', 'suggestions'] as const,
@@ -218,15 +221,22 @@ export function useSetMealAvailability() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, isAvailable }: { id: string; isAvailable: boolean }) => kitchenMenuApi.setAvailability(id, isAvailable),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.menu }),
+    onSuccess: () => invalidateAfterMenuChange(queryClient),
   });
+}
+
+/** Menu changes move the dashboard's "dishes live" count and the onboarding funnel's menu step. */
+function invalidateAfterMenuChange(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: kitchenKeys.menu });
+  queryClient.invalidateQueries({ queryKey: kitchenKeys.dashboard });
+  queryClient.invalidateQueries({ queryKey: kitchenKeys.onboarding });
 }
 
 export function useCreateMeal() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (input: UpsertMealInput) => kitchenMenuApi.create(input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.menu }),
+    onSuccess: () => invalidateAfterMenuChange(queryClient),
   });
 }
 
@@ -234,8 +244,21 @@ export function useUpdateMeal() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ id, input }: { id: string; input: Partial<UpsertMealInput> }) => kitchenMenuApi.update(id, input),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.menu }),
+    onSuccess: () => invalidateAfterMenuChange(queryClient),
   });
+}
+
+export function useDeleteMeal() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => kitchenMenuApi.remove(id),
+    onSuccess: () => invalidateAfterMenuChange(queryClient),
+  });
+}
+
+/** Cuisine catalog — static for a session, so cache it for a long while. */
+export function useCuisineOptions() {
+  return useQuery({ queryKey: kitchenKeys.cuisines, queryFn: kitchenMenuApi.cuisines, staleTime: 30 * 60_000 });
 }
 
 export function useAnalyzeMeal() {
@@ -324,7 +347,7 @@ export function useKitchenUpload() {
       purpose,
       fallbackType,
     }: {
-      asset: { uri: string; type?: string; fileName?: string };
+      asset: { uri: string; type?: string; fileName?: string; fileSize?: number };
       purpose: string;
       fallbackType?: string;
     }) => kitchenUploadApi.upload(asset, purpose, fallbackType),
@@ -400,7 +423,7 @@ export function useUploadFssaiLicenceDocument() {
   const registerDocument = useUploadOnboardingDocument();
 
   const uploadAndRegister = (
-    asset: { uri: string; type?: string; fileName?: string },
+    asset: { uri: string; type?: string; fileName?: string; fileSize?: number },
     options?: { number?: string; onSuccess?: () => void; onError?: (error: unknown) => void },
   ) => {
     upload.mutate(
@@ -520,7 +543,7 @@ export function useOperatingHours() {
 export function useUpdateWeeklyHours() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ dayOfWeek, input }: { dayOfWeek: number; input: UpdateWeeklyHoursInput }) =>
+    mutationFn: ({ dayOfWeek, input }: { dayOfWeek: DayOfWeek; input: UpdateWeeklyHoursInput }) =>
       kitchenOperatingHoursApi.updateDay(dayOfWeek, input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: kitchenKeys.operatingHours }),
   });
@@ -610,8 +633,8 @@ export function useCreateCampaign() {
     mutationFn: (input: { reelId: string; dailyBudgetRs: number; durationDays: number }) => kitchenAdsApi.create(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: kitchenKeys.campaigns });
-      // The full cost was just charged from the wallet — keep the balance fresh.
-      queryClient.invalidateQueries({ queryKey: kitchenKeys.walletSummary });
+      // The full cost was just charged from the wallet — keep the balance and ledger fresh.
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.wallet });
     },
   });
 }
@@ -837,7 +860,7 @@ export function usePurchasePremium() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: kitchenKeys.premiumSubscription });
       // Purchase charges the wallet immediately.
-      queryClient.invalidateQueries({ queryKey: kitchenKeys.walletSummary });
+      queryClient.invalidateQueries({ queryKey: kitchenKeys.wallet });
     },
   });
 }

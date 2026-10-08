@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { CalendarCheck, Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
+import { AlertCircle, CalendarCheck, Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
 import { formatCompact } from '@utils/format';
 import {
   AppBar,
@@ -73,7 +73,7 @@ const KitchenProfile = () => {
   const [vegFilter, setVegFilter] = useState<VegFilter>('ALL');
   const [descExpanded, setDescExpanded] = useState(false);
 
-  const { data: kitchen, isLoading } = useKitchen(params.kitchenId);
+  const { data: kitchen, isLoading, isError, refetch: refetchKitchen } = useKitchen(params.kitchenId);
   const { data: media, isLoading: isMediaLoading } = useKitchenMedia(params.kitchenId);
   const { data: menu, isLoading: isMenuLoading } = useKitchenMenu(params.kitchenId);
   const { data: reviews, isLoading: isReviewsLoading } = useKitchenReviews(params.kitchenId, 4);
@@ -114,6 +114,23 @@ const KitchenProfile = () => {
 
     return order.map((key) => ({ title: key, items: groups.get(key)! }));
   }, [menu, vegFilter]);
+
+  if (isError && !kitchen) {
+    return (
+      <View style={styles.screen}>
+        <AppBar title={params.kitchenName ?? 'Kitchen'} onBack={navigation.goBack} />
+        <EmptyState
+          icon={<AlertCircle size={36} color={theme.colors.state.error} strokeWidth={1.8} />}
+          title="Could not load this kitchen"
+          description="It may no longer be available, or your connection dropped."
+          actionLabel="Try again"
+          onAction={() => refetchKitchen()}
+          secondaryActionLabel="Go back"
+          onSecondaryAction={navigation.goBack}
+        />
+      </View>
+    );
+  }
 
   if (isLoading || !kitchen) {
     return (

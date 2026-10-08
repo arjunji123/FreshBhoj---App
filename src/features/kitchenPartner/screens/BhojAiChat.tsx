@@ -84,8 +84,13 @@ const BhojAiChat = () => {
         setMessages((prev) => [...prev, modelMessage]);
         scrollToEnd();
       },
-      onError: (error) =>
-        Alert.alert('BhojAI is unavailable', error instanceof KitchenApiError ? error.message : 'Please try again in a moment.'),
+      onError: (error) => {
+        // Take the unsent message back out of the thread and put it back in
+        // the box so the partner can just tap send again.
+        setMessages((prev) => prev.filter((m) => m.id !== userMessage.id));
+        setDraft((current) => current || trimmed);
+        Alert.alert('BhojAI is unavailable', error instanceof KitchenApiError ? error.message : 'Please try again in a moment.');
+      },
     });
   };
 
@@ -186,6 +191,7 @@ const BhojAiChat = () => {
             value={draft}
             onChangeText={setDraft}
             placeholder="Ask BhojAI…"
+            maxLength={2000}
             containerStyle={styles.inputField}
             size="md"
             returnKeyType="send"
@@ -195,6 +201,8 @@ const BhojAiChat = () => {
           <Pressable
             onPress={() => handleSend(draft)}
             disabled={!draft.trim() || sendMessage.isPending}
+            accessibilityRole="button"
+            accessibilityLabel="Send message"
             style={({ pressed }) => [
               styles.sendButton,
               (!draft.trim() || sendMessage.isPending) ? styles.sendButtonDisabled : null,

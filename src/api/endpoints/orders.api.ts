@@ -34,7 +34,7 @@ export const ordersApi = {
         | 'kitchen'
         | 'deliveryPartner'
         | 'support'
-      >
+      > & { hasUnreadKitchenMessages: boolean }
     >(`/customer/orders/${id}/tracking`),
 
   confirmPayment: (id: string, paymentRef?: string) =>

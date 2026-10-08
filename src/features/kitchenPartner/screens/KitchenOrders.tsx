@@ -1,5 +1,5 @@
-import React, { useMemo, useRef, useState } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Clock, MessageCircle, Phone, StickyNote } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
@@ -13,6 +13,7 @@ import {
   useKitchenOrderHistory,
 } from '../hooks/useKitchenPortal';
 import type { KitchenOrderCard, OrderStatus } from '../kitchenPartner.types';
+import { callPhone } from '../utils/contact';
 
 /** There's no order-detail screen yet and chat only makes sense once the
  * kitchen has actually taken the order — a still-`PLACED` order can still be
@@ -236,10 +237,16 @@ function OrderRow({
         </View>
       </View>
       <Text style={styles.customerName}>{order.customer.name}</Text>
-      <View style={styles.phoneRow}>
+      <TouchableOpacity
+        style={styles.phoneRow}
+        onPress={() => callPhone(order.customer.phone)}
+        accessibilityRole="button"
+        accessibilityLabel={`Call ${order.customer.name}`}
+        hitSlop={theme.layout.hitSlop}
+      >
         <Phone size={11} color={theme.colors.brand.primary} />
         <Text style={styles.phoneText}>{order.customer.phone}</Text>
-      </View>
+      </TouchableOpacity>
       {order.items.map((item, i) => (
         <Text key={i} style={styles.itemText}>
           {item.quantity}× {item.name}
@@ -263,11 +270,11 @@ function OrderRow({
       ) : null}
       {canCancel ? (
         showReject ? (
-          <TouchableOpacity onPress={onReject} disabled={isBusy} style={styles.cancelButton}>
+          <TouchableOpacity onPress={onReject} disabled={isBusy} style={styles.cancelButton} accessibilityRole="button">
             <Text style={styles.rejectText}>Reject order</Text>
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity onPress={() => onAction('CANCELLED')} disabled={isBusy} style={styles.cancelButton}>
+          <TouchableOpacity onPress={() => onAction('CANCELLED')} disabled={isBusy} style={styles.cancelButton} accessibilityRole="button">
             <Text style={styles.cancelText}>Cancel order</Text>
           </TouchableOpacity>
         )
@@ -279,18 +286,48 @@ function OrderRow({
 function OrderHistoryList() {
   const navigation = useNavigation<KitchenPartnerNavigation>();
   const [period, setPeriod] = useState<Period>('month');
+  const [page, setPage] = useState(1);
+  const [pagesMap, setPagesMap] = useState<Record<number, KitchenOrderCard[]>>({});
   const range = useMemo(() => periodToRange(period), [period]);
-  const query = useKitchenOrderHistory({ page: 1, ...range, status: ['DELIVERED', 'CANCELLED'] });
+  const query = useKitchenOrderHistory({ page, ...range, status: ['DELIVERED', 'CANCELLED'] });
+
+  useEffect(() => {
+    setPage(1);
+    setPagesMap({});
+  }, [period]);
+
+  useEffect(() => {
+    if (!query.data) return;
+    setPagesMap((prev) => ({ ...prev, [page]: query.data!.items }));
+  }, [query.data, page]);
+
+  const items = useMemo(() => {
+    const pageNumbers = Object.keys(pagesMap).map(Number).sort((a, b) => a - b);
+    return pageNumbers.flatMap((p) => pagesMap[p] ?? []);
+  }, [pagesMap]);
+
+  const handleRefresh = () => {
+    if (page === 1) {
+      query.refetch();
+    } else {
+      setPage(1);
+      setPagesMap({});
+    }
+  };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.historyWrap}>
       <ChipRow style={styles.periodRow}>
         <Chip label="Today" selected={period === 'today'} onPress={() => setPeriod('today')} />
         <Chip label="This month" selected={period === 'month'} onPress={() => setPeriod('month')} />
         <Chip label="This year" selected={period === 'year'} onPress={() => setPeriod('year')} />
       </ChipRow>
 
-      {query.isLoading ? (
+      {query.isError && items.length === 0 ? (
+        <View style={styles.emptyPadding}>
+          <EmptyState title="Something went wrong" description="We couldn't load your past orders." actionLabel="Retry" onAction={() => query.refetch()} />
+        </View>
+      ) : query.isLoading && page === 1 && items.length === 0 ? (
         <View style={styles.listPadding}>
           {[0, 1, 2].map((i) => (
             <Skeleton key={i} height={80} radius={theme.radius.card} style={{ marginBottom: theme.spacing.paddings.sm }} />
@@ -298,11 +335,23 @@ function OrderHistoryList() {
         </View>
       ) : (
         <FlatList
-          data={query.data?.items ?? []}
+          data={items}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={query.data?.items.length ? styles.listPadding : styles.emptyPadding}
+          contentContainerStyle={items.length ? styles.listPadding : styles.emptyPadding}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={query.isRefetching && page === 1} onRefresh={handleRefresh} tintColor={theme.colors.primary[600]} />}
           ListEmptyComponent={<EmptyState title="No orders in this range" description="Try a different period." />}
+          ListFooterComponent={
+            query.data?.meta.hasNextPage ? (
+              <View style={styles.loadMoreWrap}>
+                {query.isFetching && page > 1 ? (
+                  <ActivityIndicator color={theme.colors.brand.primary} />
+                ) : (
+                  <Button title="Load more" variant="outline" size="sm" fullWidth={false} onPress={() => setPage((p) => p + 1)} />
+                )}
+              </View>
+            ) : null
+          }
           renderItem={({ item }) => (
             <Card style={styles.historyCard}>
               <View style={styles.orderTopRow}>
@@ -352,14 +401,16 @@ const styles = StyleSheet.create({
   header: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.sm, gap: theme.spacing.paddings.sm },
   listPadding: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.paddings.xxl },
   emptyPadding: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: theme.layout.screenPadding },
+  historyWrap: { flex: 1 },
+  loadMoreWrap: { alignItems: 'center', paddingVertical: theme.spacing.paddings.lg },
   periodRow: { marginBottom: theme.spacing.paddings.sm },
   orderCard: { marginBottom: theme.spacing.paddings.sm },
   historyCard: { marginBottom: theme.spacing.paddings.sm },
   orderTopRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 },
   orderTopRowActions: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs },
   chatButton: {
-    width: 26,
-    height: 26,
+    width: 36,
+    height: 36,
     borderRadius: theme.radius.round,
     alignItems: 'center',
     justifyContent: 'center',
@@ -367,7 +418,7 @@ const styles = StyleSheet.create({
   },
   orderNumber: { ...theme.text.bodyMedium, color: theme.colors.text.primary, fontWeight: '700' as const },
   customerName: { ...theme.text.caption, color: theme.colors.text.secondary, marginBottom: 2 },
-  phoneRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: theme.spacing.paddings.xs },
+  phoneRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 4, minHeight: 28, marginBottom: theme.spacing.paddings.xs },
   phoneText: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },
   itemText: { ...theme.text.caption, color: theme.colors.text.secondary },
   notesRow: {
@@ -384,7 +435,7 @@ const styles = StyleSheet.create({
   etaText: { ...theme.text.caption, color: theme.colors.text.tertiary, flex: 1 },
   orderTotal: { ...theme.text.bodyMedium, color: theme.colors.text.primary, fontWeight: '700' as const },
   actionButton: { width: '100%' },
-  cancelButton: { alignItems: 'center', marginTop: theme.spacing.paddings.xs },
+  cancelButton: { alignItems: 'center', justifyContent: 'center', minHeight: 44, marginTop: theme.spacing.paddings.xs },
   cancelText: { ...theme.text.caption, color: theme.colors.text.tertiary, fontWeight: '700' as const },
   rejectText: { ...theme.text.caption, color: theme.colors.state.error, fontWeight: '700' as const },
   historyFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: theme.spacing.paddings.xs },

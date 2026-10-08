@@ -19,5 +19,8 @@ export * from './endpoints/referral.api';
 export * from './endpoints/subscriptions.api';
 export * from './endpoints/wallet.api';
 export * from './endpoints/paymentMethods.api';
+export * from './endpoints/notifications.api';
+export * from './endpoints/orderChat.api';
+export * from './endpoints/legal.api';
 
 export type * from './types';

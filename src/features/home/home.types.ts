@@ -4,6 +4,8 @@ import type { GoalTag } from '@api/types';
 export interface HomeHeaderProps {
   scrollY: SharedValue<number>;
   cartCount?: number;
+  /** Unread inbox items — drives the dot on the bell. */
+  notificationCount?: number;
   onPressLocation?: () => void;
   onPressSearch?: () => void;
   onPressNotifications?: () => void;

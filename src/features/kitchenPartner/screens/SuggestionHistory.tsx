@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { Search, Sparkles } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
@@ -103,6 +103,20 @@ const SuggestionHistory = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={items.length ? styles.listPadding : styles.emptyPadding}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={query.isRefetching && page === 1}
+              onRefresh={() => {
+                if (page === 1) {
+                  query.refetch();
+                } else {
+                  setPage(1);
+                  setPagesMap({});
+                }
+              }}
+              tintColor={theme.colors.primary[600]}
+            />
+          }
           ListEmptyComponent={
             <EmptyState
               icon={<Sparkles size={28} color={theme.colors.text.tertiary} />}

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { CalendarClock, CircleAlert, CircleCheckBig, IndianRupee, Plus, TrendingDown, Wallet as WalletIcon } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
@@ -57,7 +57,20 @@ const Wallet = () => {
     <Screen background="page">
       <AppBar title="Wallet" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={summary.isRefetching}
+            onRefresh={() => {
+              summary.refetch();
+              transactions.refetch();
+            }}
+            tintColor={theme.colors.primary[600]}
+          />
+        }
+      >
         {summary.isError ? (
           <EmptyState title="Something went wrong" description="We couldn't load your wallet." actionLabel="Retry" onAction={() => summary.refetch()} />
         ) : summary.isLoading || !data ? (
@@ -227,7 +240,7 @@ function AddMoneySheet({ sheetRef }: { sheetRef: React.RefObject<SheetHandle | n
             <Text variant="overline" color="tertiary" style={styles.sheetLabel}>
               AMOUNT
             </Text>
-            <Input value={amountInput} onChangeText={setAmountInput} placeholder="e.g. 500" keyboardType="number-pad" prefix="₹" autoFocus />
+            <Input value={amountInput} onChangeText={(value) => setAmountInput(value.replace(/\D/g, '').slice(0, 7))} placeholder="e.g. 500" keyboardType="number-pad" prefix="₹" autoFocus />
             <View style={styles.presetRow}>
               {PRESET_AMOUNTS.map((amt) => (
                 <Chip key={amt} label={`₹${amt}`} selected={amountInput === String(amt)} onPress={() => setAmountInput(String(amt))} />
@@ -270,7 +283,7 @@ const styles = StyleSheet.create({
   txTextWrap: { flex: 1, marginRight: theme.spacing.paddings.sm },
   txMetaRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.xs, marginTop: 4 },
   txAmountPositive: { color: theme.colors.accent[600] },
-  txAmountNegative: { color: theme.colors.state.error },
+  txAmountNegative: { color: theme.colors.text.primary },
   loadMoreWrap: { alignItems: 'center', paddingVertical: theme.spacing.paddings.lg },
   sheetContent: { paddingHorizontal: theme.layout.screenPadding },
   sheetLabel: { marginBottom: theme.spacing.paddings.sm },

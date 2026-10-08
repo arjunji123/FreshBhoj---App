@@ -57,20 +57,35 @@ const PremiumPlans = () => {
     return TIER_ORDER.map((tier) => byTier.get(tier)).filter((t): t is PremiumTierCatalog => !!t);
   }, [tiers.data]);
 
+  const currentTier = subscription.data?.status === 'ACTIVE' ? subscription.data.tier : null;
+
   const handlePurchase = (tier: PremiumTier) => {
-    const isUpgrade = subscription.data?.status === 'ACTIVE';
+    const catalog = sortedTiers.find((t) => t.tier === tier);
+    const price = catalog ? ` ${formatRupees(catalog.priceRs)}` : '';
+    const isSwitch = currentTier !== null;
+    const isDowngrade = currentTier !== null && TIER_ORDER.indexOf(tier) < TIER_ORDER.indexOf(currentTier);
+    const verb = isDowngrade ? 'Switch' : isSwitch ? 'Upgrade' : 'Confirm';
     Alert.alert(
-      isUpgrade ? `Upgrade to ${TIER_LABEL[tier]}?` : `Choose the ${TIER_LABEL[tier]} plan?`,
-      "This charges your kitchen wallet immediately.",
+      isDowngrade ? `Switch to ${TIER_LABEL[tier]}?` : isSwitch ? `Upgrade to ${TIER_LABEL[tier]}?` : `Choose the ${TIER_LABEL[tier]} plan?`,
+      `This charges${price} from your kitchen wallet immediately and starts a new 28-day period.`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
-          text: isUpgrade ? 'Upgrade' : 'Confirm',
+          text: verb,
           onPress: () =>
             purchase.mutate(tier, {
               onSuccess: () => navigation.navigate('PremiumSubscriptionDetail'),
-              onError: (error) =>
-                Alert.alert('Could not complete purchase', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+              onError: (error) => {
+                const message = error instanceof KitchenApiError ? error.message : 'Please try again.';
+                if (/insufficient/i.test(message)) {
+                  Alert.alert('Not enough wallet balance', message, [
+                    { text: 'Not now', style: 'cancel' },
+                    { text: 'Add money', onPress: () => navigation.navigate('Wallet') },
+                  ]);
+                } else {
+                  Alert.alert('Could not complete purchase', message);
+                }
+              },
             }),
         },
       ],
@@ -137,7 +152,13 @@ const PremiumPlans = () => {
                 </View>
 
                 <Button
-                  title={isCurrent ? 'Current Plan' : subscription.data?.status === 'ACTIVE' ? `Upgrade to ${TIER_LABEL[tierCatalog.tier]}` : 'Choose Plan'}
+                  title={
+                    isCurrent
+                      ? 'Current Plan'
+                      : currentTier
+                      ? `${TIER_ORDER.indexOf(tierCatalog.tier) < TIER_ORDER.indexOf(currentTier) ? 'Switch' : 'Upgrade'} to ${TIER_LABEL[tierCatalog.tier]}`
+                      : 'Choose Plan'
+                  }
                   variant={isCurrent ? 'outline' : 'primary'}
                   disabled={isCurrent || isBusy}
                   loading={isBusy}

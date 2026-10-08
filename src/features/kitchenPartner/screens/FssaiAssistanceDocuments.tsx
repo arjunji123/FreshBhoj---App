@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { AppBar, Badge, Button, Card, Screen } from '@components/ui';
+import CancelFssaiApplicationLink from '../components/CancelFssaiApplicationLink';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useFssaiAssistanceStatus, useKitchenUpload, useUploadFssaiAssistanceDocument } from '../hooks/useKitchenPortal';
@@ -77,7 +78,7 @@ const FssaiAssistanceDocuments: React.FC<Props> = ({ documents }) => {
     setPendingSlot(type);
     upload.mutate(
       {
-        asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName },
+        asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName, fileSize: asset.fileSize },
         purpose: 'FSSAI_ASSISTANCE_DOCUMENT',
         fallbackType: 'image/jpeg',
       },
@@ -154,6 +155,7 @@ const FssaiAssistanceDocuments: React.FC<Props> = ({ documents }) => {
           disabled={!hasAllRequired || status.isRefetching}
           style={styles.continueButton}
         />
+        <CancelFssaiApplicationLink />
       </ScrollView>
     </Screen>
   );

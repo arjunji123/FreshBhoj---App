@@ -1,5 +1,5 @@
 import React from 'react';
-import { Alert, Image, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Clapperboard, Eye, IndianRupee, MousePointerClick, Pause, Play, ShoppingBag, Square, TrendingUp, Users } from 'lucide-react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
@@ -77,7 +77,11 @@ const AdsCampaignDetail = () => {
       ) : query.isError || !campaign ? (
         <EmptyState title="Something went wrong" description="We couldn't load this campaign." actionLabel="Retry" onAction={() => query.refetch()} />
       ) : (
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={theme.colors.primary[600]} />}
+        >
           <Card style={styles.headerCard}>
             <View style={styles.headerRow}>
               {campaign.reel?.thumbnailUrl ? (

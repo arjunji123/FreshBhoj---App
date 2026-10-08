@@ -5,35 +5,35 @@ import { Share2 } from 'lucide-react-native';
 import { useTheme } from '@app/theme/useTheme';
 import { AppBar, AppBarAction, Screen } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
-import type { LegalDoc } from '@features/authentication/constants/legalContent';
+import type { LegalDoc, LegalDocKey } from '@features/authentication/constants/legalContent';
+import { formatLegalUpdatedAt, useLegalDoc } from '@features/authentication/hooks/useLegalDoc';
 
-/** `LEGAL_DOCS` has no explicit date field — same hardcoded convention `LegalSheet.tsx` already uses at signup. */
-const LAST_UPDATED = 'September 2026';
-
-function buildShareText(doc: LegalDoc): string {
+function buildShareText(doc: LegalDoc, lastUpdated: string): string {
   const sections = doc.sections
     .map((section, index) => `${index + 1}. ${section.heading}\n${section.body}`)
     .join('\n\n');
-  return `FreshBhoj ${doc.title}\nLast updated: ${LAST_UPDATED}\n\n${sections}`;
+  return `FreshBhoj ${doc.title}\nLast updated: ${lastUpdated}\n\n${sections}`;
 }
 
 /**
  * Shared renderer for the static Privacy Policy / Terms of Service screens —
- * both read from the same `LEGAL_DOCS` copy already used in the signup
- * consent sheet (`LegalSheet.tsx`), just as a full page instead of a sheet.
+ * both read the server copy (`GET /legal/:key`, with the bundled copy as an
+ * offline fallback) that the signup consent sheet shows, just as a full page.
  *
  * No PDF-generation mechanism exists anywhere in this app, so "Download as
  * PDF" would be dishonest here — this uses RN's built-in `Share` sheet
  * instead (the same pattern `ReferralScreen` uses for sharing a referral
  * link), labelled plainly as "Share" rather than implying a PDF file.
  */
-const LegalDocScreen: React.FC<{ doc: LegalDoc }> = ({ doc }) => {
+const LegalDocScreen: React.FC<{ docKey: LegalDocKey }> = ({ docKey }) => {
+  const doc = useLegalDoc(docKey);
+  const lastUpdated = formatLegalUpdatedAt(doc.updatedAt);
   const navigation = useNavigation<PrivateNavigation>();
   const theme = useTheme();
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   const handleShare = () => {
-    Share.share({ message: buildShareText(doc), title: `FreshBhoj ${doc.title}` });
+    Share.share({ message: buildShareText(doc, lastUpdated), title: `FreshBhoj ${doc.title}` });
   };
 
   return (
@@ -49,7 +49,9 @@ const LegalDocScreen: React.FC<{ doc: LegalDoc }> = ({ doc }) => {
       />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[theme.text.caption, styles.lastUpdated]}>LAST UPDATED · {LAST_UPDATED.toUpperCase()}</Text>
+        {lastUpdated ? (
+          <Text style={[theme.text.caption, styles.lastUpdated]}>LAST UPDATED · {lastUpdated.toUpperCase()}</Text>
+        ) : null}
 
         {doc.sections.map((section, index) => (
           <View key={section.heading} style={styles.section}>

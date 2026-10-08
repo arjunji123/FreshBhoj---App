@@ -231,11 +231,11 @@ const KitchenDashboard = () => {
         ) : null}
 
         {incomingOrders.data && incomingOrders.data.length > 0 ? (
-          <Card style={styles.liveOrdersCard}>
+          <Card style={styles.liveOrdersCard} onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' })}>
             <Text style={styles.sectionLabel}>LIVE ORDERS</Text>
             {incomingOrders.data.slice(0, 4).map((order) => (
               <View key={order.id} style={styles.liveOrderRow}>
-                <View style={{ flex: 1 }}>
+                <View style={styles.liveOrderInfo}>
                   <Text style={styles.liveOrderNumber}>#{order.orderNumber}</Text>
                   <Text style={styles.liveOrderItems} numberOfLines={1}>
                     {order.customer.name} · {order.items.map((i) => `${i.quantity}× ${i.name}`).join(', ')}
@@ -423,6 +423,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: theme.colors.borders.subtle,
   },
+  liveOrderInfo: { flex: 1 },
   liveOrderNumber: { ...theme.text.bodyMedium, color: theme.colors.text.primary, fontWeight: '700' as const },
   liveOrderItems: { ...theme.text.caption, color: theme.colors.text.secondary, marginTop: 2 },
   liveOrderTotal: { ...theme.text.bodyMedium, color: theme.colors.text.primary, fontWeight: '700' as const },

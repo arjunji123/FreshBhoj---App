@@ -75,6 +75,7 @@ const OrderChat = () => {
         },
         onError: (error) => {
           setPending((prev) => prev.filter((m) => m.id !== optimistic.id));
+          setDraft((current) => current || trimmed);
           Alert.alert(
             'Message not sent',
             error instanceof KitchenApiError ? error.message : 'Please try again.',
@@ -133,6 +134,7 @@ const OrderChat = () => {
               key={reply.label}
               onPress={() => handleSend(reply.label, reply.advanceToStatus)}
               disabled={sendMessage.isPending}
+              accessibilityRole="button"
               style={({ pressed }) => [styles.suggestionChip, pressed ? styles.pressed : null]}
             >
               <Text variant="label" color="brand">
@@ -147,6 +149,7 @@ const OrderChat = () => {
             value={draft}
             onChangeText={setDraft}
             placeholder="Message the customer…"
+            maxLength={500}
             containerStyle={styles.inputField}
             size="md"
             returnKeyType="send"
@@ -156,6 +159,8 @@ const OrderChat = () => {
           <Pressable
             onPress={() => handleSend(draft)}
             disabled={!draft.trim() || sendMessage.isPending}
+            accessibilityRole="button"
+            accessibilityLabel="Send message"
             style={({ pressed }) => [
               styles.sendButton,
               !draft.trim() || sendMessage.isPending ? styles.sendButtonDisabled : null,

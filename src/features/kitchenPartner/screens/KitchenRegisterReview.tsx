@@ -53,6 +53,17 @@ const KitchenRegisterReview = () => {
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}
         showsVerticalScrollIndicator={false}
       >
+        {onboarding.data?.rejectionReason ? (
+          <Card style={styles.field}>
+            <View style={styles.pendingHeader}>
+              <CircleAlert size={16} color={theme.colors.state.error} />
+              <Text style={styles.cardHeading}>Your application needs changes</Text>
+            </View>
+            <Text style={styles.pendingItem}>{onboarding.data.rejectionReason}</Text>
+            <Text style={styles.pendingItem}>Fix what is flagged, then submit again.</Text>
+          </Card>
+        ) : null}
+
         {profile.data ? (
           <Card style={styles.field}>
             <Text style={styles.summaryTitle}>{profile.data.name}</Text>

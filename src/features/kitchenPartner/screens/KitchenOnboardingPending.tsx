@@ -140,7 +140,7 @@ const KitchenOnboardingPending = () => {
 
         <Button title="Refresh status" variant="secondary" onPress={() => onboarding.refetch()} loading={onboarding.isRefetching} style={styles.button} />
 
-        {status === 'UNDER_REVIEW' ? (
+        {__DEV__ && status === 'UNDER_REVIEW' ? (
           <Button
             title={simulateApprove.isPending ? 'Approving…' : 'Simulate approval (dev only)'}
             variant="outline"

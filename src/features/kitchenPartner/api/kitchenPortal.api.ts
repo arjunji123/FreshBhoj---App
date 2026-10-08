@@ -1,4 +1,4 @@
-import { kitchenClient } from './kitchenClient';
+import { KitchenApiError, kitchenClient } from './kitchenClient';
 import type {
   BhojAiHistoryResponse,
   BhojAiReplyResponse,
@@ -9,6 +9,8 @@ import type {
   CampaignSuggestionStatus,
   CreateSubscriptionPlanInput,
   DashboardSummary,
+  CuisineOption,
+  DayOfWeek,
   FssaiAssistanceDocumentType,
   FssaiAssistanceStatusResponse,
   KitchenAccount,
@@ -159,14 +161,39 @@ export interface UpsertMealInput {
   customizationGroups?: MealCustomizationGroup[];
 }
 
+/**
+ * The menu read model echoes `id`s on customization groups/options, but the
+ * write DTOs are strict (`forbidNonWhitelisted`) — sending an `id` back is a
+ * 400. Always strip them on the way out.
+ */
+function toMealPayload<T extends Partial<UpsertMealInput>>(input: T): T {
+  if (!input.customizationGroups) return input;
+  return {
+    ...input,
+    customizationGroups: input.customizationGroups.map((group) => ({
+      name: group.name,
+      isRequired: group.isRequired,
+      minSelect: group.minSelect,
+      maxSelect: group.maxSelect,
+      options: group.options.map((option) => ({
+        name: option.name,
+        priceDelta: option.priceDelta,
+        ...(option.isDefault !== undefined ? { isDefault: option.isDefault } : {}),
+      })),
+    })),
+  };
+}
+
 export const kitchenMenuApi = {
   list: (includeUnavailable = true) => kitchenClient.get<MealDetail[]>(`/partner/menu?includeUnavailable=${includeUnavailable}`),
   get: (id: string) => kitchenClient.get<MealDetail>(`/partner/menu/${id}`),
-  create: (input: UpsertMealInput) => kitchenClient.post<MealDetail>('/partner/menu', input),
-  update: (id: string, input: Partial<UpsertMealInput>) => kitchenClient.patch<MealDetail>(`/partner/menu/${id}`, input),
+  create: (input: UpsertMealInput) => kitchenClient.post<MealDetail>('/partner/menu', toMealPayload(input)),
+  update: (id: string, input: Partial<UpsertMealInput>) => kitchenClient.patch<MealDetail>(`/partner/menu/${id}`, toMealPayload(input)),
   setAvailability: (id: string, isAvailable: boolean) =>
     kitchenClient.patch<{ id: string; isAvailable: boolean }>(`/partner/menu/${id}/availability`, { isAvailable }),
   remove: (id: string) => kitchenClient.delete<{ id: string }>(`/partner/menu/${id}`),
+  /** Public endpoint (no auth) — the cuisine catalog a dish can be tagged with. */
+  cuisines: () => kitchenClient.get<CuisineOption[]>('/catalog/cuisines', { skipAuth: true }),
   analyze: (input: { name: string; description?: string; ingredients?: string[] }) =>
     kitchenClient.post<NutritionAnalysisResult>('/partner/menu/analyze', input),
 };
@@ -295,7 +322,7 @@ export interface UpsertHolidayInput {
 
 export const kitchenOperatingHoursApi = {
   get: () => kitchenClient.get<OperatingHoursResponse>('/partner/operating-hours'),
-  updateDay: (dayOfWeek: number, input: UpdateWeeklyHoursInput) =>
+  updateDay: (dayOfWeek: DayOfWeek, input: UpdateWeeklyHoursInput) =>
     kitchenClient.put<OperatingHoursWeeklyRow>(`/partner/operating-hours/${dayOfWeek}`, input),
   addHoliday: (input: UpsertHolidayInput) => kitchenClient.post<OperatingHoursHoliday>('/partner/operating-hours/holidays', input),
   removeHoliday: (date: string) => kitchenClient.delete<{ date: string }>(`/partner/operating-hours/holidays/${date}`),
@@ -417,6 +444,8 @@ function resolveUploadMimeType(asset: { uri: string; type?: string; fileName?: s
   return fallbackType ?? 'image/jpeg';
 }
 
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
 export const kitchenUploadApi = {
   /**
    * `asset` is a react-native-image-picker result — `{uri, type, fileName}`.
@@ -424,7 +453,14 @@ export const kitchenUploadApi = {
    * when the picker itself didn't return a MIME type and the extension is
    * ambiguous.
    */
-  upload: (asset: { uri: string; type?: string; fileName?: string }, purpose: string, fallbackType?: string) => {
+  upload: (asset: { uri: string; type?: string; fileName?: string; fileSize?: number }, purpose: string, fallbackType?: string) => {
+    // The backend rejects anything over 20 MB — fail fast with a readable
+    // message instead of uploading for a minute and then getting a 400.
+    if (asset.fileSize && asset.fileSize > MAX_UPLOAD_BYTES) {
+      return Promise.reject(
+        new KitchenApiError(`That file is too large (${Math.round(asset.fileSize / 1024 / 1024)} MB). Please pick one under 20 MB.`, 413),
+      );
+    }
     const form = new FormData();
     form.append('file', {
       uri: asset.uri,

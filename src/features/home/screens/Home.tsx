@@ -22,6 +22,7 @@ import { useKitchens } from '@features/kitchens/hooks/useKitchens';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
+import { useUnreadNotificationCount } from '@features/notifications/hooks/useNotifications';
 import HomeHeader from '../components/HomeHeader';
 import GoalFilterRow from '../components/GoalFilterRow';
 import CategoryGrid from '../components/CategoryGrid';
@@ -63,6 +64,7 @@ const Home = () => {
   const cuisinesQuery = useCuisines();
   const storiesQuery = useKitchenStories(location.city);
   const { data: cartCount } = useCartCount();
+  const { data: unreadNotifications } = useUnreadNotificationCount();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
   const { getQuantity, changeQuantity } = useCartQuantityControls();
@@ -148,9 +150,10 @@ const Home = () => {
       <HomeHeader
         scrollY={scrollY}
         cartCount={cartCount?.itemCount ?? 0}
+        notificationCount={unreadNotifications ?? 0}
         onPressSearch={() => navigation.navigate('MainTabs', { screen: 'Search' })}
         onPressCart={() => navigation.navigate('Cart')}
-        onPressNotifications={() => requireAuth(() => navigation.navigate('Notifications'))}
+        onPressNotifications={() => requireAuth(() => navigation.navigate('NotificationInbox'))}
         onPressReferral={() => requireAuth(() => navigation.navigate('Referral'))}
         onPressLocation={() => navigation.navigate('Addresses')}
       />

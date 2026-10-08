@@ -1,22 +1,34 @@
-import { ActiveOrder } from '../active-orders.types';
+import { useMemo } from 'react';
+import { useActiveOrders } from '@features/orders/hooks/useOrders';
+import { formatTime } from '@utils/format';
+import type { OrderStatus as ApiOrderStatus } from '@api/types';
+import type { ActiveOrder, OrderStatus } from '../active-orders.types';
 
-// Mock data — replace with API call / store logic later
-const MOCK_ORDERS: ActiveOrder[] = [
-  {
-    id: '1',
-    title: 'Lunch Tiffin Active',
-    status: 'delivering_today',
-    statusLabel: 'DELIVERING TODAY',
-    nextDeliveryTime: '1:30 PM',
-    kitchenName: 'Shri Krishna Veg Kitchen',
-  },
-];
+const STATUS_MAP: Partial<Record<ApiOrderStatus, { status: OrderStatus; label: string }>> = {
+  PLACED: { status: 'scheduled', label: 'PLACED' },
+  ACCEPTED: { status: 'scheduled', label: 'ACCEPTED' },
+  PREPARING: { status: 'preparing', label: 'PREPARING' },
+  OUT_FOR_DELIVERY: { status: 'delivering_today', label: 'ON THE WAY' },
+};
 
 /**
- * Returns the currently active order to display, or null if none.
- * Logic can be extended to filter by time of day, user prefs, backend data, etc.
+ * The customer's most recent in-flight order, straight from `GET
+ * /customer/orders/active` — or null when nothing is on its way.
  */
 export const useActiveOrder = (): ActiveOrder | null => {
-  // TODO: Replace with real data source (API / Zustand store)
-  return MOCK_ORDERS[0] ?? null;
+  const { data } = useActiveOrders();
+  const order = data?.[0];
+
+  return useMemo(() => {
+    if (!order) return null;
+    const mapped = STATUS_MAP[order.status] ?? { status: 'scheduled' as const, label: order.statusLabel.toUpperCase() };
+    return {
+      id: order.id,
+      title: order.itemSummary,
+      status: mapped.status,
+      statusLabel: mapped.label,
+      nextDeliveryTime: formatTime(order.eta.expectedAt),
+      kitchenName: order.kitchen.name,
+    };
+  }, [order]);
 };

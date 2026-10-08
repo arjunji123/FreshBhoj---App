@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { ChevronDown, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
@@ -14,10 +14,28 @@ import {
   useSetAcceptingOrders,
   useUpdateWeeklyHours,
 } from '../hooks/useKitchenPortal';
-import type { OperatingHoursHoliday, OperatingHoursWeeklyRow } from '../kitchenPartner.types';
+import type { DayOfWeek, OperatingHoursHoliday, OperatingHoursWeeklyRow } from '../kitchenPartner.types';
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DAY_ORDER: DayOfWeek[] = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+const DAY_NAMES: Record<DayOfWeek, string> = {
+  MONDAY: 'Monday',
+  TUESDAY: 'Tuesday',
+  WEDNESDAY: 'Wednesday',
+  THURSDAY: 'Thursday',
+  FRIDAY: 'Friday',
+  SATURDAY: 'Saturday',
+  SUNDAY: 'Sunday',
+};
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+/** `YYYY-MM-DD` that is a real calendar day (rejects 2026-02-31). Pure UTC maths so the device time zone can't skew it. */
+function isRealCalendarDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
+  const check = new Date(Date.UTC(year, month - 1, day));
+  return check.getUTCFullYear() === year && check.getUTCMonth() === month - 1 && check.getUTCDate() === day;
+}
 
 function summarizeDay(day: { isClosed: boolean; session1Start: string | null; session1End: string | null; session2Start: string | null; session2End: string | null }) {
   if (day.isClosed) return 'Closed';
@@ -36,7 +54,22 @@ const KitchenTimings = () => {
   return (
     <Screen background="page">
       <AppBar title="Operating Hours" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        refreshControl={
+          <RefreshControl
+            refreshing={hours.isRefetching}
+            onRefresh={() => {
+              hours.refetch();
+              profile.refetch();
+            }}
+            tintColor={theme.colors.primary[600]}
+          />
+        }
+      >
         <Card style={styles.emergencyCard} padding="md" bordered>
           <View style={styles.emergencyRow}>
             <View style={styles.emergencyText}>
@@ -72,7 +105,7 @@ const KitchenTimings = () => {
           </>
         ) : (
           [...hours.data.weekly]
-            .sort((a, b) => a.dayOfWeek - b.dayOfWeek)
+            .sort((a, b) => DAY_ORDER.indexOf(a.dayOfWeek) - DAY_ORDER.indexOf(b.dayOfWeek))
             .map((day) => <DayCard key={day.id} day={day} />)
         )}
 
@@ -148,7 +181,7 @@ function DayCard({ day }: { day: OperatingHoursWeeklyRow }) {
   return (
     <Card style={styles.dayCard} bordered>
       <Pressable onPress={() => setExpanded((e) => !e)} style={styles.dayHeaderRow} accessibilityRole="button">
-        <Text variant="label">{DAY_NAMES[day.dayOfWeek] ?? `Day ${day.dayOfWeek}`}</Text>
+        <Text variant="label">{DAY_NAMES[day.dayOfWeek] ?? day.dayOfWeek}</Text>
         <View style={styles.dayHeaderRight}>
           <Text variant="caption" color={isClosed ? 'danger' : 'secondary'}>
             {summarizeDay(day)}
@@ -236,7 +269,8 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
   const [note, setNote] = useState('');
 
   const handleAdd = () => {
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date.trim())) {
+    const dateValue = date.trim();
+    if (!isRealCalendarDate(dateValue)) {
       Alert.alert('Invalid date', 'Use YYYY-MM-DD, e.g. 2026-10-02.');
       return;
     }
@@ -250,7 +284,7 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
     }
     addHoliday.mutate(
       {
-        date: date.trim(),
+        date: dateValue,
         isClosed,
         session1Start: s1Start || undefined,
         session1End: s1End || undefined,
@@ -273,7 +307,15 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
   const handleRemove = (holiday: OperatingHoursHoliday) => {
     Alert.alert('Remove this holiday?', holiday.date, [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Remove', style: 'destructive', onPress: () => removeHoliday.mutate(holiday.date) },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: () =>
+          removeHoliday.mutate(holiday.date, {
+            onError: (error) =>
+              Alert.alert('Could not remove holiday', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
     ]);
   };
 
@@ -293,7 +335,13 @@ function HolidaysSection({ holidays }: { holidays: OperatingHoursHoliday[] }) {
                 {holiday.note ? ` · ${holiday.note}` : ''}
               </Text>
             </View>
-            <Pressable onPress={() => handleRemove(holiday)} hitSlop={theme.layout.hitSlop} accessibilityLabel="Remove holiday">
+            <Pressable
+              onPress={() => handleRemove(holiday)}
+              hitSlop={theme.layout.hitSlop}
+              accessibilityRole="button"
+              accessibilityLabel={`Remove holiday ${holiday.date}`}
+              style={styles.removeHolidayButton}
+            >
               <Trash2 size={16} color={theme.colors.text.danger} />
             </Pressable>
           </Card>
@@ -341,6 +389,7 @@ const styles = StyleSheet.create({
   saveButton: { marginTop: theme.spacing.paddings.sm, alignSelf: 'flex-end' },
   noHolidaysText: { marginBottom: theme.spacing.paddings.sm },
   holidayRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: theme.spacing.paddings.sm },
+  removeHolidayButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   holidayTextWrap: { flex: 1 },
   addHolidayCard: { marginTop: theme.spacing.paddings.xs },
   addHolidayTitle: { marginBottom: theme.spacing.paddings.sm },

@@ -31,7 +31,7 @@ const KitchenStories = () => {
 
     upload.mutate(
       {
-        asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName },
+        asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName, fileSize: asset.fileSize },
         purpose: 'STORY_MEDIA',
         fallbackType: mediaType === 'VIDEO' ? 'video/mp4' : 'image/jpeg',
       },
@@ -53,7 +53,14 @@ const KitchenStories = () => {
   const handleDelete = (story: KitchenStory) => {
     Alert.alert('Delete this story?', 'It will stop showing to customers immediately.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => deactivate.mutate(story.id) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          deactivate.mutate(story.id, {
+            onError: (error) => Alert.alert('Could not delete story', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
     ]);
   };
 
@@ -63,7 +70,13 @@ const KitchenStories = () => {
   };
 
   const saveCaption = (id: string) => {
-    updateCaption.mutate({ id, caption: draftCaption }, { onSuccess: () => setEditingId(null) });
+    updateCaption.mutate(
+      { id, caption: draftCaption.trim() },
+      {
+        onSuccess: () => setEditingId(null),
+        onError: (error) => Alert.alert('Could not save caption', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+      },
+    );
   };
 
   return (
@@ -134,10 +147,10 @@ const KitchenStories = () => {
                     size="md"
                   />
                   <View style={styles.editActions}>
-                    <TouchableOpacity onPress={() => setEditingId(null)}>
+                    <TouchableOpacity onPress={() => setEditingId(null)} style={styles.textButton} accessibilityRole="button">
                       <Text style={styles.editCancel}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => saveCaption(item.id)}>
+                    <TouchableOpacity onPress={() => saveCaption(item.id)} style={styles.textButton} accessibilityRole="button">
                       <Text style={styles.editSave}>{updateCaption.isPending ? 'Saving…' : 'Save'}</Text>
                     </TouchableOpacity>
                   </View>
@@ -150,10 +163,10 @@ const KitchenStories = () => {
                     </Text>
                   ) : null}
                   <View style={styles.rowActions}>
-                    <TouchableOpacity onPress={() => startEdit(item)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => startEdit(item)} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Edit caption">
                       <Pencil size={13} color={theme.colors.text.secondary} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(item)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => handleDelete(item)} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Delete">
                       <Trash2 size={13} color={theme.colors.text.danger} />
                     </TouchableOpacity>
                   </View>
@@ -199,8 +212,9 @@ const styles = StyleSheet.create({
   captionText: { ...theme.text.caption, color: theme.colors.text.secondary, marginTop: theme.spacing.paddings.xs },
   captionInput: { marginTop: theme.spacing.paddings.xs },
   editActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: theme.spacing.paddings.md, marginTop: theme.spacing.paddings.xs },
+  textButton: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
   editCancel: { ...theme.text.caption, color: theme.colors.text.tertiary, fontWeight: '700' as const },
   editSave: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },
   rowActions: { flexDirection: 'row', gap: theme.spacing.paddings.sm, marginTop: theme.spacing.paddings.xs },
-  iconButton: { padding: 4 },
+  iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 });

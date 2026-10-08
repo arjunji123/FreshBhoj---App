@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
+  AlertCircle,
   HelpCircle,
   MessageSquare,
   Phone,
@@ -26,6 +27,7 @@ import {
   Button,
   Card,
   Divider,
+  EmptyState,
   Skeleton,
   SummaryRow,
 } from '@components/ui';
@@ -47,7 +49,7 @@ const OrderTracking = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
-  const { data: tracking, isLoading } = useOrderTracking(params.orderId);
+  const { data: tracking, isLoading, isError, refetch } = useOrderTracking(params.orderId);
   const { data: order, isLoading: isOrderLoading } = useOrder(params.orderId);
   const cancelOrder = useCancelOrder();
 
@@ -100,6 +102,21 @@ const OrderTracking = () => {
       },
     ]);
   };
+
+  if (isError && !tracking) {
+    return (
+      <View style={styles.screen}>
+        <AppBar title="Track Order" onBack={navigation.goBack} />
+        <EmptyState
+          icon={<AlertCircle size={36} color={theme.colors.state.error} strokeWidth={1.8} />}
+          title="Could not load tracking"
+          description="Check your connection and try again."
+          actionLabel="Retry"
+          onAction={() => refetch()}
+        />
+      </View>
+    );
+  }
 
   if (isLoading || !tracking) {
     return (
@@ -183,12 +200,21 @@ const OrderTracking = () => {
               <Phone size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
             </Pressable>
             <Pressable
-              onPress={openWhatsApp}
+              onPress={() =>
+                navigation.navigate('OrderChat', {
+                  orderId: params.orderId,
+                  orderNumber: tracking.orderNumber,
+                  kitchenName: tracking.kitchen.name,
+                })
+              }
               style={styles.contactButton}
               accessibilityRole="button"
-              accessibilityLabel="Message support"
+              accessibilityLabel={
+                tracking.hasUnreadKitchenMessages ? 'Chat with kitchen, new message' : 'Chat with kitchen'
+              }
             >
-              <MessageSquare size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+              <MessageSquare size={18} color={theme.colors.primary[600]} strokeWidth={2.4} />
+              {tracking.hasUnreadKitchenMessages ? <View style={styles.unreadDot} /> : null}
             </Pressable>
           </View>
 
@@ -346,12 +372,23 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: 2,
   },
   contactButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: theme.colors.primary[50],
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  unreadDot: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: theme.colors.state.error,
+    borderWidth: 1.5,
+    borderColor: theme.colors.surface.base,
   },
   summaryLabel: {
     color: theme.colors.text.tertiary,

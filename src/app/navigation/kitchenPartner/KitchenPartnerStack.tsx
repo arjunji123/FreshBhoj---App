@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { theme } from '@app/theme/index';
 import { Button } from '@components/ui';
@@ -53,7 +53,7 @@ function KitchenGate() {
 
   if (onboarding.isLoading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface.page }}>
+      <View style={styles.center}>
         <ActivityIndicator color={theme.colors.brand.primary} />
       </View>
     );
@@ -64,11 +64,11 @@ function KitchenGate() {
   // account could actually be ACTIVE.
   if (onboarding.isError) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface.page, padding: theme.spacing.paddings.xl }}>
-        <Text style={[theme.text.h3, { color: theme.colors.text.primary, textAlign: 'center', marginBottom: theme.spacing.paddings.xs }]}>
+      <View style={[styles.center, styles.errorPadding]}>
+        <Text style={styles.errorTitle}>
           Couldn't load your account
         </Text>
-        <Text style={[theme.text.bodySmall, { color: theme.colors.text.secondary, textAlign: 'center', marginBottom: theme.spacing.paddings.lg }]}>
+        <Text style={styles.errorBody}>
           Check your connection and try again.
         </Text>
         <Button title="Retry" onPress={() => onboarding.refetch()} fullWidth={false} />
@@ -105,6 +105,13 @@ function KitchenGate() {
   // status tracker screen, which reads `status`/`rejectionReason` itself.
   return <KitchenOnboardingPending />;
 }
+
+const styles = StyleSheet.create({
+  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface.page },
+  errorPadding: { padding: theme.spacing.paddings.xl },
+  errorTitle: { ...theme.text.h3, color: theme.colors.text.primary, textAlign: 'center', marginBottom: theme.spacing.paddings.xs },
+  errorBody: { ...theme.text.bodySmall, color: theme.colors.text.secondary, textAlign: 'center', marginBottom: theme.spacing.paddings.lg },
+});
 
 export function KitchenPartnerStack() {
   return (

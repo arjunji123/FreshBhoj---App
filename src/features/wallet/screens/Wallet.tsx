@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowDownToLine, CircleAlert, CircleCheckBig, Clock, Plus, Wallet as WalletIcon } from 'lucide-react-native';
 import { formatCurrency, formatDateTime } from '@utils/format';
@@ -89,8 +89,29 @@ const Wallet = () => {
     <Screen background="page">
       <AppBar title="Wallet" onBack={navigation.goBack} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {summary.isLoading || !summary.data ? (
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={summary.isRefetching && !summary.isLoading}
+            onRefresh={() => {
+              summary.refetch();
+              transactions.refetch();
+              withdrawals.refetch();
+            }}
+            tintColor={theme.colors.primary[600]}
+          />
+        }
+      >
+        {summary.isError && !summary.data ? (
+          <EmptyState
+            title="Couldn't load your wallet"
+            description="Check your connection and try again."
+            actionLabel="Retry"
+            onAction={() => summary.refetch()}
+          />
+        ) : summary.isLoading || !summary.data ? (
           <Skeleton height={140} radius={theme.radius.card} />
         ) : (
           <Card padding="lg" elevation="sm" style={styles.balanceCard}>

@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, Share, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, Share, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ArrowLeft, Clapperboard, Search } from 'lucide-react-native';
+import { AlertCircle, ArrowLeft, Clapperboard, Search } from 'lucide-react-native';
 import AppGradient from '@components/AppGradient';
 import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
 import type { Reel } from '@api/types';
@@ -120,9 +120,24 @@ const FoodFeed = () => {
             <Skeleton key={i} height={420} radius={0} style={styles.skeletonCard} />
           ))}
         </View>
+      ) : query.isError && !reels.length ? (
+        <EmptyState
+          icon={<AlertCircle size={36} color={theme.colors.state.error} strokeWidth={1.8} />}
+          title="Could not load reels"
+          description="Check your connection and try again."
+          actionLabel="Retry"
+          onAction={() => query.refetch()}
+        />
       ) : (
         <FlatList
           data={reels}
+          refreshControl={
+            <RefreshControl
+              refreshing={query.isRefetching && !query.isFetchingNextPage}
+              onRefresh={() => query.refetch()}
+              tintColor={theme.colors.primary[600]}
+            />
+          }
           keyExtractor={(reel) => reel.id}
           showsVerticalScrollIndicator={false}
           viewabilityConfig={viewabilityConfig}

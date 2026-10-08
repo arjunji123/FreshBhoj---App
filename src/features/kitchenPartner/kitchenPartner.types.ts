@@ -136,15 +136,20 @@ export interface KitchenProfile {
   /** Free-form tags the kitchen wants to highlight, e.g. "No onion no garlic". */
   specialities?: string[];
   /** Max simultaneous orders the kitchen can comfortably handle. */
-  capacity?: number;
+  capacity?: number | null;
 }
 
 export interface MealCustomizationOption {
+  /** Echoed by the backend on reads — must NOT be sent back on create/update (the DTO rejects unknown fields). */
+  id?: string;
   name: string;
   priceDelta: number;
+  isDefault?: boolean;
 }
 
 export interface MealCustomizationGroup {
+  /** Read-only, see `MealCustomizationOption.id`. */
+  id?: string;
   name: string;
   isRequired: boolean;
   minSelect: number;
@@ -166,11 +171,11 @@ export interface MealDetail {
   goalTags: string[];
   slots: string[];
   nutrition: {
-    calories: number;
-    proteinG: number;
-    carbsG: number;
-    fatG: number;
-    fiberG: number;
+    calories: number | null;
+    proteinG: number | null;
+    carbsG: number | null;
+    fatG: number | null;
+    fiberG: number | null;
   };
   isAvailable: boolean;
   isBestseller: boolean;
@@ -180,6 +185,13 @@ export interface MealDetail {
   cuisineSlug?: string | null;
   isJainAvailable?: boolean;
   customizationGroups?: MealCustomizationGroup[];
+}
+
+/** Public catalog entry (`GET /catalog/cuisines`) — used to tag a dish with its cuisine. */
+export interface CuisineOption {
+  id: string;
+  slug: string;
+  name: string;
 }
 
 export interface NutritionAnalysisResult {
@@ -402,16 +414,18 @@ export interface PayoutBankAccount {
   isVerified: boolean;
 }
 
-/**
- * The exact inner shape of `lastPayout` wasn't part of this round's verified
- * surface — fields are optional so the summary card can render whatever
- * comes back without risking a crash on a field that isn't there.
- */
+export type PayoutStatus = 'REQUESTED' | 'PROCESSING' | 'PAID' | 'FAILED';
+
+/** The payout record exactly as `GET /partner/payouts/summary` returns it for `lastPayout`. */
 export interface PayoutSummaryLastPayout {
-  id?: string;
-  amount?: number;
-  status?: string;
-  occurredAt?: string;
+  id: string;
+  amount: number;
+  status: PayoutStatus;
+  transferRef: string | null;
+  failureReason: string | null;
+  requestedAt: string;
+  processedAt: string | null;
+  paidAt: string | null;
 }
 
 export interface PayoutSummary {
@@ -439,8 +453,8 @@ export interface PayoutTransaction {
 
 export interface OperatingHoursWeeklyRow {
   id: string;
-  /** 0 = Sunday .. 6 = Saturday. */
-  dayOfWeek: number;
+  /** Backend enum string, MONDAY..SUNDAY (not a number). */
+  dayOfWeek: DayOfWeek;
   isClosed: boolean;
   session1Start: string | null;
   session1End: string | null;

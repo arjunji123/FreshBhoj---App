@@ -60,7 +60,7 @@ const KitchenRegisterDocuments = () => {
       const result = await DocumentPicker.pickSingle({ type: [DocumentPickerTypes.pdf, DocumentPickerTypes.images] });
       setPendingSlot('FSSAI');
       fssaiUpload.uploadAndRegister(
-        { uri: result.uri, type: result.type ?? undefined, fileName: result.name ?? undefined },
+        { uri: result.uri, type: result.type ?? undefined, fileName: result.name ?? undefined, fileSize: result.size ?? undefined },
         {
           number: fssaiNumber.trim() || undefined,
           onSuccess: () => setPendingSlot(null),
@@ -82,7 +82,7 @@ const KitchenRegisterDocuments = () => {
     const asset = result.assets[0];
     setPendingSlot(type);
     upload.mutate(
-      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName }, purpose: 'DOCUMENT', fallbackType: 'image/jpeg' },
+      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName, fileSize: asset.fileSize }, purpose: 'DOCUMENT', fallbackType: 'image/jpeg' },
       {
         onSuccess: (uploaded) => registerAfterUpload(type, uploaded.url),
         onError: (error) => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createBottomTabNavigator, type BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import KitchenDashboard from '@features/kitchenPartner/screens/KitchenDashboard';
 import KitchenOrders from '@features/kitchenPartner/screens/KitchenOrders';
 import KitchenMenu from '@features/kitchenPartner/screens/KitchenMenu';
@@ -11,9 +11,13 @@ import KitchenTabBar from './KitchenTabBar';
 
 const Tab = createBottomTabNavigator<KitchenTabParamList>();
 
+// Defined at module level so React Navigation gets a stable component type
+// (an inline arrow would remount the tab bar on every navigator render).
+const renderKitchenTabBar = (props: BottomTabBarProps) => <KitchenTabBar {...props} />;
+
 export function KitchenTabNavigator() {
   return (
-    <Tab.Navigator tabBar={(props) => <KitchenTabBar {...props} />} screenOptions={{ headerShown: false }}>
+    <Tab.Navigator tabBar={renderKitchenTabBar} screenOptions={{ headerShown: false }}>
       <Tab.Screen name="KitchenDashboard" component={KitchenDashboard} />
       <Tab.Screen name="KitchenOrders" component={KitchenOrders} />
       <Tab.Screen name="KitchenMenu" component={KitchenMenu} />

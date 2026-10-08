@@ -28,7 +28,7 @@ const FssaiAssistanceChoice: React.FC<Props> = ({ previousRequest, onGetAssistan
       setIsPicking(true);
       const result = await DocumentPicker.pickSingle({ type: [DocumentPickerTypes.pdf, DocumentPickerTypes.images] });
       fssaiUpload.uploadAndRegister(
-        { uri: result.uri, type: result.type ?? undefined, fileName: result.name ?? undefined },
+        { uri: result.uri, type: result.type ?? undefined, fileName: result.name ?? undefined, fileSize: result.size ?? undefined },
         {
           onSuccess: () => {
             setIsPicking(false);

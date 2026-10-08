@@ -2,6 +2,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { qk, reelsApi } from '@api';
 import type { ReelFeedType } from '@api/endpoints/reels.api';
 import type { Paginated, Reel } from '@api/types';
+import { useAuthGatedMutate } from '@features/authentication/hooks/useRequireAuth';
 
 export function useReelFeed(feed: ReelFeedType = 'for_you', kitchenId?: string, cuisineId?: string) {
   return useInfiniteQuery({
@@ -27,7 +28,7 @@ export function useSavedReels() {
 export function useToggleReelLike() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (reelId: string) => reelsApi.toggleLike(reelId),
     onMutate: async (reelId) => {
       await queryClient.cancelQueries({ queryKey: qk.reels.all });
@@ -52,19 +53,29 @@ export function useToggleReelLike() {
       }));
     },
   });
+
+  // A guest sees the login sheet instead of an optimistic flip that would just 401.
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 export function useToggleReelSave() {
   const queryClient = useQueryClient();
 
-  return useMutation({
+  const mutation = useMutation({
     mutationFn: (reelId: string) => reelsApi.toggleSave(reelId),
     onMutate: async (reelId) => {
       await queryClient.cancelQueries({ queryKey: qk.reels.all });
       patchReelCaches(queryClient, reelId, (reel) => ({ ...reel, isSaved: !reel.isSaved }));
     },
+    onError: (_error, reelId) => {
+      patchReelCaches(queryClient, reelId, (reel) => ({ ...reel, isSaved: !reel.isSaved }));
+    },
     onSettled: () => queryClient.invalidateQueries({ queryKey: qk.reels.saved }),
   });
+
+  const mutate = useAuthGatedMutate(mutation);
+  return { ...mutation, mutate };
 }
 
 /** Fire-and-forget: a dropped view ping is not worth surfacing to the user. */

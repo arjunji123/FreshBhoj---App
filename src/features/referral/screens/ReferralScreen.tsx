@@ -35,7 +35,9 @@ const ReferralScreen = () => {
         <View style={styles.hero}>
           <Text style={theme.text.h2}>Invite friends, earn together</Text>
           <Text style={[theme.text.body, styles.heroSubtitle]}>
-            Share your code — you get 100 FreshBhoj Coins, they get 50, the moment they sign up.
+            {data
+              ? `Share your code — you get ${data.referrerBonusCoins} FreshBhoj Coins, they get ${data.refereeBonusCoins}, the moment they sign up.`
+              : 'Share your code — you both earn FreshBhoj Coins the moment they sign up.'}
           </Text>
         </View>
 

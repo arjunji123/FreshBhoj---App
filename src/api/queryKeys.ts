@@ -91,9 +91,23 @@ export const qk = {
     quote: (params: Record<string, unknown>) => ['subscriptions', 'quote', params] as const,
   },
   wallet: {
+    /** Prefix for every wallet query — invalidate this after anything that moves money. */
+    all: ['wallet'] as const,
     summary: ['wallet', 'summary'] as const,
     transactions: ['wallet', 'transactions'] as const,
     withdrawals: ['wallet', 'withdrawals'] as const,
+  },
+  notifications: {
+    all: ['notifications'] as const,
+    inbox: (category?: string) => ['notifications', 'inbox', category ?? 'all'] as const,
+    unreadCount: ['notifications', 'unreadCount'] as const,
+  },
+  orderChat: {
+    messages: (orderId: string) => ['orderChat', orderId, 'messages'] as const,
+  },
+  legal: {
+    all: ['legal'] as const,
+    doc: (key: string) => ['legal', key] as const,
   },
   paymentMethods: {
     cards: ['paymentMethods', 'cards'] as const,

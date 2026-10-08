@@ -44,6 +44,8 @@ export type PrivateStackParamList = {
   OrderConfirmation: { orderId: string };
   OrderTracking: { orderId: string };
   OrderDetail: { orderId: string };
+  /** Customer <-> kitchen chat for one order. */
+  OrderChat: { orderId: string; orderNumber?: string; kitchenName?: string };
   WriteReview: {
     orderId?: string;
     kitchenId: string;
@@ -57,7 +59,10 @@ export type PrivateStackParamList = {
   Addresses: { selectMode?: boolean } | undefined;
   AddressForm: { addressId?: string } | undefined;
   Support: undefined;
+  /** Notification preferences (what to be told about). */
   Notifications: undefined;
+  /** The inbox itself — order updates, kitchen messages, wallet and subscription activity. */
+  NotificationInbox: undefined;
   EditProfile: undefined;
   Referral: undefined;
   DeleteAccount: undefined;

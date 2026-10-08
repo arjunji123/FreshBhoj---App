@@ -72,7 +72,7 @@ const KitchenReels = () => {
     const asset = result.assets[0];
 
     upload.mutate(
-      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName }, purpose: 'REEL_VIDEO', fallbackType: 'video/mp4' },
+      { asset: { uri: asset.uri!, type: asset.type, fileName: asset.fileName, fileSize: asset.fileSize }, purpose: 'REEL_VIDEO', fallbackType: 'video/mp4' },
       {
         onSuccess: (res) => setVideoUrl(res.url),
         onError: (error) =>
@@ -86,7 +86,8 @@ const KitchenReels = () => {
     const hashtags = hashtagsInput
       .split(/[\s,]+/)
       .map((tag) => tag.trim().replace(/^#/, ''))
-      .filter(Boolean);
+      .filter(Boolean)
+      .slice(0, 10); // backend allows at most 10 hashtags
 
     publish.mutate(
       {
@@ -106,7 +107,14 @@ const KitchenReels = () => {
   const handleDelete = (reel: KitchenReel) => {
     Alert.alert('Take down this reel?', 'It will stop showing to customers immediately.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => archive.mutate(reel.id) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          archive.mutate(reel.id, {
+            onError: (error) => Alert.alert('Could not delete reel', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
     ]);
   };
 
@@ -127,7 +135,13 @@ const KitchenReels = () => {
   };
 
   const saveCaption = (id: string) => {
-    updateReel.mutate({ id, input: { caption: draftCaption } }, { onSuccess: () => setEditingId(null) });
+    updateReel.mutate(
+      { id, input: { caption: draftCaption.trim() } },
+      {
+        onSuccess: () => setEditingId(null),
+        onError: (error) => Alert.alert('Could not save caption', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+      },
+    );
   };
 
   return (
@@ -184,7 +198,7 @@ const KitchenReels = () => {
           <Input
             value={hashtagsInput}
             onChangeText={setHashtagsInput}
-            placeholder="Hashtags, comma or space separated"
+            placeholder="Up to 10 hashtags, comma or space separated"
             containerStyle={styles.hashtagsInput}
             size="md"
           />
@@ -204,7 +218,7 @@ const KitchenReels = () => {
             </>
           ) : null}
           <View style={styles.composeActions}>
-            <TouchableOpacity onPress={resetCompose}>
+            <TouchableOpacity onPress={resetCompose} style={styles.textButton} accessibilityRole="button">
               <Text style={styles.editCancel}>Cancel</Text>
             </TouchableOpacity>
             <Button
@@ -289,10 +303,10 @@ const KitchenReels = () => {
                     size="md"
                   />
                   <View style={styles.editActions}>
-                    <TouchableOpacity onPress={() => setEditingId(null)}>
+                    <TouchableOpacity onPress={() => setEditingId(null)} style={styles.textButton} accessibilityRole="button">
                       <Text style={styles.editCancel}>Cancel</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => saveCaption(item.id)}>
+                    <TouchableOpacity onPress={() => saveCaption(item.id)} style={styles.textButton} accessibilityRole="button">
                       <Text style={styles.editSave}>{updateReel.isPending ? 'Saving…' : 'Save'}</Text>
                     </TouchableOpacity>
                   </View>
@@ -309,6 +323,8 @@ const KitchenReels = () => {
                       onPress={() => handleTogglePause(item)}
                       disabled={(pauseReel.isPending && pauseReel.variables === item.id) || (resumeReel.isPending && resumeReel.variables === item.id)}
                       style={styles.iconButton}
+                      accessibilityRole="button"
+                      accessibilityLabel={item.isPaused ? 'Resume reel' : 'Pause reel'}
                     >
                       {item.isPaused ? (
                         <Play size={13} color={theme.colors.brand.primary} />
@@ -316,10 +332,10 @@ const KitchenReels = () => {
                         <Pause size={13} color={theme.colors.text.secondary} />
                       )}
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => startEdit(item)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => startEdit(item)} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Edit caption">
                       <Pencil size={13} color={theme.colors.text.secondary} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => handleDelete(item)} style={styles.iconButton}>
+                    <TouchableOpacity onPress={() => handleDelete(item)} style={styles.iconButton} accessibilityRole="button" accessibilityLabel="Delete">
                       <Trash2 size={13} color={theme.colors.text.danger} />
                     </TouchableOpacity>
                   </View>
@@ -390,8 +406,9 @@ const styles = StyleSheet.create({
   captionText: { ...theme.text.caption, color: theme.colors.text.secondary, marginTop: theme.spacing.paddings.xs },
   captionInput: { marginTop: theme.spacing.paddings.xs },
   editActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: theme.spacing.paddings.md, marginTop: theme.spacing.paddings.xs },
+  textButton: { minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' },
   editCancel: { ...theme.text.caption, color: theme.colors.text.tertiary, fontWeight: '700' as const },
   editSave: { ...theme.text.caption, color: theme.colors.brand.primary, fontWeight: '700' as const },
   rowActions: { flexDirection: 'row', gap: theme.spacing.paddings.sm, marginTop: theme.spacing.paddings.xs },
-  iconButton: { padding: 4 },
+  iconButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
 });

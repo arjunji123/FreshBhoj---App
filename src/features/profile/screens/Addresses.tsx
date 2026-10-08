@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { Briefcase, Check, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { AlertCircle, Briefcase, Check, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react-native';
 import { AppBar, Badge, Button, Card, EmptyState, Skeleton } from '@components/ui';
+import { ApiError } from '@api';
 import type { Address } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useAddresses, useDeleteAddress, useSetDefaultAddress } from '../hooks/useProfile';
@@ -22,14 +23,25 @@ const Addresses = () => {
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<Route>();
 
-  const { data: addresses, isLoading } = useAddresses();
+  const { data: addresses, isLoading, isError, isRefetching, refetch } = useAddresses();
   const setDefault = useSetDefaultAddress();
   const remove = useDeleteAddress();
 
   const handleDelete = (address: Address) => {
     Alert.alert('Delete this address?', 'You can always add it again later.', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Delete', style: 'destructive', onPress: () => remove.mutate(address.id) },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () =>
+          remove.mutate(address.id, {
+            onError: (error) =>
+              Alert.alert(
+                'Could not delete',
+                error instanceof ApiError ? error.message : 'Please try again.',
+              ),
+          }),
+      },
     ]);
   };
 
@@ -55,6 +67,14 @@ const Addresses = () => {
           <Skeleton height={112} radius={theme.radius.card} />
           <Skeleton height={112} radius={theme.radius.card} />
         </View>
+      ) : isError && !addresses ? (
+        <EmptyState
+          icon={<AlertCircle size={34} color={theme.colors.state.error} strokeWidth={1.8} />}
+          title="Could not load your addresses"
+          description="Check your connection and try again."
+          actionLabel="Retry"
+          onAction={() => refetch()}
+        />
       ) : !addresses?.length ? (
         <EmptyState
           icon={<MapPin size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />}
@@ -64,7 +84,17 @@ const Addresses = () => {
           onAction={() => navigation.navigate('AddressForm')}
         />
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scroll}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={theme.colors.primary[600]}
+            />
+          }
+        >
           {addresses.map((address) => {
             const Icon = LABEL_ICONS[address.label] ?? MapPin;
             return (
@@ -106,13 +136,19 @@ const Addresses = () => {
                   <View style={styles.actions}>
                     <Pressable
                       onPress={() => navigation.navigate('AddressForm', { addressId: address.id })}
+                      accessibilityRole="button"
                       accessibilityLabel="Edit address"
+                      hitSlop={theme.layout.hitSlop}
+                      style={styles.actionButton}
                     >
                       <Pencil size={16} color={theme.colors.text.tertiary} strokeWidth={2.2} />
                     </Pressable>
                     <Pressable
                       onPress={() => handleDelete(address)}
+                      accessibilityRole="button"
                       accessibilityLabel="Delete address"
+                      hitSlop={theme.layout.hitSlop}
+                      style={styles.actionButton}
                     >
                       <Trash2 size={16} color={theme.colors.state.error} strokeWidth={2.2} />
                     </Pressable>
@@ -196,8 +232,14 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: 3,
   },
   actions: {
-    gap: theme.spacing.lg,
+    gap: theme.spacing.xs,
     alignItems: 'center',
+  },
+  actionButton: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   selectedRow: {
     flexDirection: 'row',

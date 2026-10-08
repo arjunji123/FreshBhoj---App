@@ -135,6 +135,7 @@ export function useToggleFavorite() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: qk.meals.all });
       queryClient.invalidateQueries({ queryKey: qk.home.feed });
+      queryClient.invalidateQueries({ queryKey: qk.support.profileStats });
     },
   });
 

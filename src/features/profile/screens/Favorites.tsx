@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Heart } from 'lucide-react-native';
+import { AlertCircle, Heart } from 'lucide-react-native';
 import { AppBar, EmptyState, MealCardSkeleton } from '@components/ui';
 import MealCard from '@components/MealCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -15,7 +15,7 @@ const Favorites = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
-  const { data, isLoading } = useFavorites();
+  const { data, isLoading, isError, isRefetching, refetch } = useFavorites();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
   const { getQuantity, changeQuantity } = useCartQuantityControls();
@@ -29,9 +29,24 @@ const Favorites = () => {
           <MealCardSkeleton />
           <MealCardSkeleton />
         </View>
+      ) : isError && !data ? (
+        <EmptyState
+          icon={<AlertCircle size={34} color={theme.colors.state.error} strokeWidth={1.8} />}
+          title="Could not load your favourites"
+          description="Check your connection and try again."
+          actionLabel="Retry"
+          onAction={() => refetch()}
+        />
       ) : (
         <FlatList
           data={data?.items ?? []}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={theme.colors.primary[600]}
+            />
+          }
           keyExtractor={(meal) => meal.id}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={[

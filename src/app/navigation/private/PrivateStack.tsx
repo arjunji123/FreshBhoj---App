@@ -21,6 +21,7 @@ import PaymentProcessing from '@features/orders/screens/PaymentProcessing';
 import OrderConfirmation from '@features/orders/screens/OrderConfirmation';
 import OrderTracking from '@features/orders/screens/OrderTracking';
 import OrderDetail from '@features/orders/screens/OrderDetail';
+import OrderChat from '@features/orders/screens/OrderChat';
 import WriteReview from '@features/reviews/screens/WriteReview';
 
 // Account
@@ -28,6 +29,7 @@ import Addresses from '@features/profile/screens/Addresses';
 import AddressForm from '@features/profile/screens/AddressForm';
 import Support from '@features/profile/screens/Support';
 import Notifications from '@features/profile/screens/Notifications';
+import NotificationInbox from '@features/notifications/screens/NotificationInbox';
 import EditProfile from '@features/profile/screens/EditProfile';
 import DeleteAccount from '@features/profile/screens/DeleteAccount';
 import ReferralScreen from '@features/referral/screens/ReferralScreen';
@@ -102,6 +104,7 @@ export function PrivateTabs() {
       />
       <Stack.Screen name="OrderTracking" component={OrderTracking} />
       <Stack.Screen name="OrderDetail" component={OrderDetail} />
+      <Stack.Screen name="OrderChat" component={OrderChat} />
       <Stack.Screen
         name="WriteReview"
         component={WriteReview}
@@ -112,6 +115,7 @@ export function PrivateTabs() {
       <Stack.Screen name="AddressForm" component={AddressForm} />
       <Stack.Screen name="Support" component={Support} />
       <Stack.Screen name="Notifications" component={Notifications} />
+      <Stack.Screen name="NotificationInbox" component={NotificationInbox} />
       <Stack.Screen name="EditProfile" component={EditProfile} />
       <Stack.Screen name="Referral" component={ReferralScreen} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccount} />

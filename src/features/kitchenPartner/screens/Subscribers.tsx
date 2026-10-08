@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, StyleSheet, View } from 'react-native';
-import { ListChecks, MessageCircle, Search, SquarePen, Users } from 'lucide-react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { ListChecks, Phone, Search, Users } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
 import { AppBar, AppBarAction, Avatar, Badge, Button, Card, Chip, ChipRow, EmptyState, FoodTypeDot, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
@@ -10,6 +10,7 @@ import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types'
 import { KitchenApiError } from '../api/kitchenClient';
 import { useApproveSubscription, useRejectSubscription, useSubscriptions } from '../hooks/useKitchenPortal';
 import type { Subscription, SubscriptionCounts, SubscriptionStatus } from '../kitchenPartner.types';
+import { callPhone } from '../utils/contact';
 
 type FilterTab = 'ALL' | SubscriptionStatus;
 
@@ -72,6 +73,15 @@ const Subscribers = () => {
   }, [pagesMap]);
 
   const counts: SubscriptionCounts | undefined = query.data?.counts;
+
+  const handleRefresh = () => {
+    if (page === 1) {
+      query.refetch();
+    } else {
+      setPage(1);
+      setPagesMap({});
+    }
+  };
 
   const openReject = (subscription: Subscription) => {
     setRejectTarget(subscription);
@@ -148,6 +158,7 @@ const Subscribers = () => {
           keyExtractor={(item) => item.id}
           contentContainerStyle={items.length ? styles.listPadding : styles.emptyPadding}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={query.isRefetching && page === 1} onRefresh={handleRefresh} tintColor={theme.colors.primary[600]} />}
           ListEmptyComponent={
             <EmptyState icon={<Users size={28} color={theme.colors.text.tertiary} />} title="No subscribers here" description="Subscription requests will show up here." />
           }
@@ -243,23 +254,17 @@ function SubscriberRow({
         </View>
       ) : null}
 
-      <View style={styles.comingSoonRow}>
-        <View style={styles.comingSoonButton}>
-          <MessageCircle size={12} color={theme.colors.text.disabled} />
-          <Text variant="caption" style={styles.comingSoonText}>
-            Message
-          </Text>
-        </View>
-        <View style={styles.comingSoonButton}>
-          <SquarePen size={12} color={theme.colors.text.disabled} />
-          <Text variant="caption" style={styles.comingSoonText}>
-            Edit plan
-          </Text>
-        </View>
-        <Text variant="caption" color="tertiary" style={styles.comingSoonLabel}>
-          Coming soon
+      <TouchableOpacity
+        style={styles.callRow}
+        onPress={() => callPhone(subscription.customer.phone)}
+        accessibilityRole="button"
+        accessibilityLabel={`Call ${subscription.customer.fullName || subscription.customer.phone}`}
+      >
+        <Phone size={14} color={theme.colors.brand.primary} />
+        <Text variant="label" color="brand">
+          Call customer
         </Text>
-      </View>
+      </TouchableOpacity>
     </Card>
   );
 }
@@ -284,18 +289,15 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.borders.subtle,
   },
   approveButton: { flex: 1 },
-  comingSoonRow: {
+  callRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.paddings.md,
-    marginTop: theme.spacing.paddings.sm,
-    paddingTop: theme.spacing.paddings.sm,
+    gap: theme.spacing.paddings.xs,
+    minHeight: 44,
+    marginTop: theme.spacing.paddings.xs,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: theme.colors.borders.subtle,
   },
-  comingSoonButton: { flexDirection: 'row', alignItems: 'center', gap: 4, opacity: 0.5 },
-  comingSoonText: { color: theme.colors.text.disabled },
-  comingSoonLabel: { marginLeft: 'auto', fontStyle: 'italic' },
   rejectSheetBody: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm },
   rejectSheetHint: { ...theme.text.bodySmall, color: theme.colors.text.secondary, marginBottom: theme.spacing.paddings.md },
   rejectInput: { marginBottom: theme.spacing.paddings.lg },

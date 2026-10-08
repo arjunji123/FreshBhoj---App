@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { theme } from '@app/theme/index';
 import { AppBar, Button, Card, Screen } from '@components/ui';
+import CancelFssaiApplicationLink from '../components/CancelFssaiApplicationLink';
 import type { KitchenPartnerNavigation } from '@app/navigation/navigation.types';
 import { KitchenApiError } from '../api/kitchenClient';
 import { useConfirmFssaiAssistancePayment } from '../hooks/useKitchenPortal';
@@ -70,6 +71,7 @@ const FssaiAssistancePay: React.FC<Props> = ({ request }) => {
           loading={confirmPayment.isPending}
           style={styles.button}
         />
+        <CancelFssaiApplicationLink />
       </ScrollView>
     </Screen>
   );

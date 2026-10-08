@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { Banknote, Building2, IndianRupee, Landmark, ShieldCheck, Wallet } from 'lucide-react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useNavigation } from '@react-navigation/native';
@@ -55,10 +55,18 @@ const Payouts = () => {
   );
 
   const handleRequestPayout = () => {
-    requestPayout.mutate(undefined, {
-      onError: (error) =>
-        Alert.alert('Could not request payout', error instanceof KitchenApiError ? error.message : 'Please try again.'),
-    });
+    const amount = summary.data?.availableForPayout ?? 0;
+    Alert.alert('Request payout?', `${formatRupees(amount)} will be sent to the bank account on file.`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Request payout',
+        onPress: () =>
+          requestPayout.mutate(undefined, {
+            onError: (error) =>
+              Alert.alert('Could not request payout', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
+    ]);
   };
 
   const data = summary.data;
@@ -68,7 +76,20 @@ const Payouts = () => {
     <Screen background="page">
       <AppBar title="Payouts" onBack={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={summary.isRefetching}
+            onRefresh={() => {
+              summary.refetch();
+              transactions.refetch();
+            }}
+            tintColor={theme.colors.primary[600]}
+          />
+        }
+      >
         {summary.isError ? (
           <EmptyState title="Something went wrong" description="We couldn't load your payouts." actionLabel="Retry" onAction={() => summary.refetch()} />
         ) : summary.isLoading || !data ? (
@@ -114,11 +135,7 @@ const Payouts = () => {
                 </Text>
                 <Text variant="bodyMedium">
                   {data.lastPayout
-                    ? `${data.lastPayout.amount != null ? formatRupees(data.lastPayout.amount) : '—'}${
-                        data.lastPayout.occurredAt
-                          ? ` · ${new Date(data.lastPayout.occurredAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`
-                          : ''
-                      }`
+                    ? `${formatRupees(data.lastPayout.amount)} · ${new Date(data.lastPayout.paidAt ?? data.lastPayout.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`
                     : 'No payouts yet'}
                 </Text>
               </View>
@@ -286,6 +303,6 @@ const styles = StyleSheet.create({
   txRight: { alignItems: 'flex-end' },
   txBadge: { marginTop: 4 },
   txAmountPositive: { color: theme.colors.accent[600] },
-  txAmountNegative: { color: theme.colors.state.error },
+  txAmountNegative: { color: theme.colors.text.primary },
   loadMoreWrap: { alignItems: 'center', paddingVertical: theme.spacing.paddings.lg },
 });

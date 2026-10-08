@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ChefHat, Search as SearchIcon, X } from 'lucide-react-native';
+import { AlertCircle, ChefHat, Search as SearchIcon, X } from 'lucide-react-native';
 import { AppBar, EmptyState, Input, KitchenCardSkeleton } from '@components/ui';
 import KitchenCard from '@components/KitchenCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -12,7 +12,7 @@ const FollowedKitchens = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
-  const { data, isLoading } = useFollowedKitchens();
+  const { data, isLoading, isError, isRefetching, refetch } = useFollowedKitchens();
   const [query, setQuery] = useState('');
 
   const kitchens = useMemo(() => data?.items ?? [], [data?.items]);
@@ -42,7 +42,12 @@ const FollowedKitchens = () => {
             leftIcon={<SearchIcon size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />}
             rightIcon={
               query ? (
-                <Pressable onPress={() => setQuery('')} hitSlop={theme.layout.hitSlop}>
+                <Pressable
+                  onPress={() => setQuery('')}
+                  hitSlop={theme.layout.hitSlop}
+                  accessibilityRole="button"
+                  accessibilityLabel="Clear search"
+                >
                   <X size={17} color={theme.colors.text.tertiary} strokeWidth={2.4} />
                 </Pressable>
               ) : undefined
@@ -56,9 +61,24 @@ const FollowedKitchens = () => {
           <KitchenCardSkeleton />
           <KitchenCardSkeleton />
         </View>
+      ) : isError && !data ? (
+        <EmptyState
+          icon={<AlertCircle size={34} color={theme.colors.state.error} strokeWidth={1.8} />}
+          title="Could not load your kitchens"
+          description="Check your connection and try again."
+          actionLabel="Retry"
+          onAction={() => refetch()}
+        />
       ) : (
         <FlatList
           data={filteredKitchens}
+          refreshControl={
+            <RefreshControl
+              refreshing={isRefetching}
+              onRefresh={() => refetch()}
+              tintColor={theme.colors.primary[600]}
+            />
+          }
           keyExtractor={(kitchen) => kitchen.id}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"

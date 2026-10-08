@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { CalendarDays, CheckCircle2, MessageCircle, Pause, Phone, Play, SquarePen, XCircle } from 'lucide-react-native';
+import { Alert, RefreshControl, ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { CalendarDays, CheckCircle2, Pause, Phone, Play, XCircle } from 'lucide-react-native';
 import { BarChart } from 'react-native-gifted-charts';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { theme } from '@app/theme/index';
@@ -19,6 +19,7 @@ import {
   useSubscriptionDetail,
 } from '../hooks/useKitchenPortal';
 import type { DeliveryScheduleEntry, SubscriptionStatus } from '../kitchenPartner.types';
+import { callPhone } from '../utils/contact';
 
 type SubscriberDetailRoute = RouteProp<KitchenPartnerStackParamList, 'SubscriberDetail'>;
 
@@ -86,9 +87,17 @@ const SubscriberDetail = () => {
   };
 
   const handlePause = () => {
-    pauseSubscription.mutate(subscriptionId, {
-      onError: (error) => Alert.alert('Could not pause', error instanceof KitchenApiError ? error.message : 'Please try again.'),
-    });
+    Alert.alert('Pause this subscription?', 'No deliveries will be scheduled until you resume it.', [
+      { text: 'Keep active', style: 'cancel' },
+      {
+        text: 'Pause',
+        style: 'destructive',
+        onPress: () =>
+          pauseSubscription.mutate(subscriptionId, {
+            onError: (error) => Alert.alert('Could not pause', error instanceof KitchenApiError ? error.message : 'Please try again.'),
+          }),
+      },
+    ]);
   };
 
   const handleResume = () => {
@@ -133,7 +142,11 @@ const SubscriberDetail = () => {
       ) : query.isError || !subscription ? (
         <EmptyState title="Something went wrong" description="We couldn't load this subscriber." actionLabel="Retry" onAction={() => query.refetch()} />
       ) : (
-        <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={theme.colors.primary[600]} />}
+        >
           <Card style={styles.headerCard}>
             <View style={styles.customerRow}>
               <Avatar uri={subscription.customer.profileImage} name={subscription.customer.fullName} size={48} />
@@ -216,23 +229,17 @@ const SubscriberDetail = () => {
               </View>
             ) : null}
 
-            <View style={styles.comingSoonRow}>
-              <View style={styles.comingSoonButton}>
-                <MessageCircle size={12} color={theme.colors.text.disabled} />
-                <Text variant="caption" style={styles.comingSoonText}>
-                  Message
-                </Text>
-              </View>
-              <View style={styles.comingSoonButton}>
-                <SquarePen size={12} color={theme.colors.text.disabled} />
-                <Text variant="caption" style={styles.comingSoonText}>
-                  Edit plan
-                </Text>
-              </View>
-              <Text variant="caption" color="tertiary" style={styles.comingSoonLabel}>
-                Coming soon
+            <TouchableOpacity
+              style={styles.callRow}
+              onPress={() => callPhone(subscription.customer.phone)}
+              accessibilityRole="button"
+              accessibilityLabel={`Call ${subscription.customer.fullName || subscription.customer.phone}`}
+            >
+              <Phone size={14} color={theme.colors.brand.primary} />
+              <Text variant="label" color="brand">
+                Call customer
               </Text>
-            </View>
+            </TouchableOpacity>
           </Card>
 
           <Card style={styles.scheduleCard}>
@@ -382,18 +389,15 @@ const styles = StyleSheet.create({
   },
   actionButton: { flex: 1 },
   iconAction: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  comingSoonRow: {
+  callRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.paddings.md,
-    marginTop: theme.spacing.paddings.md,
-    paddingTop: theme.spacing.paddings.sm,
+    gap: theme.spacing.paddings.xs,
+    minHeight: 44,
+    marginTop: theme.spacing.paddings.sm,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: theme.colors.borders.subtle,
   },
-  comingSoonButton: { flexDirection: 'row', alignItems: 'center', gap: 4, opacity: 0.5 },
-  comingSoonText: { color: theme.colors.text.disabled },
-  comingSoonLabel: { marginLeft: 'auto', fontStyle: 'italic' },
   scheduleCard: { marginBottom: theme.spacing.paddings.md },
   sectionHeaderRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: theme.spacing.paddings.md },
   scheduleStrip: { flexDirection: 'row', justifyContent: 'space-between' },

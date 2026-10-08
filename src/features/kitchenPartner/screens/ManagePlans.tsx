@@ -218,20 +218,20 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
   const [isPopular, setIsPopular] = useState(plan?.isPopular ?? false);
 
   const handleSubmit = () => {
-    if (!name.trim()) return Alert.alert('Missing name', 'Give this plan a name.');
+    if (name.trim().length < 3) return Alert.alert('Missing name', 'Give this plan a name of at least 3 characters.');
     if (deliveryDays.length === 0) return Alert.alert('Pick delivery days', 'Select at least one delivery day.');
     if (dietOptions.length === 0) return Alert.alert('Pick diet options', 'Select at least one diet option this plan offers.');
     if (slotOptions.length === 0) return Alert.alert('Pick delivery slots', 'Select at least one delivery slot this plan offers.');
 
     const price = Number(priceRs);
-    if (!price || price <= 0) return Alert.alert('Enter a price', 'Enter a valid price for this plan.');
+    if (!Number.isInteger(price) || price <= 0) return Alert.alert('Enter a price', 'Enter the plan price as a whole number of rupees.');
 
     const originalPrice = originalPriceRs.trim() ? Number(originalPriceRs) : undefined;
-    if (originalPrice !== undefined && (Number.isNaN(originalPrice) || originalPrice <= price)) {
-      return Alert.alert('Check the original price', 'The original price must be higher than the plan price to show a discount.');
+    if (originalPrice !== undefined && (!Number.isInteger(originalPrice) || originalPrice <= price)) {
+      return Alert.alert('Check the original price', 'The original price must be a whole number higher than the plan price to show a discount.');
     }
 
-    if (!includesDescription.trim()) return Alert.alert('Add a description', "Describe what's included in this plan.");
+    if (includesDescription.trim().length < 3) return Alert.alert('Add a description', "Describe what's included in this plan.");
 
     const input: CreateSubscriptionPlanInput = {
       name: name.trim(),
@@ -239,7 +239,8 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
       deliveryDays,
       mealsPerDay,
       priceRs: price,
-      originalPriceRs: originalPrice,
+      // On edit, 0 is how the backend clears an existing discount badge.
+      originalPriceRs: originalPrice ?? (plan?.originalPriceRs ? 0 : undefined),
       dietOptions,
       jainAvailable,
       slotOptions,
@@ -259,7 +260,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
 
   return (
     <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-      <Input label="Plan name" value={name} onChangeText={setName} placeholder="e.g. Weekday Lunch Combo" containerStyle={styles.field} />
+      <Input label="Plan name" value={name} onChangeText={setName} placeholder="e.g. Weekday Lunch Combo" maxLength={60} containerStyle={styles.field} />
 
       <Text variant="overline" color="tertiary" style={styles.sheetLabel}>
         BILLING CYCLE
@@ -345,6 +346,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
         value={includesDescription}
         onChangeText={setIncludesDescription}
         placeholder="e.g. 1 roti basket, dal, sabzi, rice, salad daily"
+        maxLength={300}
         multiline
         containerStyle={[styles.field, styles.sheetSectionGap]}
       />

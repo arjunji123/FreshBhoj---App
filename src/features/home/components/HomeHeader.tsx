@@ -20,6 +20,7 @@ const REFERRAL_ICON_GRADIENT = ['#FFC21A', '#1DB9A0', '#0B4F6C'];
 const HomeHeader = ({
   scrollY,
   cartCount = 0,
+  notificationCount = 0,
   onPressLocation,
   onPressSearch,
   onPressNotifications,
@@ -93,6 +94,7 @@ const HomeHeader = ({
           <View style={styles.actions}>
             <Pressable
               onPress={onPressReferral}
+              hitSlop={theme.layout.hitSlop}
               accessibilityRole="button"
               accessibilityLabel="Refer and earn"
             >
@@ -107,6 +109,7 @@ const HomeHeader = ({
 
             <Pressable
               style={styles.iconButton}
+              hitSlop={theme.layout.hitSlop}
               onPress={onPressCart}
               accessibilityRole="button"
               accessibilityLabel="Cart"
@@ -121,11 +124,19 @@ const HomeHeader = ({
 
             <Pressable
               style={styles.iconButton}
+              hitSlop={theme.layout.hitSlop}
               onPress={onPressNotifications}
               accessibilityRole="button"
-              accessibilityLabel="Notifications"
+              accessibilityLabel={
+                notificationCount > 0 ? `Notifications, ${notificationCount} unread` : 'Notifications'
+              }
             >
               <Bell size={19} color={theme.colors.text.inverse} strokeWidth={2} />
+              {notificationCount > 0 ? (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{notificationCount > 9 ? '9+' : notificationCount}</Text>
+                </View>
+              ) : null}
             </Pressable>
           </View>
         </Animated.View>

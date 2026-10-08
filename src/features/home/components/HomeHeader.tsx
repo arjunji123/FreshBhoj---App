@@ -10,7 +10,7 @@ import type { HomeHeaderProps } from '../home.types';
 import { useTheme } from "@app/theme/useTheme";
 
 /** Deliberately not brand red — this icon needs to read as "reward", not another CTA. */
-const REFERRAL_ICON_GRADIENT = ['#FFD166', '#FF6B6B', '#8B5CF6'];
+const REFERRAL_ICON_GRADIENT = ['#FFC21A', '#1DB9A0', '#0B4F6C'];
 
 /**
  * Brand-gradient header that collapses as the feed scrolls: the greeting and

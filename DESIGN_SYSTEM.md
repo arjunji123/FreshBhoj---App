@@ -30,16 +30,24 @@ theme.layout.screenPadding    // 20 — the screen gutter
 
 ## Colour
 
-**Primary (red/coral)** — the existing brand gradient is preserved exactly:
-`400 #FF6B6B → 700 #BA2121 → 900 #670000` are the three stops already in the
-logo, splash and CTAs. `600 #E2121D` is the flat CTA fill.
+**Primary (teal)** — shared with the website. Brand gradient is
+`500 #0E9A8E → 600 #087F78 → 900 #0B4F6C` (aqua → teal → deep ocean). `600 #087F78`
+is the flat CTA fill and keeps white text at WCAG AA. `400 #1DB9A0` is the light
+brand tint (use for text/icons on dark surfaces, not as a fill behind white text).
 
-**Accent (green)** — health tags, nutrition chips, verified badges, success,
-completed tracking steps. Deliberately **never** a call-to-action colour: red
+**Accent (emerald)** — health tags, nutrition chips, verified badges, success,
+completed tracking steps. Deliberately **never** a call-to-action colour: teal
 is the only thing on screen allowed to ask for a tap.
 
-**Neutral** — the greys the app was already using ad hoc (`#0F172A`, `#94A3B8`,
-`#F1F5F9`, `#E2E8F0`…), now formalised into a 0–900 ramp.
+**Amber (marigold `#FFC21A`)** — the single warm accent: ratings, offers,
+"bestseller" flags.
+
+**Neutral** — a teal-tinted ink ramp, `0 #FFFFFF` → `900 #0D1B1E`; the page
+background is `neutral[50] #F3F8F8` so white cards lift off the page.
+
+**Type** — one family, Plus Jakarta Sans, for everything (the legacy `aBeeZee`
+key resolves to it). The decorative `medievalSharp` face is used only for the
+"FreshBhoj" wordmark.
 
 `foodType` is separate and unthemed: the veg/non-veg square is a regulated
 convention, so `VEG` green and `NON_VEG` red are fixed.

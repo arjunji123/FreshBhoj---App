@@ -102,7 +102,7 @@ const PersonalDetails = () => {
               onPress={handleBack}
               activeOpacity={0.7}
             >
-              <ArrowLeft size={16} color="#0F172A" strokeWidth={2.5} />
+              <ArrowLeft size={16} color="#0D1B1E" strokeWidth={2.5} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{headerTitle}</Text>
           </View>
@@ -144,7 +144,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   pullHandle: {
     width: 48,
     height: 4,
-    backgroundColor: '#E2E8F0',
+    backgroundColor: '#DCE6E7',
     borderRadius: 9999,
     alignSelf: 'center',
     marginTop: 24,
@@ -170,7 +170,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   headerTitle: {
     fontSize: theme.typography.fontSizes.xxl,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
-    color: '#0F172A',
+    color: '#0D1B1E',
     lineHeight: 28,
   },
 });

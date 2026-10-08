@@ -12,7 +12,7 @@ interface PersonalDetailsFormProps {
 
 const INPUT_ICON_COLOR = '#94A3B8';
 const INPUT_BG = '#F8FAFC';
-const INPUT_BORDER = '#E2E8F0';
+const INPUT_BORDER = '#DCE6E7';
 const LABEL_COLOR = '#334155';
 const PLACEHOLDER_COLOR = '#94A3B8';
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
         height: '100%',
         fontSize: staticTheme.typography.fontSizes.md,
         fontFamily: staticTheme.typography.fontFamilies.plusJakartaSans.regular,
-        color: '#0F172A',
+        color: '#0D1B1E',
         padding: 0,
     },
 });

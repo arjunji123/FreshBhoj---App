@@ -83,7 +83,7 @@ const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive,
                             <Sparkles size={16} color={colors.gradient2} />
                         </View>
                         <View style={styles.floatChipLeft}>
-                            <Utensils size={14} color={'#3B82F6'} />
+                            <Utensils size={14} color={'#087F78'} />
                         </View> */}
                     </>
                 ) : null}

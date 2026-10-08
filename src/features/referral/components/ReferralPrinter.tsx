@@ -25,8 +25,8 @@ const PRINT_DURATION = 900;
 
 /** Fun, festive stops — deliberately not the everyday brand red, so this one
  * screen reads as a special reward moment rather than another CTA. */
-const PRINTER_GRADIENT = ['#FF7A59', '#8B5CF6', '#3B82F6'];
-const BUTTON_GRADIENT = ['#FFD166', '#FF6B6B', '#8B5CF6'];
+const PRINTER_GRADIENT = ['#FFC21A', '#14ADA0', '#0B4F6C'];
+const BUTTON_GRADIENT = ['#FFC21A', '#1DB9A0', '#0B4F6C'];
 
 /**
  * The centrepiece of the Refer & Earn screen: a cartoon "printer" that spits
@@ -145,7 +145,7 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
             <Sparkles size={16} color={theme.colors.accent[500]} strokeWidth={2.2} />
           </Animated.View>
           <Animated.View entering={ZoomIn.delay(160).springify()}>
-            <Sparkles size={22} color="#8B5CF6" strokeWidth={2.2} />
+            <Sparkles size={22} color="#087F78" strokeWidth={2.2} />
           </Animated.View>
           <Animated.View entering={ZoomIn.delay(260).springify()}>
             <Sparkles size={14} color={theme.colors.primary[500]} strokeWidth={2.2} />
@@ -213,7 +213,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: 4,
   },
   lightAmber: {
-    backgroundColor: '#FFD166',
+    backgroundColor: '#FFC21A',
   },
   lightGreen: {
     backgroundColor: theme.colors.accent[400],
@@ -296,7 +296,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 108,
     height: 108,
     borderRadius: 54,
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#087F78',
   },
   printButton: {
     width: 92,

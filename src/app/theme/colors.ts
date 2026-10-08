@@ -9,33 +9,33 @@ export const palette = {
     transparent: 'transparent',
     glass: 'rgba(255,255,255,0.2)',
 
-    gradient1: '#FF6B6B',
-    gradient2: '#BA2121',
-    gradient3: '#670000',
-    gradient4: '#F2F2F2',
-    gradient5: '#818181',
+    gradient1: '#0E9A8E',
+    gradient2: '#087F78',
+    gradient3: '#0B4F6C',
+    gradient4: '#F3F8F8',
+    gradient5: '#8FA2A6',
     gradient6: '#FFFFFF',
-    gradient7: '#FF4D4D',
-    gradient8: '#913F3F',
+    gradient7: '#14ADA0',
+    gradient8: '#0A5A66',
 
     // Text Colors
-    textPrimary: '#F76C6C',
-    textSecondary: '#D02123',
-    textGradient1: "#FB0000",
-    textGradient2: "#950000",
+    textPrimary: '#1DB9A0',
+    textSecondary: '#087F78',
+    textGradient1: "#1DB9A0",
+    textGradient2: "#0B4F6C",
 
     // Grays
-    gray1: '#777777',
-    gray2: '#DBDBDB',
-    gray3: '#C2C2C2',
-    gray4: '#656565',
+    gray1: '#5F7377',
+    gray2: '#DCE6E7',
+    gray3: '#C3D1D3',
+    gray4: '#47595D',
 
     // Semantic
-    inactive: '#D5AFAF',
-    success: '#4CAF50',
-    warning: '#FFC107',
+    inactive: '#B7CBCD',
+    success: '#0F9D6B',
+    warning: '#FFC21A',
     error: '#F44336',
-    info: '#2196F3',
+    info: '#1E7BD8',
 };
 
 /**
@@ -52,28 +52,28 @@ export const elevation = {
         elevation: 0,
     },
     xs: {
-        shadowColor: '#0F172A',
+        shadowColor: '#0D1B1E',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.04,
         shadowRadius: 3,
         elevation: 1,
     },
     sm: {
-        shadowColor: '#0F172A',
+        shadowColor: '#0D1B1E',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.06,
         shadowRadius: 8,
         elevation: 3,
     },
     md: {
-        shadowColor: '#0F172A',
+        shadowColor: '#0D1B1E',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.08,
         shadowRadius: 16,
         elevation: 6,
     },
     lg: {
-        shadowColor: '#0F172A',
+        shadowColor: '#0D1B1E',
         shadowOffset: { width: 0, height: 12 },
         shadowOpacity: 0.1,
         shadowRadius: 28,
@@ -81,7 +81,7 @@ export const elevation = {
     },
     /** For sticky bottom bars — the shadow points upward. */
     bar: {
-        shadowColor: '#0F172A',
+        shadowColor: '#0D1B1E',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.06,
         shadowRadius: 16,
@@ -89,7 +89,7 @@ export const elevation = {
     },
     /** Brand-tinted glow under primary CTAs. */
     primary: {
-        shadowColor: '#E2121D',
+        shadowColor: '#087F78',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.28,
         shadowRadius: 18,
@@ -185,8 +185,8 @@ export const colors = {
 
     surface: {
         base: neutral[0],
-        /** Page background — pure white throughout the app. */
-        page: neutral[0],
+        /** Page background — soft mint-white so white cards lift off the page. */
+        page: neutral[50],
         subtle: neutral[100],
         raised: neutral[0],
         inverse: neutral[900],

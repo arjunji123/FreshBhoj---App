@@ -73,7 +73,7 @@ export default ActiveTiffinCard;
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginHorizontal: 20,
-    backgroundColor: '#FFF9F5',
+    backgroundColor: '#F3F8F8',
     borderRadius: theme.spacing.borderRadius.xl,
     padding: 18,
     overflow: 'hidden',
@@ -85,7 +85,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(251, 191, 146, 0.2)',
+    backgroundColor: 'rgba(8, 127, 120, 0.1)',
   },
   topRow: {
     flexDirection: 'row',
@@ -103,7 +103,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: theme.spacing.borderRadius.lg,
-    backgroundColor: '#FDEAEA',
+    backgroundColor: '#D3F1EE',
     justifyContent: 'center',
     alignItems: 'center',
   },

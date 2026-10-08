@@ -33,9 +33,9 @@ export interface ButtonProps {
 }
 
 const SIZES: Record<ButtonSize, { height: number; paddingHorizontal: number; radius: number }> = {
-  sm: { height: 38, paddingHorizontal: staticTheme.spacing.md, radius: staticTheme.radius.control },
-  md: { height: 48, paddingHorizontal: staticTheme.spacing.lg, radius: staticTheme.radius.control },
-  lg: { height: 56, paddingHorizontal: staticTheme.spacing.xl, radius: staticTheme.radius.button },
+  sm: { height: 40, paddingHorizontal: staticTheme.spacing.lg, radius: staticTheme.radius.pill },
+  md: { height: 50, paddingHorizontal: staticTheme.spacing.xl, radius: staticTheme.radius.pill },
+  lg: { height: 56, paddingHorizontal: staticTheme.spacing.xl, radius: staticTheme.radius.pill },
 };
 
 /**

@@ -23,13 +23,13 @@ const borderRadius = {
 
     // ── Named aliases used by the component library ────────────────────────
     /** Inputs, chips, small buttons. */
-    control: moderateScale(14),
+    control: moderateScale(16),
     /** Standard content card. */
-    card: moderateScale(20),
+    card: moderateScale(24),
     /** Large CTA buttons. */
-    button: moderateScale(18),
+    button: moderateScale(9999),
     /** Bottom sheets and the curved bottom of the app header. */
-    sheet: moderateScale(28),
+    sheet: moderateScale(32),
     /** Fully rounded pill. */
     pill: moderateScale(9999),
 };

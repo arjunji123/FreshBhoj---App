@@ -1,8 +1,11 @@
 export const fontFamilies = {
     medievalSharp: 'MedievalSharp',
+    // Legacy key: screens built earlier reference `aBeeZee` for titles. It now
+    // resolves to Plus Jakarta Sans so the whole app reads as one simple,
+    // highly legible family (ABeeZee files stay bundled but are unused).
     aBeeZee: {
-        regular: 'ABeeZee-Regular',
-        italic: 'ABeeZee-Italic',
+        regular: 'PlusJakartaSans-SemiBold',
+        italic: 'PlusJakartaSans-SemiBoldItalic',
     },
     plusJakartaSans: {
         regular: 'PlusJakartaSans-Regular',

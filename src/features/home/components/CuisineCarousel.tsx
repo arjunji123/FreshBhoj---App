@@ -40,7 +40,7 @@ const CarouselItem: React.FC<CarouselItemProps> = ({ item, index, scrollX, onPre
     scrollX,
     index,
     itemSize: FULL_ITEM_SIZE,
-    labelBgColors: ['rgba(226,18,29,0)', theme.colors.primary[600], 'rgba(226,18,29,0)'],
+    labelBgColors: ['rgba(8,127,120,0)', theme.colors.primary[600], 'rgba(8,127,120,0)'],
     labelTextColors: [theme.colors.text.tertiary, theme.colors.text.inverse, theme.colors.text.tertiary],
   });
 

@@ -1,8 +1,11 @@
 import React, { useMemo } from 'react';
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ImageBackground, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Play } from 'lucide-react-native';
 import AppGradient from '@components/AppGradient';
-import SectionHeader from '@components/SectionHeader';
+import LinearGradient from 'react-native-linear-gradient';
+import PressableScale from '@animations/PressableScale';
+import { theme as staticTheme } from '@app/theme/index';
+import HomeSectionHeader from './HomeSectionHeader';
 import { Skeleton, VerifiedBadge } from '@components/ui';
 import type { KitchenStoryGroup } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
@@ -25,10 +28,10 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <SectionHeader title="Kitchen Stories" />
+        <HomeSectionHeader title="Kitchen Stories" />
         <View style={[styles.scrollContent, styles.skeletonRow]}>
           {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} width={CARD_WIDTH} height={CARD_HEIGHT} radius={theme.radius.lg} />
+            <Skeleton key={index} width={CARD_WIDTH} height={CARD_HEIGHT} radius={theme.radius.xl} />
           ))}
         </View>
       </View>
@@ -41,7 +44,7 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
 
   return (
     <View style={styles.container}>
-      <SectionHeader title="Kitchen Stories" />
+      <HomeSectionHeader title="Kitchen Stories" />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -57,12 +60,17 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
             style={[styles.storyCard, !group.coverImage ? styles.storyCardFallback : null]}
             imageStyle={styles.storyImage}
           >
+            <LinearGradient
+              colors={theme.colors.overlay.imageFade}
+              locations={[0.45, 1]}
+              style={StyleSheet.absoluteFillObject}
+            />
             {isVideo ? (
               <View style={styles.playButton}>
                 <Play
                   size={18}
-                  color={theme.colors.text.inverse}
-                  fill={theme.colors.text.inverse}
+                  color={ON_PHOTO}
+                  fill={ON_PHOTO}
                 />
               </View>
             ) : null}
@@ -82,12 +90,13 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
         );
 
         return (
-          <Pressable
+          <PressableScale
             key={group.kitchen.id}
             onPress={() => onPressGroup(group)}
+            scaleTo={0.97}
+            haptic={false}
             accessibilityRole="button"
             accessibilityLabel={`${group.kitchen.name} stories`}
-            style={({ pressed }) => [pressed ? styles.pressed : null]}
           >
             {group.hasUnseen ? (
               <AppGradient
@@ -101,7 +110,7 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
             ) : (
               <View style={styles.seenRing}>{card}</View>
             )}
-          </Pressable>
+          </PressableScale>
         );
       })}
       </ScrollView>
@@ -111,9 +120,12 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
 
 export default KitchenStoriesRail;
 
-const CARD_WIDTH = 159;
-const CARD_HEIGHT = 239;
-const RING_PADDING = 3;
+/** Text over photography stays white in both themes. */
+const ON_PHOTO = staticTheme.colors.neutral[0];
+
+const CARD_WIDTH = 124;
+const CARD_HEIGHT = 176;
+const RING_PADDING = 2.5;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
@@ -126,24 +138,21 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   skeletonRow: {
     flexDirection: 'row',
   },
-  pressed: {
-    opacity: 0.92,
-    transform: [{ scale: 0.98 }],
-  },
   unseenRing: {
+    ...theme.elevation.sm,
     padding: RING_PADDING,
-    borderRadius: theme.radius.lg + RING_PADDING,
+    borderRadius: theme.radius.xl + RING_PADDING,
   },
   seenRing: {
     padding: RING_PADDING,
-    borderRadius: theme.radius.lg + RING_PADDING,
+    borderRadius: theme.radius.xl + RING_PADDING,
     borderWidth: 1.5,
     borderColor: theme.colors.borders.subtle,
   },
   storyCard: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.xl,
     overflow: 'hidden',
     justifyContent: 'space-between',
     backgroundColor: theme.colors.neutral[200],
@@ -152,18 +161,18 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[200],
   },
   storyImage: {
-    borderRadius: theme.radius.lg,
+    borderRadius: theme.radius.xl,
   },
   playButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
     margin: theme.spacing.sm,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    backgroundColor: theme.colors.overlay.scrimSoft,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.5)',
+    borderColor: theme.colors.overlay.glassStrong,
   },
   footer: {
     padding: theme.spacing.sm,
@@ -176,11 +185,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   storyName: {
     ...theme.text.bodyMedium,
-    color: theme.colors.text.inverse,
+    color: ON_PHOTO,
     flexShrink: 1,
   },
   storyCount: {
     ...theme.text.caption,
-    color: 'rgba(255,255,255,0.8)',
+    color: ON_PHOTO,
+    opacity: 0.85,
   },
 });

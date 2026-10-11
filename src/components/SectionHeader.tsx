@@ -60,7 +60,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   title: {
     fontSize: theme.typography.fontSizes.xxl,
     fontFamily: theme.typography.fontFamilies.aBeeZee.regular,
-    color: theme.colors.palette.black,
+    color: theme.colors.text.primary,
   },
   actionText: {
     fontSize: theme.typography.fontSizes.lg,

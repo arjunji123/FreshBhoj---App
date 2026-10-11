@@ -1,11 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { NativeScrollEvent, NativeSyntheticEvent, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
-import { UtensilsCrossed } from 'lucide-react-native';
 import MealCard from '@components/MealCard';
-import SectionHeader from '@components/SectionHeader';
+import { EmptySearch } from '@components/illustrations';
 import { EmptyState, MealCardSkeleton } from '@components/ui';
 import type {
   Cuisine,
@@ -21,9 +20,11 @@ import { useCartCount, useCartQuantityControls } from '@features/cart/hooks/useC
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useKitchens } from '@features/kitchens/hooks/useKitchens';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
+import { useTabBarFootprint, useTabBarScrollHandler } from '@app/navigation/private/tabBarVisibility';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { useUnreadNotificationCount } from '@features/notifications/hooks/useNotifications';
+import HomeSectionHeader from '../components/HomeSectionHeader';
 import HomeHeader from '../components/HomeHeader';
 import GoalFilterRow from '../components/GoalFilterRow';
 import CategoryGrid from '../components/CategoryGrid';
@@ -53,6 +54,7 @@ const Home = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
+  const tabBarFootprint = useTabBarFootprint();
   const requireAuth = useRequireAuth();
   const scrollY = useSharedValue(0);
 
@@ -91,9 +93,21 @@ const Home = () => {
   const meals = flattenPages(feedQuery.data?.pages);
 
   // Drives the collapsing header on the UI thread.
+  // Also forwards to the tab bar's hide-on-scroll logic (plain JS handler).
+  const onTabBarScroll = useTabBarScrollHandler();
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
+      runOnJS(onTabBarScroll)({
+        nativeEvent: {
+          contentOffset: { x: 0, y: event.contentOffset.y },
+          contentSize: { width: event.contentSize.width, height: event.contentSize.height },
+          layoutMeasurement: {
+            width: event.layoutMeasurement.width,
+            height: event.layoutMeasurement.height,
+          },
+        },
+      } as NativeSyntheticEvent<NativeScrollEvent>);
     },
   });
 
@@ -108,10 +122,7 @@ const Home = () => {
       // Categories open their own filtered results page rather than filtering
       // the Home feed in place — Breakfast/Lunch/Dinner/Healthy Snacks are
       // meant to feel like distinct destinations, not a toggle.
-      navigation.navigate('MainTabs', {
-        screen: 'Search',
-        params: { category: selected.slug, categoryName: selected.name },
-      });
+      navigation.navigate('Search', { category: selected.slug, categoryName: selected.name });
     },
     [navigation],
   );
@@ -158,7 +169,7 @@ const Home = () => {
         scrollY={scrollY}
         cartCount={cartCount?.itemCount ?? 0}
         notificationCount={unreadNotifications ?? 0}
-        onPressSearch={() => navigation.navigate('MainTabs', { screen: 'Search' })}
+        onPressSearch={(origin) => navigation.navigate('Search', { origin })}
         onPressCart={() => navigation.navigate('Cart')}
         onPressNotifications={() => requireAuth(() => navigation.navigate('NotificationInbox'))}
         onPressReferral={() => requireAuth(() => navigation.navigate('Referral'))}
@@ -167,7 +178,7 @@ const Home = () => {
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE + tabBarFootprint }]}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
         refreshControl={
@@ -245,13 +256,14 @@ const Home = () => {
         <Animated.View entering={enterRise(5)}>
         <CuisineCarousel
           cuisines={cuisinesQuery.data ?? []}
+          selectedSlug={cuisine}
           onSelect={handleSelectCuisine}
           isLoading={cuisinesQuery.isLoading}
         />
         </Animated.View>
 
         <Animated.View entering={enterRise(6)} style={styles.categorySection}>
-          <SectionHeader title={HOME_COPY.categories} />
+          <HomeSectionHeader title={HOME_COPY.categories} />
           <CategoryGrid
             categories={home?.categories ?? []}
             onSelect={handleSelectCategory}
@@ -287,10 +299,10 @@ const Home = () => {
         </Animated.View>
 
         <View style={styles.feedSection}>
-          <SectionHeader title={isFiltered ? 'Matching meals' : HOME_COPY.feedTitle} />
-          <Text style={[theme.text.bodySmall, styles.feedSubtitle]}>
-            {HOME_COPY.feedSubtitle}
-          </Text>
+          <HomeSectionHeader
+            title={isFiltered ? 'Matching meals' : HOME_COPY.feedTitle}
+            subtitle={HOME_COPY.feedSubtitle}
+          />
 
           {feedQuery.isLoading ? (
             <View style={styles.feedList}>
@@ -300,9 +312,7 @@ const Home = () => {
             </View>
           ) : meals.length === 0 ? (
             <EmptyState
-              icon={
-                <UtensilsCrossed size={36} color={theme.colors.primary[600]} strokeWidth={1.8} />
-              }
+              illustration={<EmptySearch size={160} />}
               title={HOME_COPY.emptyFeedTitle}
               description={HOME_COPY.emptyFeedBody}
               actionLabel={isFiltered ? 'Clear filters' : undefined}
@@ -348,16 +358,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE,
   },
   categorySection: {
-    marginTop: theme.spacing.lg,
+    marginTop: theme.spacing.xl,
   },
   feedSection: {
-    marginTop: theme.spacing.lg,
-  },
-  feedSubtitle: {
-    color: theme.colors.text.secondary,
-    paddingHorizontal: theme.layout.screenPadding,
-    marginTop: -theme.spacing.sm,
-    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.xl,
   },
   feedList: {
     paddingHorizontal: theme.layout.screenPadding,

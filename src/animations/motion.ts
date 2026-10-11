@@ -1,8 +1,9 @@
 import { Easing, FadeIn, FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
 
 /** Shared spring / timing feel so every screen moves the same way. */
-export const SPRING_PRESS = { damping: 18, stiffness: 420, mass: 0.6 } as const;
-export const SPRING_RELEASE = { damping: 11, stiffness: 320, mass: 0.7 } as const;
+// Critically damped (damping >= 2*sqrt(stiffness*mass)): settles with no overshoot.
+export const SPRING_PRESS = { damping: 32, stiffness: 420, mass: 0.6 } as const;
+export const SPRING_RELEASE = { damping: 30, stiffness: 320, mass: 0.7 } as const;
 export const SPRING_POP = { damping: 9, stiffness: 260, mass: 0.7 } as const;
 export const EASE_OUT = Easing.out(Easing.cubic);
 

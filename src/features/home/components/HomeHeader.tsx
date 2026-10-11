@@ -1,21 +1,35 @@
-import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import { Bell, ChevronDown, Gift, MapPin, Search, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { Extrapolation, interpolate, useAnimatedStyle } from 'react-native-reanimated';
+import Animated, {
+  Extrapolation,
+  FadeIn,
+  FadeOut,
+  interpolate,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
+import PressableScale from '@animations/PressableScale';
+import { theme as staticTheme } from '@app/theme/index';
 import { useAuthStore } from '@features/authentication/store/authStore';
-import { HOME_COPY, SCROLL_THRESHOLD, TOP_ROW_HEIGHT } from '../home.constants';
+import {
+  HOME_COPY,
+  SCROLL_THRESHOLD,
+  SEARCH_HINTS,
+  SEARCH_HINT_INTERVAL_MS,
+  TOP_ROW_HEIGHT,
+} from '../home.constants';
 import type { HomeHeaderProps } from '../home.types';
-import { useTheme } from "@app/theme/useTheme";
+import { useTheme } from '@app/theme/useTheme';
 
-/** Deliberately not brand red — this icon needs to read as "reward", not another CTA. */
-const REFERRAL_ICON_GRADIENT = ['#FFC21A', '#1DB9A0', '#0B4F6C'];
+/** The header is brand-teal in both themes, so its foreground is always white. */
+const ON_BRAND = staticTheme.colors.neutral[0];
 
 /**
  * Brand-gradient header that collapses as the feed scrolls: the greeting and
- * location row fade away, the curved bottom tightens, and the search bar stays
- * pinned — so search is always one tap away without eating the viewport.
+ * location block fade and fold away, the curved bottom tightens, and the
+ * search pill stays pinned — so search is always one tap away.
  */
 const HomeHeader = ({
   scrollY,
@@ -27,29 +41,51 @@ const HomeHeader = ({
   onPressCart,
   onPressReferral,
 }: HomeHeaderProps) => {
-    const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const location = useAuthStore((s) => s.location);
   const fullName = useAuthStore((s) => s.fullName);
+  const searchRef = useRef<View>(null);
+  const [hintIndex, setHintIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(
+      () => setHintIndex((i) => (i + 1) % SEARCH_HINTS.length),
+      SEARCH_HINT_INTERVAL_MS,
+    );
+    return () => clearInterval(id);
+  }, []);
 
   const firstName = fullName?.trim().split(' ')[0];
   const locationLabel = location.locality || location.address || 'Set your area';
 
+  const handlePressSearch = useCallback(() => {
+    const node = searchRef.current;
+    if (!node) {
+      onPressSearch?.({ x: 0, y: 0, width: 0, height: 0 });
+      return;
+    }
+    node.measureInWindow((x, y, width, height) => onPressSearch?.({ x, y, width, height }));
+  }, [onPressSearch]);
+
   const topRowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [1, 0], Extrapolation.CLAMP),
+    opacity: interpolate(scrollY.value, [0, SCROLL_THRESHOLD * 0.7], [1, 0], Extrapolation.CLAMP),
     height: interpolate(
       scrollY.value,
       [0, SCROLL_THRESHOLD],
       [TOP_ROW_HEIGHT, 0],
       Extrapolation.CLAMP,
     ),
-    marginBottom: interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [0, -12], Extrapolation.CLAMP),
+    marginBottom: interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [0, -theme.spacing.md], Extrapolation.CLAMP),
+    transform: [
+      { translateY: interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [0, -8], Extrapolation.CLAMP) },
+    ],
     overflow: 'hidden' as const,
   }));
 
   const containerStyle = useAnimatedStyle(() => {
-    const radius = interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [32, 18], Extrapolation.CLAMP);
+    const radius = interpolate(scrollY.value, [0, SCROLL_THRESHOLD], [32, 20], Extrapolation.CLAMP);
     return {
       borderBottomLeftRadius: radius,
       borderBottomRightRadius: radius,
@@ -58,71 +94,65 @@ const HomeHeader = ({
   });
 
   return (
-    <Animated.View style={containerStyle}>
+    <Animated.View style={[styles.shadow, containerStyle]}>
       <AppGradient
         colors={theme.colors.gradients.brand}
         locations={theme.colors.gradients.brandLocations}
-        direction="vertical"
+        direction="diagonal"
         style={[styles.container, { paddingTop: insets.top + theme.spacing.md }]}
       >
+        <View pointerEvents="none" style={styles.orbLarge} />
+        <View pointerEvents="none" style={styles.orbSmall} />
+
         <Animated.View style={[styles.topRow, topRowStyle]}>
-          <Pressable
+          <PressableScale
             style={styles.locationContainer}
             onPress={onPressLocation}
+            scaleTo={0.98}
+            haptic={false}
             accessibilityRole="button"
             accessibilityLabel="Change delivery area"
           >
-            <MapPin
-              size={18}
-              color={theme.colors.text.inverse}
-              fill={theme.colors.text.inverse}
-              strokeWidth={2}
-            />
-            <View style={styles.locationText}>
-              <Text style={[theme.text.caption, styles.greeting]} numberOfLines={1}>
-                {firstName ? `Hi ${firstName} · Delivering to` : 'DELIVERING TO'}
+            <Text style={[theme.text.h1, styles.greeting]} numberOfLines={1}>
+              {firstName ? `Hi, ${firstName}` : 'Welcome'}
+            </Text>
+            <View style={styles.addressRow}>
+              <MapPin size={14} color={ON_BRAND} strokeWidth={2.4} />
+              <Text style={[theme.text.label, styles.address]} numberOfLines={1}>
+                {locationLabel}
               </Text>
-              <View style={styles.addressRow}>
-                <Text style={[theme.text.h4, styles.address]} numberOfLines={1}>
-                  {locationLabel}
-                </Text>
-                <ChevronDown size={15} color={theme.colors.text.inverse} strokeWidth={2.5} />
-              </View>
+              <ChevronDown size={14} color={ON_BRAND} strokeWidth={2.6} />
             </View>
-          </Pressable>
+          </PressableScale>
 
           <View style={styles.actions}>
-            <Pressable
+            <PressableScale
               onPress={onPressReferral}
+              style={styles.iconButton}
               hitSlop={theme.layout.hitSlop}
               accessibilityRole="button"
               accessibilityLabel="Refer and earn"
             >
-              <AppGradient
-                colors={REFERRAL_ICON_GRADIENT}
-                direction="diagonal"
-                style={styles.iconButton}
-              >
-                <Gift size={18} color={theme.colors.text.inverse} strokeWidth={2.2} />
-              </AppGradient>
-            </Pressable>
+              <Gift size={18} color={ON_BRAND} strokeWidth={2.2} />
+              <View style={styles.accentDot} />
+            </PressableScale>
 
-            <Pressable
+            <PressableScale
               style={styles.iconButton}
               hitSlop={theme.layout.hitSlop}
               onPress={onPressCart}
               accessibilityRole="button"
               accessibilityLabel="Cart"
             >
-              <ShoppingBag size={19} color={theme.colors.text.inverse} strokeWidth={2} />
+              <ShoppingBag size={18} color={ON_BRAND} strokeWidth={2.2} />
               {cartCount > 0 ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
                 </View>
               ) : null}
-            </Pressable>
+            </PressableScale>
 
-            <Pressable
+            <PressableScale
               style={styles.iconButton}
               hitSlop={theme.layout.hitSlop}
               onPress={onPressNotifications}
@@ -131,27 +161,43 @@ const HomeHeader = ({
                 notificationCount > 0 ? `Notifications, ${notificationCount} unread` : 'Notifications'
               }
             >
-              <Bell size={19} color={theme.colors.text.inverse} strokeWidth={2} />
+              <Bell size={18} color={ON_BRAND} strokeWidth={2.2} />
               {notificationCount > 0 ? (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>{notificationCount > 9 ? '9+' : notificationCount}</Text>
                 </View>
               ) : null}
-            </Pressable>
+            </PressableScale>
           </View>
         </Animated.View>
 
-        <Pressable
-          style={styles.searchBar}
-          onPress={onPressSearch}
+        <View ref={searchRef} collapsable={false} style={styles.searchWrap}>
+        <PressableScale
+          onPress={handlePressSearch}
+          scaleTo={0.985}
+          haptic={false}
           accessibilityRole="search"
-          accessibilityLabel={HOME_COPY.searchPlaceholder}
+          accessibilityLabel={`Search. ${SEARCH_HINTS[hintIndex]}`}
+          style={styles.searchBar}
         >
-          <Search size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />
-          <Text style={[theme.text.body, styles.searchPlaceholder]}>
-            {HOME_COPY.searchPlaceholder}
-          </Text>
-        </Pressable>
+          <View style={styles.searchInner}>
+            <View style={styles.searchIconWrap}>
+              <Search size={16} color={theme.colors.primary[700]} strokeWidth={2.4} />
+            </View>
+            <View style={styles.hintWrap}>
+              <Animated.Text
+                key={hintIndex}
+                entering={FadeIn.duration(380)}
+                exiting={FadeOut.duration(260)}
+                style={[theme.text.body, styles.searchPlaceholder]}
+                numberOfLines={1}
+              >
+                {SEARCH_HINTS[hintIndex] ?? HOME_COPY.searchPlaceholder}
+              </Animated.Text>
+            </View>
+          </View>
+        </PressableScale>
+        </View>
       </AppGradient>
     </Animated.View>
   );
@@ -159,81 +205,133 @@ const HomeHeader = ({
 
 export default HomeHeader;
 
-const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  container: {
-    paddingHorizontal: theme.layout.screenPadding,
-    paddingBottom: theme.spacing.lg,
-  },
-  topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-    flex: 1,
-  },
-  locationText: {
-    flex: 1,
-  },
-  greeting: {
-    color: 'rgba(255,255,255,0.78)',
-    letterSpacing: 0.4,
-  },
-  addressRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  address: {
-    color: theme.colors.text.inverse,
-    flexShrink: 1,
-  },
-  actions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-  },
-  iconButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: theme.colors.overlay.glass,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badge: {
-    position: 'absolute',
-    top: 4,
-    right: 3,
-    minWidth: 16,
-    height: 16,
-    paddingHorizontal: 4,
-    borderRadius: 8,
-    backgroundColor: theme.colors.amber[500],
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  badgeText: {
-    ...theme.text.caption,
-    fontSize: 9,
-    lineHeight: 12,
-    color: theme.colors.text.inverse,
-  },
-  searchBar: {
-    height: 50,
-    backgroundColor: theme.colors.surface.base,
-    borderRadius: theme.radius.pill,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: theme.spacing.lg,
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.lg,
-    ...theme.elevation.sm,
-  },
-  searchPlaceholder: {
-    color: theme.colors.text.tertiary,
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    shadow: {
+      backgroundColor: theme.colors.primary[900],
+    },
+    container: {
+      paddingHorizontal: theme.layout.screenPadding,
+      paddingBottom: theme.spacing.lg,
+    },
+    orbLarge: {
+      position: 'absolute',
+      width: 220,
+      height: 220,
+      borderRadius: 110,
+      top: -90,
+      right: -70,
+      backgroundColor: theme.colors.overlay.glass,
+      opacity: 0.35,
+    },
+    orbSmall: {
+      position: 'absolute',
+      width: 120,
+      height: 120,
+      borderRadius: 60,
+      bottom: -50,
+      left: -30,
+      backgroundColor: theme.colors.overlay.glass,
+      opacity: 0.25,
+    },
+    topRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: theme.spacing.md,
+    },
+    locationContainer: {
+      flex: 1,
+      gap: 2,
+    },
+    greeting: {
+      color: ON_BRAND,
+    },
+    addressRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    address: {
+      color: ON_BRAND,
+      opacity: 0.9,
+      flexShrink: 1,
+    },
+    actions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.sm,
+    },
+    iconButton: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: theme.colors.overlay.glass,
+      borderWidth: 1,
+      borderColor: theme.colors.overlay.glassStrong,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    accentDot: {
+      position: 'absolute',
+      top: 8,
+      right: 9,
+      width: 6,
+      height: 6,
+      borderRadius: 3,
+      backgroundColor: theme.colors.amber[300],
+    },
+    badge: {
+      position: 'absolute',
+      top: 2,
+      right: 1,
+      minWidth: 16,
+      height: 16,
+      paddingHorizontal: 4,
+      borderRadius: 8,
+      backgroundColor: theme.colors.amber[500],
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    badgeText: {
+      ...theme.text.caption,
+      fontSize: 9,
+      lineHeight: 12,
+      color: ON_BRAND,
+    },
+    searchBar: {
+      height: 54,
+      backgroundColor: theme.colors.surface.base,
+      borderRadius: theme.radius.pill,
+      paddingHorizontal: theme.spacing.sm,
+      justifyContent: 'center',
+      ...theme.elevation.md,
+    },
+    searchWrap: {
+      marginTop: theme.spacing.md,
+    },
+    searchInner: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.md,
+    },
+    searchIconWrap: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface.brandWash,
+    },
+    hintWrap: {
+      flex: 1,
+      height: 24,
+      justifyContent: 'center',
+    },
+    searchPlaceholder: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      color: theme.colors.text.tertiary,
+    },
+  });

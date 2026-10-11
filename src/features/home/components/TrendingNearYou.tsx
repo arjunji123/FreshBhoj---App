@@ -1,8 +1,10 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { MapPinOff } from 'lucide-react-native';
+import PressableScale from '@animations/PressableScale';
 import { Skeleton } from '@components/ui';
 import type { NearbyMealCard } from '@api/types';
+import HomeSectionHeader from './HomeSectionHeader';
 import NearbyMealTile, { CARD_WIDTH } from './NearbyMealTile';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -19,20 +21,12 @@ interface TrendingNearYouProps {
   onSetLocation: () => void;
 }
 
-const Header = () => {
-    const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
-  return (
-(
-  <View style={styles.header}>
-    <Text style={theme.text.h2}>Trending Near You</Text>
-    <Text style={[theme.text.bodySmall, styles.headerSubtitle]}>
-      Popular dishes that others nearby are loving
-    </Text>
-  </View>
-)
-  );
-};
+const Header = () => (
+  <HomeSectionHeader
+    title="Trending Near You"
+    subtitle="Popular dishes that others nearby are loving"
+  />
+);
 
 const TileSkeleton = () => {
     const theme = useTheme();
@@ -40,7 +34,7 @@ const TileSkeleton = () => {
   return (
 (
   <View style={styles.tileSkeleton}>
-    <Skeleton height={110} radius={theme.radius.card} />
+    <Skeleton height={128} radius={0} />
     <View style={styles.tileSkeletonBody}>
       <Skeleton width="80%" height={14} />
       <Skeleton width="55%" height={11} />
@@ -76,17 +70,21 @@ const TrendingNearYou: React.FC<TrendingNearYouProps> = ({
     return (
       <View style={styles.container}>
         <Header />
-        <Pressable
+        <PressableScale
           onPress={onSetLocation}
+          scaleTo={0.98}
+          haptic={false}
           accessibilityRole="button"
           accessibilityLabel="Set your delivery area"
           style={styles.noLocationCard}
         >
-          <MapPinOff size={20} color={theme.colors.primary[600]} strokeWidth={2} />
+          <View style={styles.noLocationIcon}>
+            <MapPinOff size={20} color={theme.colors.primary[600]} strokeWidth={2} />
+          </View>
           <Text style={[theme.text.bodyMedium, styles.noLocationText]}>
             Set your delivery area to see what’s trending near you
           </Text>
-        </Pressable>
+        </PressableScale>
       </View>
     );
   }
@@ -121,29 +119,22 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     marginTop: theme.spacing.xl,
   },
-  header: {
-    paddingHorizontal: theme.layout.screenPadding,
-    marginBottom: theme.spacing.md,
-  },
-  headerSubtitle: {
-    color: theme.colors.text.secondary,
-    marginTop: 4,
-  },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingHorizontal: theme.layout.screenPadding,
     gap: theme.spacing.lg,
+    rowGap: theme.spacing.lg,
   },
   tileSkeleton: {
     width: CARD_WIDTH,
     backgroundColor: theme.colors.surface.raised,
-    borderRadius: theme.radius.card,
+    borderRadius: theme.radius.xxl,
     overflow: 'hidden',
-    ...theme.elevation.xs,
+    ...theme.elevation.sm,
   },
   tileSkeletonBody: {
-    padding: theme.spacing.sm,
+    padding: theme.spacing.md,
     gap: 6,
   },
   tileSkeletonFooter: {
@@ -158,10 +149,18 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     gap: theme.spacing.md,
     marginHorizontal: theme.layout.screenPadding,
     padding: theme.spacing.lg,
-    borderRadius: theme.radius.card,
+    borderRadius: theme.radius.xxl,
     backgroundColor: theme.colors.primary[50],
     borderWidth: 1,
     borderColor: theme.colors.borders.brand,
+  },
+  noLocationIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surface.base,
   },
   noLocationText: {
     flex: 1,

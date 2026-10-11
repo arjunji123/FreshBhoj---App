@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Animated from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
 import { EmptyOrders } from '@components/illustrations';
 import { ApiError } from '@api';
 import type { OrderCard, OrderStatus } from '@api/types';
@@ -59,7 +61,7 @@ const OrderHistory = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <View style={styles.header}>
         <Text style={theme.text.h1}>Your Orders</Text>
         <Text style={[theme.text.bodySmall, styles.subtitle]}>
@@ -120,7 +122,8 @@ const OrderHistory = () => {
               <Skeleton height={128} radius={theme.radius.card} />
             ) : null
           }
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
+            <Animated.View entering={enterRise(index)}>
             <OrderHistoryCard
               order={item}
               isReordering={reorder.isPending && reorder.variables === item.id}
@@ -138,6 +141,7 @@ const OrderHistory = () => {
                 })
               }
             />
+            </Animated.View>
           )}
         />
       )}

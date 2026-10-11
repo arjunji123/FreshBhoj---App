@@ -13,6 +13,7 @@ import { useAuthStore } from '../store/authStore';
 import type { PublicNavigation } from '@app/navigation/navigation.types';
 import { useTheme } from "@app/theme/useTheme";
 import { LoginHero } from '@components/illustrations';
+import { navigationRef } from '@app/navigation/navigationRef';
 
 const { width, height } = Dimensions.get('window');
 
@@ -69,7 +70,17 @@ const OTPScreen = () => {
           // user still needs the profile + location steps.
           if (useAuthStore.getState().isProfilePending || isProfilePending) {
             navigation.navigate('OTPSuccess');
+            return;
           }
+          // The navigator tree swaps (public -> private) under the *same*
+          // NavigationContainer, so the Login/OTP routes would otherwise carry
+          // over into the private stack and strand the user on them. Once the
+          // swap has rendered, start the signed-in app from Home.
+          setTimeout(() => {
+            if (navigationRef.isReady()) {
+              navigationRef.resetRoot({ index: 0, routes: [{ name: 'MainTabs' }] });
+            }
+          }, 0);
         },
         onError: (error) => {
           setErrorMessage(

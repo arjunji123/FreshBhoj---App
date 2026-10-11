@@ -1,5 +1,6 @@
 import React, { useRef, useMemo } from 'react';
 import { Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
   AlertTriangle,
@@ -10,6 +11,10 @@ import {
   ShoppingBag,
   UtensilsCrossed,
 } from 'lucide-react-native';
+import PressableScale from '@animations/PressableScale';
+import { enterRise } from '@animations/motion';
+import { KitchenIcon } from '@components/icons';
+import { IconBadge } from '@features/profile/components/ProfileBlocks';
 import { formatCurrency } from '@utils/format';
 import {
   AppBar,
@@ -159,8 +164,10 @@ const MealDetailScreen = () => {
               <Text style={[theme.text.h1, styles.title]}>{meal.name}</Text>
             </View>
 
-            <Pressable
-              style={styles.kitchenRow}
+            <PressableScale
+              haptic={false}
+              scaleTo={0.98}
+              style={[styles.kitchenRow, theme.elevation.xs]}
               onPress={() =>
                 navigation.navigate('KitchenProfile', {
                   kitchenId: meal.kitchen.id,
@@ -170,10 +177,18 @@ const MealDetailScreen = () => {
               accessibilityRole="button"
               accessibilityLabel={`View ${meal.kitchen.name}`}
             >
-              <Text style={[theme.text.bodyMedium, styles.kitchenName]}>{meal.kitchen.name}</Text>
-              {meal.kitchen.isVerified ? <VerifiedBadge /> : null}
-              <ChevronRight size={16} color={theme.colors.text.tertiary} strokeWidth={2.4} />
-            </Pressable>
+              <IconBadge icon={KitchenIcon} size={36} />
+              <View style={styles.kitchenInfo}>
+                <Text style={[theme.text.overline, styles.kitchenLabel]}>SOLD BY</Text>
+                <View style={styles.kitchenNameRow}>
+                  <Text style={[theme.text.bodyMedium, styles.kitchenName]} numberOfLines={1}>
+                    {meal.kitchen.name}
+                  </Text>
+                  {meal.kitchen.isVerified ? <VerifiedBadge /> : null}
+                </View>
+              </View>
+              <ChevronRight size={18} color={theme.colors.text.tertiary} strokeWidth={2.4} />
+            </PressableScale>
 
             <View style={styles.metaRow}>
               <RatingPill value={meal.rating} count={meal.ratingCount} size="md" />
@@ -206,12 +221,14 @@ const MealDetailScreen = () => {
             </View>
           </View>
 
-          <NutritionPanel nutrition={meal.nutrition} servingSize={meal.servingSize} />
+          <Animated.View entering={enterRise(1)}>
+            <NutritionPanel nutrition={meal.nutrition} servingSize={meal.servingSize} />
+          </Animated.View>
 
           {meal.ingredients.length ? (
             <View style={styles.section}>
               <Text style={theme.text.h3}>Ingredients</Text>
-              <Card padding="md" elevation="xs" style={styles.ingredientCard}>
+              <Card padding="md" elevation="sm" style={styles.ingredientCard}>
                 {meal.ingredients.map((ingredient, index) => (
                   <View key={ingredient}>
                     {index > 0 ? <Divider spacing={theme.spacing.sm} /> : null}
@@ -228,7 +245,9 @@ const MealDetailScreen = () => {
           {meal.allergens.length ? (
             <View style={styles.section}>
               <View style={styles.allergenCard}>
-                <AlertTriangle size={18} color={theme.colors.amber[600]} strokeWidth={2.2} />
+                <View style={styles.allergenBadge}>
+                  <AlertTriangle size={18} color={theme.colors.amber[600]} strokeWidth={2.2} />
+                </View>
                 <View style={styles.allergenText}>
                   <Text style={[theme.text.h4, styles.allergenTitle]}>Allergen information</Text>
                   <Text style={[theme.text.bodySmall, styles.allergenBody]}>
@@ -243,8 +262,10 @@ const MealDetailScreen = () => {
           {meal.servingSize ? (
             <View style={styles.section}>
               <Text style={theme.text.h3}>Portion</Text>
-              <Card padding="md" elevation="xs" style={styles.portionCard}>
-                <UtensilsCrossed size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
+              <Card padding="md" elevation="sm" style={styles.portionCard}>
+                <View style={styles.portionBadge}>
+                  <UtensilsCrossed size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
+                </View>
                 <Text style={theme.text.body}>{meal.servingSize}</Text>
               </Card>
             </View>
@@ -408,11 +429,26 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   kitchenRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: theme.spacing.md,
+    marginTop: theme.spacing.md,
+    padding: theme.spacing.md,
+    borderRadius: theme.radius.card,
+    backgroundColor: theme.colors.surface.raised,
+  },
+  kitchenInfo: {
+    flex: 1,
+  },
+  kitchenLabel: {
+    color: theme.colors.text.tertiary,
+  },
+  kitchenNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: theme.spacing.sm,
-    marginTop: theme.spacing.sm,
   },
   kitchenName: {
-    color: theme.colors.text.brand,
+    color: theme.colors.text.primary,
+    flexShrink: 1,
   },
   metaRow: {
     flexDirection: 'row',
@@ -474,6 +510,22 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.amber[50],
     borderWidth: 1,
     borderColor: theme.colors.amber[100],
+  },
+  portionBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surface.brandWash,
+  },
+  allergenBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.amber[100],
   },
   allergenText: {
     flex: 1,

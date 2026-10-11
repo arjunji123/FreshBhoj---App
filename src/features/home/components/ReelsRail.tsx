@@ -3,10 +3,10 @@ import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated from 'react-native-reanimated';
 import { Eye, Flame, Play } from 'lucide-react-native';
-import SectionHeader from '@components/SectionHeader';
+import HomeSectionHeader from './HomeSectionHeader';
 import { Skeleton } from '@components/ui';
 import PressableScale from '@animations/PressableScale';
-import { enterPop } from '@animations/motion';
+import { enterRise } from '@animations/motion';
 import { theme as staticTheme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { Reel } from '@api/types';
@@ -47,10 +47,10 @@ const ReelsRail: React.FC<ReelsRailProps> = ({
   if (isLoading && !reels.length) {
     return (
       <View style={styles.container}>
-        <SectionHeader title={HOME_COPY.reelsTitle} />
+        <HomeSectionHeader title={HOME_COPY.reelsTitle} subtitle={HOME_COPY.reelsSubtitle} />
         <View style={styles.scroll}>
           {[0, 1].map((i) => (
-            <Skeleton key={i} width={CARD_WIDTH} height={CARD_HEIGHT} radius={theme.radius.card} />
+            <Skeleton key={i} width={CARD_WIDTH} height={CARD_HEIGHT} radius={theme.radius.xxl} />
           ))}
         </View>
       </View>
@@ -61,12 +61,11 @@ const ReelsRail: React.FC<ReelsRailProps> = ({
 
   return (
     <View style={styles.container}>
-      <SectionHeader
+      <HomeSectionHeader
         title={HOME_COPY.reelsTitle}
-        actionLabel="See all"
-        onActionPress={onSeeAll}
+        subtitle={HOME_COPY.reelsSubtitle}
+        onSeeAll={onSeeAll}
       />
-      <Text style={[theme.text.bodySmall, styles.subtitle]}>{HOME_COPY.reelsSubtitle}</Text>
 
       <ScrollView
         horizontal
@@ -76,7 +75,7 @@ const ReelsRail: React.FC<ReelsRailProps> = ({
         decelerationRate="fast"
       >
         {reels.map((reel, index) => (
-          <Animated.View key={reel.id} entering={enterPop(index)}>
+          <Animated.View key={reel.id} entering={enterRise(index)}>
             <PressableScale
               onPress={() => onPressReel(reel)}
               scaleTo={0.96}
@@ -157,13 +156,7 @@ export default ReelsRail;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
-    marginTop: theme.spacing.lg,
-  },
-  subtitle: {
-    color: theme.colors.text.secondary,
-    paddingHorizontal: theme.layout.screenPadding,
-    marginTop: -theme.spacing.sm,
-    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.xl,
   },
   scroll: {
     flexDirection: 'row',
@@ -173,12 +166,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    borderRadius: theme.radius.card,
+    borderRadius: theme.radius.xxl,
     overflow: 'hidden',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: theme.colors.neutral[200],
-    ...theme.elevation.sm,
+    ...theme.elevation.md,
   },
   fallback: {
     backgroundColor: theme.colors.primary[800],
@@ -191,9 +184,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
     gap: 3,
     paddingHorizontal: 8,
-    paddingVertical: 3,
+    paddingVertical: 4,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.overlay.scrim,
+    backgroundColor: theme.colors.overlay.scrimSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.overlay.glass,
   },
   viewsText: {
     ...theme.text.caption,
@@ -254,10 +249,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 6,
     borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.amber[500],
+    backgroundColor: theme.colors.surface.base,
   },
   orderText: {
     ...theme.text.label,
-    color: ON_PHOTO,
+    color: theme.colors.primary[700],
   },
 });

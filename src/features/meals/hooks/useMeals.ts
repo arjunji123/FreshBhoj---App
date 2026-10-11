@@ -25,9 +25,23 @@ export function useMealFeed(filters: MealListParams = {}) {
   });
 }
 
-/** Flattens the infinite pages into the single array a list needs. */
+/**
+ * Flattens the infinite pages into the single array a list needs. Offset
+ * pagination can return the same row on two pages when the data changes (or
+ * the sort key ties) between fetches, so items that carry an `id` are
+ * de-duplicated — otherwise lists keyed by id throw "two children with the
+ * same key".
+ */
 export function flattenPages<T>(pages?: Array<Paginated<T>>): T[] {
-  return pages?.flatMap((page) => page.items) ?? [];
+  const items = pages?.flatMap((page) => page.items) ?? [];
+  const seen = new Set<unknown>();
+  return items.filter((item) => {
+    const id = (item as { id?: unknown } | null)?.id;
+    if (id === undefined) return true;
+    if (seen.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 /**

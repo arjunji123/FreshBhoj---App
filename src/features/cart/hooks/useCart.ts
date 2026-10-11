@@ -78,7 +78,16 @@ export function useAddToCart() {
           .addItem(input.mealSnapshot ?? { id: input.mealId, name: '' }, input.quantity ?? 1, input.sourceStoryId);
         return Promise.resolve(buildGuestCart(useGuestCartStore.getState().lines));
       }
-      return cartApi.addItem(input);
+      // `mealSnapshot` only feeds the local guest cart; the API's DTO rejects
+      // unknown fields, so it must not be sent.
+      return cartApi.addItem({
+        mealId: input.mealId,
+        quantity: input.quantity,
+        customizationIds: input.customizationIds,
+        specialInstructions: input.specialInstructions,
+        replaceCart: input.replaceCart,
+        sourceStoryId: input.sourceStoryId,
+      });
     },
     ...options,
   });

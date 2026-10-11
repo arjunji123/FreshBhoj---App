@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AlertCircle, ChefHat, Search as SearchIcon, X } from 'lucide-react-native';
+import { AlertCircle, Search as SearchIcon, X } from 'lucide-react-native';
+import Animated from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
+import { KitchenIcon } from '@components/icons';
 import { AppBar, EmptyState, Input, KitchenCardSkeleton } from '@components/ui';
 import KitchenCard from '@components/KitchenCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -92,7 +95,7 @@ const FollowedKitchens = () => {
               />
             ) : (
               <EmptyState
-                icon={<ChefHat size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+                icon={<KitchenIcon size={44} color={theme.colors.primary[600]} />}
                 title="Not following anyone yet"
                 description="Follow a kitchen and their new dishes and reels show up in your feed."
                 actionLabel="Discover kitchens"
@@ -100,7 +103,8 @@ const FollowedKitchens = () => {
               />
             )
           }
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
+            <Animated.View entering={enterRise(index)}>
             <KitchenCard
               kitchen={item}
               layout="full"
@@ -112,6 +116,7 @@ const FollowedKitchens = () => {
                 })
               }
             />
+            </Animated.View>
           )}
         />
       )}

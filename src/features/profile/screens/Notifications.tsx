@@ -1,6 +1,9 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import Animated from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
+
 import {
   AlertCircle,
   Bell,
@@ -104,10 +107,10 @@ const Notifications = () => {
           />
         ) : (
           <>
-            {SECTIONS.map((section) => (
-              <View key={section.title} style={styles.section}>
+            {SECTIONS.map((section, sectionIndex) => (
+              <Animated.View key={section.title} entering={enterRise(sectionIndex)} style={styles.section}>
                 <Text style={[theme.text.overline, styles.sectionLabel]}>{section.title}</Text>
-                <Card padding="none" elevation="xs">
+                <Card padding="none" elevation="sm">
                   {section.toggles.map(({ key, title, subtitle, Icon }, index) => (
                     <View key={key}>
                       {index > 0 ? <Divider spacing={0} /> : null}
@@ -131,7 +134,7 @@ const Notifications = () => {
                     </View>
                   ))}
                 </Card>
-              </View>
+              </Animated.View>
             ))}
 
             <View style={styles.infoNote}>

@@ -1,7 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AlertCircle, Trash2 } from 'lucide-react-native';
+import Animated from 'react-native-reanimated';
+import { AlertCircle } from 'lucide-react-native';
+import { enterRise } from '@animations/motion';
+import { KitchenIcon, TrashIcon } from '@components/icons';
+import { IconBadge } from '@features/profile/components/ProfileBlocks';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import {
@@ -93,15 +97,17 @@ const Cart = () => {
         onBack={navigation.goBack}
         right={
           <AppBarAction onPress={handleClear} accessibilityLabel="Empty cart">
-            <Trash2 size={17} color={theme.colors.state.error} strokeWidth={2.2} />
+            <TrashIcon size={18} color={theme.colors.state.error} />
           </AppBarAction>
         }
       />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {cart.kitchen ? (
-          <Card padding="md" elevation="xs" style={styles.kitchenCard}>
+          <Animated.View entering={enterRise(0)}>
+          <Card padding="md" elevation="sm" style={styles.kitchenCard}>
             <View style={styles.kitchenRow}>
+              <IconBadge icon={KitchenIcon} />
               <View style={styles.kitchenText}>
                 <Text style={[theme.text.overline, styles.kitchenLabel]}>ORDERING FROM</Text>
                 <View style={styles.kitchenNameRow}>
@@ -111,14 +117,18 @@ const Cart = () => {
                   {cart.kitchen.isVerified ? <VerifiedBadge /> : null}
                 </View>
               </View>
-              <Text style={[theme.text.caption, styles.prepTime]}>
-                {cart.kitchen.prepTimeMins} min
-              </Text>
+              <View style={styles.prepPill}>
+                <Text style={[theme.text.caption, styles.prepTime]}>
+                  {cart.kitchen.prepTimeMins} min
+                </Text>
+              </View>
             </View>
           </Card>
+          </Animated.View>
         ) : null}
 
-        <Card padding="md" elevation="xs" style={styles.itemsCard}>
+        <Animated.View entering={enterRise(1)}>
+        <Card padding="md" elevation="sm" style={styles.itemsCard}>
           {cart.items.map((line, index) => (
             <View key={line.id}>
               {index > 0 ? <Divider spacing={theme.spacing.xs} /> : null}
@@ -132,6 +142,7 @@ const Cart = () => {
             </View>
           ))}
         </Card>
+        </Animated.View>
 
         <CouponPanel
           cart={cart}
@@ -230,7 +241,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     gap: theme.spacing.sm,
   },
   prepTime: {
-    color: theme.colors.text.secondary,
+    color: theme.colors.primary[600],
+  },
+  prepPill: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface.brandWash,
   },
   itemsCard: {
     marginTop: theme.spacing.md,

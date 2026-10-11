@@ -1,8 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { Image, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { AlertCircle, CalendarCheck, Clock, Heart, MapPin, Share2, ShieldCheck } from 'lucide-react-native';
+import PressableScale from '@animations/PressableScale';
+import { enterRise } from '@animations/motion';
 import { formatCompact } from '@utils/format';
 import {
   AppBar,
@@ -193,7 +196,7 @@ const KitchenProfile = () => {
         </View>
 
         {/* ── Identity ──────────────────────────────────────────────── */}
-        <View style={styles.identity}>
+        <Animated.View entering={enterRise(0)} style={styles.identity}>
           <View style={styles.logoWrap}>
             {kitchen.logoUrl ? (
               <Image source={{ uri: kitchen.logoUrl }} style={styles.logo} resizeMode="cover" />
@@ -239,11 +242,11 @@ const KitchenProfile = () => {
               />
             </View>
           </View>
-        </View>
+        </Animated.View>
 
         {/* ── Trust strip ───────────────────────────────────────────── */}
         {kitchen.isVerified ? (
-          <Card padding="md" elevation="xs" style={styles.trustCard}>
+          <Card padding="md" elevation="xs" style={styles.trustCard} bordered>
             <View style={styles.trustRow}>
               <VerifiedBadge />
               <Text style={[theme.text.bodySmall, styles.trustText]}>
@@ -268,11 +271,13 @@ const KitchenProfile = () => {
           </Pressable>
         ) : null}
 
-        <View style={styles.statsRow}>
+        <Animated.View entering={enterRise(2)} style={styles.statsRow}>
           <Stat label="Dishes" value={String(kitchen.counts.meals)} />
+          <View style={styles.statDivider} />
           <Stat label="Followers" value={formatCompact(kitchen.followerCount)} />
+          <View style={styles.statDivider} />
           <Stat label="Reviews" value={formatCompact(kitchen.counts.reviews)} />
-        </View>
+        </Animated.View>
 
         <View style={styles.followRow}>
           <Button
@@ -308,8 +313,10 @@ const KitchenProfile = () => {
                 {VEG_FILTERS.map((option) => {
                   const isActive = vegFilter === option.key;
                   return (
-                    <Pressable
+                    <PressableScale
                       key={option.key}
+                      haptic={false}
+                      scaleTo={0.95}
                       onPress={() => setVegFilter(option.key)}
                       style={[styles.vegFilterPill, isActive ? styles.vegFilterPillActive : null]}
                     >
@@ -324,7 +331,7 @@ const KitchenProfile = () => {
                       >
                         {option.label}
                       </Text>
-                    </Pressable>
+                    </PressableScale>
                   );
                 })}
               </View>
@@ -506,6 +513,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     height: 76,
   },
   logo: {
+    ...theme.elevation.sm,
     width: 76,
     height: 76,
     borderRadius: theme.radius.card,
@@ -588,10 +596,15 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     marginTop: theme.spacing.lg,
     marginHorizontal: theme.layout.screenPadding,
-    paddingVertical: theme.spacing.md,
+    paddingVertical: theme.spacing.lg,
     borderRadius: theme.radius.card,
     backgroundColor: theme.colors.surface.raised,
-    ...theme.elevation.xs,
+    ...theme.elevation.sm,
+  },
+  statDivider: {
+    width: 1,
+    marginVertical: 2,
+    backgroundColor: theme.colors.borders.subtle,
   },
   stat: {
     flex: 1,

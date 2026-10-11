@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { AlertCircle, Briefcase, Check, Home, MapPin, Pencil, Plus, Trash2 } from 'lucide-react-native';
+import { AlertCircle, Briefcase, Check, Home, MapPin, Plus } from 'lucide-react-native';
+import Animated from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
+import { AddressIcon, PencilIcon, TrashIcon } from '@components/icons';
 import { AppBar, Badge, Button, Card, EmptyState, Skeleton } from '@components/ui';
 import { ApiError } from '@api';
 import type { Address } from '@api/types';
@@ -77,7 +80,7 @@ const Addresses = () => {
         />
       ) : !addresses?.length ? (
         <EmptyState
-          icon={<MapPin size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+          icon={<AddressIcon size={44} color={theme.colors.primary[600]} />}
           title="No saved addresses"
           description="Add where you want your food delivered and checkout gets a lot faster."
           actionLabel="Add address"
@@ -95,13 +98,13 @@ const Addresses = () => {
             />
           }
         >
-          {addresses.map((address) => {
+          {addresses.map((address, index) => {
             const Icon = LABEL_ICONS[address.label] ?? MapPin;
             return (
+              <Animated.View key={address.id} entering={enterRise(index)}>
               <Card
-                key={address.id}
                 padding="md"
-                elevation="xs"
+                elevation="sm"
                 onPress={() => handleSelect(address)}
                 style={[styles.card, address.isDefault ? styles.cardDefault : null]}
               >
@@ -141,7 +144,7 @@ const Addresses = () => {
                       hitSlop={theme.layout.hitSlop}
                       style={styles.actionButton}
                     >
-                      <Pencil size={16} color={theme.colors.text.tertiary} strokeWidth={2.2} />
+                      <PencilIcon size={18} color={theme.colors.text.secondary} />
                     </Pressable>
                     <Pressable
                       onPress={() => handleDelete(address)}
@@ -150,7 +153,7 @@ const Addresses = () => {
                       hitSlop={theme.layout.hitSlop}
                       style={styles.actionButton}
                     >
-                      <Trash2 size={16} color={theme.colors.state.error} strokeWidth={2.2} />
+                      <TrashIcon size={18} color={theme.colors.state.error} />
                     </Pressable>
                   </View>
                 </View>
@@ -164,6 +167,7 @@ const Addresses = () => {
                   </View>
                 ) : null}
               </Card>
+              </Animated.View>
             );
           })}
 
@@ -212,10 +216,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     gap: theme.spacing.md,
   },
   iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: theme.colors.primary[50],
+    width: 40,
+    height: 40,
+    borderRadius: 13,
+    backgroundColor: theme.colors.surface.brandWash,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -236,10 +240,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
   },
   actionButton: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: theme.colors.surface.subtle,
   },
   selectedRow: {
     flexDirection: 'row',

@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
 import { Dimensions, Image, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Heart } from 'lucide-react-native';
+import { Heart, MapPin } from 'lucide-react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import PressableScale from '@animations/PressableScale';
 import { theme as staticTheme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import AddToCartControl from '@components/AddToCartControl';
@@ -28,6 +30,9 @@ interface NearbyMealTileProps {
  * overlays the photo here and the kitchen line shows real distance, which no
  * other meal card in the app needs.
  */
+/** Text over photography stays white in both themes. */
+const ON_PHOTO = staticTheme.colors.neutral[0];
+
 const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
   meal,
   onPress,
@@ -41,11 +46,13 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
   const unavailable = !meal.isOrderable;
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
+      scaleTo={0.975}
+      haptic={false}
       accessibilityRole="button"
       accessibilityLabel={meal.name}
-      style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
+      style={styles.card}
     >
       <View style={styles.imageContainer}>
         {meal.image ? (
@@ -53,6 +60,23 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
         ) : (
           <View style={[styles.image, styles.imageFallback]} />
         )}
+        <LinearGradient
+          colors={theme.colors.overlay.imageFade}
+          locations={[0.5, 1]}
+          style={StyleSheet.absoluteFillObject}
+        />
+        <View style={styles.ratingSlot}>
+          <RatingPill value={meal.rating} variant="solid" />
+        </View>
+        <View style={styles.foodType}>
+          <FoodTypeDot type={meal.foodType} size={11} />
+        </View>
+        <View style={styles.distancePill}>
+          <MapPin size={10} color={ON_PHOTO} strokeWidth={2.6} />
+          <Text style={styles.distanceText} numberOfLines={1}>
+            {meal.distanceLabel}
+          </Text>
+        </View>
         <Pressable
           style={styles.favoriteButton}
           hitSlop={theme.layout.hitSlop}
@@ -76,16 +100,12 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
       </View>
 
       <View style={styles.content}>
-        <View style={styles.nameRow}>
-          <FoodTypeDot type={meal.foodType} size={11} />
-          <Text style={[theme.text.h4, styles.name]} numberOfLines={1}>
-            {meal.name}
-          </Text>
-          <RatingPill value={meal.rating} variant="solid" />
-        </View>
+        <Text style={[theme.text.h4, styles.name]} numberOfLines={1}>
+          {meal.name}
+        </Text>
 
         <Text style={[theme.text.caption, styles.meta]} numberOfLines={1}>
-          {meal.kitchen.name} · {meal.distanceLabel}
+          {meal.kitchen.name}
         </Text>
 
         <View style={styles.footer}>
@@ -98,7 +118,7 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
           />
         </View>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 };
 
@@ -109,17 +129,47 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
       card: {
         width: CARD_WIDTH,
         backgroundColor: theme.colors.surface.raised,
-        borderRadius: theme.radius.card,
+        borderRadius: theme.radius.xxl,
         overflow: 'hidden',
-        ...theme.elevation.sm,
+        ...theme.elevation.md,
       },
-      pressed: {
-        opacity: 0.94,
-        transform: [{ scale: 0.99 }],
+      ratingSlot: {
+        position: 'absolute',
+        top: theme.spacing.sm,
+        left: theme.spacing.sm,
+      },
+      foodType: {
+        position: 'absolute',
+        right: theme.spacing.sm,
+        bottom: theme.spacing.sm,
+        padding: 3,
+        borderRadius: theme.radius.sm,
+        backgroundColor: theme.colors.surface.base,
+      },
+      distancePill: {
+        position: 'absolute',
+        left: theme.spacing.sm,
+        bottom: theme.spacing.sm,
+        maxWidth: '65%',
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 3,
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        borderRadius: theme.radius.pill,
+        backgroundColor: theme.colors.overlay.scrimSoft,
+        borderWidth: 1,
+        borderColor: theme.colors.overlay.glass,
+      },
+      distanceText: {
+        ...theme.text.caption,
+        fontSize: 10,
+        lineHeight: 13,
+        color: ON_PHOTO,
       },
       imageContainer: {
         width: '100%',
-        height: 110,
+        height: 128,
         backgroundColor: theme.colors.neutral[100],
       },
       image: {
@@ -154,16 +204,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         paddingHorizontal: theme.spacing.sm,
       },
       content: {
-        padding: theme.spacing.sm,
-        gap: 4,
-      },
-      nameRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
+        padding: theme.spacing.md,
+        gap: 2,
       },
       name: {
-        flex: 1,
         color: theme.colors.text.primary,
       },
       meta: {

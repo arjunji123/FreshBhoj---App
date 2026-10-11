@@ -1,115 +1,48 @@
 import React, { useMemo } from 'react';
-import { Dimensions, Image, Pressable, StyleSheet, View } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedScrollHandler,
-  type SharedValue,
-} from 'react-native-reanimated';
-import AppGradient from '@components/AppGradient';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { Check } from 'lucide-react-native';
 import { Skeleton } from '@components/ui';
-import { useCoverFlowAnimations } from '@animations/useCoverFlowAnimations';
+import PressableScale from '@animations/PressableScale';
+import { theme as staticTheme } from '@app/theme/index';
 import type { Cuisine } from '@api/types';
-import { useTheme } from "@app/theme/useTheme";
+import { useTheme } from '@app/theme/useTheme';
+import HomeSectionHeader from './HomeSectionHeader';
 
-// ── Layout constants ──────────────────────────────────────────────
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEM_WIDTH = SCREEN_WIDTH * 0.32;
-const SPACING = 12;
-const FULL_ITEM_SIZE = ITEM_WIDTH + SPACING;
-const IMAGE_SIZE = ITEM_WIDTH * 0.85;
-const RING_SIZE = IMAGE_SIZE + 8;
+const CARD_WIDTH = 112;
+const CARD_HEIGHT = 140;
+const GAP = staticTheme.spacing.md;
 
-interface CarouselItemProps {
-  item: Cuisine;
-  index: number;
-  scrollX: SharedValue<number>;
-  onPress: (cuisine: Cuisine) => void;
-}
-
-const CarouselItem: React.FC<CarouselItemProps> = ({ item, index, scrollX, onPress }) => {
-    const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
-  const {
-    animatedScale,
-    animatedOverlay,
-    animatedRing,
-    animatedShadow,
-    animatedLabelBg,
-    animatedLabelText,
-  } = useCoverFlowAnimations({
-    scrollX,
-    index,
-    itemSize: FULL_ITEM_SIZE,
-    labelBgColors: ['rgba(8,127,120,0)', theme.colors.primary[600], 'rgba(8,127,120,0)'],
-    labelTextColors: [theme.colors.text.tertiary, theme.colors.text.inverse, theme.colors.text.tertiary],
-  });
-
-  return (
-    <Animated.View style={[styles.itemContainer, animatedScale]}>
-      <Pressable onPress={() => onPress(item)} accessibilityRole="button" accessibilityLabel={item.name}>
-        <Animated.View style={[styles.shadowWrapper, animatedShadow]}>
-        <View style={styles.imageWrapper}>
-          {/* Gradient ring — fades in only for the centred item. */}
-          <Animated.View style={[StyleSheet.absoluteFill, styles.ringContainer, animatedRing]}>
-            <AppGradient
-              colors={theme.colors.gradients.brand}
-              locations={theme.colors.gradients.brandLocations}
-              direction="diagonal"
-              style={styles.gradientRing}
-            />
-          </Animated.View>
-
-          <View style={styles.neutralRing} />
-
-          <View style={styles.innerCircle}>
-            {item.imageUrl ? (
-              <Image source={{ uri: item.imageUrl }} style={styles.image} />
-            ) : (
-              <View style={[styles.image, styles.imageFallback]} />
-            )}
-            {/* White wash that fades out as an item approaches the centre. */}
-            <Animated.View style={[styles.whiteOverlay, animatedOverlay]} />
-          </View>
-        </View>
-        </Animated.View>
-      </Pressable>
-
-      <Animated.View style={[styles.labelPill, animatedLabelBg]}>
-        <Animated.Text style={[styles.labelText, animatedLabelText]} numberOfLines={1}>
-          {item.name}
-        </Animated.Text>
-      </Animated.View>
-    </Animated.View>
-  );
-};
+/** Text over photography stays white in both themes. */
+const ON_PHOTO = staticTheme.colors.neutral[0];
 
 interface CuisineCarouselProps {
   cuisines: Cuisine[];
   onSelect: (cuisine: Cuisine) => void;
+  /** Currently applied cuisine filter, if any. */
+  selectedSlug?: string;
   isLoading?: boolean;
 }
 
-/** Cover-flow style carousel of cuisines — the centred item scales up and glows. */
-const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect, isLoading }) => {
-    const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
-  const scrollX = useSharedValue(0);
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollX.value = event.contentOffset.x;
-    },
-  });
+/** Image-first cuisine cards with a bottom scrim. Tapping toggles the feed filter. */
+const CuisineCarousel: React.FC<CuisineCarouselProps> = ({
+  cuisines,
+  onSelect,
+  selectedSlug,
+  isLoading,
+}) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
   if (isLoading) {
     return (
-      <View style={[styles.container, styles.skeletonRow]}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <View key={index} style={styles.skeletonItem}>
-            <Skeleton width={RING_SIZE} height={RING_SIZE} radius={RING_SIZE / 2} />
-            <Skeleton width={ITEM_WIDTH * 0.6} height={10} style={styles.gapTop} />
-          </View>
-        ))}
+      <View style={styles.container}>
+        <HomeSectionHeader title="Explore cuisines" />
+        <View style={styles.skeletonRow}>
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} width={CARD_WIDTH} height={CARD_HEIGHT} radius={theme.radius.xxl} />
+          ))}
+        </View>
       </View>
     );
   }
@@ -118,106 +51,104 @@ const CuisineCarousel: React.FC<CuisineCarouselProps> = ({ cuisines, onSelect, i
 
   return (
     <View style={styles.container}>
-      <Animated.FlatList
+      <HomeSectionHeader
+        title="Explore cuisines"
+        subtitle={selectedSlug ? 'Filtering the feed below' : 'Tap one to filter the feed'}
+      />
+      <FlatList
         data={cuisines}
         horizontal
         showsHorizontalScrollIndicator={false}
-        snapToInterval={FULL_ITEM_SIZE}
-        decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: theme.layout.screenPadding }}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
+        contentContainerStyle={styles.list}
         keyExtractor={(item) => item.id}
-        getItemLayout={(_, index) => ({
-          length: FULL_ITEM_SIZE,
-          offset: FULL_ITEM_SIZE * index,
-          index,
-        })}
-        renderItem={({ item, index }) => (
-          <CarouselItem item={item} index={index} scrollX={scrollX} onPress={onSelect} />
-        )}
-        ItemSeparatorComponent={() => <View style={{ width: SPACING }} />}
+        ItemSeparatorComponent={Separator}
+        renderItem={({ item }) => {
+          const isSelected = item.slug === selectedSlug;
+          return (
+            <PressableScale
+              onPress={() => onSelect(item)}
+              scaleTo={0.96}
+              haptic={false}
+              accessibilityRole="button"
+              accessibilityState={{ selected: isSelected }}
+              accessibilityLabel={item.name}
+              style={[styles.card, isSelected ? styles.cardSelected : null]}
+            >
+              {item.imageUrl ? (
+                <Image source={{ uri: item.imageUrl }} style={StyleSheet.absoluteFillObject} resizeMode="cover" />
+              ) : (
+                <View style={[StyleSheet.absoluteFillObject, styles.fallback]} />
+              )}
+              <LinearGradient
+                colors={theme.colors.overlay.imageFade}
+                locations={[0.4, 1]}
+                style={StyleSheet.absoluteFillObject}
+              />
+              {isSelected ? (
+                <View style={styles.check}>
+                  <Check size={12} color={ON_PHOTO} strokeWidth={3} />
+                </View>
+              ) : null}
+              <Text style={[theme.text.label, styles.name]} numberOfLines={2}>
+                {item.name}
+              </Text>
+            </PressableScale>
+          );
+        }}
       />
     </View>
   );
 };
 
+const Separator = () => <View style={separatorStyle.gap} />;
+const separatorStyle = StyleSheet.create({ gap: { width: GAP } });
+
 export default CuisineCarousel;
 
-const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  container: {
-    marginTop: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
-  },
-  skeletonRow: {
-    flexDirection: 'row',
-    paddingHorizontal: theme.layout.screenPadding,
-    gap: SPACING,
-  },
-  skeletonItem: {
-    width: ITEM_WIDTH,
-    alignItems: 'center',
-  },
-  gapTop: {
-    marginTop: 10,
-  },
-  itemContainer: {
-    width: ITEM_WIDTH,
-    alignItems: 'center',
-  },
-  shadowWrapper: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    borderRadius: RING_SIZE / 2,
-  },
-  imageWrapper: {
-    width: RING_SIZE,
-    height: RING_SIZE,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  ringContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gradientRing: {
-    width: RING_SIZE,
-    height: RING_SIZE,
-    borderRadius: RING_SIZE / 2,
-  },
-  neutralRing: {
-    ...StyleSheet.absoluteFillObject,
-    borderRadius: RING_SIZE / 2,
-    borderWidth: 1.5,
-    borderColor: theme.colors.neutral[200],
-  },
-  innerCircle: {
-    width: IMAGE_SIZE,
-    height: IMAGE_SIZE,
-    borderRadius: IMAGE_SIZE / 2,
-    backgroundColor: theme.colors.surface.base,
-    overflow: 'hidden',
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
-  },
-  imageFallback: {
-    backgroundColor: theme.colors.neutral[200],
-  },
-  whiteOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: theme.colors.surface.base,
-  },
-  labelPill: {
-    marginTop: 10,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: 5,
-    borderRadius: theme.radius.pill,
-  },
-  labelText: {
-    ...theme.text.label,
-    textAlign: 'center',
-  },
-});
+const createStyles = (theme: ReturnType<typeof useTheme>) =>
+  StyleSheet.create({
+    container: {
+      marginTop: theme.spacing.xl,
+    },
+    skeletonRow: {
+      flexDirection: 'row',
+      gap: GAP,
+      paddingHorizontal: theme.layout.screenPadding,
+    },
+    list: {
+      paddingHorizontal: theme.layout.screenPadding,
+      paddingBottom: theme.spacing.sm,
+    },
+    card: {
+      width: CARD_WIDTH,
+      height: CARD_HEIGHT,
+      borderRadius: theme.radius.xxl,
+      overflow: 'hidden',
+      justifyContent: 'flex-end',
+      padding: theme.spacing.md,
+      backgroundColor: theme.colors.neutral[200],
+      borderWidth: 2,
+      borderColor: 'transparent',
+      ...theme.elevation.sm,
+    },
+    cardSelected: {
+      borderColor: theme.colors.primary[500],
+    },
+    fallback: {
+      backgroundColor: theme.colors.primary[800],
+    },
+    check: {
+      position: 'absolute',
+      top: theme.spacing.sm,
+      right: theme.spacing.sm,
+      width: 22,
+      height: 22,
+      borderRadius: 11,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.primary[600],
+    },
+    name: {
+      color: ON_PHOTO,
+    },
+  });

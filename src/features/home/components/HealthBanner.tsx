@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
-import { Leaf, Sparkles } from 'lucide-react-native';
+import { Sparkles } from 'lucide-react-native';
+import { HealthyBowl } from '@components/illustrations';
 import { theme as staticTheme } from '@app/theme/index';
 import { useTheme } from '@app/theme/useTheme';
 import { HEALTH_TIPS, HOME_COPY } from '../home.constants';
@@ -28,9 +29,7 @@ const HealthBanner: React.FC = () => {
       end={{ x: 1, y: 1 }}
       style={styles.banner}
     >
-      <View style={styles.iconWrap}>
-        <Leaf size={22} color={ON_BRAND} strokeWidth={2.2} />
-      </View>
+      <View pointerEvents="none" style={styles.orb} />
       <View style={styles.textWrap}>
         <Text style={styles.title}>{HOME_COPY.bannerTitle}</Text>
         <Animated.View key={tipIndex} entering={FadeIn.duration(400)} exiting={FadeOut.duration(200)}>
@@ -41,6 +40,9 @@ const HealthBanner: React.FC = () => {
             </Text>
           </View>
         </Animated.View>
+      </View>
+      <View style={styles.art}>
+        <HealthyBowl size={84} tone="onBrand" />
       </View>
     </LinearGradient>
   );
@@ -57,18 +59,28 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.md,
     marginHorizontal: theme.layout.screenPadding,
-    marginTop: theme.spacing.lg,
-    padding: theme.spacing.lg,
-    borderRadius: theme.radius.card,
-    minHeight: 84,
+    marginTop: theme.spacing.xl,
+    paddingVertical: theme.spacing.lg,
+    paddingLeft: theme.spacing.lg,
+    paddingRight: theme.spacing.sm,
+    borderRadius: theme.radius.xxl,
+    minHeight: 104,
+    overflow: 'hidden',
+    ...theme.elevation.primary,
   },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
+  orb: {
+    position: 'absolute',
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    top: -70,
+    right: 30,
     backgroundColor: theme.colors.overlay.glass,
+    opacity: 0.3,
+  },
+  art: {
+    width: 84,
+    height: 84,
   },
   textWrap: {
     flex: 1,

@@ -13,18 +13,30 @@ export type PublicStackParamList = {
   PersonalDetails: undefined;
 };
 
-/** The five bottom tabs. */
+/** The three bottom tabs (Search and Orders are stack screens). */
 export type MainTabParamList = {
   Home: undefined;
-  Search: { query?: string; goalTag?: GoalTag; category?: string; categoryName?: string } | undefined;
   FoodFeed: undefined;
-  Orders: undefined;
   Profile: undefined;
 };
 
 /** Everything reachable once signed in. */
 export type PrivateStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList>;
+
+  /** Search overlay (transparent modal over the current tab). */
+  Search:
+    | {
+        query?: string;
+        goalTag?: GoalTag;
+        category?: string;
+        categoryName?: string;
+        /** Window rect of the tapped search bar; the overlay grows out of it. */
+        origin?: { x: number; y: number; width: number; height: number };
+      }
+    | undefined;
+  /** One-time orders + subscriptions. */
+  Orders: undefined;
 
   // Discovery
   MealDetail: { mealId: string; mealName?: string };

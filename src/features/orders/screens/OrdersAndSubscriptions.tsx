@@ -1,6 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Chip, ChipRow, Screen } from '@components/ui';
+import { useNavigation } from '@react-navigation/native';
+import { AppBar, Chip, ChipRow, Screen } from '@components/ui';
+import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import Subscriptions from '@features/subscriptions/screens/Subscriptions';
 import OrderHistory from './OrderHistory';
 import { useTheme } from "@app/theme/useTheme";
@@ -13,23 +15,24 @@ const TABS: Array<{ key: Tab; label: string }> = [
 ];
 
 /**
- * What the "Orders" tab actually renders now. Adds an in-screen segmented
+ * What the "Orders" stack screen renders (reached from Home, Profile and Support; no longer a tab). Adds an in-screen segmented
  * toggle above either the existing `OrderHistory` (untouched) or the new
  * Subscriptions hub — same local-`useState` + `ChipRow`/`Chip selected`
- * pattern as `KitchenProfile`'s own in-screen tabs. The tab bar icon/label
- * both stay "Orders"; nothing about the bottom nav itself changes.
+ * pattern as `KitchenProfile`'s own in-screen tabs.
  *
- * `Screen`'s `SafeAreaView` only pads edges it actually overlaps, so nesting
- * `OrderHistory`/`Subscriptions` (each with their own top-edge `Screen`)
- * below this one doesn't double the top inset.
+ * `OrderHistory` renders its `Screen` with no safe-area edges for the same reason.
  */
 const OrdersAndSubscriptions = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+  const navigation = useNavigation<PrivateNavigation>();
   const [tab, setTab] = useState<Tab>('orders');
 
+  // `AppBar` owns the top safe-area inset, so this shell (and the nested
+  // `OrderHistory`) take no top edge of their own.
   return (
-    <Screen background="base">
+    <Screen background="base" edges={[]}>
+      <AppBar title="Orders" onBack={() => navigation.goBack()} />
       <View style={styles.toggleWrap}>
         <ChipRow>
           {TABS.map((item) => (

@@ -11,7 +11,7 @@ export const CATEGORY_EMOJI: Record<string, string> = {
 
 // ── Home header animation ───────────────────────────────────────────────────
 /** Height the greeting/location row collapses from as the page scrolls. */
-export const TOP_ROW_HEIGHT = 46;
+export const TOP_ROW_HEIGHT = 64;
 export const SCROLL_THRESHOLD = 80;
 
 export const HOME_COPY = {
@@ -31,6 +31,15 @@ export const HOME_COPY = {
   emptyFeedTitle: 'No meals match those filters',
   emptyFeedBody: 'Try clearing a filter or two — we add new kitchens every week.',
 } as const;
+
+/** Search-pill hints, cross-faded every few seconds. */
+export const SEARCH_HINTS: string[] = [
+  'Search dal, protein bowls…',
+  'Try “high protein lunch”…',
+  'Search a kitchen or a dish…',
+  'Light dinners under 500 kcal…',
+];
+export const SEARCH_HINT_INTERVAL_MS = 3000;
 
 /** Rotating one-liners for the Home health banner. */
 export const HEALTH_TIPS: string[] = [

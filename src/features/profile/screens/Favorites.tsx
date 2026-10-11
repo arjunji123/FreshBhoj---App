@@ -1,7 +1,10 @@
 import React, { useMemo } from 'react';
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AlertCircle, Heart } from 'lucide-react-native';
+import { AlertCircle } from 'lucide-react-native';
+import Animated from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
+import { HeartIcon } from '@components/icons';
 import { AppBar, EmptyState, MealCardSkeleton } from '@components/ui';
 import MealCard from '@components/MealCard';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -55,14 +58,15 @@ const Favorites = () => {
           ]}
           ListEmptyComponent={
             <EmptyState
-              icon={<Heart size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+              icon={<HeartIcon size={44} color={theme.colors.primary[600]} />}
               title="No favourites yet"
               description="Tap the heart on any meal and it lands here for next time."
               actionLabel="Browse meals"
               onAction={() => navigation.navigate('MainTabs', { screen: 'Home' })}
             />
           }
-          renderItem={({ item }) => (
+          renderItem={({ item, index }) => (
+            <Animated.View entering={enterRise(index)}>
             <MealCard
               meal={item}
               style={styles.card}
@@ -74,6 +78,7 @@ const Favorites = () => {
               onChangeQuantity={(next) => changeQuantity(item.id, next)}
               onToggleFavorite={() => toggleFavorite.mutate(item.id)}
             />
+            </Animated.View>
           )}
         />
       )}

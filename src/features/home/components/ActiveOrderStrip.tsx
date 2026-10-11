@@ -1,6 +1,8 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { ChefHat, ChevronRight, Clock } from 'lucide-react-native';
+import PressableScale from '@animations/PressableScale';
+import { theme as staticTheme } from '@app/theme/index';
 import AppGradient from '@components/AppGradient';
 import type { OrderDetail } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
@@ -14,16 +16,21 @@ interface ActiveOrderStripProps {
  * Persistent reminder that food is on its way. Sits high on Home because
  * "where's my order?" is the single most common reason someone reopens the app.
  */
+/** Strip sits on the brand gradient in both themes, so its foreground is always white. */
+const ON_BRAND = staticTheme.colors.neutral[0];
+
 const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
   return (
 (
-  <Pressable
+  <PressableScale
     onPress={onPress}
+    scaleTo={0.98}
+    haptic={false}
     accessibilityRole="button"
     accessibilityLabel={`Track order ${order.orderNumber}`}
-    style={({ pressed }) => [styles.wrapper, pressed ? styles.pressed : null]}
+    style={styles.wrapper}
   >
     <AppGradient
       colors={theme.colors.gradients.brand}
@@ -32,7 +39,7 @@ const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) =
       style={styles.card}
     >
       <View style={styles.iconWrap}>
-        <ChefHat size={20} color={theme.colors.text.inverse} strokeWidth={2.2} />
+        <ChefHat size={20} color={ON_BRAND} strokeWidth={2.2} />
       </View>
 
       <View style={styles.content}>
@@ -41,16 +48,16 @@ const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) =
           {order.kitchen.name}
         </Text>
         <View style={styles.etaRow}>
-          <Clock size={12} color="rgba(255,255,255,0.85)" strokeWidth={2.4} />
+          <Clock size={12} color={ON_BRAND} strokeWidth={2.4} />
           <Text style={[theme.text.caption, styles.eta]}>
             Arriving in {order.eta.rangeLabel}
           </Text>
         </View>
       </View>
 
-      <ChevronRight size={20} color={theme.colors.text.inverse} strokeWidth={2.4} />
+      <ChevronRight size={20} color={ON_BRAND} strokeWidth={2.4} />
     </AppGradient>
-  </Pressable>
+  </PressableScale>
 )
   );
 };
@@ -61,13 +68,9 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   wrapper: {
     marginTop: theme.spacing.lg,
     marginHorizontal: theme.layout.screenPadding,
-    borderRadius: theme.radius.card,
+    borderRadius: theme.radius.xxl,
     overflow: 'hidden',
     ...theme.elevation.primary,
-  },
-  pressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.99 }],
   },
   card: {
     flexDirection: 'row',
@@ -87,10 +90,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
   },
   status: {
-    color: 'rgba(255,255,255,0.8)',
+    color: ON_BRAND,
+    opacity: 0.85,
   },
   kitchen: {
-    color: theme.colors.text.inverse,
+    color: ON_BRAND,
     marginTop: 2,
   },
   etaRow: {
@@ -100,6 +104,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: 4,
   },
   eta: {
-    color: 'rgba(255,255,255,0.85)',
+    color: ON_BRAND,
+    opacity: 0.9,
   },
 });

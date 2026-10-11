@@ -87,7 +87,12 @@ export const useAuthStore = create<AuthStoreState>()(
 			onRehydrateStorage: () => (state) => {
 				if (state?.isAuthenticated && !state.rememberMe) {
 					tokenStore.clear();
-					useAuthStore.setState({ ...initialAuthState });
+					// MMKV is synchronous, so zustand rehydrates *during* `create()`,
+					// before `useAuthStore` is assigned — touching it here would hit
+					// the const's temporal dead zone, leave the persisted
+					// "authenticated" flag set, and strand the user in a logged-in UI
+					// with no tokens. Defer the reset by a tick.
+					void Promise.resolve().then(() => useAuthStore.setState({ ...initialAuthState }));
 				}
 			},
 		},

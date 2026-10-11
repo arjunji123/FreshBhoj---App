@@ -36,7 +36,7 @@ const OrderConfirmation = () => {
 
   useEffect(() => {
     ringScale.value = withTiming(1, { duration: 420, easing: Easing.out(Easing.cubic) });
-    tickScale.value = withDelay(160, withSpring(1, { damping: 11, stiffness: 160 }));
+    tickScale.value = withDelay(160, withSpring(1, { damping: 26, stiffness: 160 }));
     contentOpacity.value = withDelay(360, withTiming(1, { duration: 420 }));
   }, [tickScale, ringScale, contentOpacity]);
 
@@ -48,7 +48,9 @@ const OrderConfirmation = () => {
   const contentStyle = useAnimatedStyle(() => ({ opacity: contentOpacity.value }));
 
   /** Closing lands on Orders, not back into the checkout stack. */
-  const goHome = () => navigation.navigate('MainTabs', { screen: 'Orders' });
+  // Reset so back from Orders lands on Home, not on this finished checkout.
+  const goHome = () =>
+    navigation.reset({ index: 1, routes: [{ name: 'MainTabs' }, { name: 'Orders' }] });
 
   return (
     <View style={styles.screen}>

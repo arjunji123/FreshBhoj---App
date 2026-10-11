@@ -11,6 +11,7 @@ import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useCartQuantityControls } from '@features/cart/hooks/useCart';
 import { useCuisines } from '@features/home/hooks/useHomeFeed';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
+import { useTabBarFootprint, useTabBarScrollHandler } from '@app/navigation/private/tabBarVisibility';
 import FoodFeedCard from '../components/FoodFeedCard';
 import {
   recordReelShare,
@@ -33,6 +34,8 @@ const FoodFeed = () => {
     const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
   const insets = useSafeAreaInsets();
+  const onTabBarScroll = useTabBarScrollHandler();
+  const tabBarFootprint = useTabBarFootprint();
   const [cuisineId, setCuisineId] = useState<string | undefined>(undefined);
   const [muted, setMuted] = useState(true);
 
@@ -91,7 +94,7 @@ const FoodFeed = () => {
           </View>
 
           <Pressable
-            onPress={() => navigation.navigate('MainTabs', { screen: 'Search' })}
+            onPress={() => navigation.navigate('Search')}
             accessibilityRole="button"
             accessibilityLabel="Search"
             hitSlop={theme.layout.hitSlop}
@@ -140,13 +143,19 @@ const FoodFeed = () => {
           }
           keyExtractor={(reel) => reel.id}
           showsVerticalScrollIndicator={false}
+          onScroll={onTabBarScroll}
+          scrollEventThrottle={16}
           viewabilityConfig={viewabilityConfig}
           onViewableItemsChanged={onViewableItemsChanged}
           onEndReachedThreshold={0.5}
           onEndReached={() => {
             if (query.hasNextPage && !query.isFetchingNextPage) query.fetchNextPage();
           }}
-          contentContainerStyle={reels.length ? styles.listContent : styles.emptyContent}
+          contentContainerStyle={
+            reels.length
+              ? [styles.listContent, { paddingBottom: MINI_CART_BAR_CLEARANCE + tabBarFootprint }]
+              : styles.emptyContent
+          }
           ListEmptyComponent={
             <EmptyState
               icon={<Clapperboard size={36} color={theme.colors.primary[600]} strokeWidth={1.8} />}

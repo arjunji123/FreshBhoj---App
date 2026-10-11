@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
 import { Skeleton } from '@components/ui';
 import MealCard from '@components/MealCard';
-import SectionHeader from '@components/SectionHeader';
+import HomeSectionHeader from './HomeSectionHeader';
 import { enterRise } from '@animations/motion';
 import type { MealCard as MealCardType } from '@api/types';
 import { useTheme } from '@app/theme/useTheme';
@@ -36,12 +36,11 @@ const HealthyPicks: React.FC<HealthyPicksProps> = ({
 
   return (
     <View style={styles.container}>
-      <SectionHeader title={HOME_COPY.healthyTitle} />
-      <Text style={[theme.text.bodySmall, styles.subtitle]}>{HOME_COPY.healthySubtitle}</Text>
+      <HomeSectionHeader title={HOME_COPY.healthyTitle} subtitle={HOME_COPY.healthySubtitle} />
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {isLoading
           ? Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} width={168} height={250} radius={theme.radius.card} />
+              <Skeleton key={i} width={168} height={250} radius={theme.radius.xxl} />
             ))
           : meals.map((meal, index) => (
               <Animated.View key={meal.id} entering={enterRise(index)}>
@@ -65,13 +64,7 @@ export default HealthyPicks;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
-    marginTop: theme.spacing.lg,
-  },
-  subtitle: {
-    color: theme.colors.text.secondary,
-    paddingHorizontal: theme.layout.screenPadding,
-    marginTop: -theme.spacing.sm,
-    marginBottom: theme.spacing.md,
+    marginTop: theme.spacing.xl,
   },
   row: {
     flexDirection: 'row',

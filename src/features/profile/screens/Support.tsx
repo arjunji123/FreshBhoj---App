@@ -34,12 +34,12 @@ const Support = () => {
     if (contact) open(contact.whatsapp.url);
   };
 
-  const handleTrackOrder = () => navigation.navigate('MainTabs', { screen: 'Orders' });
+  const handleTrackOrder = () => navigation.navigate('Orders');
 
   // OrdersAndSubscriptions has no route param to pre-select its internal
   // Subscriptions segment, so this lands on the same screen as "Track Order"
   // and the customer flips the in-screen toggle themselves.
-  const handleSubscription = () => navigation.navigate('MainTabs', { screen: 'Orders' });
+  const handleSubscription = () => navigation.navigate('Orders');
 
   const handlePayments = () => navigation.navigate('PaymentMethods');
 

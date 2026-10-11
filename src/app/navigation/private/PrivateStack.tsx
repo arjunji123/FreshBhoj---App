@@ -2,6 +2,8 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { PrivateStackParamList } from '../navigation.types';
 import { BottomTabNavigator } from './BottomTabNavigator';
+import Search from '@features/search/screens/Search';
+import OrdersAndSubscriptions from '@features/orders/screens/OrdersAndSubscriptions';
 
 // Discovery
 import MealDetail from '@features/meals/screens/MealDetail';
@@ -66,6 +68,19 @@ export function PrivateTabs() {
       }}
     >
       <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+      <Stack.Screen
+        name="Search"
+        component={Search}
+        options={{
+          presentation: 'transparentModal',
+          // The screen runs its own open/close animation; a native fade on top
+          // of it leaves the overlay blended with the screen underneath.
+          animation: 'none',
+          headerShown: false,
+          contentStyle: { backgroundColor: 'transparent' },
+        }}
+      />
+      <Stack.Screen name="Orders" component={OrdersAndSubscriptions} options={{ animation: 'slide_from_right' }} />
 
       <Stack.Screen name="MealDetail" component={MealDetail} />
       <Stack.Screen name="KitchenProfile" component={KitchenProfile} />

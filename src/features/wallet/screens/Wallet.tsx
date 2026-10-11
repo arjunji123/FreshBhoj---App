@@ -1,7 +1,11 @@
 import React, { useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowDownToLine, CircleAlert, CircleCheckBig, Clock, Plus, Wallet as WalletIcon } from 'lucide-react-native';
+import { ArrowDownToLine, CircleAlert, CircleCheckBig, Clock, Plus } from 'lucide-react-native';
+import Animated from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
+import { WalletIcon } from '@components/icons';
+import { IconBadge } from '@features/profile/components/ProfileBlocks';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { ApiError } from '@api';
 import {
@@ -114,9 +118,10 @@ const Wallet = () => {
         ) : summary.isLoading || !summary.data ? (
           <Skeleton height={140} radius={theme.radius.card} />
         ) : (
-          <Card padding="lg" elevation="sm" style={styles.balanceCard}>
+          <Animated.View entering={enterRise(0)}>
+          <Card padding="lg" elevation="md" style={styles.balanceCard}>
             <View style={styles.balanceIcon}>
-              <WalletIcon size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
+              <IconBadge icon={WalletIcon} size={48} />
             </View>
             <Text style={[theme.text.caption, styles.balanceLabel]}>FRESHBHOJ BALANCE</Text>
             <Text style={theme.text.h1}>{formatCurrency(summary.data.balanceRs)}</Text>
@@ -139,19 +144,20 @@ const Wallet = () => {
               />
             </View>
           </Card>
+          </Animated.View>
         )}
 
         {summary.data ? (
-          <View style={styles.statsRow}>
-            <Card padding="md" elevation="xs" style={styles.statCard}>
+          <Animated.View entering={enterRise(1)} style={styles.statsRow}>
+            <Card padding="md" elevation="sm" style={styles.statCard}>
               <Text style={theme.text.h3}>{formatCurrency(summary.data.totalCreditsRs)}</Text>
               <Text style={[theme.text.caption, styles.statLabel]}>Total credits</Text>
             </Card>
-            <Card padding="md" elevation="xs" style={styles.statCard}>
+            <Card padding="md" elevation="sm" style={styles.statCard}>
               <Text style={theme.text.h3}>{formatCurrency(summary.data.thisMonthSpentRs)}</Text>
               <Text style={[theme.text.caption, styles.statLabel]}>This month spent</Text>
             </Card>
-          </View>
+          </Animated.View>
         ) : null}
 
         {pendingWithdrawals.length > 0 ? (
@@ -186,7 +192,7 @@ const Wallet = () => {
           </View>
         ) : filteredItems.length === 0 ? (
           <EmptyState
-            icon={<WalletIcon size={32} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+            icon={<WalletIcon size={44} color={theme.colors.primary[600]} />}
             title="No transactions yet"
             description="Top-ups and payments will show up here."
           />
@@ -415,12 +421,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
   },
   balanceIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: theme.colors.primary[50],
-    alignItems: 'center',
-    justifyContent: 'center',
     marginBottom: theme.spacing.sm,
   },
   balanceLabel: {

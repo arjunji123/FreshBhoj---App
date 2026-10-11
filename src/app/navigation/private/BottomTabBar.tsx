@@ -1,29 +1,32 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Home, Play, Receipt, Search, User } from 'lucide-react-native';
+import { FeedPlayIcon, HomeTabIcon, ProfileTabIcon } from '@components/icons';
 import Animated, {
   Easing,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import AppGradient from '@components/AppGradient';
-import { useActiveOrders } from '@features/orders/hooks/useOrders';
 import { useTheme } from '@app/theme/useTheme';
+import {
+  TAB_BAR_HEIGHT,
+  TAB_BAR_TOGGLE,
+  useTabBarBottomGap,
+  useTabBarVisibility,
+} from './tabBarVisibility';
 
-type IconProps = { color: string; size: number; strokeWidth: number };
+type TabIconComponent = React.FC<{ size?: number; color?: string; active?: boolean }>;
 
-const TABS: Record<string, { label: string; Icon: React.FC<IconProps> }> = {
-  Home: { label: 'Home', Icon: Home },
-  Search: { label: 'Search', Icon: Search },
-  Orders: { label: 'Orders', Icon: Receipt },
-  Profile: { label: 'Profile', Icon: User },
+const TABS: Record<string, { label: string; Icon: TabIconComponent }> = {
+  Home: { label: 'Home', Icon: HomeTabIcon },
+  Profile: { label: 'Profile', Icon: ProfileTabIcon },
 };
 
-const BAR_HEIGHT = 64;
-const SIDE_GUTTER = 14;
+const BAR_WIDTH = 264;
+/** Extra slide distance so the raised Feed button clears the screen edge too. */
+const HIDE_OVERSHOOT = 40;
 const INDICATOR_INSET = 6;
 const SLIDE = { duration: 260, easing: Easing.out(Easing.cubic) } as const;
 
@@ -37,8 +40,10 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   const styles = useMemo(() => createStyles(theme), [theme]);
   const ACTIVE_COLOR = theme.colors.primary[600];
   const INACTIVE_COLOR = theme.colors.neutral[400];
-  const insets = useSafeAreaInsets();
-  const { data: activeOrders } = useActiveOrders();
+  const bottomGap = useTabBarBottomGap();
+  const hidden = useTabBarVisibility((s) => s.hidden);
+  const setHidden = useTabBarVisibility((s) => s.setHidden);
+  const hideProgress = useSharedValue(0);
 
   const [rowWidth, setRowWidth] = useState(0);
   const slotWidth = rowWidth / state.routes.length;
@@ -57,6 +62,21 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
     visible.value = withTiming(hasIndicator ? 1 : 0, { duration: 180 });
   }, [state.index, slotWidth, hasIndicator, x, visible]);
 
+  // Always reveal the bar when the active tab changes.
+  useEffect(() => {
+    setHidden(false);
+  }, [state.index, setHidden]);
+
+  useEffect(() => {
+    hideProgress.value = withTiming(hidden ? 1 : 0, TAB_BAR_TOGGLE);
+  }, [hidden, hideProgress]);
+
+  const shift = TAB_BAR_HEIGHT + bottomGap + HIDE_OVERSHOOT;
+  const containerAnimStyle = useAnimatedStyle(() => ({
+    opacity: 1 - hideProgress.value,
+    transform: [{ translateY: hideProgress.value * shift }],
+  }));
+
   const indicatorStyle = useAnimatedStyle(() => ({
     opacity: visible.value,
     transform: [{ translateX: x.value }],
@@ -65,7 +85,10 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   const onRowLayout = (e: LayoutChangeEvent) => setRowWidth(e.nativeEvent.layout.width);
 
   return (
-    <View style={[styles.container, { paddingBottom: Math.max(insets.bottom, 16) }]}>
+    <Animated.View
+      pointerEvents={hidden ? 'none' : 'box-none'}
+      style={[styles.container, { paddingBottom: bottomGap }, containerAnimStyle]}
+    >
       <View style={styles.bar}>
         <View style={styles.tabRow} onLayout={onRowLayout}>
           {slotWidth > 0 ? (
@@ -110,22 +133,23 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
                       direction="diagonal"
                       style={styles.feedButton}
                     >
-                      <Play
-                        size={22}
-                        color={theme.colors.text.inverse}
-                        fill={theme.colors.text.inverse}
-                        strokeWidth={0}
+                      <AppGradient
+                        colors={['rgba(255,255,255,0.55)', 'rgba(255,255,255,0)']}
+                        direction="vertical"
+                        style={styles.feedGloss}
                       />
+                      <FeedPlayIcon size={34} color={theme.colors.palette.white} />
                     </AppGradient>
                   </View>
                   <Text
                     style={[
                       styles.label,
                       styles.feedLabel,
+                      isFocused ? styles.labelActive : null,
                       { color: isFocused ? ACTIVE_COLOR : INACTIVE_COLOR },
                     ]}
                   >
-                    Feed
+                    Reels
                   </Text>
                 </Pressable>
               );
@@ -136,7 +160,6 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
 
             const { Icon } = tab;
             const color = isFocused ? ACTIVE_COLOR : INACTIVE_COLOR;
-            const badgeCount = route.name === 'Orders' ? activeOrders?.length ?? 0 : 0;
 
             return (
               <Pressable
@@ -147,23 +170,18 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
                 accessibilityLabel={tab.label}
                 accessibilityState={{ selected: isFocused }}
               >
-                <View>
-                  <Icon size={22} color={color} strokeWidth={isFocused ? 2.4 : 2} />
-                  {badgeCount > 0 ? (
-                    <View style={styles.badge}>
-                      <Text style={styles.badgeText}>{badgeCount > 9 ? '9+' : badgeCount}</Text>
-                    </View>
-                  ) : null}
-                </View>
-                <Text style={[styles.label, isFocused ? styles.labelActive : null, { color }]}>
-                  {tab.label}
-                </Text>
+                <Icon size={24} color={color} active={isFocused} />
+                {isFocused ? (
+                  <Text style={[styles.label, styles.labelActive, { color }]} numberOfLines={1}>
+                    {tab.label}
+                  </Text>
+                ) : null}
               </Pressable>
             );
           })}
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 };
 
@@ -171,12 +189,15 @@ export default BottomTabBar;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
-    backgroundColor: theme.colors.surface.page,
-    paddingHorizontal: SIDE_GUTTER,
-    paddingTop: theme.spacing.sm,
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    alignItems: 'center',
   },
   bar: {
-    height: BAR_HEIGHT,
+    width: BAR_WIDTH,
+    height: TAB_BAR_HEIGHT,
     borderRadius: 32,
     backgroundColor: theme.colors.surface.raised,
     borderWidth: StyleSheet.hairlineWidth,
@@ -192,63 +213,62 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     position: 'absolute',
     top: 8,
     bottom: 8,
-    borderRadius: 24,
+    borderRadius: 22,
     backgroundColor: theme.colors.surface.brandWash,
   },
   tabItem: {
     flex: 1,
     height: '100%',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 3,
+    gap: 6,
   },
   label: {
     ...theme.text.caption,
-    fontSize: 10,
-    letterSpacing: 0.2,
+    fontSize: 12,
+    letterSpacing: 0.1,
   },
   labelActive: {
     fontWeight: '700',
   },
-  feedLabel: {
-    marginTop: -5,
-  },
   feedOuter: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    position: 'absolute',
+    top: -34,
+    alignSelf: 'center',
+    width: 68,
+    height: 68,
+    borderRadius: 26,
     backgroundColor: theme.colors.surface.raised,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: -34,
     ...theme.elevation.sm,
   },
   feedButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+    width: 58,
+    height: 58,
+    borderRadius: 21,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.22)',
     justifyContent: 'center',
     alignItems: 'center',
-    ...theme.elevation.primary,
+    shadowColor: theme.colors.primary[700],
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  badge: {
+  feedGloss: {
     position: 'absolute',
-    top: -6,
-    right: -10,
-    minWidth: 17,
-    height: 17,
-    paddingHorizontal: 4,
-    borderRadius: 9,
-    backgroundColor: theme.colors.primary[600],
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: theme.colors.surface.raised,
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '52%',
   },
-  badgeText: {
-    ...theme.text.caption,
-    fontSize: 9,
-    lineHeight: 12,
-    color: theme.colors.text.inverse,
+  feedLabel: {
+    position: 'absolute',
+    bottom: 7,
+    alignSelf: 'center',
   },
 });

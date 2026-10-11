@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
-import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Image, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { Clock, MapPin } from 'lucide-react-native';
+import PressableScale from '@animations/PressableScale';
+import { theme as staticTheme } from '@app/theme/index';
 import { formatCurrency } from '@utils/format';
 import type { KitchenCard as KitchenCardType } from '@api/types';
 import { VerifiedBadge } from './ui/Badge';
@@ -20,6 +22,9 @@ interface KitchenCardProps {
  * Curated-kitchen card. The Verified badge is deliberately the loudest thing
  * after the name — it is the trust signal the whole product is built on.
  */
+/** Text over photography stays white in both themes. */
+const ON_PHOTO = staticTheme.colors.neutral[0];
+
 const KitchenCard: React.FC<KitchenCardProps> = ({
   kitchen,
   onPress,
@@ -32,16 +37,13 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
   const image = kitchen.signatureDish?.image ?? kitchen.coverImage;
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
+      haptic={false}
+      scaleTo={0.975}
       accessibilityRole="button"
       accessibilityLabel={kitchen.name}
-      style={({ pressed }) => [
-        styles.card,
-        isRail ? styles.cardRail : styles.cardFull,
-        pressed ? styles.pressed : null,
-        style,
-      ]}
+      style={[styles.card, isRail ? styles.cardRail : styles.cardFull, style]}
     >
       <View style={[styles.imageWrap, isRail ? styles.imageRail : styles.imageFull]}>
         {image ? (
@@ -55,6 +57,14 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
           colors={theme.colors.overlay.imageFade}
           style={StyleSheet.absoluteFillObject}
         />
+
+        <View style={styles.topPills}>
+          <RatingPill value={kitchen.rating} count={kitchen.ratingCount} variant="solid" />
+          <View style={styles.timePill}>
+            <Clock size={11} color={ON_PHOTO} strokeWidth={2.4} />
+            <Text style={styles.timeText}>{kitchen.prepTimeMins} min</Text>
+          </View>
+        </View>
 
         {!kitchen.isOpenNow ? (
           <View style={styles.closedOverlay}>
@@ -92,11 +102,6 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
         ) : null}
 
         <View style={styles.metaRow}>
-          <RatingPill value={kitchen.rating} count={kitchen.ratingCount} />
-          <View style={styles.metaItem}>
-            <Clock size={12} color={theme.colors.text.tertiary} strokeWidth={2.2} />
-            <Text style={[theme.text.caption, styles.metaText]}>{kitchen.prepTimeMins} min</Text>
-          </View>
           {kitchen.locality ? (
             <View style={styles.metaItem}>
               <MapPin size={12} color={theme.colors.text.tertiary} strokeWidth={2.2} />
@@ -107,7 +112,7 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
           ) : null}
         </View>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 };
 
@@ -116,25 +121,47 @@ export default KitchenCard;
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     backgroundColor: theme.colors.surface.raised,
-    borderRadius: theme.radius.card,
+    borderRadius: theme.radius.xxl,
     overflow: 'hidden',
-    ...theme.elevation.sm,
+    ...theme.elevation.md,
   },
   cardRail: {
-    width: 230,
+    width: 248,
   },
   cardFull: {
     width: '100%',
   },
-  pressed: {
-    opacity: 0.94,
-    transform: [{ scale: 0.99 }],
+  topPills: {
+    position: 'absolute',
+    top: theme.spacing.sm,
+    left: theme.spacing.sm,
+    right: theme.spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.overlay.scrimSoft,
+    borderWidth: 1,
+    borderColor: theme.colors.overlay.glass,
+  },
+  timeText: {
+    ...theme.text.caption,
+    fontSize: 10,
+    lineHeight: 13,
+    color: ON_PHOTO,
   },
   imageWrap: {
     width: '100%',
     backgroundColor: theme.colors.neutral[100],
   },
-  imageRail: { height: 132 },
+  imageRail: { height: 150 },
   imageFull: { height: 168 },
   image: {
     width: '100%',
@@ -151,7 +178,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   closedText: {
     ...theme.text.label,
-    color: theme.colors.text.inverse,
+    color: ON_PHOTO,
   },
   dishStrip: {
     position: 'absolute',
@@ -160,7 +187,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     bottom: theme.spacing.md,
   },
   dishLabel: {
-    color: 'rgba(255,255,255,0.75)',
+    color: ON_PHOTO,
+    opacity: 0.8,
     fontSize: 9,
     letterSpacing: 0.8,
   },
@@ -172,10 +200,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   dishName: {
     flex: 1,
-    color: theme.colors.text.inverse,
+    color: ON_PHOTO,
   },
   dishPrice: {
-    color: theme.colors.text.inverse,
+    color: ON_PHOTO,
   },
   body: {
     padding: theme.spacing.md,

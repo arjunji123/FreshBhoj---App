@@ -12,9 +12,10 @@ import { theme as staticTheme } from '@app/theme/index';
 import { useTheme } from '@app/theme/useTheme';
 import { Skeleton } from '@components/ui';
 import PressableScale from '@animations/PressableScale';
-import { enterPop } from '@animations/motion';
+import { enterRise } from '@animations/motion';
 import type { GoalTag, GoalTagOption } from '@api/types';
 import { HOME_COPY } from '../home.constants';
+import HomeSectionHeader from './HomeSectionHeader';
 
 interface GoalFilterRowProps {
   options: GoalTagOption[];
@@ -45,7 +46,7 @@ const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onTogg
       <View style={styles.container}>
         <View style={styles.row}>
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} width={104} height={46} radius={staticTheme.radius.pill} />
+            <Skeleton key={index} width={112} height={48} radius={staticTheme.radius.pill} />
           ))}
         </View>
       </View>
@@ -56,7 +57,7 @@ const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onTogg
 
   return (
     <View style={styles.container}>
-      <Text style={[theme.text.h3, styles.title]}>{HOME_COPY.goalTitle}</Text>
+      <HomeSectionHeader title={HOME_COPY.goalTitle} subtitle={HOME_COPY.goalSubtitle} />
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -67,7 +68,7 @@ const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onTogg
           const isSelected = selected.includes(option.key);
 
           return (
-            <Animated.View key={option.key} entering={enterPop(index)}>
+            <Animated.View key={option.key} entering={enterRise(index)}>
               <PressableScale
                 onPress={() => onToggle(option.key)}
                 scaleTo={0.93}
@@ -104,23 +105,19 @@ export default GoalFilterRow;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
-    marginTop: theme.spacing.lg,
-  },
-  title: {
-    color: theme.colors.text.primary,
-    paddingHorizontal: theme.layout.screenPadding,
-    marginBottom: theme.spacing.sm,
+    marginTop: theme.spacing.xl,
   },
   row: {
     flexDirection: 'row',
     gap: theme.spacing.sm,
     paddingHorizontal: theme.layout.screenPadding,
+    paddingBottom: theme.spacing.sm,
   },
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.sm,
-    paddingVertical: 7,
+    paddingVertical: 8,
     paddingLeft: 7,
     paddingRight: theme.spacing.md,
     borderRadius: theme.radius.pill,
@@ -129,11 +126,12 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   chipIdle: {
     backgroundColor: theme.colors.surface.raised,
     borderColor: theme.colors.overlay.primaryBorder,
-    ...theme.elevation.xs,
+    ...theme.elevation.sm,
   },
   chipSelected: {
     backgroundColor: theme.colors.primary[600],
     borderColor: theme.colors.primary[600],
+    ...theme.elevation.primary,
   },
   iconWrap: {
     width: 30,

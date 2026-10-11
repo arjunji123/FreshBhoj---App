@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { ArrowLeft } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import PressableScale from '@animations/PressableScale';
 import { useTheme } from "@app/theme/useTheme";
 
 export interface AppBarProps {
@@ -43,25 +44,23 @@ const AppBar: React.FC<AppBarProps> = ({
       <View style={styles.row}>
         <View style={styles.side}>
           {onBack ? (
-            <Pressable
+            <PressableScale
               onPress={onBack}
+              haptic={false}
+              scaleTo={0.92}
               accessibilityRole="button"
               accessibilityLabel="Go back"
               hitSlop={theme.layout.hitSlop}
-              style={({ pressed }) => [
-                styles.iconButton,
-                isTransparent ? styles.iconButtonFloating : null,
-                pressed ? styles.pressed : null,
-              ]}
+              style={[styles.iconButton, isTransparent ? styles.iconButtonFloating : null]}
             >
               <ArrowLeft size={20} color={theme.colors.text.primary} strokeWidth={2.5} />
-            </Pressable>
+            </PressableScale>
           ) : null}
         </View>
 
         <View style={[styles.titleWrap, centerTitle ? styles.titleCenter : styles.titleLeft]}>
           {title ? (
-            <Text style={theme.text.h3} numberOfLines={1}>
+            <Text style={[theme.text.h3, styles.title]} numberOfLines={1}>
               {title}
             </Text>
           ) : null}
@@ -91,19 +90,17 @@ export const AppBarAction: React.FC<{
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
+      haptic={false}
+      scaleTo={0.92}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
       hitSlop={theme.layout.hitSlop}
-      style={({ pressed }) => [
-        styles.iconButton,
-        floating ? styles.iconButtonFloating : null,
-        pressed ? styles.pressed : null,
-      ]}
+      style={[styles.iconButton, floating ? styles.iconButtonFloating : null]}
     >
       {children}
-    </Pressable>
+    </PressableScale>
   );
 };
 
@@ -135,6 +132,9 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.sm,
   },
+  title: {
+    color: theme.colors.text.primary,
+  },
   titleWrap: {
     flex: 1,
   },
@@ -148,17 +148,15 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   iconButton: {
     width: 40,
     height: 40,
-    borderRadius: 20,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: theme.colors.surface.raised,
+    borderWidth: 1,
+    borderColor: theme.colors.borders.subtle,
   },
   iconButtonFloating: {
-    backgroundColor: theme.colors.surface.base,
+    borderWidth: 0,
     ...theme.elevation.sm,
-  },
-  pressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.94 }],
   },
 });

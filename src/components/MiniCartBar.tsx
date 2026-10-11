@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ChevronRight, ShoppingBag } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,11 +8,19 @@ import { formatCurrency } from '@utils/format';
 import { useCart } from '@features/cart/hooks/useCart';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { getActiveRouteNames, navigationRef } from '@app/navigation/navigationRef';
+import {
+  TAB_BAR_HEIGHT,
+  TAB_BAR_TOGGLE,
+  useTabBarBottomGap,
+  useTabBarVisibility,
+} from '@app/navigation/private/tabBarVisibility';
 import AppGradient from './AppGradient';
 import { useTheme } from "@app/theme/useTheme";
 
 const GAP_ABOVE_BAR = staticTheme.spacing.md;
 const BAR_HEIGHT = 52;
+// Clears the raised Feed button that overhangs the top of the tab pill.
+const TAB_BAR_ABOVE_GAP = 40;
 
 /** Extra bottom padding a scrollable screen should add so its own content
  * never sits behind the floating cart bar when the cart has items. */
@@ -43,6 +52,24 @@ const MiniCartBar = () => {
   const isGuest = useAuthStore((s) => s.isGuest);
   const { data: cart } = useCart();
   const [routeNames, setRouteNames] = useState<string[]>([]);
+  const tabBarGap = useTabBarBottomGap();
+  const tabBarHidden = useTabBarVisibility((s) => s.hidden);
+  const follow = useSharedValue(0);
+
+  // Bottom tabs are only on screen when the focused route sits inside them.
+  const isOnTabScreen = routeNames[0] === 'MainTabs';
+  // Distance the cart bar drops when the tab bar slides away: the pill's
+  // height plus the gap that separates the two.
+  const dropDistance = TAB_BAR_HEIGHT + TAB_BAR_ABOVE_GAP;
+  const collapsed = isOnTabScreen && tabBarHidden;
+
+  useEffect(() => {
+    follow.value = withTiming(collapsed ? 1 : 0, TAB_BAR_TOGGLE);
+  }, [collapsed, follow]);
+
+  const followStyle = useAnimatedStyle(() => ({
+    transform: [{ translateY: follow.value * dropDistance }],
+  }));
 
   useEffect(() => {
     const sync = () => {
@@ -56,17 +83,19 @@ const MiniCartBar = () => {
   if ((!isAuthenticated && !isGuest) || !cart || cart.isEmpty) return null;
   if (routeNames.some((name) => HIDDEN_ROUTES.has(name))) return null;
 
-  // Bottom tabs are only on screen when the focused route sits inside them.
-  const isOnTabScreen = routeNames[0] === 'MainTabs';
+  // On tab screens the floating pill sits at `tabBarGap` from the bottom; the
+  // cart bar rests above it and glides down to the pill's slot when it hides.
   const safeBottom = Math.max(insets.bottom, 24);
-  const bottom = (isOnTabScreen ? theme.layout.tabBarHeight + safeBottom : safeBottom) + GAP_ABOVE_BAR;
+  const bottom = isOnTabScreen
+    ? tabBarGap + TAB_BAR_HEIGHT + TAB_BAR_ABOVE_GAP
+    : safeBottom + GAP_ABOVE_BAR;
 
   return (
+    <Animated.View style={[styles.wrap, { bottom }, isOnTabScreen ? followStyle : null]}>
     <Pressable
       onPress={() => navigationRef.isReady() && navigationRef.navigate('Cart')}
       accessibilityRole="button"
       accessibilityLabel={`View cart, ${cart.itemCount} items`}
-      style={[styles.wrap, { bottom }]}
     >
       <AppGradient
         colors={theme.colors.gradients.brand}
@@ -86,6 +115,7 @@ const MiniCartBar = () => {
         </View>
       </AppGradient>
     </Pressable>
+    </Animated.View>
   );
 };
 

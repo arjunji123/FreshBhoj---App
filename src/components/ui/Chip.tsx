@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
-import { Pressable, ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { ScrollView, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import AppGradient from '@components/AppGradient';
+import PressableScale from '@animations/PressableScale';
 import { useTheme } from "@app/theme/useTheme";
 
 export interface ChipProps {
@@ -37,11 +38,12 @@ export const Chip: React.FC<ChipProps> = ({ label, selected = false, onPress, ic
 
   if (selected) {
     return (
-      <Pressable
+      <PressableScale
         onPress={onPress}
+        scaleTo={0.93}
         accessibilityRole="button"
         accessibilityState={{ selected }}
-        style={({ pressed }) => [pressed ? styles.pressed : null, style]}
+        style={style}
       >
         <AppGradient
           colors={theme.colors.gradients.brand}
@@ -51,24 +53,20 @@ export const Chip: React.FC<ChipProps> = ({ label, selected = false, onPress, ic
         >
           {content}
         </AppGradient>
-      </Pressable>
+      </PressableScale>
     );
   }
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
+      scaleTo={0.93}
       accessibilityRole="button"
       accessibilityState={{ selected }}
-      style={({ pressed }) => [
-        styles.chip,
-        styles.chipIdle,
-        pressed ? styles.pressed : null,
-        style,
-      ]}
+      style={[styles.chip, styles.chipIdle, style]}
     >
       {content}
-    </Pressable>
+    </PressableScale>
   );
 };
 

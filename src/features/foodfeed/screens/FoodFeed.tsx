@@ -117,7 +117,7 @@ const FoodFeed = () => {
       {query.isLoading ? (
         <View style={styles.listPadding}>
           {[0, 1].map((i) => (
-            <Skeleton key={i} height={420} radius={0} style={styles.skeletonCard} />
+            <Skeleton key={i} height={420} radius={theme.radius.card} style={styles.skeletonCard} />
           ))}
         </View>
       ) : query.isError && !reels.length ? (
@@ -242,6 +242,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     gap: theme.spacing.lg,
   },
   skeletonCard: {
-    marginHorizontal: 0,
+    marginHorizontal: theme.layout.screenPadding,
+    width: 'auto',
   },
 });

@@ -15,6 +15,7 @@ import {
   type SheetHandle,
 } from '@components/ui';
 import MealCard from '@components/MealCard';
+import { EmptySearch } from '@components/illustrations';
 import type { MainTabParamList, PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages, useMealFeed, useToggleFavorite } from '@features/meals/hooks/useMeals';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
@@ -221,9 +222,7 @@ const Search = () => {
                   />
                 ) : (
                   <EmptyState
-                    icon={
-                      <SearchIcon size={34} color={theme.colors.primary[600]} strokeWidth={1.8} />
-                    }
+                    illustration={<EmptySearch size={190} />}
                     title={debounced ? `No results for "${debounced}"` : 'No meals match these filters'}
                     description="Try a different dish, or drop one of the filters."
                     actionLabel={hasActiveFilters ? 'Clear filters' : undefined}

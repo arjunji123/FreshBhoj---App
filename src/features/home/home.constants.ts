@@ -21,8 +21,23 @@ export const HOME_COPY = {
   categories: 'What are you eating?',
   feedTitle: 'Meals for you',
   feedSubtitle: 'Matched to your goals and your area',
-  reelsTitle: 'Food Feed',
+  reelsTitle: 'Watch & Order',
   reelsSubtitle: 'See it being made, then order it',
+  goalTitle: 'Eat your goal',
+  goalSubtitle: 'Pick what you are training for',
+  healthyTitle: 'Healthy picks for you',
+  healthySubtitle: 'High protein, lighter on calories',
+  bannerTitle: 'Eat fresh. Feel great.',
   emptyFeedTitle: 'No meals match those filters',
   emptyFeedBody: 'Try clearing a filter or two — we add new kitchens every week.',
 } as const;
+
+/** Rotating one-liners for the Home health banner. */
+export const HEALTH_TIPS: string[] = [
+  'Protein at every meal keeps you full for longer.',
+  'Half your plate vegetables makes every meal lighter.',
+  'Drink a glass of water before you eat.',
+  'Home-cooked meals usually carry less oil and salt.',
+  'Eat slowly - your body needs 20 minutes to feel full.',
+  'Swap fried snacks for roasted or sprouted ones.',
+];

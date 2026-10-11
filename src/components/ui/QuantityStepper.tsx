@@ -1,7 +1,9 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Minus, Plus, Trash2 } from 'lucide-react-native';
 import { useTheme } from "@app/theme/useTheme";
+import Animated, { ZoomIn } from 'react-native-reanimated';
+import PressableScale from '@animations/PressableScale';
 
 interface QuantityStepperProps {
   value: number;
@@ -44,17 +46,17 @@ const QuantityStepper: React.FC<QuantityStepperProps> = ({
 
   return (
     <View style={[styles.container, style]}>
-      <Pressable
+      <PressableScale
         onPress={decrement}
         disabled={disabled || (atMin && !showRemoveAtMin)}
         hitSlop={theme.layout.hitSlop}
         accessibilityRole="button"
         accessibilityLabel={atMin && showRemoveAtMin ? 'Remove item' : 'Decrease quantity'}
-        style={({ pressed }) => [
+        scaleTo={0.86}
+        style={[
           styles.button,
           { width: dimension, height: dimension },
           atMin && !showRemoveAtMin ? styles.buttonDisabled : null,
-          pressed ? styles.pressed : null,
         ]}
       >
         {atMin && showRemoveAtMin ? (
@@ -66,26 +68,32 @@ const QuantityStepper: React.FC<QuantityStepperProps> = ({
             strokeWidth={2.8}
           />
         )}
-      </Pressable>
+      </PressableScale>
 
-      <Text style={[size === 'sm' ? theme.text.label : theme.text.h4, styles.value]}>{value}</Text>
+      <Animated.Text
+        key={value}
+        entering={ZoomIn.duration(160)}
+        style={[size === 'sm' ? theme.text.label : theme.text.h4, styles.value]}
+      >
+        {value}
+      </Animated.Text>
 
-      <Pressable
+      <PressableScale
         onPress={() => !disabled && !atMax && onChange(value + 1)}
         disabled={disabled || atMax}
         hitSlop={theme.layout.hitSlop}
         accessibilityRole="button"
         accessibilityLabel="Increase quantity"
-        style={({ pressed }) => [
+        scaleTo={0.86}
+        style={[
           styles.button,
           styles.buttonPrimary,
           { width: dimension, height: dimension },
           atMax ? styles.buttonDisabled : null,
-          pressed ? styles.pressed : null,
         ]}
       >
         <Plus size={iconSize} color={theme.colors.text.inverse} strokeWidth={2.8} />
-      </Pressable>
+      </PressableScale>
     </View>
   );
 };
@@ -114,9 +122,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     minWidth: 22,
     textAlign: 'center',
     color: theme.colors.text.primary,
-  },
-  pressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.9 }],
   },
 });

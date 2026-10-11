@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
-import { Image, Pressable, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
-import { Clock, Heart } from 'lucide-react-native';
+import { Image, StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import { Clock, Heart, Leaf } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
 import type { MealCard as MealCardType } from '@api/types';
 import AddToCartControl from './AddToCartControl';
@@ -8,7 +8,9 @@ import Badge from './ui/Badge';
 import FoodTypeDot from './ui/FoodTypeDot';
 import NutritionBadgeRow from './ui/NutritionBadge';
 import { GOAL_TAG_LABELS } from '@utils/labels';
+import { isHealthyMeal } from '@utils/health';
 import { useTheme } from "@app/theme/useTheme";
+import PressableScale from '@animations/PressableScale';
 
 interface MealCardProps {
   meal: MealCardType;
@@ -46,16 +48,13 @@ const MealCard: React.FC<MealCardProps> = ({
   const unavailable = !meal.isOrderable;
 
   return (
-    <Pressable
+    <PressableScale
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={meal.name}
-      style={({ pressed }) => [
-        styles.card,
-        isCompact ? styles.cardCompact : null,
-        pressed ? styles.pressed : null,
-        style,
-      ]}
+      scaleTo={0.975}
+      haptic={false}
+      style={[styles.card, isCompact ? styles.cardCompact : null, style]}
     >
       <View style={[styles.imageWrap, isCompact ? styles.imageWrapCompact : null]}>
         {meal.image ? (
@@ -70,12 +69,20 @@ const MealCard: React.FC<MealCardProps> = ({
           </View>
         ) : null}
 
+        {isHealthyMeal(meal) && !meal.isBestseller ? (
+          <View style={styles.healthyTag}>
+            <Leaf size={9} color={theme.colors.text.inverse} strokeWidth={2.6} />
+            <Text style={styles.bestsellerText}>HEALTHY</Text>
+          </View>
+        ) : null}
+
         {onToggleFavorite ? (
-          <Pressable
+          <PressableScale
             onPress={onToggleFavorite}
             hitSlop={theme.layout.hitSlop}
             accessibilityRole="button"
             accessibilityLabel={meal.isFavorite ? 'Remove from favourites' : 'Add to favourites'}
+            scaleTo={0.8}
             style={styles.favoriteButton}
           >
             <Heart
@@ -84,7 +91,7 @@ const MealCard: React.FC<MealCardProps> = ({
               fill={meal.isFavorite ? theme.colors.primary[600] : 'transparent'}
               strokeWidth={2.2}
             />
-          </Pressable>
+          </PressableScale>
         ) : null}
 
         {unavailable ? (
@@ -150,7 +157,7 @@ const MealCard: React.FC<MealCardProps> = ({
           ) : null}
         </View>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 };
 
@@ -207,6 +214,18 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     lineHeight: 11,
     letterSpacing: 0.4,
     color: theme.colors.text.inverse,
+  },
+  healthyTag: {
+    position: 'absolute',
+    top: 6,
+    left: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+    backgroundColor: theme.colors.primary[600],
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: theme.radius.sm,
   },
   favoriteButton: {
     position: 'absolute',

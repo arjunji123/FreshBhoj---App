@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Receipt } from 'lucide-react-native';
+import { EmptyOrders } from '@components/illustrations';
 import { ApiError } from '@api';
 import type { OrderCard, OrderStatus } from '@api/types';
 import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
@@ -104,7 +104,7 @@ const OrderHistory = () => {
           }
           ListEmptyComponent={
             <EmptyState
-              icon={<Receipt size={36} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+              illustration={<EmptyOrders size={190} />}
               title={filterIndex === 0 ? 'No orders yet' : `No ${filter.label.toLowerCase()} orders`}
               description={
                 filterIndex === 0

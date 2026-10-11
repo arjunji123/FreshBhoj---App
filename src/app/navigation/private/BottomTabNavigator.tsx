@@ -14,7 +14,7 @@ export function BottomTabNavigator() {
   return (
     <Tab.Navigator
       tabBar={(props) => <BottomTabBar {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{ headerShown: false, animation: 'fade' }}
     >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Search" component={Search} />

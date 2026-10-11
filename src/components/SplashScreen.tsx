@@ -10,6 +10,7 @@ import Animated, {
 // components
 import AppGradient from './AppGradient';
 import { useTheme } from "@app/theme/useTheme";
+import { SplashPlate } from '@components/illustrations';
 
 const { width } = Dimensions.get('window');
 
@@ -40,11 +41,11 @@ const SplashScreen = () => {
     <AppGradient style={styles.container}>
 
       {/* --- Top Left Plate --- */}
-      <Animated.Image
-        source={require('@assets/images/plate_top.png')}
-        style={[styles.topLeftImage, topImageStyle]}
-        resizeMode="contain"
-      />
+      <Animated.View style={[styles.topLeftImage, topImageStyle]} pointerEvents="none">
+        <View style={styles.tiltTop}>
+          <SplashPlate size={width * 0.8} />
+        </View>
+      </Animated.View>
 
       {/* --- Center Content --- */}
       <View style={styles.centerContent}>
@@ -88,11 +89,11 @@ const SplashScreen = () => {
       </View>
 
       {/* --- Bottom Right Plate --- */}
-      <Animated.Image
-        source={require('@assets/images/plate_bottom.png')}
-        style={[styles.bottomRightImage, bottomImageStyle]}
-        resizeMode="contain"
-      />
+      <Animated.View style={[styles.bottomRightImage, bottomImageStyle]} pointerEvents="none">
+        <View style={styles.tiltBottom}>
+          <SplashPlate size={width * 0.8} />
+        </View>
+      </Animated.View>
 
     </AppGradient>
   );
@@ -120,6 +121,9 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: width * 0.8,
     height: width * 0.8,
   },
+
+  tiltTop: { transform: [{ rotate: '-14deg' }] },
+  tiltBottom: { transform: [{ rotate: '166deg' }] },
 
   // --- Center Text Block ---
   centerContent: {

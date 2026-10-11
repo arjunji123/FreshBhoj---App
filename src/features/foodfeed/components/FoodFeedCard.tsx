@@ -9,7 +9,6 @@ import type { Reel } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const MEDIA_HEIGHT = SCREEN_WIDTH * 1.25;
 
 const FOOD_TYPE_LABEL: Record<string, string> = {
   VEG: 'Veg',
@@ -140,12 +139,16 @@ const FoodFeedCard: React.FC<FoodFeedCardProps> = ({
 export default FoodFeedCard;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+  // Cards float inside the screen gutter with rounded corners instead of
+  // running edge to edge; media height follows the (narrower) card width.
   wrapper: {
     marginBottom: theme.spacing.lg,
+    paddingHorizontal: theme.layout.screenPadding,
   },
   media: {
     width: '100%',
-    height: MEDIA_HEIGHT,
+    height: (SCREEN_WIDTH - theme.layout.screenPadding * 2) * 1.25,
+    borderRadius: theme.radius.card,
     backgroundColor: theme.colors.neutral[900],
     overflow: 'hidden',
   },
@@ -204,7 +207,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.lg,
-    paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.sm,
   },
   statButton: {

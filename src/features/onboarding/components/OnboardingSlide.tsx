@@ -1,4 +1,4 @@
-import { View, Text, Image, Dimensions, StyleSheet } from 'react-native'
+import { View, Text, Dimensions, StyleSheet } from 'react-native'
 import React, { useEffect } from 'react'
 import { colors, spacing, theme, typography } from '@app/theme';
 import OnboardingPaginator from './OnboardingPaginator';
@@ -7,6 +7,7 @@ import { ArrowRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import GradientText from '@components/GradientText';
+import type { IllustrationProps } from '@components/illustrations';
 
 export interface OnboardingItem {
     id: string;
@@ -14,7 +15,8 @@ export interface OnboardingItem {
     title: string;
     subtitle?: string;
     description: string;
-    image: any;
+    /** Animated vector hero for this slide (see src/components/illustrations). */
+    Illustration: React.ComponentType<IllustrationProps>;
     variant: 'plate' | 'reel' | 'thali';
     ctaLabel: string;
 }
@@ -30,6 +32,9 @@ interface OnboardingSlideProps {
 }
 
 const { width, height } = Dimensions.get('window');
+
+/** Hero illustration edge; the old PNGs were 400dp, capped to the screen width here. */
+const HERO_SIZE = Math.min(400, width * 0.96);
 
 const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive, onPrimaryPress, onBackPress }: OnboardingSlideProps) => {
     const isMiddleSlide = item.variant === 'reel';
@@ -64,29 +69,10 @@ const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive,
     };
 
     const renderHeroVisual = () => {
-        if (item.variant === 'reel') {
-            return (
-                <View style={styles.reelCardShell}>
-                    <Image source={item.image} style={styles.reelImage} resizeMode="cover" />
-                </View>
-            );
-        }
-
+        const { Illustration } = item;
         return (
             <View style={styles.plateVisualWrap}>
-                {/* <Image source={require('@assets/images/plate_bottom.png')} style={styles.platePattern} resizeMode="contain" /> */}
-                <Image source={item.image} style={styles.mainPlateImage} resizeMode="contain" />
-
-                {item.variant === 'plate' ? (
-                    <>
-                        {/* <View style={styles.floatChipRight}>
-                            <Sparkles size={16} color={colors.gradient2} />
-                        </View>
-                        <View style={styles.floatChipLeft}>
-                            <Utensils size={14} color={'#087F78'} />
-                        </View> */}
-                    </>
-                ) : null}
+                <Illustration size={HERO_SIZE} tone="onBrand" />
             </View>
         );
     };
@@ -173,20 +159,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
-    platePattern: {
-        width: 320,
-        height: 320,
-        opacity: 0.16,
-        position: 'absolute',
-    },
-    mainPlateImage: {
-        width: 400,
-        height: 400,
-    },
-    mainThaliImage: {
-        width: 472,
-        height: 472,
-    },
     heroTitle: {
         position: 'absolute',
         right: 0,
@@ -220,21 +192,6 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255,255,255,0.9)',
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    reelCardShell: {
-        width: '100%',
-        height: 500,
-        marginTop: 100,
-        borderRadius: spacing.borderRadius.xxxl,
-        overflow: 'hidden',
-        zIndex: 0,
-    },
-    reelImage: {
-        width: '100%',
-        height: '100%',
-        paddingTop: spacing.paddings.sm,
-        marginTop: spacing.paddings.xl,
-        // ...StyleSheet.absoluteFill,
     },
     textContainer: {
         width: '100%',

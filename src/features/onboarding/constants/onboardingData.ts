@@ -1,3 +1,4 @@
+import { HealthyBowl, ReelPhone, Thali } from '@components/illustrations';
 import type { OnboardingItem } from '../components/OnboardingSlide';
 
 export const onboardingData: OnboardingItem[] = [
@@ -7,7 +8,7 @@ export const onboardingData: OnboardingItem[] = [
         title: 'Healthy food,',
         subtitle: 'always.',
         description: 'Every kitchen is verified in person — fresh, home-style meals only. No junk, no shortcuts, no exceptions.',
-        image: require('@assets/images/banana_leaf_thali.png'),
+        Illustration: HealthyBowl,
         variant: 'plate',
         ctaLabel: 'Next',
     },
@@ -17,7 +18,7 @@ export const onboardingData: OnboardingItem[] = [
         title: 'Watch it cook,',
         subtitle: 'then order.',
         description: 'Scroll real kitchen reels in the Food Feed, see your meal being prepared, and order it in one tap.',
-        image: require('@assets/images/reel_image.png'),
+        Illustration: ReelPhone,
         variant: 'reel',
         ctaLabel: 'Next',
     },
@@ -27,7 +28,7 @@ export const onboardingData: OnboardingItem[] = [
         title: 'Subscribe &',
         subtitle: 'never worry.',
         description: 'Fixed breakfast, lunch or dinner plans — know what\'s cooking daily, pay once, and swap meals anytime.',
-        image: require('@assets/images/thali_group.png'),
+        Illustration: Thali,
         variant: 'thali',
         ctaLabel: 'Get Started',
     },

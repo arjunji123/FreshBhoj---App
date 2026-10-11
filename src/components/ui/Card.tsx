@@ -1,7 +1,8 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { theme as staticTheme } from '@app/theme/index';
 import { useTheme } from "@app/theme/useTheme";
+import PressableScale from '@animations/PressableScale';
 
 type Elevation = 'none' | 'xs' | 'sm' | 'md' | 'lg';
 type Padding = 'none' | 'sm' | 'md' | 'lg';
@@ -66,13 +67,9 @@ const Card: React.FC<CardProps> = ({
   }
 
   return (
-    <Pressable
-      testID={testID}
-      onPress={onPress}
-      style={({ pressed }) => [cardStyle, pressed ? styles.pressed : null]}
-    >
+    <PressableScale testID={testID} onPress={onPress} scaleTo={0.975} haptic={false} style={cardStyle}>
       {children}
-    </Pressable>
+    </PressableScale>
   );
 };
 

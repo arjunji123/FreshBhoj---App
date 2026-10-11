@@ -1,10 +1,14 @@
 import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
+import Animated from 'react-native-reanimated';
 import Button from './Button';
+import { enterRise, enterPop } from '@animations/motion';
 import { useTheme } from "@app/theme/useTheme";
 
 interface EmptyStateProps {
   icon?: React.ReactNode;
+  /** Full illustration (e.g. <EmptyCart />). Replaces the icon circle when given. */
+  illustration?: React.ReactNode;
   title: string;
   description?: string;
   actionLabel?: string;
@@ -20,6 +24,7 @@ interface EmptyStateProps {
  */
 const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
+  illustration,
   title,
   description,
   actionLabel,
@@ -33,11 +38,19 @@ const EmptyState: React.FC<EmptyStateProps> = ({
       return (
     (
       <View style={[styles.container, style]}>
-        {icon ? <View style={styles.iconCircle}>{icon}</View> : null}
+        {illustration ? (
+          <Animated.View entering={enterPop(0)} style={styles.illustration}>
+            {illustration}
+          </Animated.View>
+        ) : icon ? (
+          <Animated.View entering={enterPop(0)} style={styles.iconCircle}>
+            {icon}
+          </Animated.View>
+        ) : null}
 
-        <Text style={[theme.text.h2, styles.title]} numberOfLines={2}>
+        <Animated.Text entering={enterRise(1)} style={[theme.text.h2, styles.title]} numberOfLines={2}>
           {title}
-        </Text>
+        </Animated.Text>
 
         {description ? (
           <Text style={[theme.text.body, styles.description]}>{description}</Text>
@@ -78,6 +91,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.xl,
+  },
+  illustration: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: theme.spacing.md,
   },
   title: {
     textAlign: 'center',

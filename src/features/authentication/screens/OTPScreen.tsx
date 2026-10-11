@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import { Dimensions, Image, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { StatusBar } from 'react-native';
 import { ApiError } from '@api';
@@ -12,6 +12,7 @@ import { useSendKitchenOtp, useVerifyKitchenOtp } from '@features/kitchenPartner
 import { useAuthStore } from '../store/authStore';
 import type { PublicNavigation } from '@app/navigation/navigation.types';
 import { useTheme } from "@app/theme/useTheme";
+import { LoginHero } from '@components/illustrations';
 
 const { width, height } = Dimensions.get('window');
 
@@ -102,11 +103,9 @@ const OTPScreen = () => {
       />
 
       <View style={styles.imageContainer} pointerEvents="none">
-        <Image
-          source={require('@assets/images/otpscreen.png')}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <View style={styles.image}>
+          <LoginHero size={Math.min(width * AUTH_VALUES.otpImageWidthRatio, height * AUTH_VALUES.otpImageHeightRatio)} />
+        </View>
       </View>
     </View>
   );
@@ -131,5 +130,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
   },
 });

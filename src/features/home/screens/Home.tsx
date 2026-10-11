@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated, { useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
+import { enterRise } from '@animations/motion';
 import { UtensilsCrossed } from 'lucide-react-native';
 import MealCard from '@components/MealCard';
 import SectionHeader from '@components/SectionHeader';
@@ -31,8 +32,11 @@ import KitchenStoriesRail from '../components/KitchenStoriesRail';
 import TrendingNearYou from '../components/TrendingNearYou';
 import FeaturedKitchens from '../components/FeaturedKitchens';
 import ReelsRail from '../components/ReelsRail';
+import HealthBanner from '../components/HealthBanner';
+import HealthyPicks from '../components/HealthyPicks';
 import ActiveOrderStrip from '../components/ActiveOrderStrip';
 import { HOME_COPY } from '../home.constants';
+import { useHealthyPicks } from '../hooks/useHealthyPicks';
 import { useCuisines, useHomeFeed, useKitchenStories } from '../hooks/useHomeFeed';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -80,6 +84,8 @@ const Home = () => {
     () => ({ goalTags: goalTags.length ? goalTags : undefined, cuisine }),
     [goalTags, cuisine],
   );
+
+  const healthyPicks = useHealthyPicks();
 
   const feedQuery = useMealFeed(feedFilters);
   const meals = flattenPages(feedQuery.data?.pages);
@@ -136,10 +142,11 @@ const Home = () => {
   const handleRefresh = useCallback(() => {
     homeQuery.refetch();
     feedQuery.refetch();
+    healthyPicks.refetch();
     storiesQuery.refetch();
     recentKitchensQuery.refetch();
     if (hasLocation) nearbyQuery.refetch();
-  }, [homeQuery, feedQuery, storiesQuery, recentKitchensQuery, nearbyQuery, hasLocation]);
+  }, [homeQuery, feedQuery, healthyPicks, storiesQuery, recentKitchensQuery, nearbyQuery, hasLocation]);
 
   const home = homeQuery.data;
   const activeOrder = home?.activeOrders?.[0];
@@ -181,11 +188,13 @@ const Home = () => {
           }
         }}
       >
+        <Animated.View entering={enterRise(0)}>
         <KitchenStoriesRail
           groups={storiesQuery.data ?? []}
           onPressGroup={handlePressStoryGroup}
           isLoading={storiesQuery.isLoading}
         />
+        </Animated.View>
 
         {activeOrder ? (
           <ActiveOrderStrip
@@ -194,28 +203,63 @@ const Home = () => {
           />
         ) : null}
 
+        <Animated.View entering={enterRise(1)}>
+        <ReelsRail
+          reels={home?.trendingReels ?? []}
+          isLoading={homeQuery.isLoading}
+          onPressReel={(reel) => navigation.navigate('ReelViewer', { reelId: reel.id })}
+          onOrderReel={(reel) =>
+            reel.meal
+              ? navigation.navigate('MealDetail', { mealId: reel.meal.id, mealName: reel.meal.name })
+              : navigation.navigate('ReelViewer', { reelId: reel.id })
+          }
+          onSeeAll={() => navigation.navigate('MainTabs', { screen: 'FoodFeed' })}
+        />
+        </Animated.View>
+
+        <Animated.View entering={enterRise(2)}>
+          <HealthBanner />
+        </Animated.View>
+
+        <Animated.View entering={enterRise(3)}>
         <GoalFilterRow
           options={home?.goalTags ?? []}
           selected={goalTags}
           onToggle={handleToggleGoal}
           isLoading={homeQuery.isLoading}
         />
+        </Animated.View>
 
+        <Animated.View entering={enterRise(4)}>
+          <HealthyPicks
+            meals={healthyPicks.meals}
+            isLoading={healthyPicks.isLoading}
+            onPressMeal={openMeal}
+            onAddMeal={(meal) => addToCart(meal)}
+            getQuantity={getQuantity}
+            onChangeQuantity={changeQuantity}
+            onToggleFavorite={(meal) => toggleFavorite.mutate(meal.id)}
+          />
+        </Animated.View>
+
+        <Animated.View entering={enterRise(5)}>
         <CuisineCarousel
           cuisines={cuisinesQuery.data ?? []}
           onSelect={handleSelectCuisine}
           isLoading={cuisinesQuery.isLoading}
         />
+        </Animated.View>
 
-        <View style={styles.categorySection}>
+        <Animated.View entering={enterRise(6)} style={styles.categorySection}>
           <SectionHeader title={HOME_COPY.categories} />
           <CategoryGrid
             categories={home?.categories ?? []}
             onSelect={handleSelectCategory}
             isLoading={homeQuery.isLoading}
           />
-        </View>
+        </Animated.View>
 
+        <Animated.View entering={enterRise(7)}>
         <FeaturedKitchens
           kitchens={recentKitchens}
           isLoading={recentKitchensQuery.isLoading}
@@ -226,13 +270,9 @@ const Home = () => {
             })
           }
         />
+        </Animated.View>
 
-        <ReelsRail
-          reels={home?.trendingReels ?? []}
-          onPressReel={(reel) => navigation.navigate('ReelViewer', { reelId: reel.id })}
-          onSeeAll={() => navigation.navigate('MainTabs', { screen: 'FoodFeed' })}
-        />
-
+        <Animated.View entering={enterRise(8)}>
         <TrendingNearYou
           meals={nearbyMeals}
           isLoading={hasLocation && nearbyQuery.isLoading}
@@ -244,6 +284,7 @@ const Home = () => {
           onToggleFavorite={(meal) => toggleFavorite.mutate(meal.id)}
           onSetLocation={() => navigation.navigate('Addresses')}
         />
+        </Animated.View>
 
         <View style={styles.feedSection}>
           <SectionHeader title={isFiltered ? 'Matching meals' : HOME_COPY.feedTitle} />
@@ -272,9 +313,9 @@ const Home = () => {
             />
           ) : (
             <View style={styles.feedList}>
-              {meals.map((meal) => (
+              {meals.map((meal, index) => (
+                <Animated.View key={meal.id} entering={enterRise(index)}>
                 <MealCard
-                  key={meal.id}
                   meal={meal}
                   onPress={() => openMeal(meal)}
                   onAdd={() => addToCart(meal)}
@@ -282,6 +323,7 @@ const Home = () => {
                   onChangeQuantity={(next) => changeQuantity(meal.id, next)}
                   onToggleFavorite={() => toggleFavorite.mutate(meal.id)}
                 />
+                </Animated.View>
               ))}
 
               {feedQuery.isFetchingNextPage ? <MealCardSkeleton /> : null}

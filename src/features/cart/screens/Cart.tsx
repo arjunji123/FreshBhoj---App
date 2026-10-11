@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AlertCircle, ShoppingBag, Trash2 } from 'lucide-react-native';
+import { AlertCircle, Trash2 } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import {
@@ -17,6 +17,7 @@ import {
 } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
+import { EmptyCart } from '@components/illustrations';
 import CartItemRow from '../components/CartItemRow';
 import CouponPanel from '../components/CouponPanel';
 import CoinsPanel from '../components/CoinsPanel';
@@ -74,7 +75,7 @@ const Cart = () => {
       <View style={styles.screen}>
         <AppBar title="Your Cart" onBack={navigation.goBack} />
         <EmptyState
-          icon={<ShoppingBag size={38} color={theme.colors.primary[600]} strokeWidth={1.8} />}
+          illustration={<EmptyCart size={190} />}
           title="Your cart is empty"
           description="Fresh, macro-counted meals from verified kitchens near you are a tap away."
           actionLabel="Browse meals"

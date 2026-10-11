@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import AppGradient from '@components/AppGradient';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { useTheme } from "@app/theme/useTheme";
+import { LoginHero } from '@components/illustrations';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,11 +17,9 @@ const LoginTopSection = () => {
             style={styles.topSection}
         >
             <View style={styles.imageContainer}>
-                <Image
-                    source={require('@assets/images/loginimage.png')}
-                    style={styles.plateImage}
-                    resizeMode="cover"
-                />
+                <View style={styles.plateImage}>
+                    <LoginHero size={width * AUTH_VALUES.loginPlateImageWidthRatio} tone="onBrand" />
+                </View>
             </View>
             {/* Positioned independent of the image's own flow/size so it always
                 clears the white sheet's overlap, regardless of device aspect ratio. */}

@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
-  Pressable,
   StyleProp,
   StyleSheet,
   Text,
@@ -12,6 +11,7 @@ import {
 import { theme as staticTheme } from '@app/theme/index';
 import { useTheme } from '@app/theme/useTheme';
 import AppGradient from '@components/AppGradient';
+import PressableScale from '@animations/PressableScale';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'outline' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
@@ -84,13 +84,15 @@ const Button: React.FC<ButtonProps> = ({
   );
 
   return (
-    <Pressable
+    <PressableScale
       testID={testID}
       onPress={onPress}
       disabled={isDisabled}
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
-      style={({ pressed }) => [
+      scaleTo={0.96}
+      haptic={variant !== 'ghost'}
+      style={[
         styles.base,
         {
           height: dimensions.height,
@@ -100,7 +102,6 @@ const Button: React.FC<ButtonProps> = ({
         fullWidth ? styles.fullWidth : styles.autoWidth,
         variantStyles[variant],
         variant === 'primary' && !isDisabled ? staticTheme.elevation.primary : null,
-        pressed && !isDisabled ? styles.pressed : null,
         isDisabled ? styles.disabled : null,
         style,
       ]}
@@ -114,7 +115,7 @@ const Button: React.FC<ButtonProps> = ({
         />
       ) : null}
       {label}
-    </Pressable>
+    </PressableScale>
   );
 };
 
@@ -158,10 +159,6 @@ const styles = StyleSheet.create({
   },
   iconLeft: { marginRight: staticTheme.spacing.sm },
   iconRight: { marginLeft: staticTheme.spacing.sm },
-  pressed: {
-    opacity: 0.9,
-    transform: [{ scale: 0.985 }],
-  },
   disabled: {
     opacity: 0.45,
   },

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { User, Mail } from 'lucide-react-native';
-import { theme as staticTheme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 
 interface PersonalDetailsFormProps {
     fullName: string;
@@ -10,18 +10,16 @@ interface PersonalDetailsFormProps {
     onEmailChange: (text: string) => void;
 }
 
-const INPUT_ICON_COLOR = '#94A3B8';
-const INPUT_BG = '#F8FAFC';
-const INPUT_BORDER = '#DCE6E7';
-const LABEL_COLOR = '#334155';
-const PLACEHOLDER_COLOR = '#94A3B8';
-
 const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
     fullName,
     email,
     onFullNameChange,
     onEmailChange,
 }) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
+    const INPUT_ICON_COLOR = theme.colors.text.tertiary;
+    const PLACEHOLDER_COLOR = theme.colors.text.tertiary;
     return (
         <View style={styles.container}>
             {/* Full Name Field */}
@@ -35,6 +33,7 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                         style={styles.input}
                         placeholder="e.g. Rahul Sharma"
                         placeholderTextColor={PLACEHOLDER_COLOR}
+                        selectionColor={theme.colors.primary[600]}
                         value={fullName}
                         onChangeText={onFullNameChange}
                         autoCapitalize="words"
@@ -54,6 +53,7 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
                         style={styles.input}
                         placeholder="rahul@freshbhoj.com"
                         placeholderTextColor={PLACEHOLDER_COLOR}
+                        selectionColor={theme.colors.primary[600]}
                         value={email}
                         onChangeText={onEmailChange}
                         keyboardType="email-address"
@@ -66,7 +66,7 @@ const PersonalDetailsForm: React.FC<PersonalDetailsFormProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: {
         gap: 32,
         paddingHorizontal: 28,
@@ -75,16 +75,16 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     label: {
-        fontSize: staticTheme.typography.fontSizes.sm,
-        fontFamily: staticTheme.typography.fontFamilies.plusJakartaSans.semibold,
-        color: LABEL_COLOR,
+        fontSize: theme.typography.fontSizes.sm,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
+        color: theme.colors.text.secondary,
         paddingLeft: 4,
     },
     inputWrapper: {
         height: 56,
-        backgroundColor: INPUT_BG,
+        backgroundColor: theme.colors.surface.base,
         borderWidth: 1,
-        borderColor: INPUT_BORDER,
+        borderColor: theme.colors.borders.subtle,
         borderRadius: 24,
         flexDirection: 'row',
         alignItems: 'center',
@@ -99,9 +99,9 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         height: '100%',
-        fontSize: staticTheme.typography.fontSizes.md,
-        fontFamily: staticTheme.typography.fontFamilies.plusJakartaSans.regular,
-        color: '#0D1B1E',
+        fontSize: theme.typography.fontSizes.md,
+        fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
+        color: theme.colors.text.primary,
         padding: 0,
     },
 });

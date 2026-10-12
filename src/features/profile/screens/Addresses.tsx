@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
-import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { AlertCircle, Briefcase, Check, Home, MapPin, Plus } from 'lucide-react-native';
 import Animated from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
 import { AddressIcon, PencilIcon, TrashIcon } from '@components/icons';
-import { AppBar, Badge, Button, Card, EmptyState, Skeleton } from '@components/ui';
+import { AppBar, Badge, Button, Card, EmptyState, Skeleton, Text } from '@components/ui';
 import { ApiError } from '@api';
 import type { Address } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
@@ -219,7 +219,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 13,
-    backgroundColor: theme.colors.surface.brandWash,
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },

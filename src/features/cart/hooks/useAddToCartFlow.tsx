@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useState } from 'react';
-import { Alert, Modal, StyleSheet, Text, View } from 'react-native';
+import { Alert, Modal, StyleSheet, View } from 'react-native';
 import { ShoppingBag } from 'lucide-react-native';
 import { useTheme } from '@app/theme/useTheme';
-import { Button } from '@components/ui';
+import { Button, Text } from '@components/ui';
 import type { MealCard } from '@api/types';
 import type { AddCartItemInput } from '@api/endpoints/cart.api';
 import type { GuestCartMealInput } from '../store/guestCartStore';
@@ -92,7 +92,7 @@ export function useAddToCartFlow() {
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <View style={styles.iconWrap}>
-            <ShoppingBag size={24} color={theme.colors.primary[600]} strokeWidth={2.2} />
+            <ShoppingBag size={24} color={theme.colors.text.brand} strokeWidth={2.2} />
           </View>
 
           <Text style={[theme.text.h3, styles.title]}>Start a new cart?</Text>
@@ -151,7 +151,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.lg,

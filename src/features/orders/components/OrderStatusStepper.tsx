@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@components/ui';
 import { Bike, Check, ChefHat, PartyPopper, Receipt } from 'lucide-react-native';
 import { formatTime } from '@utils/format';
 import type { OrderStatus, TrackingStep } from '@api/types';
@@ -131,7 +132,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingBottom: theme.spacing.xl,
   },
   labelCurrent: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   labelIdle: {
     color: theme.colors.text.tertiary,

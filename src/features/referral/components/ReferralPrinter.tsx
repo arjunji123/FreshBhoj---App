@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View, Text } from 'react-native';
 import Animated, {
   Easing,
   FadeIn,
@@ -246,7 +246,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderBottomLeftRadius: theme.radius.control,
     borderBottomRightRadius: theme.radius.control,
     borderWidth: 1,
-    borderColor: theme.colors.borders.subtle,
+    borderColor: '#DCE6E7',
     borderTopWidth: 0,
     alignItems: 'center',
     paddingTop: theme.spacing.lg,
@@ -255,13 +255,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     ...theme.elevation.sm,
   },
   paperEyebrow: {
-    color: theme.colors.text.tertiary,
+    color: '#5F7377',
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
     fontSize: theme.typography.fontSizes.xs,
     letterSpacing: 1.2,
   },
   paperCode: {
-    color: theme.colors.text.primary,
+    color: '#0D1B1E',
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.extrabold,
     fontSize: theme.typography.fontSizes.display3,
     letterSpacing: 4,
@@ -271,11 +271,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: '70%',
     borderBottomWidth: 1,
     borderStyle: 'dashed',
-    borderColor: theme.colors.borders.subtle,
+    borderColor: '#DCE6E7',
     marginVertical: theme.spacing.sm,
   },
   paperFootnote: {
-    color: theme.colors.text.secondary,
+    color: '#47595D',
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
     fontSize: theme.typography.fontSizes.xs,
     textAlign: 'center',

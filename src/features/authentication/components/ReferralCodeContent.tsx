@@ -68,6 +68,7 @@ const ReferralCodeContent: React.FC<ReferralCodeContentProps> = ({ onSaveAndCont
         }}
         placeholder="Enter code"
         placeholderTextColor={theme.colors.text.tertiary}
+        selectionColor={theme.colors.primary[600]}
         autoCapitalize="characters"
         autoCorrect={false}
         maxLength={12}
@@ -111,7 +112,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.md,
@@ -184,7 +185,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 36,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.lg,

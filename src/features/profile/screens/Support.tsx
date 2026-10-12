@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   CalendarClock,
@@ -12,7 +12,7 @@ import {
   Receipt,
   Send,
 } from 'lucide-react-native';
-import { AppBar, Card, Divider, Skeleton } from '@components/ui';
+import { AppBar, Card, Divider, Skeleton, Text } from '@components/ui';
 import AppGradient from '@components/AppGradient';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useFaqs, useSupportContact } from '../hooks/useProfile';
@@ -286,7 +286,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   quickTileLabel: {
     color: theme.colors.text.secondary,
@@ -370,10 +370,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: theme.radius.card,
   },
   contactAccent: {
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.brand.accentSubtle,
   },
   contactBrand: {
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   contactDisabled: {
     opacity: 0.5,

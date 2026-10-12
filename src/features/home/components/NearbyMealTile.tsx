@@ -31,7 +31,7 @@ interface NearbyMealTileProps {
  * other meal card in the app needs.
  */
 /** Text over photography stays white in both themes. */
-const ON_PHOTO = staticTheme.colors.neutral[0];
+const ON_PHOTO = staticTheme.colors.palette.white;
 
 const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
   meal,
@@ -109,7 +109,7 @@ const NearbyMealTile: React.FC<NearbyMealTileProps> = ({
         </Text>
 
         <View style={styles.footer}>
-          <Text style={theme.text.numeric}>{formatCurrency(meal.price)}</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.numeric]}>{formatCurrency(meal.price)}</Text>
           <AddToCartControl
             quantity={onChangeQuantity ? quantity : 0}
             onAdd={onAdd}

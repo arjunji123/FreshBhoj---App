@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { AlertCircle } from 'lucide-react-native';
@@ -8,17 +8,7 @@ import { KitchenIcon, TrashIcon } from '@components/icons';
 import { IconBadge } from '@features/profile/components/ProfileBlocks';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
-import {
-  AppBar,
-  AppBarAction,
-  Button,
-  Card,
-  Divider,
-  EmptyState,
-  Skeleton,
-  StickyBar,
-  VerifiedBadge,
-} from '@components/ui';
+import { AppBar, AppBarAction, Button, Card, Divider, EmptyState, Skeleton, StickyBar, VerifiedBadge, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { EmptyCart } from '@components/illustrations';
@@ -241,7 +231,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     gap: theme.spacing.sm,
   },
   prepTime: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   prepPill: {
     paddingHorizontal: theme.spacing.md,

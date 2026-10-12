@@ -1,12 +1,12 @@
 import React, { useState, useMemo } from 'react';
-import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
 import { EmptyOrders } from '@components/illustrations';
 import { ApiError } from '@api';
 import type { OrderCard, OrderStatus } from '@api/types';
-import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
+import { Chip, ChipRow, EmptyState, Screen, Skeleton, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import OrderHistoryCard from '../components/OrderHistoryCard';
 import { useOrderHistory, useReorder } from '../hooks/useOrders';
@@ -100,8 +100,8 @@ const OrderHistory = () => {
             <RefreshControl
               refreshing={query.isRefetching && !query.isLoading}
               onRefresh={query.refetch}
-              tintColor={theme.colors.primary[600]}
-              colors={[theme.colors.primary[600]]}
+              tintColor={theme.colors.text.brand}
+              colors={[theme.colors.text.brand]}
             />
           }
           ListEmptyComponent={

@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import {
   CreditCard,
@@ -13,7 +13,7 @@ import { useTheme } from '@app/theme/useTheme';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type { CardBrand, SavedCard, UpiPaymentMethod } from '@api/types';
-import { AppBar, AppBarAction, Button, Card, Divider, Input, ListItem, Screen, Sheet, Skeleton } from '@components/ui';
+import { AppBar, AppBarAction, Button, Card, Divider, Input, ListItem, Screen, Sheet, Skeleton, Text } from '@components/ui';
 import type { SheetHandle } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useWalletSummary } from '@features/wallet/hooks/useWallet';

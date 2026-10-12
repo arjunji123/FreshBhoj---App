@@ -1,18 +1,10 @@
 import React, { useMemo } from 'react';
-import { Alert, Image, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { MapPin, MessageSquare, RotateCcw } from 'lucide-react-native';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { ApiError } from '@api';
-import {
-  AppBar,
-  Badge,
-  Button,
-  Card,
-  Divider,
-  Skeleton,
-  SummaryRow,
-} from '@components/ui';
+import { AppBar, Badge, Button, Card, Divider, Skeleton, SummaryRow, Text } from '@components/ui';
 import { StarRow } from '@components/ui/Rating';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import OrderStatusStepper from '../components/OrderStatusStepper';
@@ -185,7 +177,7 @@ const OrderDetail = () => {
         <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERED TO</Text>
         <Card padding="md" elevation="xs">
           <View style={styles.addressRow}>
-            <MapPin size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+            <MapPin size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
             <Text style={[theme.text.body, styles.addressText]}>
               {[address?.line1, address?.line2, address?.locality, address?.city, address?.pincode]
                 .filter(Boolean)
@@ -248,7 +240,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   ratePrompt: {
     alignItems: 'center',
     marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   ratePromptBody: {
     color: theme.colors.text.secondary,
@@ -293,7 +285,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
   },
   itemImageFallback: {
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   itemText: {
     flex: 1,

@@ -76,7 +76,7 @@ const OrderChat = () => {
     if (messagesQuery.isLoading) {
       return (
         <View style={styles.center}>
-          <ActivityIndicator color={theme.colors.primary[600]} />
+          <ActivityIndicator color={theme.colors.text.brand} />
         </View>
       );
     }

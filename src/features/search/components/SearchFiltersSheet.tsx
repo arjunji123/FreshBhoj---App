@@ -204,7 +204,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   const styles = useMemo(() => createStyles(theme), [theme]);
   return (
     <View style={styles.section}>
-      <Text style={[theme.text.h4, styles.sectionTitle]}>{title}</Text>
+      <Text style={[{ color: theme.colors.text.primary }, theme.text.h4, styles.sectionTitle]}>{title}</Text>
       {children}
     </View>
   );
@@ -229,7 +229,7 @@ const FilterPill: React.FC<{
       <Text
         style={[
           theme.text.label,
-          { color: selected ? theme.colors.primary[700] : theme.colors.text.secondary },
+          { color: selected ? theme.colors.text.brand : theme.colors.text.secondary },
         ]}
       >
         {label}

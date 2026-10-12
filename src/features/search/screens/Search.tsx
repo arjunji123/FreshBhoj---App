@@ -335,7 +335,7 @@ const Search = () => {
                         hitSlop={theme.layout.hitSlop}
                         accessibilityLabel="Clear category filter"
                       >
-                        <X size={16} color={theme.colors.primary[700]} strokeWidth={2.4} />
+                        <X size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
                       </Pressable>
                     </View>
                   ) : null}
@@ -590,7 +590,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderColor: theme.colors.borders.brand,
   },
   categoryBannerText: {
-    color: theme.colors.primary[700],
+    color: theme.colors.text.brand,
     flex: 1,
   },
   sortRow: {

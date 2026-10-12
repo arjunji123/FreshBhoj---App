@@ -36,7 +36,7 @@ const KitchenFoodFeedSection: React.FC<KitchenFoodFeedSectionProps> = ({ media, 
     <View style={styles.container}>
       {posts.length ? (
         <View style={styles.section}>
-          <Text style={[theme.text.h4, styles.sectionTitle]}>Posts</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h4, styles.sectionTitle]}>Posts</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -70,7 +70,7 @@ const KitchenFoodFeedSection: React.FC<KitchenFoodFeedSectionProps> = ({ media, 
 
       {reels.length ? (
         <View style={styles.section}>
-          <Text style={[theme.text.h4, styles.sectionTitle]}>Reels</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h4, styles.sectionTitle]}>Reels</Text>
           <View style={styles.reelsGrid}>
             {reels.map((item) => (
               <Pressable

@@ -51,7 +51,7 @@ const HealthBanner: React.FC = () => {
 export default HealthBanner;
 
 /** Banner is brand-teal in both themes, so its text is always white. */
-const ON_BRAND = staticTheme.colors.neutral[0];
+const ON_BRAND = staticTheme.colors.palette.white;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   banner: {

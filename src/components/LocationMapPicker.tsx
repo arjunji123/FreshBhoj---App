@@ -6,6 +6,19 @@ import { getCurrentPosition, requestLocationPermission } from '@utils/deviceLoca
 import { reverseGeocode, type ReverseGeocodeResult } from '@utils/geocoding';
 import AppGradient from './AppGradient';
 import { useTheme } from "@app/theme/useTheme";
+import { useThemeStore } from '@app/theme/themeStore';
+
+/** Android (Google Maps) ignores `userInterfaceStyle`, so dark mode needs an explicit style. */
+const DARK_MAP_STYLE = [
+  { elementType: 'geometry', stylers: [{ color: '#152A2D' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#9DB2B5' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#091416' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2E4E52' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#C2D2D4' }] },
+  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1F3A3D' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0B2A33' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#1F3A3D' }] },
+];
 
 const DEFAULT_REGION: Region = {
   // Jaipur — the app's single-city launch fallback.
@@ -41,6 +54,7 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
 }) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
   const mapRef = useRef<MapView>(null);
   const [region, setRegion] = useState<Region>(
     initialLatitude && initialLongitude
@@ -109,6 +123,8 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         ref={mapRef}
         style={StyleSheet.absoluteFillObject}
         initialRegion={region}
+        userInterfaceStyle={isDark ? 'dark' : 'light'}
+        customMapStyle={isDark ? DARK_MAP_STYLE : undefined}
         onRegionChangeComplete={(nextRegion) => {
           setRegion(nextRegion);
           resolveAddress(nextRegion.latitude, nextRegion.longitude);
@@ -135,17 +151,17 @@ const LocationMapPicker: React.FC<LocationMapPickerProps> = ({
         style={({ pressed }) => [styles.locateButton, pressed ? styles.pressed : null]}
       >
         {isLocating ? (
-          <ActivityIndicator size="small" color={theme.colors.primary[600]} />
+          <ActivityIndicator size="small" color={theme.colors.text.brand} />
         ) : (
-          <LocateFixed size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
+          <LocateFixed size={18} color={theme.colors.text.brand} strokeWidth={2.2} />
         )}
       </Pressable>
 
       <View style={styles.addressBar}>
         {isResolving ? (
-          <ActivityIndicator size="small" color={theme.colors.primary[600]} />
+          <ActivityIndicator size="small" color={theme.colors.text.brand} />
         ) : (
-          <MapPin size={15} color={theme.colors.primary[600]} strokeWidth={2.2} />
+          <MapPin size={15} color={theme.colors.text.brand} strokeWidth={2.2} />
         )}
         <Text style={[theme.text.bodySmall, styles.addressText]} numberOfLines={2}>
           {isResolving ? 'Finding address…' : address ?? 'Move the map to set your location'}

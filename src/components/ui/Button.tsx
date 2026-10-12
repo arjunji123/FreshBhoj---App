@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { theme as staticTheme } from '@app/theme/index';
 import { useTheme } from '@app/theme/useTheme';
+import { useThemeStore } from '@app/theme/themeStore';
 import AppGradient from '@components/AppGradient';
 import PressableScale from '@animations/PressableScale';
 
@@ -59,7 +60,8 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   const theme = useTheme();
   const contentColor = useMemo(() => createContentColor(theme), [theme]);
-  const variantStyles = useMemo(() => createVariantStyles(theme), [theme]);
+  const isDark = useThemeStore((st) => st.resolvedScheme) === 'dark';
+  const variantStyles = useMemo(() => createVariantStyles(theme, isDark), [theme, isDark]);
   const isDisabled = disabled || loading;
   const dimensions = SIZES[size];
   const textVariant = size === 'sm' ? staticTheme.text.buttonSmall : staticTheme.text.button;
@@ -127,7 +129,7 @@ const createContentColor = (theme: ReturnType<typeof useTheme>): Record<ButtonVa
   danger: theme.colors.text.inverse,
 });
 
-const createVariantStyles = (theme: ReturnType<typeof useTheme>): Record<ButtonVariant, ViewStyle> => ({
+const createVariantStyles = (theme: ReturnType<typeof useTheme>, isDark: boolean): Record<ButtonVariant, ViewStyle> => ({
   primary: {},
   secondary: { backgroundColor: theme.colors.surface.brandWash },
   ghost: { backgroundColor: 'transparent' },
@@ -136,7 +138,8 @@ const createVariantStyles = (theme: ReturnType<typeof useTheme>): Record<ButtonV
     borderWidth: 1.5,
     borderColor: theme.colors.borders.subtle,
   },
-  danger: { backgroundColor: theme.colors.state.error },
+  // Dark `state.error` is a light red tuned for text; white label needs a deeper fill.
+  danger: { backgroundColor: isDark ? '#DC2626' : theme.colors.state.error },
 });
 
 export default Button;

@@ -50,7 +50,7 @@ const KitchenMenu = () => {
     <Screen background="page">
       <View style={styles.header}>
         <View>
-          <Text style={theme.text.h1}>Menu</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h1]}>Menu</Text>
           {query.data ? <Text style={styles.subtitle}>{`${query.data.length} dish${query.data.length === 1 ? '' : 'es'}`}</Text> : null}
         </View>
         <Button title="Add dish" leftIcon={<Plus size={16} color={theme.colors.palette.white} />} size="sm" fullWidth={false} onPress={() => navigation.navigate('KitchenMealForm')} />

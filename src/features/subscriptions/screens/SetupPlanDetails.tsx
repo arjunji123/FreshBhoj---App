@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { AppBar, Button, Chip, ChipRow, QuantityStepper, Screen, StickyBar } from '@components/ui';
+import { AppBar, Button, Chip, ChipRow, QuantityStepper, Screen, StickyBar, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import type { BillingCycle, DayOfWeek, FoodType, MealSlot } from '@api/types';
 import { useSetupPlanStore } from '../store/setupPlanStore';

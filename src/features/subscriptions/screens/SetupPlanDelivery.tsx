@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import dayjs from 'dayjs';
 import { MapPin, Plus } from 'lucide-react-native';
-import { AppBar, Button, Card, Chip, ChipRow, Screen, StickyBar } from '@components/ui';
+import { AppBar, Button, Card, Chip, ChipRow, Screen, StickyBar, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
 import { useSetupPlanStore } from '../store/setupPlanStore';
@@ -133,6 +133,7 @@ const SetupPlanDelivery = () => {
           onChangeText={(text) => setDelivery({ specialInstructions: text })}
           placeholder="Anything the kitchen should know? (e.g. less spicy, no onions)"
           placeholderTextColor={theme.colors.text.tertiary}
+          selectionColor={theme.colors.brand.primary}
           multiline
           maxLength={300}
           style={[theme.text.body, styles.notes]}
@@ -164,7 +165,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     color: theme.colors.text.tertiary,
   },
   link: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   addressRow: {
     flexDirection: 'row',
@@ -174,7 +175,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },

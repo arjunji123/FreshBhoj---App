@@ -120,7 +120,7 @@ const KitchenStories = () => {
     <Screen background="page">
       <View style={styles.header}>
         <View style={styles.headerText}>
-          <Text style={theme.text.h1}>Stories</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h1]}>Stories</Text>
           <Text style={styles.subtitle}>Live for 24 hours, with real engagement stats</Text>
         </View>
         <Button
@@ -335,7 +335,7 @@ const styles = StyleSheet.create({
     borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.overlay.glassStrong,
+    backgroundColor: theme.colors.overlay.scrim,
   },
   mealRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: theme.spacing.paddings.xs },
   mealText: { ...theme.text.caption, color: theme.colors.text.secondary, flex: 1 },
@@ -356,7 +356,7 @@ const styles = StyleSheet.create({
   pickText: { ...theme.text.caption, color: theme.colors.text.secondary, fontWeight: '700' as const },
   previewWrap: { width: 110, height: 140, marginBottom: theme.spacing.paddings.md },
   preview: { width: 110, height: 140, borderRadius: theme.radius.md, backgroundColor: theme.colors.surface.subtle },
-  previewVideo: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.neutral[900] },
+  previewVideo: { alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.palette.black },
   previewRemove: {
     position: 'absolute',
     top: -8,

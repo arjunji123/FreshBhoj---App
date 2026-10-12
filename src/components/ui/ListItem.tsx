@@ -84,7 +84,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: theme.radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.surface.brandWash,
   },
   iconWrapDestructive: {
     backgroundColor: theme.colors.state.errorBg,

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Coins, Wallet as WalletIcon } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
@@ -11,7 +11,7 @@ import type {
   MealSlot,
   SubscriptionQuoteInput,
 } from '@api/types';
-import { Button, Card, Divider, Screen, AppBar, Skeleton, StickyBar, SummaryRow } from '@components/ui';
+import { Button, Card, Divider, Screen, AppBar, Skeleton, StickyBar, SummaryRow, Text } from '@components/ui';
 import PaymentMethodPicker from '@features/cart/components/PaymentMethodPicker';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
@@ -228,7 +228,7 @@ const SetupPlanReview = () => {
                   value={coinsOn}
                   onValueChange={handleToggleCoins}
                   trackColor={{ false: theme.colors.neutral[200], true: theme.colors.accent[400] }}
-                  thumbColor={theme.colors.surface.base}
+                  thumbColor={theme.colors.palette.white}
                 />
               </View>
             ) : null}
@@ -300,7 +300,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: 3,
   },
   link: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   instructionsNote: {
     color: theme.colors.text.tertiary,

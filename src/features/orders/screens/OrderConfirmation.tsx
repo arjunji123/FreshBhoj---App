@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import Animated, {
   Easing,
@@ -12,7 +12,7 @@ import Animated, {
 import { Check, Clock, Receipt, X } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
 import Logo from '@components/Logo';
-import { Button, Card, Skeleton } from '@components/ui';
+import { Button, Card, Skeleton, Text } from '@components/ui';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useOrder } from '../hooks/useOrders';
 import { useTheme } from "@app/theme/useTheme";
@@ -93,7 +93,7 @@ const OrderConfirmation = () => {
               <Card padding="lg" elevation="sm" style={styles.etaCard}>
                 <Text style={[theme.text.overline, styles.etaLabel]}>ESTIMATED ARRIVAL</Text>
                 <View style={styles.etaRow}>
-                  <Clock size={26} color={theme.colors.primary[600]} strokeWidth={2.4} />
+                  <Clock size={26} color={theme.colors.text.brand} strokeWidth={2.4} />
                   <Text style={theme.text.displayMedium}>{order.eta.etaMinutes} Mins</Text>
                 </View>
               </Card>
@@ -101,7 +101,7 @@ const OrderConfirmation = () => {
               <Card padding="md" elevation="xs" style={styles.orderCard}>
                 <View style={styles.orderRow}>
                   <View style={styles.receiptIcon}>
-                    <Receipt size={17} color={theme.colors.primary[600]} strokeWidth={2.2} />
+                    <Receipt size={17} color={theme.colors.text.brand} strokeWidth={2.2} />
                   </View>
                   <View style={styles.orderText}>
                     <Text style={theme.text.h4}>Order #{order.orderNumber}</Text>
@@ -162,7 +162,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   successRing: {
     ...StyleSheet.absoluteFillObject,
     borderRadius: 60,
-    backgroundColor: theme.colors.accent[100],
+    backgroundColor: theme.colors.state.successBg,
   },
   successCircle: {
     width: 78,
@@ -218,7 +218,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },

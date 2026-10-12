@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleProp, Text, TextStyle } from 'react-native';
 import { theme as staticTheme } from '@app/theme/index';
+import { useThemeStore } from '@app/theme/themeStore';
 import GradientText from './GradientText';
 
 export type LogoSize = 'sm' | 'md' | 'lg';
@@ -23,6 +24,7 @@ const SIZES: Record<LogoSize, number> = {
 /** The FreshBhoj wordmark — the same medievalSharp treatment used on the
  * splash and login screens, reused wherever the brand mark belongs post-login. */
 const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'gradient', style }) => {
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
   const textStyle: TextStyle = {
     fontFamily: staticTheme.typography.fontFamilies.medievalSharp,
     fontSize: SIZES[size],
@@ -31,7 +33,11 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'gradient', style })
   if (variant === 'gradient') {
     return (
       <GradientText
-        colors={staticTheme.colors.gradients.brand}
+        colors={
+          isDark
+            ? [staticTheme.colors.primary[300], staticTheme.colors.primary[400], staticTheme.colors.primary[500]]
+            : staticTheme.colors.gradients.brand
+        }
         direction="diagonal"
         style={[textStyle, style]}
         numberOfLines={1}
@@ -48,7 +54,7 @@ const Logo: React.FC<LogoProps> = ({ size = 'md', variant = 'gradient', style })
     <Text
       style={[
         textStyle,
-        { color: variant === 'inverse' ? staticTheme.colors.palette.white : staticTheme.colors.primary[600] },
+        { color: variant === 'inverse' ? staticTheme.colors.palette.white : isDark ? staticTheme.colors.primary[400] : staticTheme.colors.primary[600] },
         style,
       ]}
       numberOfLines={1}

@@ -102,7 +102,7 @@ const PersonalDetails = () => {
               onPress={handleBack}
               activeOpacity={0.7}
             >
-              <ArrowLeft size={16} color="#0D1B1E" strokeWidth={2.5} />
+              <ArrowLeft size={16} color={theme.colors.text.primary} strokeWidth={2.5} />
             </TouchableOpacity>
             <Text style={styles.headerTitle}>{headerTitle}</Text>
           </View>
@@ -136,7 +136,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   sheetContainer: {
     borderTopLeftRadius: 40,
     borderTopRightRadius: 40,
-    backgroundColor: theme.colors.palette.white,
+    backgroundColor: theme.colors.surface.page,
   },
   draggableIcon: {
     display: 'none',
@@ -144,7 +144,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   pullHandle: {
     width: 48,
     height: 4,
-    backgroundColor: '#DCE6E7',
+    backgroundColor: theme.colors.borders.default,
     borderRadius: 9999,
     alignSelf: 'center',
     marginTop: 24,
@@ -163,14 +163,14 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 9999,
-    backgroundColor: '#F1F5F9',
+    backgroundColor: theme.colors.surface.subtle,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: theme.typography.fontSizes.xxl,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
-    color: '#0D1B1E',
+    color: theme.colors.text.primary,
     lineHeight: 28,
   },
 });

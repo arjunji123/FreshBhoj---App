@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Briefcase, Home, MapPin } from 'lucide-react-native';
 import { ApiError } from '@api';
 import type { AddressLabel } from '@api/types';
-import { AppBar, Button, Chip, Input, StickyBar } from '@components/ui';
+import { AppBar, Button, Chip, Input, StickyBar, Text } from '@components/ui';
 import LocationMapPicker, { type PickedLocation } from '@components/LocationMapPicker';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useAddresses, useCreateAddress, useUpdateAddress } from '../hooks/useProfile';

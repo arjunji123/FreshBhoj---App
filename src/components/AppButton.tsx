@@ -70,7 +70,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         flexDirection: 'row',
     },
     title: {
-        color: theme.colors.background,
+        color: theme.colors.text.inverse,
         fontSize: theme.typography.fontSizes.lg,
         fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
         zIndex: 1,

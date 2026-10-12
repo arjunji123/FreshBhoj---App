@@ -212,7 +212,7 @@ const KitchenProfile = () => {
 
           <View style={styles.identityText}>
             <View style={styles.nameRow}>
-              <Text style={[theme.text.h1, styles.name]} numberOfLines={2}>
+              <Text style={[{ color: theme.colors.text.primary }, theme.text.h1, styles.name]} numberOfLines={2}>
                 {kitchen.name}
               </Text>
             </View>
@@ -326,7 +326,7 @@ const KitchenProfile = () => {
                       <Text
                         style={[
                           theme.text.label,
-                          { color: isActive ? theme.colors.primary[700] : theme.colors.text.secondary },
+                          { color: isActive ? theme.colors.text.brand : theme.colors.text.secondary },
                         ]}
                       >
                         {option.label}
@@ -338,7 +338,7 @@ const KitchenProfile = () => {
 
               {menuSections.map((section) => (
                 <View key={section.title} style={styles.menuSection}>
-                  <Text style={[theme.text.h4, styles.menuSectionTitle]}>{section.title}</Text>
+                  <Text style={[{ color: theme.colors.text.primary }, theme.text.h4, styles.menuSectionTitle]}>{section.title}</Text>
                   <View style={styles.menuList}>
                     {section.items.map((meal) => (
                       <MealCard
@@ -471,7 +471,7 @@ const Stat: React.FC<{ label: string; value: string }> = ({ label, value }) => {
   return (
 (
   <View style={styles.stat}>
-    <Text style={theme.text.h3}>{value}</Text>
+    <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>{value}</Text>
     <Text style={[theme.text.caption, styles.statLabel]}>{label}</Text>
   </View>
 )
@@ -571,7 +571,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   trustCard: {
     marginHorizontal: theme.layout.screenPadding,
     marginTop: theme.spacing.lg,
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.surface.accentWash,
   },
   trustRow: {
     flexDirection: 'row',
@@ -580,7 +580,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   trustText: {
     flex: 1,
-    color: theme.colors.accent[700],
+    color: theme.colors.text.accent,
   },
   description: {
     color: theme.colors.text.secondary,

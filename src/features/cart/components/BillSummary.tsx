@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Coins, Info, Sparkles } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
-import { Card, Divider, SummaryRow } from '@components/ui';
+import { Card, Divider, SummaryRow, Text } from '@components/ui';
 import type { PriceBreakdown } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -93,20 +93,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.brand.accentSubtle,
     alignItems: 'center',
   },
   savingsText: {
-    color: theme.colors.accent[700],
+    color: theme.colors.text.accent,
   },
   freeDeliveryHint: {
     marginTop: theme.spacing.sm,
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.amber[50],
+    backgroundColor: theme.colors.state.warningBg,
     alignItems: 'center',
   },
   freeDeliveryText: {
-    color: theme.colors.amber[700],
+    color: theme.colors.state.warningBg === theme.colors.amber[50] ? theme.colors.amber[700] : theme.colors.amber[300], // light : dark
   },
 });

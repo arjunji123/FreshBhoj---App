@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { LayoutGrid, ClipboardList, UtensilsCrossed, Camera, Clapperboard, UserCircle } from 'lucide-react-native';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 
 const ICONS: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
   KitchenDashboard: LayoutGrid,
@@ -24,6 +24,8 @@ const LABELS: Record<string, string> = {
 };
 
 export default function KitchenTabBar({ state, navigation }: BottomTabBarProps) {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
 
   return (
@@ -60,7 +62,7 @@ export default function KitchenTabBar({ state, navigation }: BottomTabBarProps) 
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flexDirection: 'row',
     backgroundColor: theme.colors.surface.base,

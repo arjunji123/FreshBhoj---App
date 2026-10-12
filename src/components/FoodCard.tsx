@@ -106,7 +106,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     width: CARD_WIDTH,
     height: 250,
-    backgroundColor: theme.colors.palette.white,
+    backgroundColor: theme.colors.surface.raised,
     borderRadius: theme.spacing.borderRadius.xxl,
     overflow: 'hidden',
     ...Shadows.heavy,
@@ -145,7 +145,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     fontSize: theme.typography.fontSizes.md,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
-    color: theme.colors.palette.black,
+    color: theme.colors.text.primary,
   },
   ratingBadge: {
     backgroundColor: theme.colors.palette.success,
@@ -161,7 +161,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   restaurantText: {
     fontSize: theme.typography.fontSizes.sm,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
-    color: theme.colors.palette.gray1,
+    color: theme.colors.text.secondary,
     marginTop: 4,
   },
   priceAddRow: {

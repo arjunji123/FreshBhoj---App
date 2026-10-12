@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { formatCurrency } from '@utils/format';
-import { FoodTypeDot, QuantityStepper } from '@components/ui';
+import { FoodTypeDot, QuantityStepper, Text } from '@components/ui';
 import type { CartLine } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 

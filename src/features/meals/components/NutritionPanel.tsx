@@ -52,7 +52,7 @@ const NutritionPanel: React.FC<NutritionPanelProps> = ({ nutrition, servingSize 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={theme.text.h3}>Nutrition</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>Nutrition</Text>
         {servingSize ? (
           <Text style={[theme.text.caption, styles.serving]}>per {servingSize}</Text>
         ) : null}

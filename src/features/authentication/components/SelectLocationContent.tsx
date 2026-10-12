@@ -164,7 +164,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderColor: theme.colors.borders.brand,
   },
   currentLocationText: {
-    color: theme.colors.primary[700],
+    color: theme.colors.text.brand,
   },
   pressed: {
     opacity: 0.85,

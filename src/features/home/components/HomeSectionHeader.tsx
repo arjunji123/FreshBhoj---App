@@ -39,7 +39,7 @@ const HomeSectionHeader: React.FC<HomeSectionHeaderProps> = ({ title, subtitle, 
           style={styles.pill}
         >
           <Text style={[theme.text.label, styles.pillText]}>See all</Text>
-          <ChevronRight size={14} color={theme.colors.primary[700]} strokeWidth={2.6} />
+          <ChevronRight size={14} color={theme.colors.text.brand} strokeWidth={2.6} />
         </PressableScale>
       ) : null}
     </View>
@@ -81,6 +81,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       borderColor: theme.colors.borders.brand,
     },
     pillText: {
-      color: theme.colors.primary[700],
+      color: theme.colors.text.brand,
     },
   });

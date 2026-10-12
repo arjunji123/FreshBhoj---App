@@ -10,6 +10,7 @@ import Animated, {
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import AppGradient from '@components/AppGradient';
 import { useTheme } from '@app/theme/useTheme';
+import { useThemeStore } from '@app/theme/themeStore';
 import {
   TAB_BAR_HEIGHT,
   TAB_BAR_TOGGLE,
@@ -38,8 +39,10 @@ const SLIDE = { duration: 260, easing: Easing.out(Easing.cubic) } as const;
 const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const ACTIVE_COLOR = theme.colors.primary[600];
-  const INACTIVE_COLOR = theme.colors.neutral[400];
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
+  const ACTIVE_COLOR = theme.colors.text.brand;
+  // neutral[400] is too close to the raised dark surface to read as an icon/label.
+  const INACTIVE_COLOR = isDark ? theme.colors.neutral[600] : theme.colors.neutral[400];
   const bottomGap = useTabBarBottomGap();
   const hidden = useTabBarVisibility((s) => s.hidden);
   const setHidden = useTabBarVisibility((s) => s.setHidden);

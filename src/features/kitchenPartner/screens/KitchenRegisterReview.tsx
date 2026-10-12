@@ -41,7 +41,7 @@ const KitchenRegisterReview = () => {
   return (
     <Screen background="page">
       <View style={styles.header}>
-        <Text style={theme.text.h2}>Review & submit</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>Review & submit</Text>
         <Button title="Log out" variant="ghost" size="sm" fullWidth={false} onPress={handleLogout} />
       </View>
 

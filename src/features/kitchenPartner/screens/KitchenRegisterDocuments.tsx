@@ -145,7 +145,7 @@ const KitchenRegisterDocuments = () => {
   return (
     <Screen background="page">
       <View style={styles.header}>
-        <Text style={theme.text.h2}>Documents</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>Documents</Text>
         <Button title="Log out" variant="ghost" size="sm" fullWidth={false} onPress={handleLogout} />
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('UploadGuide')} style={styles.uploadTipsLink}>

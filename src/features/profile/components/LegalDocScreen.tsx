@@ -1,9 +1,9 @@
 import React from 'react';
-import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Share, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Share2 } from 'lucide-react-native';
 import { useTheme } from '@app/theme/useTheme';
-import { AppBar, AppBarAction, Screen } from '@components/ui';
+import { AppBar, AppBarAction, Screen, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import type { LegalDoc, LegalDocKey } from '@features/authentication/constants/legalContent';
 import { formatLegalUpdatedAt, useLegalDoc } from '@features/authentication/hooks/useLegalDoc';
@@ -92,7 +92,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       marginBottom: theme.spacing.xs,
     },
     number: {
-      color: theme.colors.primary[600],
+      color: theme.colors.text.brand,
       minWidth: 28,
     },
     heading: {

@@ -75,6 +75,7 @@ const Input: React.FC<InputProps> = ({
         <TextInput
           style={[theme.text.bodyLarge, styles.input, inputStyle]}
           placeholderTextColor={theme.colors.text.tertiary}
+          selectionColor={theme.colors.brand.primary}
           editable={editable}
           onFocus={(event) => {
             setIsFocused(true);

@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { CalendarCheck } from 'lucide-react-native';
 import { ActiveOrder } from '../active-orders.types';
 import { useTheme } from "@app/theme/useTheme";
+import { useThemeStore } from '@app/theme/themeStore';
 
 interface ActiveTiffinCardProps {
   order: ActiveOrder;
@@ -16,13 +17,22 @@ const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   paused: { bg: '#F3F4F6', text: '#6B7280' },
 };
 
+const STATUS_COLORS_DARK: Record<string, { bg: string; text: string }> = {
+  delivering_today: { bg: 'rgba(15, 157, 107, 0.18)', text: '#6EE7B7' },
+  preparing: { bg: 'rgba(255, 194, 26, 0.16)', text: '#FFD866' },
+  scheduled: { bg: 'rgba(30, 123, 216, 0.2)', text: '#6FB6FF' },
+  paused: { bg: 'rgba(255, 255, 255, 0.08)', text: '#9DB2B5' },
+};
+
 const ActiveTiffinCard: React.FC<ActiveTiffinCardProps> = ({
   order,
   onViewSchedule,
 }) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
-  const statusColor = STATUS_COLORS[order.status] ?? STATUS_COLORS.scheduled;
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
+  const statusMap = isDark ? STATUS_COLORS_DARK : STATUS_COLORS;
+  const statusColor = statusMap[order.status] ?? statusMap.scheduled;
 
   return (
     <View style={styles.card}>
@@ -35,7 +45,7 @@ const ActiveTiffinCard: React.FC<ActiveTiffinCardProps> = ({
           <View style={styles.iconBox}>
             <CalendarCheck
               size={22}
-              color={theme.colors.gradient2}
+              color={theme.colors.text.brand}
               strokeWidth={1.8}
             />
           </View>
@@ -73,7 +83,7 @@ export default ActiveTiffinCard;
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   card: {
     marginHorizontal: 20,
-    backgroundColor: '#F3F8F8',
+    backgroundColor: theme.colors.neutral[50],
     borderRadius: theme.spacing.borderRadius.xl,
     padding: 18,
     overflow: 'hidden',
@@ -103,14 +113,14 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: theme.spacing.borderRadius.lg,
-    backgroundColor: '#D3F1EE',
+    backgroundColor: theme.colors.brand.primarySubtle,
     justifyContent: 'center',
     alignItems: 'center',
   },
   title: {
     fontSize: theme.typography.fontSizes.xl,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
-    color: theme.colors.palette.black,
+    color: theme.colors.text.primary,
     flexShrink: 1,
   },
   statusBadge: {
@@ -131,25 +141,25 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   deliveryTime: {
     fontSize: theme.typography.fontSizes.sm,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.regular,
-    color: theme.colors.palette.gray1,
+    color: theme.colors.text.secondary,
     marginBottom: 2,
   },
   kitchenName: {
     fontSize: theme.typography.fontSizes.lg,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
-    color: theme.colors.palette.black,
+    color: theme.colors.text.primary,
   },
   scheduleButton: {
     borderWidth: 1.2,
-    borderColor: theme.colors.palette.gray3,
+    borderColor: theme.colors.borders.default,
     borderRadius: theme.spacing.borderRadius.md,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: theme.colors.palette.white,
+    backgroundColor: theme.colors.surface.raised,
   },
   scheduleButtonText: {
     fontSize: theme.typography.fontSizes.sm,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
-    color: theme.colors.gradient2,
+    color: theme.colors.text.brand,
   },
 });

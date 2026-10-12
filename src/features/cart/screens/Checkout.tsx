@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, StyleSheet, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Lock, MapPin, Plus } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type { PaymentMethod } from '@api/types';
-import { AppBar, Button, Card, Divider, Skeleton, StickyBar } from '@components/ui';
+import { AppBar, Button, Card, Divider, Skeleton, StickyBar, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
@@ -138,7 +138,7 @@ const Checkout = () => {
           <Card padding="md" elevation="xs">
             <View style={styles.addressRow}>
               <View style={styles.addressIcon}>
-                <MapPin size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+                <MapPin size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
               </View>
               <View style={styles.addressText}>
                 <Text style={theme.text.h4}>
@@ -164,7 +164,7 @@ const Checkout = () => {
             onPress={() => navigation.navigate('AddressForm')}
             style={styles.addAddressCard}
           >
-            <Plus size={18} color={theme.colors.primary[600]} strokeWidth={2.4} />
+            <Plus size={18} color={theme.colors.text.brand} strokeWidth={2.4} />
             <Text style={[theme.text.h4, styles.link]}>Add a delivery address</Text>
           </Card>
         )}
@@ -285,7 +285,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     color: theme.colors.text.tertiary,
   },
   link: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   addressRow: {
     flexDirection: 'row',
@@ -295,7 +295,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -339,7 +339,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderColor: theme.colors.borders.brand,
   },
   quantityText: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   summaryName: {
     flex: 1,

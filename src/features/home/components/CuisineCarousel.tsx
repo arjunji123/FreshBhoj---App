@@ -14,7 +14,7 @@ const CARD_HEIGHT = 140;
 const GAP = staticTheme.spacing.md;
 
 /** Text over photography stays white in both themes. */
-const ON_PHOTO = staticTheme.colors.neutral[0];
+const ON_PHOTO = staticTheme.colors.palette.white;
 
 interface CuisineCarouselProps {
   cuisines: Cuisine[];

@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Text } from '@components/ui';
 import PressableScale from '@animations/PressableScale';
 import { useTheme } from '@app/theme/useTheme';
 import { ChevronRightIcon, IconProps } from '@components/icons';
@@ -27,9 +28,9 @@ export const useTone = (tone: Tone) => {
       };
     }
     return {
-      bg: theme.colors.surface.brandWash,
+      bg: theme.colors.brand.primarySubtle,
       ink: theme.colors.primary[600],
-      tint: theme.colors.borders.brand,
+      tint: theme.colors.brand.primarySubtle,
     };
   }, [theme, tone]);
 };

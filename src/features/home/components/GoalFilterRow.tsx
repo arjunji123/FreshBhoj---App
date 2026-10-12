@@ -86,7 +86,7 @@ const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onTogg
                 <Text
                   style={[
                     theme.text.label,
-                    { color: isSelected ? staticTheme.colors.neutral[0] : theme.colors.text.primary },
+                    { color: isSelected ? staticTheme.colors.palette.white : theme.colors.text.primary },
                   ]}
                   numberOfLines={1}
                 >
@@ -142,6 +142,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.overlay.accentWash,
   },
   iconWrapSelected: {
-    backgroundColor: staticTheme.colors.neutral[0],
+    backgroundColor: staticTheme.colors.palette.white,
   },
 });

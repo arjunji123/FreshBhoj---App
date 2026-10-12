@@ -1,6 +1,7 @@
 import { View, StyleSheet } from 'react-native'
-import React, { useEffect } from 'react'
-import { spacing, colors } from '@app/theme/index';
+import React, { useEffect, useMemo } from 'react'
+import { spacing } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import AppGradient from '@components/AppGradient';
 import Animated, { Easing, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
@@ -18,6 +19,8 @@ interface OnboardingPaginatorProps {
 }
 
 const OnboardingPaginator = ({ data, currentIndex }: OnboardingPaginatorProps) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const translateX = useSharedValue(currentIndex * STEP);
 
     useEffect(() => {
@@ -55,7 +58,7 @@ const OnboardingPaginator = ({ data, currentIndex }: OnboardingPaginatorProps) =
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: {
         height: CONTAINER_HEIGHT,
         justifyContent: 'center',
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
         width: INACTIVE_DOT_WIDTH,
         height: DOT_HEIGHT,
         borderRadius: spacing.borderRadius.round,
-        backgroundColor: colors.palette.gray2,
+        backgroundColor: theme.colors.palette.gray2,
     }
 })
 

@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Camera, ChevronRight, MapPin } from 'lucide-react-native';
 import { ApiError } from '@api';
-import { AppBar, Avatar, Button, Input, StickyBar } from '@components/ui';
+import { AppBar, Avatar, Button, Input, StickyBar, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useDefaultAddress, useProfile, useUpdateProfile, useUpdateProfileImage } from '../hooks/useProfile';
@@ -248,7 +248,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -258,6 +258,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   addressPrompt: {
     flex: 1,
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
 });

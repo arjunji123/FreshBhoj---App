@@ -150,7 +150,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginHorizontal: theme.layout.screenPadding,
     padding: theme.spacing.lg,
     borderRadius: theme.radius.xxl,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.surface.brandWash,
     borderWidth: 1,
     borderColor: theme.colors.borders.brand,
   },
@@ -164,6 +164,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   noLocationText: {
     flex: 1,
-    color: theme.colors.primary[700],
+    color: theme.colors.text.brand,
   },
 });

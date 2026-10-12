@@ -57,7 +57,7 @@ const KitchenProfile = () => {
           />
         }
       >
-        <Text style={theme.text.h1}>Kitchen Profile</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h1]}>Kitchen Profile</Text>
 
         {profile.isError ? (
           <EmptyState

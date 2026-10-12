@@ -112,7 +112,7 @@ const MealDetailScreen = () => {
       <View style={styles.screen}>
         <AppBar title="Meal" onBack={navigation.goBack} />
         <View style={styles.errorState}>
-          <Text style={theme.text.h3}>We could not load this meal</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>We could not load this meal</Text>
           <Text style={[theme.text.body, styles.errorBody]}>
             Check your connection and try again.
           </Text>
@@ -161,7 +161,7 @@ const MealDetailScreen = () => {
           <View style={styles.titleBlock}>
             <View style={styles.titleRow}>
               <FoodTypeDot type={meal.foodType} size={16} />
-              <Text style={[theme.text.h1, styles.title]}>{meal.name}</Text>
+              <Text style={[{ color: theme.colors.text.primary }, theme.text.h1, styles.title]}>{meal.name}</Text>
             </View>
 
             <PressableScale
@@ -227,14 +227,14 @@ const MealDetailScreen = () => {
 
           {meal.ingredients.length ? (
             <View style={styles.section}>
-              <Text style={theme.text.h3}>Ingredients</Text>
+              <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>Ingredients</Text>
               <Card padding="md" elevation="sm" style={styles.ingredientCard}>
                 {meal.ingredients.map((ingredient, index) => (
                   <View key={ingredient}>
                     {index > 0 ? <Divider spacing={theme.spacing.sm} /> : null}
                     <View style={styles.ingredientRow}>
                       <View style={styles.ingredientDot} />
-                      <Text style={theme.text.body}>{ingredient}</Text>
+                      <Text style={[{ color: theme.colors.text.primary }, theme.text.body]}>{ingredient}</Text>
                     </View>
                   </View>
                 ))}
@@ -261,12 +261,12 @@ const MealDetailScreen = () => {
 
           {meal.servingSize ? (
             <View style={styles.section}>
-              <Text style={theme.text.h3}>Portion</Text>
+              <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>Portion</Text>
               <Card padding="md" elevation="sm" style={styles.portionCard}>
                 <View style={styles.portionBadge}>
                   <UtensilsCrossed size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
                 </View>
-                <Text style={theme.text.body}>{meal.servingSize}</Text>
+                <Text style={[{ color: theme.colors.text.primary }, theme.text.body]}>{meal.servingSize}</Text>
               </Card>
             </View>
           ) : null}
@@ -274,7 +274,7 @@ const MealDetailScreen = () => {
           {reviews?.items.length ? (
             <View style={styles.section}>
               <View style={styles.sectionHeaderRow}>
-                <Text style={theme.text.h3}>Reviews</Text>
+                <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>Reviews</Text>
                 <Pressable
                   onPress={() =>
                     navigation.navigate('KitchenReviews', {
@@ -302,7 +302,7 @@ const MealDetailScreen = () => {
 
           {similar?.length ? (
             <View style={styles.section}>
-              <Text style={theme.text.h3}>You may also like</Text>
+              <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>You may also like</Text>
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -332,7 +332,7 @@ const MealDetailScreen = () => {
               {meal.mrp && meal.mrp > meal.price ? `${meal.discountPercent}% OFF` : 'PRICE'}
             </Text>
             <View style={styles.stickyPriceRow}>
-              <Text style={theme.text.h2}>{formatCurrency(meal.price)}</Text>
+              <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>{formatCurrency(meal.price)}</Text>
               {meal.mrp && meal.mrp > meal.price ? (
                 <Text style={[theme.text.bodySmall, styles.stickyMrp]}>
                   {formatCurrency(meal.mrp)}
@@ -507,9 +507,9 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     gap: theme.spacing.md,
     padding: theme.spacing.lg,
     borderRadius: theme.radius.card,
-    backgroundColor: theme.colors.amber[50],
+    backgroundColor: theme.colors.state.warningBg,
     borderWidth: 1,
-    borderColor: theme.colors.amber[100],
+    borderColor: 'rgba(255, 194, 26, 0.35)',
   },
   portionBadge: {
     width: 36,
@@ -525,16 +525,16 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.amber[100],
+    backgroundColor: theme.colors.state.warningBg,
   },
   allergenText: {
     flex: 1,
   },
   allergenTitle: {
-    color: theme.colors.amber[700],
+    color: theme.colors.text.primary,
   },
   allergenBody: {
-    color: theme.colors.amber[700],
+    color: theme.colors.text.secondary,
     marginTop: 3,
   },
   portionCard: {

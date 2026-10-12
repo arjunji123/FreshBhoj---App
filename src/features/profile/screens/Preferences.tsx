@@ -1,11 +1,11 @@
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Bell, Check, Moon, Smartphone, Sun } from 'lucide-react-native';
 import { useTheme } from '@app/theme/useTheme';
 import { commitThemeMode } from '@app/theme/commitThemeMode';
 import { useThemeStore, type ThemeMode } from '@app/theme/themeStore';
-import { AppBar, Card, Divider, ListItem, Screen } from '@components/ui';
+import { AppBar, Card, Divider, ListItem, Screen, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 
 const APPEARANCE_OPTIONS: Array<{

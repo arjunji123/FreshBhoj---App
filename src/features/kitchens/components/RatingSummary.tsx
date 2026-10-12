@@ -19,7 +19,7 @@ const RatingSummary: React.FC<RatingSummaryProps> = ({ summary }) => {
   <Card padding="lg" elevation="xs" style={styles.card}>
     <View style={styles.row}>
       <View style={styles.scoreBlock}>
-        <Text style={theme.text.displayMedium}>{summary.average.toFixed(1)}</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.displayMedium]}>{summary.average.toFixed(1)}</Text>
         <StarRow value={summary.average} size={14} />
         <Text style={[theme.text.caption, styles.count]}>
           {formatCompact(summary.total)} reviews

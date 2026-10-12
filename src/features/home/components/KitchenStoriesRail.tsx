@@ -121,7 +121,7 @@ const KitchenStoriesRail: React.FC<KitchenStoriesRailProps> = ({ groups, onPress
 export default KitchenStoriesRail;
 
 /** Text over photography stays white in both themes. */
-const ON_PHOTO = staticTheme.colors.neutral[0];
+const ON_PHOTO = staticTheme.colors.palette.white;
 
 const CARD_WIDTH = 124;
 const CARD_HEIGHT = 176;

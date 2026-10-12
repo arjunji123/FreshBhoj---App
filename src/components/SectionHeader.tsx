@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import GradientText from './GradientText';
 import { useTheme } from "@app/theme/useTheme";
+import { useThemeStore } from '@app/theme/themeStore';
 
 interface SectionHeaderProps {
   title: string;
@@ -30,13 +31,19 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 }) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
   return (
     <View style={[styles.container, style]}>
       <Text style={[styles.title, titleStyle]}>{title}</Text>
       {actionLabel && (
         <TouchableOpacity onPress={onActionPress} activeOpacity={0.7}>
           <GradientText
-            colors={theme.colors.defaultColor}
+            // The default gradient ends in deep navy, which vanishes on the dark page.
+            colors={
+              isDark
+                ? [theme.colors.textGradient1, theme.colors.textGradient1, theme.colors.textGradient2]
+                : theme.colors.defaultColor
+            }
             direction="diagonal"
           >
             <Text style={[styles.actionText, actionStyle]}>{actionLabel}</Text>

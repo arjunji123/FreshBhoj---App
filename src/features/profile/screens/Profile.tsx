@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { formatCurrency, formatPhone } from '@utils/format';
@@ -11,7 +11,7 @@ import {
   AddressIcon, BellIcon, CardIcon, ChevronRightIcon, CoinIcon, GiftIcon, HeartIcon, HelpIcon, KitchenIcon,
   LogoutIcon, OrdersIcon, PencilIcon, SettingsIcon, TrashIcon, WalletIcon,
 } from '@components/icons';
-import { Avatar, Card, Divider, Screen, Skeleton } from '@components/ui';
+import { Avatar, Card, Divider, Screen, Skeleton, Text } from '@components/ui';
 import { BalanceTile, GlassStat, IconBadge, QuickAction, SettingsRow } from '../components/ProfileBlocks';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';

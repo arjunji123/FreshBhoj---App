@@ -73,17 +73,18 @@ export const darkColors = {
     primary: primary[600],
     primaryPressed: primary[500],
     primarySubtle: 'rgba(29, 185, 160, 0.18)',
-    onPrimary: neutral[0],
+    onPrimary: darkPalette.white,
     accent: accent[500],
     accentSubtle: 'rgba(15, 157, 107, 0.18)',
-    onAccent: neutral[0],
+    onAccent: darkPalette.white,
   },
 
   text: {
     primary: neutral[900],
     secondary: neutral[600],
     tertiary: neutral[500],
-    inverse: neutral[0],
+    /** Text/icons on filled brand colours, photos and scrims — must stay white in dark mode. */
+    inverse: darkPalette.white,
     brand: primary[400],
     accent: accent[400],
     danger: semantic.error,

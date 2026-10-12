@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { ChevronDown, ChevronUp, Tag, X } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
-import { Button, Card, Input } from '@components/ui';
+import { Button, Card, Input, Text } from '@components/ui';
 import type { Cart, Coupon } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -64,7 +64,7 @@ const CouponPanel: React.FC<CouponPanelProps> = ({
         accessibilityState={{ expanded }}
       >
         <View style={styles.headerIcon}>
-          <Tag size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+          <Tag size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
         </View>
         <View style={styles.headerText}>
           <Text style={theme.text.h4}>Apply a coupon</Text>
@@ -146,7 +146,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   appliedCard: {
     marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.brand.accentSubtle,
   },
   appliedRow: {
     flexDirection: 'row',
@@ -165,7 +165,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
   },
   appliedCode: {
-    color: theme.colors.accent[700],
+    color: theme.colors.text.accent,
   },
   appliedSaving: {
     color: theme.colors.accent[600],
@@ -181,7 +181,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -234,7 +234,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.surface.brandWash,
   },
   offerCodeText: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
     fontSize: 11,
   },
   offerText: {

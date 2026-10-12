@@ -17,6 +17,7 @@ import { VerifiedBadge } from '@components/ui';
 import FoodTypeDot from '@components/ui/FoodTypeDot';
 import type { Reel } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
+import { neutral } from '@app/theme/palette';
 
 interface ReelCardProps {
   reel: Reel;
@@ -317,10 +318,10 @@ export default ReelCard;
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     width: '100%',
-    backgroundColor: theme.colors.neutral[900],
+    backgroundColor: neutral[900],
   },
   fallback: {
-    backgroundColor: theme.colors.neutral[800],
+    backgroundColor: neutral[800],
   },
   rail: {
     position: 'absolute',
@@ -404,10 +405,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: 17,
     borderWidth: 1.5,
     borderColor: theme.colors.surface.base,
-    backgroundColor: theme.colors.neutral[700],
+    backgroundColor: neutral[700],
   },
   kitchenLogoFallback: {
-    backgroundColor: theme.colors.neutral[700],
+    backgroundColor: neutral[700],
   },
   kitchenName: {
     color: theme.colors.text.inverse,
@@ -434,7 +435,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.neutral[700],
+    backgroundColor: neutral[700],
   },
   shopText: {
     flex: 1,

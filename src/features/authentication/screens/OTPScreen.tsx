@@ -13,6 +13,7 @@ import { useAuthStore } from '../store/authStore';
 import type { PublicNavigation } from '@app/navigation/navigation.types';
 import { useTheme } from "@app/theme/useTheme";
 import { LoginHero } from '@components/illustrations';
+import { useThemeStore } from '@app/theme/themeStore';
 import { navigationRef } from '@app/navigation/navigationRef';
 
 const { width, height } = Dimensions.get('window');
@@ -25,6 +26,7 @@ const OTPScreen = () => {
   const phoneNumber = route.params?.phoneNumber ?? '';
   const isKitchen = route.params?.accountType === 'KITCHEN';
 
+  const isDark = useThemeStore((s) => s.resolvedScheme === 'dark');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const verifyOtp = useVerifyOtp();
@@ -35,9 +37,9 @@ const OTPScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
-      StatusBar.setBarStyle('dark-content', true);
+      StatusBar.setBarStyle(isDark ? 'light-content' : 'dark-content', true);
       return () => StatusBar.setBarStyle('light-content', true);
-    }, []),
+    }, [isDark]),
   );
 
   const handleSubmitOTP = (otp: string) => {

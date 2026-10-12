@@ -42,7 +42,7 @@ const KitchenRegisterOwnerDetails = () => {
   return (
     <Screen background="page">
       <View style={styles.header}>
-        <Text style={theme.text.h2}>Owner details</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>Owner details</Text>
         <Button title="Log out" variant="ghost" size="sm" fullWidth={false} onPress={handleLogout} />
       </View>
 

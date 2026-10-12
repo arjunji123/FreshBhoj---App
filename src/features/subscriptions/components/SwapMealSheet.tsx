@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, Pressable, StyleSheet, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 import { ApiError } from '@api';
 import type { MealSortBy } from '@api/endpoints/meals.api';
 import type { MealCard } from '@api/types';
-import { Button, Chip, ChipRow, EmptyState, Sheet, Skeleton } from '@components/ui';
+import { Button, Chip, ChipRow, EmptyState, Sheet, Skeleton, Text } from '@components/ui';
 import type { SheetHandle } from '@components/ui';
 import { flattenPages, useMealFeed } from '@features/meals/hooks/useMeals';
 import { useSwapDeliveryMeal } from '../hooks/useSubscriptions';
@@ -210,7 +210,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   rowSelected: {
     borderColor: theme.colors.primary[600],
-    backgroundColor: theme.colors.surface.brandWash,
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   rowImage: {
     width: 52,

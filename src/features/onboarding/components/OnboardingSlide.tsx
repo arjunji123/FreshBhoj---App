@@ -1,6 +1,7 @@
 import { View, Text, Dimensions, StyleSheet } from 'react-native'
-import React, { useEffect } from 'react'
-import { colors, spacing, theme, typography } from '@app/theme';
+import React, { useEffect, useMemo } from 'react'
+import { colors, spacing, typography } from '@app/theme';
+import { useTheme } from '@app/theme/useTheme';
 import OnboardingPaginator from './OnboardingPaginator';
 import GradientButton from '@components/GradientButton';
 import { ArrowRight } from 'lucide-react-native';
@@ -37,6 +38,8 @@ const { width, height } = Dimensions.get('window');
 const HERO_SIZE = Math.min(400, width * 0.96);
 
 const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive, onPrimaryPress, onBackPress }: OnboardingSlideProps) => {
+    const theme = useTheme();
+    const styles = useMemo(() => createStyles(theme), [theme]);
     const isMiddleSlide = item.variant === 'reel';
     const showBack = itemIndex > 0;
 
@@ -131,7 +134,7 @@ const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive,
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: {
         flex: 1,
         alignItems: 'center',
@@ -197,7 +200,7 @@ const styles = StyleSheet.create({
         width: '100%',
         height: height * 0.45,
         alignItems: 'center',
-        backgroundColor: colors.palette.white,
+        backgroundColor: theme.colors.surface.base,
         borderTopLeftRadius: spacing.borderRadius.xxxl,
         borderTopRightRadius: spacing.borderRadius.xxxl,
         paddingTop: spacing.paddings.xl,
@@ -213,7 +216,7 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSizes.display2,
         lineHeight: typography.lineHeights.display1,
         fontFamily: typography.fontFamilies.aBeeZee.regular,
-        color: '#111827',
+        color: theme.colors.text.primary,
         textAlign: 'center',
     },
     subtitle: {
@@ -228,7 +231,7 @@ const styles = StyleSheet.create({
         fontSize: typography.fontSizes.xl,
         // lineHeight: typography.lineHeights.,
         fontFamily: typography.fontFamilies.plusJakartaSans.regular,
-        color: '#6B7280',
+        color: theme.colors.text.secondary,
         textAlign: 'center',
         paddingHorizontal: spacing.paddings.xs,
     },
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
     },
     backText: {
         marginTop: spacing.paddings.sm,
-        color: '#9CA3AF',
+        color: theme.colors.text.tertiary,
         fontFamily: typography.fontFamilies.plusJakartaSans.semibold,
         fontSize: typography.fontSizes.lg,
     },

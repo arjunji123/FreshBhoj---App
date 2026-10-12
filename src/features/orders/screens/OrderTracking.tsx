@@ -1,15 +1,5 @@
 import React, { useMemo } from 'react';
-import {
-  Alert,
-  Image,
-  Linking,
-  Pressable,
-  ScrollView,
-  Share,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Alert, Image, Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import {
   AlertCircle,
@@ -21,16 +11,7 @@ import {
   XCircle,
 } from 'lucide-react-native';
 import { ApiError } from '@api';
-import {
-  AppBar,
-  AppBarAction,
-  Button,
-  Card,
-  Divider,
-  EmptyState,
-  Skeleton,
-  SummaryRow,
-} from '@components/ui';
+import { AppBar, AppBarAction, Button, Card, Divider, EmptyState, Skeleton, SummaryRow, Text } from '@components/ui';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import OrderStatusStepper from '../components/OrderStatusStepper';
 import { useCancelOrder, useOrder, useOrderTracking } from '../hooks/useOrders';
@@ -140,7 +121,7 @@ const OrderTracking = () => {
         onBack={navigation.goBack}
         right={
           <AppBarAction onPress={openWhatsApp} accessibilityLabel="Get help">
-            <HelpCircle size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
+            <HelpCircle size={18} color={theme.colors.text.brand} strokeWidth={2.2} />
           </AppBarAction>
         }
       />
@@ -197,7 +178,7 @@ const OrderTracking = () => {
               accessibilityRole="button"
               accessibilityLabel="Call kitchen"
             >
-              <Phone size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+              <Phone size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
             </Pressable>
             <Pressable
               onPress={() =>
@@ -213,7 +194,7 @@ const OrderTracking = () => {
                 tracking.hasUnreadKitchenMessages ? 'Chat with kitchen, new message' : 'Chat with kitchen'
               }
             >
-              <MessageSquare size={18} color={theme.colors.primary[600]} strokeWidth={2.4} />
+              <MessageSquare size={18} color={theme.colors.text.brand} strokeWidth={2.4} />
               {tracking.hasUnreadKitchenMessages ? <View style={styles.unreadDot} /> : null}
             </Pressable>
           </View>
@@ -261,7 +242,7 @@ const OrderTracking = () => {
                 accessibilityRole="button"
                 accessibilityLabel="Call delivery partner"
               >
-                <Phone size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+                <Phone size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
               </Pressable>
             </View>
           </Card>
@@ -336,7 +317,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.surface.brandWash,
   },
   etaBadgeText: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
     textTransform: 'capitalize',
   },
   sectionLabel: {
@@ -362,7 +343,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
   },
   kitchenLogoFallback: {
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   kitchenText: {
     flex: 1,
@@ -375,7 +356,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -401,11 +382,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: theme.spacing.md,
     padding: theme.spacing.md,
     borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.brand.accentSubtle,
   },
   hygieneText: {
     flex: 1,
-    color: theme.colors.accent[700],
+    color: theme.colors.text.accent,
   },
   actions: {
     flexDirection: 'row',

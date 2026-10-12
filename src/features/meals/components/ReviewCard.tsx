@@ -21,7 +21,7 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review, onHelpful }) => {
     <View style={styles.header}>
       <Avatar uri={review.author.avatar} name={review.author.name} size={38} />
       <View style={styles.headerText}>
-        <Text style={theme.text.h4} numberOfLines={1}>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h4]} numberOfLines={1}>
           {review.author.name}
         </Text>
         <View style={styles.metaRow}>

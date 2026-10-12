@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { ArrowDownToLine, CircleAlert, CircleCheckBig, Clock, Plus } from 'lucide-react-native';
 import Animated from 'react-native-reanimated';
@@ -8,20 +8,7 @@ import { WalletIcon } from '@components/icons';
 import { IconBadge } from '@features/profile/components/ProfileBlocks';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { ApiError } from '@api';
-import {
-  AppBar,
-  Badge,
-  Button,
-  Card,
-  Chip,
-  ChipRow,
-  Divider,
-  EmptyState,
-  Input,
-  Screen,
-  Sheet,
-  Skeleton,
-} from '@components/ui';
+import { AppBar, Badge, Button, Card, Chip, ChipRow, Divider, EmptyState, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
 import type { BadgeTone, SheetHandle } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages } from '@features/meals/hooks/useMeals';
@@ -104,7 +91,7 @@ const Wallet = () => {
               transactions.refetch();
               withdrawals.refetch();
             }}
-            tintColor={theme.colors.primary[600]}
+            tintColor={theme.colors.text.brand}
           />
         }
       >
@@ -192,7 +179,7 @@ const Wallet = () => {
           </View>
         ) : filteredItems.length === 0 ? (
           <EmptyState
-            icon={<WalletIcon size={44} color={theme.colors.primary[600]} />}
+            icon={<WalletIcon size={44} color={theme.colors.text.brand} />}
             title="No transactions yet"
             description="Top-ups and payments will show up here."
           />
@@ -224,7 +211,7 @@ const Wallet = () => {
             {transactions.hasNextPage ? (
               <View style={styles.loadMoreWrap}>
                 {transactions.isFetchingNextPage ? (
-                  <ActivityIndicator color={theme.colors.primary[600]} />
+                  <ActivityIndicator color={theme.colors.text.brand} />
                 ) : (
                   <Button
                     title="Load more"
@@ -450,7 +437,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   pendingCard: {
     marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.amber[50],
+    backgroundColor: theme.colors.state.warningBg,
   },
   pendingHeader: {
     flexDirection: 'row',
@@ -459,7 +446,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   pendingTitle: {
-    color: theme.colors.amber[700],
+    color: theme.colors.state.warningBg === theme.colors.amber[50] ? theme.colors.amber[700] : theme.colors.amber[300], // light : dark
   },
   pendingRow: {
     flexDirection: 'row',
@@ -540,13 +527,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   resultIconSuccess: {
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.brand.accentSubtle,
   },
   resultIconError: {
     backgroundColor: theme.colors.state.errorBg,
   },
   resultIconPending: {
-    backgroundColor: theme.colors.amber[50],
+    backgroundColor: theme.colors.state.warningBg,
   },
   resultTitle: {
     textAlign: 'center',

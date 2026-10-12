@@ -207,7 +207,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       borderWidth: 1,
       borderColor: theme.colors.borders.subtle,
     },
-    rowUnread: { backgroundColor: theme.colors.surface.brandWash, borderColor: theme.colors.primary[100] },
+    rowUnread: { backgroundColor: theme.colors.surface.brandWash, borderColor: theme.colors.borders.brand },
     rowPressed: { opacity: 0.85 },
     iconWrap: {
       width: 36,
@@ -215,7 +215,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       borderRadius: 18,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: theme.colors.primary[50],
+      backgroundColor: theme.colors.brand.primarySubtle,
     },
     rowText: { flex: 1, gap: 2 },
     rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.sm },

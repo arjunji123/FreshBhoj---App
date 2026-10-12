@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { ScrollView, Share, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, Share, StyleSheet, View, Text as RNText } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Coins, Share2, Users } from 'lucide-react-native';
-import { AppBar, Card, EmptyState, Screen, Skeleton } from '@components/ui';
+import { AppBar, Card, EmptyState, Screen, Skeleton, Text } from '@components/ui';
 import GradientButton from '@components/GradientButton';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import ReferralPrinter from '../components/ReferralPrinter';
@@ -33,7 +33,7 @@ const ReferralScreen = () => {
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.hero}>
-          <Text style={theme.text.h2}>Invite friends, earn together</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>Invite friends, earn together</Text>
           <Text style={[theme.text.body, styles.heroSubtitle]}>
             {data
               ? `Share your code — you get ${data.referrerBonusCoins} FreshBhoj Coins, they get ${data.refereeBonusCoins}, the moment they sign up.`
@@ -47,14 +47,14 @@ const ReferralScreen = () => {
           <Card padding="md" elevation="xs" style={styles.statsCard}>
             <View style={styles.statsRow}>
               <View style={styles.stat}>
-                <Coins size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
-                <Text style={theme.text.h3}>{data.coinsBalance}</Text>
+                <Coins size={18} color={theme.colors.text.brand} strokeWidth={2.2} />
+                <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>{data.coinsBalance}</Text>
                 <Text style={[theme.text.caption, styles.statLabel]}>FreshBhoj Coins</Text>
               </View>
               <View style={styles.statDivider} />
               <View style={styles.stat}>
-                <Users size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
-                <Text style={theme.text.h3}>{data.invitesCount}</Text>
+                <Users size={18} color={theme.colors.text.brand} strokeWidth={2.2} />
+                <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>{data.invitesCount}</Text>
                 <Text style={[theme.text.caption, styles.statLabel]}>Friends invited</Text>
               </View>
             </View>
@@ -104,7 +104,7 @@ const HowStep: React.FC<{ index: number; text: string }> = ({ index, text }) => 
 (
   <View style={styles.howStep}>
     <View style={styles.howBadge}>
-      <Text style={styles.howBadgeText}>{index}</Text>
+      <RNText style={styles.howBadgeText}>{index}</RNText>
     </View>
     <Text style={[theme.text.bodySmall, styles.howText]}>{text}</Text>
   </View>
@@ -170,13 +170,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 1,
   },
   howBadgeText: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.bold,
     fontSize: theme.typography.fontSizes.sm,
   },

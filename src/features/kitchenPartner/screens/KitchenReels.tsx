@@ -147,7 +147,7 @@ const KitchenReels = () => {
   return (
     <Screen background="page">
       <View style={styles.header}>
-        <Text style={theme.text.h1}>Reels</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h1]}>Reels</Text>
         <Button
           title={upload.isPending ? 'Uploading…' : 'New reel'}
           leftIcon={<Clapperboard size={16} color={theme.colors.palette.white} />}
@@ -160,7 +160,7 @@ const KitchenReels = () => {
 
       {videoUrl ? (
         <Card style={styles.composeCard} padding="md">
-          <Text style={theme.text.overline}>Video uploaded</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.overline]}>Video uploaded</Text>
 
           <View style={styles.editToolsRow}>
             <TouchableOpacity

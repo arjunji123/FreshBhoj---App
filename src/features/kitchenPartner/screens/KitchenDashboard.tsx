@@ -76,7 +76,7 @@ const KitchenDashboard = () => {
   return (
     <Screen background="page">
       <View style={styles.topBar}>
-        <Text style={theme.text.h1}>Dashboard</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h1]}>Dashboard</Text>
         <View style={styles.topBarActions}>
           <Pressable
             onPress={() => navigation.navigate('BhojAiChat')}
@@ -153,7 +153,7 @@ const KitchenDashboard = () => {
                   })
                 }
                 disabled={setAccepting.isPending}
-                trackColor={{ true: theme.colors.overlay.glassStrong }}
+                trackColor={{ true: 'rgba(255, 255, 255, 0.45)' }}
                 thumbColor={theme.colors.palette.white}
               />
             </View>
@@ -514,9 +514,9 @@ const styles = StyleSheet.create({
   storyStats: { flexDirection: 'row', alignItems: 'center', gap: 3, marginTop: 4 },
   storyStatText: { ...theme.text.caption, fontSize: 10, color: theme.colors.text.tertiary },
   banner: { borderRadius: theme.radius.card, padding: theme.spacing.paddings.lg, marginBottom: theme.spacing.paddings.md },
-  bannerGreeting: { ...theme.text.bodySmall, color: theme.colors.overlay.glassStrong },
+  bannerGreeting: { ...theme.text.bodySmall, color: 'rgba(255, 255, 255, 0.85)' },
   bannerName: { ...theme.text.h2, color: theme.colors.palette.white, marginTop: 2 },
-  bannerDate: { ...theme.text.bodySmall, color: theme.colors.overlay.glassStrong, marginTop: 4 },
+  bannerDate: { ...theme.text.bodySmall, color: 'rgba(255, 255, 255, 0.85)', marginTop: 4 },
   statusBadgeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.xs, marginTop: theme.spacing.paddings.sm },
   acceptingRow: {
     flexDirection: 'row',
@@ -545,10 +545,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: theme.spacing.paddings.sm,
-    backgroundColor: theme.colors.amber[50],
+    backgroundColor: theme.colors.state.warningBg,
     marginBottom: theme.spacing.paddings.md,
   },
-  actionText: { ...theme.text.bodySmall, color: theme.colors.amber[700], flex: 1, fontWeight: '600' as const },
+  actionText: { ...theme.text.bodySmall, color: theme.colors.text.primary, flex: 1, fontWeight: '600' as const },
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.paddings.sm, marginBottom: theme.spacing.paddings.md },
   statSkeleton: { width: '47%' },
   statCard: { width: '47%' },

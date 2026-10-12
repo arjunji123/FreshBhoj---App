@@ -24,6 +24,7 @@ const LoginPhoneInput: React.FC<LoginPhoneInputProps> = ({ value, onChangeText }
                 keyboardType="phone-pad"
                 value={value}
                 cursorColor={theme.colors.primary[600]}
+                selectionColor={theme.colors.primary[600]}
                 onChangeText={onChangeText}
                 maxLength={AUTH_VALUES.phoneMaxLength}
             />

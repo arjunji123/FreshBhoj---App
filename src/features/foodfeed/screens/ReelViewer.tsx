@@ -19,6 +19,7 @@ import {
   useToggleReelSave,
 } from '../hooks/useReels';
 import { useTheme } from "@app/theme/useTheme";
+import { neutral } from '@app/theme/palette';
 
 type Route = RouteProp<PrivateStackParamList, 'ReelViewer'>;
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -168,7 +169,7 @@ export default ReelViewer;
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: theme.colors.neutral[900],
+    backgroundColor: neutral[900],
   },
   close: {
     position: 'absolute',

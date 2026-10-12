@@ -3,6 +3,7 @@ import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { BadgeCheck } from 'lucide-react-native';
 import { theme as staticTheme } from '@app/theme/index';
 import { useTheme } from '@app/theme/useTheme';
+import { useThemeStore } from '@app/theme/themeStore';
 
 export type BadgeTone = 'accent' | 'brand' | 'neutral' | 'warning' | 'danger' | 'info';
 export type BadgeSize = 'sm' | 'md';
@@ -19,7 +20,47 @@ export interface BadgeProps {
 
 const createTones = (
   theme: ReturnType<typeof useTheme>,
-): Record<BadgeTone, { soft: string; solid: string; text: string; border: string }> => ({
+  isDark: boolean,
+): Record<BadgeTone, { soft: string; solid: string; text: string; border: string }> => isDark ? ({
+  // The light-mode washes (primary[50], amber[50]…) glare on a dark page and their
+  // dark ink fails contrast — use translucent washes with light ink instead.
+  accent: {
+    soft: theme.colors.surface.accentWash,
+    solid: theme.colors.accent[600],
+    text: theme.colors.accent[400],
+    border: theme.colors.accent[700],
+  },
+  brand: {
+    soft: theme.colors.surface.brandWash,
+    solid: theme.colors.primary[600],
+    text: theme.colors.primary[300],
+    border: theme.colors.borders.brand,
+  },
+  neutral: {
+    soft: theme.colors.neutral[100],
+    solid: theme.colors.neutral[400],
+    text: theme.colors.neutral[600],
+    border: theme.colors.neutral[200],
+  },
+  warning: {
+    soft: theme.colors.state.warningBg,
+    solid: theme.colors.amber[500],
+    text: theme.colors.amber[300],
+    border: theme.colors.amber[700],
+  },
+  danger: {
+    soft: theme.colors.state.errorBg,
+    solid: theme.colors.state.error,
+    text: theme.colors.state.error,
+    border: theme.colors.state.error,
+  },
+  info: {
+    soft: theme.colors.state.infoBg,
+    solid: theme.colors.state.info,
+    text: theme.colors.state.info,
+    border: theme.colors.neutral[200],
+  },
+}) : ({
   accent: {
     soft: theme.colors.accent[50],
     solid: theme.colors.accent[600],
@@ -68,7 +109,8 @@ const Badge: React.FC<BadgeProps> = ({
   style,
 }) => {
   const theme = useTheme();
-  const tones = useMemo(() => createTones(theme), [theme]);
+  const isDark = useThemeStore((st) => st.resolvedScheme) === 'dark';
+  const tones = useMemo(() => createTones(theme, isDark), [theme, isDark]);
   const palette = tones[tone];
   const isSolid = variant === 'solid';
 
@@ -119,7 +161,7 @@ export const VerifiedBadge: React.FC<{ size?: number; showLabel?: boolean }> = (
     />
   ) : (
     <View style={styles.verifiedDot}>
-      <BadgeCheck size={size} color={theme.colors.neutral[0]} fill={theme.colors.accent[600]} strokeWidth={2} />
+      <BadgeCheck size={size} color={theme.colors.palette.white} fill={theme.colors.accent[600]} strokeWidth={2} />
     </View>
   );
 };

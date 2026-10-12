@@ -7,6 +7,7 @@ import AddToCartControl from '@components/AddToCartControl';
 import { formatCurrency } from '@utils/format';
 import type { Reel } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
+import { neutral } from '@app/theme/palette';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -149,11 +150,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: '100%',
     height: (SCREEN_WIDTH - theme.layout.screenPadding * 2) * 1.25,
     borderRadius: theme.radius.card,
-    backgroundColor: theme.colors.neutral[900],
+    backgroundColor: neutral[900],
     overflow: 'hidden',
   },
   fallback: {
-    backgroundColor: theme.colors.neutral[800],
+    backgroundColor: neutral[800],
   },
   muteButton: {
     position: 'absolute',

@@ -1,11 +1,11 @@
 import React, { useRef, useState, useMemo } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { CalendarDays, Heart, Pause, Play, RefreshCw } from 'lucide-react-native';
 import { ApiError } from '@api';
 import type { CustomerSubscriptionStatus, SubscriptionDeliveryStatus } from '@api/types';
 import { formatCurrency, humanizeEnum } from '@utils/format';
-import { AppBar, Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton } from '@components/ui';
+import { AppBar, Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton, Text } from '@components/ui';
 import type { BadgeTone, SheetHandle } from '@components/ui';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useFavorites } from '@features/meals/hooks/useMeals';
@@ -321,7 +321,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
   },
   kitchenLogoFallback: {
-    backgroundColor: theme.colors.primary[100],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   headerText: {
     flex: 1,

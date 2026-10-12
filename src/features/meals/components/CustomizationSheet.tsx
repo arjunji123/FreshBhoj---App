@@ -85,7 +85,7 @@ const CustomizationSheet: React.FC<CustomizationSheetProps> = ({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.quantityRow}>
-          <Text style={theme.text.h4}>Quantity</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h4]}>Quantity</Text>
           <QuantityStepper value={quantity} onChange={setQuantity} min={1} max={20} />
         </View>
 
@@ -149,7 +149,7 @@ const CustomizationSheet: React.FC<CustomizationSheetProps> = ({
       <View style={styles.footer}>
         <View style={styles.totalWrap}>
           <Text style={[theme.text.overline, styles.totalLabel]}>TOTAL PRICE</Text>
-          <Text style={theme.text.h2}>{formatCurrency(lineTotal)}</Text>
+          <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>{formatCurrency(lineTotal)}</Text>
         </View>
 
         <Button

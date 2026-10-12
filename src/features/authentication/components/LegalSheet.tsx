@@ -51,7 +51,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginBottom: theme.spacing.xl,
   },
   heading: {
-    color: theme.colors.primary[700],
+    color: theme.colors.text.brand,
     marginBottom: 6,
   },
   body: {

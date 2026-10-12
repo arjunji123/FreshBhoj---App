@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import Animated, {
   Easing,
@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { AlertCircle, CookingPot, X } from 'lucide-react-native';
 import AppGradient from '@components/AppGradient';
-import { Button } from '@components/ui';
+import { Button, Text } from '@components/ui';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useConfirmPayment, useFailPayment } from '../hooks/useOrders';
 import { useTheme } from "@app/theme/useTheme";
@@ -142,7 +142,7 @@ const PaymentProcessing = () => {
 
       <View style={styles.body}>
         <Animated.View style={[styles.iconCard, pulseStyle]}>
-          <CookingPot size={54} color={theme.colors.primary[600]} strokeWidth={1.8} />
+          <CookingPot size={54} color={theme.colors.text.brand} strokeWidth={1.8} />
           <View style={styles.sparkle} />
         </Animated.View>
 
@@ -263,7 +263,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   progressLabel: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   progressTrack: {
     height: 8,

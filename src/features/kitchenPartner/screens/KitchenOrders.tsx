@@ -102,7 +102,7 @@ const KitchenOrders = () => {
   return (
     <Screen background="page">
       <View style={styles.header}>
-        <Text style={theme.text.h1}>Orders</Text>
+        <Text style={[{ color: theme.colors.text.primary }, theme.text.h1]}>Orders</Text>
         <ChipRow>
           {(Object.keys(TAB_LABEL) as OrderTab[]).map((key) => (
             <Chip key={key} label={TAB_LABEL[key]} selected={tab === key} onPress={() => setTab(key)} />

@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import { Beef, Flame } from 'lucide-react-native';
 import { useTheme } from "@app/theme/useTheme";
+import { useThemeStore } from '@app/theme/themeStore';
 
 interface NutritionBadgeRowProps {
   calories?: number | null;
@@ -23,7 +24,8 @@ export const NutritionBadgeRow: React.FC<NutritionBadgeRowProps> = ({
   size = 'compact',
 }) => {
     const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
+    const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
+    const styles = useMemo(() => createStyles(theme, isDark), [theme, isDark]);
   const hasCalories = typeof calories === 'number' && calories > 0;
   const hasProtein = typeof proteinG === 'number' && proteinG > 0;
   if (!hasCalories && !hasProtein) return null;
@@ -52,7 +54,7 @@ export const NutritionBadgeRow: React.FC<NutritionBadgeRowProps> = ({
 
 export default NutritionBadgeRow;
 
-const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>, isDark: boolean) => StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -67,8 +69,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingVertical: 3,
     borderRadius: theme.radius.pill,
   },
-  caloriePill: { backgroundColor: theme.colors.amber[50] },
-  proteinPill: { backgroundColor: theme.colors.accent[50] },
-  calorieText: { color: theme.colors.amber[700] },
-  proteinText: { color: theme.colors.accent[700] },
+  caloriePill: { backgroundColor: isDark ? theme.colors.state.warningBg : theme.colors.amber[50] },
+  proteinPill: { backgroundColor: isDark ? theme.colors.surface.accentWash : theme.colors.accent[50] },
+  calorieText: { color: isDark ? theme.colors.amber[300] : theme.colors.amber[700] },
+  proteinText: { color: isDark ? theme.colors.accent[400] : theme.colors.accent[700] },
 });

@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AlertTriangle } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { AppBar, Button, Card, Input, Screen } from '@components/ui';
+import { AppBar, Button, Card, Input, Screen, Text } from '@components/ui';
 import { ApiError, authApi } from '@api';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
@@ -143,7 +143,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: theme.spacing.sm,
-    backgroundColor: theme.colors.surface.brandWash,
+    backgroundColor: theme.colors.brand.primarySubtle,
     borderRadius: theme.radius.card,
     padding: theme.spacing.md,
     marginBottom: theme.spacing.lg,

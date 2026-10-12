@@ -87,7 +87,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 96,
     height: 96,
     borderRadius: 48,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.surface.brandWash,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: theme.spacing.xl,

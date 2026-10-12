@@ -2,6 +2,7 @@ import React from 'react';
 import { StatusBar, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
 import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '@app/theme/useTheme';
+import { useThemeStore } from '@app/theme/themeStore';
 
 interface ScreenProps {
   children: React.ReactNode;
@@ -17,16 +18,18 @@ const Screen: React.FC<ScreenProps> = ({
   children,
   background = 'page',
   edges = ['top'],
-  barStyle = 'dark-content',
+  barStyle,
   style,
 }) => {
   const theme = useTheme();
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
+  const resolvedBarStyle = barStyle ?? (isDark ? 'light-content' : 'dark-content');
   return (
     <SafeAreaView
       edges={edges}
       style={[styles.flex, { backgroundColor: theme.colors.surface[background] }, style]}
     >
-      <StatusBar barStyle={barStyle} backgroundColor="transparent" translucent />
+      <StatusBar barStyle={resolvedBarStyle} backgroundColor="transparent" translucent />
       <View style={styles.flex}>{children}</View>
     </SafeAreaView>
   );

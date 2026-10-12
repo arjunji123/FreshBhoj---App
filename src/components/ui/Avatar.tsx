@@ -36,11 +36,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
   },
   fallback: {
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.surface.brandWash,
     alignItems: 'center',
     justifyContent: 'center',
   },
   initials: {
-    color: theme.colors.primary[700],
+    color: theme.colors.text.brand,
   },
 });

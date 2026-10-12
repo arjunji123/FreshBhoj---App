@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
@@ -15,7 +15,7 @@ import {
   Tag,
   WandSparkles,
 } from 'lucide-react-native';
-import { AppBar, Card, Divider, EmptyState, ListItem, Skeleton } from '@components/ui';
+import { AppBar, Card, Divider, EmptyState, ListItem, Skeleton, Text } from '@components/ui';
 import type { NotificationPreferences } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '../hooks/useProfile';
@@ -127,7 +127,7 @@ const Notifications = () => {
                               false: theme.colors.neutral[200],
                               true: theme.colors.accent[400],
                             }}
-                            thumbColor={theme.colors.surface.base}
+                            thumbColor={theme.colors.palette.white}
                           />
                         }
                       />

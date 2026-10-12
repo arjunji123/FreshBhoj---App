@@ -53,14 +53,14 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onS
               {category.iconUrl ? (
                 <Image source={{ uri: category.iconUrl }} style={styles.icon} resizeMode="cover" />
               ) : (
-                <Text style={styles.emoji}>{CATEGORY_EMOJI[category.slug] ?? '🍽️'}</Text>
+                <Text style={[{ color: theme.colors.text.primary }, styles.emoji]}>{CATEGORY_EMOJI[category.slug] ?? '🍽️'}</Text>
               )}
             </View>
             <Text
               style={[
                 theme.text.h4,
                 styles.label,
-                { color: isActive ? theme.colors.primary[700] : theme.colors.text.primary },
+                { color: isActive ? theme.colors.text.brand : theme.colors.text.primary },
               ]}
               numberOfLines={2}
             >
@@ -109,7 +109,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       height: 48,
       borderRadius: 24,
       overflow: 'hidden',
-      backgroundColor: theme.colors.primary[50],
+      backgroundColor: theme.colors.surface.brandWash,
       alignItems: 'center',
       justifyContent: 'center',
     },

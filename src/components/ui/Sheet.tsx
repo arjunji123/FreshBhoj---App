@@ -91,7 +91,7 @@ const Sheet = forwardRef<SheetHandle, SheetProps>(
                 <Text style={[theme.text.overline, styles.eyebrow]}>{eyebrow}</Text>
               ) : null}
               {title ? (
-                <Text style={theme.text.h2} numberOfLines={2}>
+                <Text style={[theme.text.h2, styles.title]} numberOfLines={2}>
                   {title}
                 </Text>
               ) : null}
@@ -151,8 +151,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     gap: 4,
   },
+  title: {
+    color: theme.colors.text.primary,
+  },
   eyebrow: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
   },
   closeButton: {
     width: 32,

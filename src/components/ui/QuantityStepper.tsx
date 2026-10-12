@@ -64,7 +64,7 @@ const QuantityStepper: React.FC<QuantityStepperProps> = ({
         ) : (
           <Minus
             size={iconSize}
-            color={atMin ? theme.colors.text.disabled : theme.colors.primary[600]}
+            color={atMin ? theme.colors.text.disabled : theme.colors.text.brand}
             strokeWidth={2.8}
           />
         )}
@@ -110,7 +110,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderRadius: theme.radius.md,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.surface.brandWash,
   },
   buttonPrimary: {
     backgroundColor: theme.colors.primary[600],

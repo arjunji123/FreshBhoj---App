@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import { Coins, X } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
-import { Button, Card } from '@components/ui';
+import { Button, Card, Text } from '@components/ui';
 import type { Cart } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -61,7 +61,7 @@ const CoinsPanel: React.FC<CoinsPanelProps> = ({ cart, onApply, onRemove, isAppl
     <Card padding="lg" elevation="xs" style={styles.card}>
       <View style={styles.row}>
         <View style={styles.headerIcon}>
-          <Coins size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+          <Coins size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
         </View>
         <View style={styles.headerText}>
           <Text style={theme.text.h4}>FreshBhoj Coins</Text>
@@ -100,7 +100,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   appliedCard: {
     marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.accent[50],
+    backgroundColor: theme.colors.brand.accentSubtle,
   },
   appliedRow: {
     flexDirection: 'row',
@@ -119,7 +119,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
   },
   appliedTitle: {
-    color: theme.colors.accent[700],
+    color: theme.colors.text.accent,
   },
   appliedSaving: {
     color: theme.colors.accent[600],
@@ -134,7 +134,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 17,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
   },

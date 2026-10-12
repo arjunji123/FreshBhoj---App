@@ -17,7 +17,7 @@ interface ActiveOrderStripProps {
  * "where's my order?" is the single most common reason someone reopens the app.
  */
 /** Strip sits on the brand gradient in both themes, so its foreground is always white. */
-const ON_BRAND = staticTheme.colors.neutral[0];
+const ON_BRAND = staticTheme.colors.palette.white;
 
 const ActiveOrderStrip: React.FC<ActiveOrderStripProps> = ({ order, onPress }) => {
     const theme = useTheme();

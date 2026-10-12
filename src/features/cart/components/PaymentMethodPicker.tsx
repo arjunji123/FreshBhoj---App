@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import { Text } from '@components/ui';
 import { Banknote, CheckCircle2, CreditCard, Smartphone, Wallet } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
 import type { PaymentMethod } from '@api/types';
@@ -72,7 +73,7 @@ const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChan
             {isSelected ? (
               <CheckCircle2
                 size={20}
-                color={theme.colors.primary[600]}
+                color={theme.colors.text.brand}
                 strokeWidth={2.4}
               />
             ) : (

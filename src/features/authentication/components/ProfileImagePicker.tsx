@@ -46,7 +46,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
         borderRadius: AVATAR_SIZE / 2,
-        backgroundColor: theme.colors.primary[50],
+        backgroundColor: theme.colors.brand.primarySubtle,
         borderWidth: 2,
         borderStyle: 'dashed',
         borderColor: theme.colors.overlay.primaryBorder,

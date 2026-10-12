@@ -23,7 +23,7 @@ interface KitchenCardProps {
  * after the name — it is the trust signal the whole product is built on.
  */
 /** Text over photography stays white in both themes. */
-const ON_PHOTO = staticTheme.colors.neutral[0];
+const ON_PHOTO = staticTheme.colors.palette.white;
 
 const KitchenCard: React.FC<KitchenCardProps> = ({
   kitchen,

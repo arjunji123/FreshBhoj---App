@@ -24,7 +24,7 @@ import type { HomeHeaderProps } from '../home.types';
 import { useTheme } from '@app/theme/useTheme';
 
 /** The header is brand-teal in both themes, so its foreground is always white. */
-const ON_BRAND = staticTheme.colors.neutral[0];
+const ON_BRAND = staticTheme.colors.palette.white;
 
 /**
  * Brand-gradient header that collapses as the feed scrolls: the greeting and
@@ -182,7 +182,7 @@ const HomeHeader = ({
         >
           <View style={styles.searchInner}>
             <View style={styles.searchIconWrap}>
-              <Search size={16} color={theme.colors.primary[700]} strokeWidth={2.4} />
+              <Search size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
             </View>
             <View style={styles.hintWrap}>
               <Animated.Text

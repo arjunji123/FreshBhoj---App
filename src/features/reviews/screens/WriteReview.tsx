@@ -1,10 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
 import { Leaf, PackageCheck, Sparkles } from 'lucide-react-native';
 import { ApiError } from '@api';
-import { AppBar, Button, Card, StickyBar } from '@components/ui';
+import { AppBar, Button, Card, StickyBar, Text } from '@components/ui';
 import { StarRow } from '@components/ui/Rating';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useCreateReview } from '../hooks/useReviews';
@@ -134,7 +134,7 @@ const WriteReview = () => {
                 <Text
                   style={[
                     theme.text.caption,
-                    { color: isSelected ? theme.colors.primary[600] : theme.colors.text.secondary },
+                    { color: isSelected ? theme.colors.text.brand : theme.colors.text.secondary },
                   ]}
                 >
                   {label}
@@ -150,6 +150,7 @@ const WriteReview = () => {
           onChangeText={setComment}
           placeholder="The flavours were amazing, but the portion could be slightly larger. Packaging was perfect!"
           placeholderTextColor={theme.colors.text.tertiary}
+          selectionColor={theme.colors.brand.primary}
           multiline
           maxLength={1000}
           style={[theme.text.body, styles.commentInput]}
@@ -184,7 +185,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   mealImage: {
     width: 54,
@@ -193,13 +194,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
   },
   mealImageFallback: {
-    backgroundColor: theme.colors.primary[100],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   mealText: {
     flex: 1,
   },
   eyebrow: {
-    color: theme.colors.primary[600],
+    color: theme.colors.text.brand,
     marginBottom: 2,
   },
   kitchenName: {
@@ -234,7 +235,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   tagCardSelected: {
     borderColor: theme.colors.primary[600],
-    backgroundColor: theme.colors.surface.brandWash,
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   commentInput: {
     minHeight: 110,

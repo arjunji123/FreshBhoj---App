@@ -1,11 +1,11 @@
 import React, { useRef, useState, useMemo } from 'react';
-import { Alert, FlatList, Image, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { CalendarClock, CalendarOff, Plus } from 'lucide-react-native';
 import { ApiError } from '@api';
 import type { CustomerSubscriptionStatus, CustomerSubscriptionSummary } from '@api/types';
 import { formatCurrency, humanizeEnum } from '@utils/format';
-import { AppBarAction, Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton } from '@components/ui';
+import { AppBarAction, Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton, Text } from '@components/ui';
 import type { BadgeTone, SheetHandle } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useBulkPauseSubscriptions, useCustomerSubscriptions } from '../hooks/useSubscriptions';
@@ -234,7 +234,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   vacationCard: {
     marginBottom: theme.spacing.lg,
-    backgroundColor: theme.colors.surface.brandWash,
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   vacationRow: {
     flexDirection: 'row',
@@ -275,7 +275,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     backgroundColor: theme.colors.neutral[100],
   },
   logoFallback: {
-    backgroundColor: theme.colors.primary[100],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   cardText: {
     flex: 1,

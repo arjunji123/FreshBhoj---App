@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: theme.spacing.paddings.md,
   },
-  resultIconSuccess: { backgroundColor: theme.colors.accent[50] },
+  resultIconSuccess: { backgroundColor: theme.colors.brand.accentSubtle },
   resultIconError: { backgroundColor: theme.colors.state.errorBg },
   resultSub: { marginTop: theme.spacing.paddings.xs },
   resultButton: { marginTop: theme.spacing.paddings.xl, alignSelf: 'stretch' },

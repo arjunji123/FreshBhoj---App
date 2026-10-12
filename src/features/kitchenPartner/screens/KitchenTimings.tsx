@@ -390,7 +390,7 @@ export default KitchenTimings;
 
 const styles = StyleSheet.create({
   scroll: { paddingHorizontal: theme.layout.screenPadding, paddingTop: theme.spacing.paddings.sm, paddingBottom: theme.spacing.paddings.xxl },
-  emergencyCard: { marginBottom: theme.spacing.paddings.lg, backgroundColor: theme.colors.amber[50] },
+  emergencyCard: { marginBottom: theme.spacing.paddings.lg, backgroundColor: theme.colors.state.warningBg },
   emergencyRow: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.paddings.sm },
   emergencyText: { flex: 1 },
   emergencyHint: { marginTop: 2 },

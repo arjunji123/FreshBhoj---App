@@ -27,7 +27,7 @@ const CARD_HEIGHT = 295; // ~9:16
 const CARD_GAP = staticTheme.spacing.md;
 
 /** Text over photography must stay white in both themes (theme inverse flips in dark mode). */
-const ON_PHOTO = staticTheme.colors.neutral[0];
+const ON_PHOTO = staticTheme.colors.palette.white;
 
 /**
  * "Watch & Order" — the reels hook, placed right under the stories. Tall
@@ -253,6 +253,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   orderText: {
     ...theme.text.label,
-    color: theme.colors.primary[700],
+    color: theme.colors.text.brand,
   },
 });

@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { theme } from '@app/theme/index';
+import { useTheme } from '@app/theme/useTheme';
 import { Button } from '@components/ui';
 import { useKitchenOnboardingStatus } from '@features/kitchenPartner/hooks/useKitchenPortal';
 import KitchenOnboardingPending from '@features/kitchenPartner/screens/KitchenOnboardingPending';
@@ -49,6 +49,8 @@ const Stack = createNativeStackNavigator<KitchenPartnerStackParamList>();
  * shows the form for the step after it.
  */
 function KitchenGate() {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
   const onboarding = useKitchenOnboardingStatus();
 
   if (onboarding.isLoading) {
@@ -106,7 +108,7 @@ function KitchenGate() {
   return <KitchenOnboardingPending />;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.surface.page },
   errorPadding: { padding: theme.spacing.paddings.xl },
   errorTitle: { ...theme.text.h3, color: theme.colors.text.primary, textAlign: 'center', marginBottom: theme.spacing.paddings.xs },

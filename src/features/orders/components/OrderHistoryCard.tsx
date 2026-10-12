@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, View } from 'react-native';
 import { RotateCcw, Star } from 'lucide-react-native';
 import { formatCurrency, formatDateTime } from '@utils/format';
-import { Badge, Button, Card, Divider, type BadgeTone } from '@components/ui';
+import { Badge, Button, Card, Divider, type BadgeTone, Text } from '@components/ui';
 import type { OrderCard, OrderStatus } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -136,7 +136,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     borderColor: theme.colors.surface.base,
   },
   thumbnailFallback: {
-    backgroundColor: theme.colors.primary[50],
+    backgroundColor: theme.colors.brand.primarySubtle,
   },
   headerText: {
     flex: 1,

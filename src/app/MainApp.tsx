@@ -7,6 +7,7 @@ import Animated, { Easing, runOnJS, useSharedValue, withTiming } from 'react-nat
 import { queryClient } from '@api';
 import SplashScreen from '@components/SplashScreen';
 import { useCaptureReferralLink } from '@features/referral/useCaptureReferralLink';
+import { useThemeStore } from '@app/theme/themeStore';
 import { AppNavigator } from './navigation/AppNavigator';
 
 const SPLASH_DURATION_MS = 2200;
@@ -15,6 +16,8 @@ const SPLASH_FADE_MS = 320;
 const MainApp = () => {
   const [showSplashOverlay, setShowSplashOverlay] = useState(true);
   const splashOpacity = useSharedValue(1);
+
+  const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
 
   useCaptureReferralLink();
 
@@ -39,7 +42,7 @@ const MainApp = () => {
       <SafeAreaProvider>
         <KeyboardProvider>
           <StatusBar
-            barStyle={showSplashOverlay ? 'light-content' : 'dark-content'}
+            barStyle={showSplashOverlay || isDark ? 'light-content' : 'dark-content'}
             backgroundColor="transparent"
             translucent
           />

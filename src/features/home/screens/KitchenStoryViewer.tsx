@@ -259,7 +259,7 @@ export default KitchenStoryViewer;
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: theme.colors.neutral[900],
+    backgroundColor: '#0D1B1E',
   },
   scrim: {
     ...StyleSheet.absoluteFillObject,

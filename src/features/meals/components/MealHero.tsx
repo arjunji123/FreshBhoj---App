@@ -96,6 +96,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   dotActive: {
     width: 20,
-    backgroundColor: theme.colors.surface.base,
+    backgroundColor: theme.colors.palette.white,
   },
 });

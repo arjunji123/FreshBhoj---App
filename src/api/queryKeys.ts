@@ -23,6 +23,7 @@ export const qk = {
     list: (filters: Record<string, unknown>) => ['meals', 'list', filters] as const,
     trendingNearby: (filters: Record<string, unknown>) =>
       ['meals', 'trendingNearby', filters] as const,
+    fit: ['meals', 'fit'] as const,
     detail: (id: string) => ['meals', 'detail', id] as const,
     similar: (id: string) => ['meals', 'similar', id] as const,
     favorites: ['meals', 'favorites'] as const,

@@ -48,7 +48,26 @@ export interface TrendingNearbyParams {
   limit?: number;
 }
 
+/** BhojFit rails from `GET /meals/fit`: everything above the filterable list, in one call. */
+export interface FitOverview {
+  proteinChampions: MealCard[];
+  lightAndLean: MealCard[];
+  kitchens: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    locality: string | null;
+    isVerified: boolean;
+    rating: number;
+    mealCount: number;
+    avgProteinG: number;
+  }>;
+}
+
 export const mealsApi = {
+  fit: (params: { limit?: number } = {}) =>
+    apiClient.get<FitOverview>('/meals/fit', { query: params as Record<string, unknown> }),
+
   list: (params: MealListParams = {}) =>
     apiClient.get<Paginated<MealCard>>('/meals', { query: params as Record<string, unknown> }),
 

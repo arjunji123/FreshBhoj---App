@@ -40,7 +40,7 @@ const FitHero: React.FC<FitHeroProps> = ({ targets, inCart, onSetTarget }) => {
 
       <View style={styles.badge}>
         <Sparkles size={12} color={FIT.lime} strokeWidth={2.4} />
-        <Text style={styles.badgeText}>FIT BY FRESHBHOJ</Text>
+        <Text style={styles.badgeText}>BHOJFIT</Text>
       </View>
 
       <View style={styles.row}>

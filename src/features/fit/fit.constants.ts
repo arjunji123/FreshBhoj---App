@@ -36,7 +36,7 @@ export interface FitGoalOption {
 }
 
 export const FIT_GOALS: FitGoalOption[] = [
-  { key: 'ALL', label: 'All fit meals', hint: 'Everything healthy', tags: [...HEALTHY_GOAL_TAGS, 'MUSCLE_GAIN'] },
+  { key: 'ALL', label: 'All meals', hint: 'Everything healthy', tags: [...HEALTHY_GOAL_TAGS, 'MUSCLE_GAIN'] },
   { key: 'MUSCLE_GAIN', label: 'Build muscle', hint: 'High protein', tags: ['MUSCLE_GAIN', 'HIGH_PROTEIN'] },
   { key: 'FAT_LOSS', label: 'Lose fat', hint: 'Light and lean', tags: ['WEIGHT_LOSS', 'LOW_CALORIE'] },
   { key: 'BALANCED', label: 'Eat balanced', hint: 'Everyday healthy', tags: ['HEALTHY_LIFESTYLE'] },
@@ -60,9 +60,9 @@ export const FIT_COPY = {
   proteinSubtitle: 'The most protein per plate near you',
   lightTitle: 'Light & lean',
   lightSubtitle: 'Under 450 kcal, still filling',
-  kitchensTitle: 'Fit kitchens',
+  kitchensTitle: 'BhojFit kitchens',
   kitchensSubtitle: 'Kitchens that cook for your goals',
-  feedTitle: 'All fit meals',
+  feedTitle: 'All BhojFit meals',
 } as const;
 
 export const FIT_TIPS: string[] = [

@@ -11,7 +11,7 @@ interface FitAdBannerProps {
   onPress: () => void;
 }
 
-/** Home promo for the Fit tab. Tapping jumps straight to it. */
+/** Home promo for the Fit tab (BhojFit). Tapping jumps straight to it. */
 const FitAdBanner: React.FC<FitAdBannerProps> = ({ onPress }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -27,19 +27,19 @@ const FitAdBanner: React.FC<FitAdBannerProps> = ({ onPress }) => {
   const chipB = useAnimatedStyle(() => ({ transform: [{ translateY: 4 * float.value }] }));
 
   return (
-    <PressableScale onPress={onPress} scaleTo={0.97} accessibilityRole="button" accessibilityLabel="Open Fit: healthy macro-counted meals" style={styles.wrap}>
+    <PressableScale onPress={onPress} scaleTo={0.97} accessibilityRole="button" accessibilityLabel="Open BhojFit: healthy macro-counted meals" style={styles.wrap}>
       <LinearGradient colors={[FIT.forest, FIT.deep, FIT.emerald]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
         <View pointerEvents="none" style={styles.orb} />
         <View style={styles.copy}>
           <View style={styles.newTag}>
-            <Text style={styles.newText}>NEW</Text>
+            <Text style={styles.newText}>NEW · BHOJFIT</Text>
           </View>
           <Text style={styles.title}>
             Eat clean. <Text style={styles.accent}>Train smart.</Text>
           </Text>
           <Text style={styles.sub}>Macro-counted meals, your daily protein target and fit kitchens.</Text>
           <View style={styles.cta}>
-            <Text style={styles.ctaText}>Open Fit</Text>
+            <Text style={styles.ctaText}>Open BhojFit</Text>
             <ArrowRight size={14} color={FIT.forest} strokeWidth={2.8} />
           </View>
         </View>

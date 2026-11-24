@@ -23,10 +23,10 @@ type TabIconComponent = React.FC<{ size?: number; color?: string; active?: boole
 const TABS: Record<string, { label: string; Icon: TabIconComponent }> = {
   Home: { label: 'Home', Icon: HomeTabIcon },
   Profile: { label: 'Profile', Icon: ProfileTabIcon },
-  Fit: { label: 'Fit', Icon: FitTabIcon },
+  Fit: { label: 'BhojFit', Icon: FitTabIcon },
 };
 
-const BAR_WIDTH = 344;
+const BAR_WIDTH = 368;
 /** Extra slide distance so the raised Feed button clears the screen edge too. */
 const HIDE_OVERSHOOT = 40;
 const INDICATOR_INSET = 6;

@@ -145,14 +145,14 @@ const FitHub = () => {
             haptic={false}
             scaleTo={0.98}
             accessibilityRole="button"
-            accessibilityLabel="Start a weekly Fit plan"
+            accessibilityLabel="Start a weekly BhojFit plan"
             style={styles.plan}
           >
             <View style={styles.planIcon}>
               <CalendarCheck size={22} color={FIT.forest} strokeWidth={2.4} />
             </View>
             <View style={styles.planText}>
-              <Text style={styles.planTitle}>Weekly Fit plan</Text>
+              <Text style={styles.planTitle}>Weekly BhojFit plan</Text>
               <Text style={styles.planSub}>Lock in your macros. Fresh meals delivered every day.</Text>
             </View>
             <ChevronRight size={20} color={FIT.lime} />

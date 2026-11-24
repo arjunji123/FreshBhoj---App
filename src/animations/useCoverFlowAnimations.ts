@@ -23,7 +23,7 @@ const DEFAULTS = {
   overlayOpacity: [0.55, 0.4, 0, 0.4, 0.55] as [number, number, number, number, number],
   ringOpacity: [0, 0, 1, 0, 0] as [number, number, number, number, number],
   shadowMultiplier: 1,
-  labelBgColors: ['rgba(8, 127, 120, 0)', '#087F78', 'rgba(8, 127, 120, 0)'] as [string, string, string],
+  labelBgColors: ['rgba(18, 134, 95, 0)', '#12865F', 'rgba(18, 134, 95, 0)'] as [string, string, string],
   labelTextColors: ['#777777', '#FFFFFF', '#777777'] as [string, string, string],
 };
 

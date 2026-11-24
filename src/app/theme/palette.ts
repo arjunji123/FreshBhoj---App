@@ -1,26 +1,26 @@
 /**
  * FreshBhoj colour scales — the single source of truth for every colour in the app.
  *
- * Brand: an aqua → teal → deep-ocean gradient (#1DB9A0 → #087F78 → #0B4F6C),
- * shared with the website. `primary[600]` (#087F78) is the CTA fill — it keeps
+ * Brand: a light-green → emerald → deep-forest gradient (#34C98A → #12865F → #0C4A38),
+ * shared with the website. `primary[600]` (#12865F) is the CTA fill — it keeps
  * white text at WCAG AA. Marigold (`amber`) is the single warm accent.
  *
  * Rule for every screen built after this file: reference a token here.
  * No new hex literals in feature code.
  */
 
-/** Teal — brand primary. Logo, CTAs, active states, gradients. */
+/** Green — brand primary. Logo, CTAs, active states, gradients. */
 export const primary = {
-  50: '#EFFAF8',
-  100: '#D3F1EE',
-  200: '#A7E3DC',
-  300: '#6FD0C5',
-  400: '#1DB9A0', // brand gradient stop 1
-  500: '#0E9A8E',
-  600: '#087F78', // primary CTA fill (white text passes AA)
-  700: '#076B6A',
-  800: '#0A5A66',
-  900: '#0B4F6C', // brand gradient stop 3
+  50: '#EEFBF4',
+  100: '#D5F5E4',
+  200: '#AAEACB',
+  300: '#72DAAA',
+  400: '#34C98A', // brand gradient stop 1
+  500: '#17A672',
+  600: '#12865F', // primary CTA fill (white text passes AA)
+  700: '#0F6F50',
+  800: '#0D5C43',
+  900: '#0C4A38', // brand gradient stop 3
 } as const;
 
 /** Emerald — health, nutrition, "verified kitchen", success. Never a CTA colour. */
@@ -93,8 +93,8 @@ export const overlay = {
   imageFade: ['rgba(13,27,30,0)', 'rgba(13,27,30,0.78)'] as [string, string],
   glass: 'rgba(255, 255, 255, 0.2)',
   glassStrong: 'rgba(255, 255, 255, 0.35)',
-  primaryWash: 'rgba(8, 127, 120, 0.07)',
-  primaryBorder: 'rgba(8, 127, 120, 0.22)',
+  primaryWash: 'rgba(18, 134, 95, 0.07)',
+  primaryBorder: 'rgba(18, 134, 95, 0.22)',
   accentWash: 'rgba(15, 157, 107, 0.09)',
 } as const;
 

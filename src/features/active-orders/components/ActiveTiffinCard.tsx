@@ -95,7 +95,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    backgroundColor: 'rgba(8, 127, 120, 0.1)',
+    backgroundColor: 'rgba(18, 134, 95, 0.1)',
   },
   topRow: {
     flexDirection: 'row',

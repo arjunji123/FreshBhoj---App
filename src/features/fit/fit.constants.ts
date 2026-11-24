@@ -60,9 +60,9 @@ export const FIT_COPY = {
   proteinSubtitle: 'The most protein per plate near you',
   lightTitle: 'Light & lean',
   lightSubtitle: 'Under 450 kcal, still filling',
-  kitchensTitle: 'BhojFit kitchens',
+  kitchensTitle: 'Bhoj Fit kitchens',
   kitchensSubtitle: 'Kitchens that cook for your goals',
-  feedTitle: 'All BhojFit meals',
+  feedTitle: 'All Bhoj Fit meals',
 } as const;
 
 export const FIT_TIPS: string[] = [

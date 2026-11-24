@@ -11,7 +11,7 @@ interface FitAdBannerProps {
   onPress: () => void;
 }
 
-/** Home promo for the Fit tab (BhojFit). Tapping jumps straight to it. */
+/** Home promo for the Fit tab (Bhoj Fit). Tapping jumps straight to it. */
 const FitAdBanner: React.FC<FitAdBannerProps> = ({ onPress }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -27,19 +27,20 @@ const FitAdBanner: React.FC<FitAdBannerProps> = ({ onPress }) => {
   const chipB = useAnimatedStyle(() => ({ transform: [{ translateY: 4 * float.value }] }));
 
   return (
-    <PressableScale onPress={onPress} scaleTo={0.97} accessibilityRole="button" accessibilityLabel="Open BhojFit: healthy macro-counted meals" style={styles.wrap}>
+    <PressableScale onPress={onPress} scaleTo={0.97} accessibilityRole="button" accessibilityLabel="Open Bhoj Fit: healthy macro-counted meals" style={styles.wrap}>
       <LinearGradient colors={[FIT.forest, FIT.deep, FIT.emerald]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
         <View pointerEvents="none" style={styles.orb} />
         <View style={styles.copy}>
           <View style={styles.newTag}>
-            <Text style={styles.newText}>NEW · BHOJFIT</Text>
+            <Text style={styles.newText}>New · Bhoj Fit</Text>
           </View>
           <Text style={styles.title}>
-            Eat clean. <Text style={styles.accent}>Train smart.</Text>
+            Eat clean.{'\n'}
+            <Text style={styles.accent}>Train{'\u00A0'}smart.</Text>
           </Text>
           <Text style={styles.sub}>Macro-counted meals, your daily protein target and fit kitchens.</Text>
           <View style={styles.cta}>
-            <Text style={styles.ctaText}>Open BhojFit</Text>
+            <Text style={styles.ctaText}>Open Bhoj Fit</Text>
             <ArrowRight size={14} color={FIT.forest} strokeWidth={2.8} />
           </View>
         </View>
@@ -70,7 +71,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     orb: { position: 'absolute', width: 190, height: 190, borderRadius: 95, right: -50, top: -80, backgroundColor: FIT.lime, opacity: 0.15 },
     copy: { flex: 1, gap: 6 },
     newTag: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: theme.radius.pill, backgroundColor: FIT.lime },
-    newText: { color: FIT.forest, fontSize: 10, fontWeight: '900', letterSpacing: 1 },
+    newText: { color: FIT.forest, fontSize: 11, fontWeight: '800', letterSpacing: 0.2 },
     title: { color: FIT.onHero, fontSize: 22, lineHeight: 26, fontWeight: '800', letterSpacing: -0.4 },
     accent: { color: FIT.lime },
     sub: { color: FIT.heroMuted, fontSize: 12, lineHeight: 17 },

@@ -90,3 +90,16 @@ export const FitTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }
     </IconFrame>
   );
 };
+
+/** Orders: a receipt with a zig-zag edge and two text lines. Filled when active. */
+export const OrdersTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }) => {
+  const l = layers(color, tint);
+  const body = 'M6 3.6h12v16.8l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4z';
+  return (
+    <IconFrame size={size}>
+      <Path d={body} {...l.fill} fillOpacity={active ? 0.28 : 0.1} />
+      <Path d={body} {...l.line} />
+      <Path d="M9 8.6h6M9 12h6" {...l.line} />
+    </IconFrame>
+  );
+};

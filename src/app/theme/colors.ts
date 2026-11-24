@@ -9,20 +9,20 @@ export const palette = {
     transparent: 'transparent',
     glass: 'rgba(255,255,255,0.2)',
 
-    gradient1: '#0E9A8E',
-    gradient2: '#087F78',
-    gradient3: '#0B4F6C',
+    gradient1: '#17A672',
+    gradient2: '#12865F',
+    gradient3: '#0C4A38',
     gradient4: '#F3F8F8',
     gradient5: '#8FA2A6',
     gradient6: '#FFFFFF',
-    gradient7: '#14ADA0',
-    gradient8: '#0A5A66',
+    gradient7: '#2BBE82',
+    gradient8: '#0D5C43',
 
     // Text Colors
-    textPrimary: '#1DB9A0',
-    textSecondary: '#087F78',
-    textGradient1: "#1DB9A0",
-    textGradient2: "#0B4F6C",
+    textPrimary: '#34C98A',
+    textSecondary: '#12865F',
+    textGradient1: "#34C98A",
+    textGradient2: "#0C4A38",
 
     // Grays
     gray1: '#5F7377',
@@ -89,7 +89,7 @@ export const elevation = {
     },
     /** Brand-tinted glow under primary CTAs. */
     primary: {
-        shadowColor: '#087F78',
+        shadowColor: '#12865F',
         shadowOffset: { width: 0, height: 8 },
         shadowOpacity: 0.28,
         shadowRadius: 18,

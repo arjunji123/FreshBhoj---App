@@ -48,7 +48,7 @@ export interface TrendingNearbyParams {
   limit?: number;
 }
 
-/** BhojFit rails from `GET /meals/fit`: everything above the filterable list, in one call. */
+/** Bhoj Fit rails from `GET /meals/fit`: everything above the filterable list, in one call. */
 export interface FitOverview {
   proteinChampions: MealCard[];
   lightAndLean: MealCard[];

@@ -43,8 +43,8 @@ export const overlay = {
   imageFade: ['rgba(9,20,22,0)', 'rgba(9,20,22,0.88)'] as [string, string],
   glass: 'rgba(255, 255, 255, 0.08)',
   glassStrong: 'rgba(255, 255, 255, 0.16)',
-  primaryWash: 'rgba(29, 185, 160, 0.14)',
-  primaryBorder: 'rgba(29, 185, 160, 0.34)',
+  primaryWash: 'rgba(52, 201, 138, 0.14)',
+  primaryBorder: 'rgba(52, 201, 138, 0.34)',
   accentWash: 'rgba(15, 157, 107, 0.16)',
 } as const;
 

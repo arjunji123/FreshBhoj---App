@@ -5,13 +5,13 @@
  * src/app/theme/palette.ts so the art stays on-brand in light and dark mode.
  */
 export const IC = {
-  ink: '#0B4F6C',
+  ink: '#0C4A38',
   inkDeep: '#073A52',
-  teal: '#087F78',
-  tealMid: '#0E9A8E',
-  aqua: '#1DB9A0',
-  aquaSoft: '#6FD0C5',
-  mint: '#A7E3DC',
+  teal: '#12865F',
+  tealMid: '#17A672',
+  aqua: '#34C98A',
+  aquaSoft: '#72DAAA',
+  mint: '#AAEACB',
   marigold: '#FFC21A',
   marigoldDeep: '#F5A400',
   marigoldSoft: '#FFD866',

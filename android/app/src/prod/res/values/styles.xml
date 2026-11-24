@@ -6,5 +6,5 @@
         <item name="android:windowSplashScreenAnimationDuration">1</item>
     </style>
 
-     <color name="splash_red">#1DB9A0</color>
+     <color name="splash_red">#34C98A</color>
 </resources>

@@ -13,12 +13,13 @@ export type PublicStackParamList = {
   PersonalDetails: undefined;
 };
 
-/** The three bottom tabs (Search and Orders are stack screens). */
+/** The five bottom tabs. `OrdersTab` is a placeholder slot: pressing it opens the `Orders` stack screen. */
 export type MainTabParamList = {
   Home: undefined;
-  FoodFeed: undefined;
-  Profile: undefined;
   Fit: undefined;
+  FoodFeed: undefined;
+  OrdersTab: undefined;
+  Profile: undefined;
 };
 
 /** Everything reachable once signed in. */

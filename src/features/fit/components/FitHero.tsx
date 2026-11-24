@@ -40,7 +40,7 @@ const FitHero: React.FC<FitHeroProps> = ({ targets, inCart, onSetTarget }) => {
 
       <View style={styles.badge}>
         <Sparkles size={12} color={FIT.lime} strokeWidth={2.4} />
-        <Text style={styles.badgeText}>BHOJFIT</Text>
+        <Text style={styles.badgeText}>Bhoj Fit</Text>
       </View>
 
       <View style={styles.row}>
@@ -129,7 +129,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       borderWidth: 1,
       borderColor: FIT.glassBorder,
     },
-    badgeText: { color: FIT.lime, fontSize: 10, fontWeight: '800', letterSpacing: 1.2 },
+    badgeText: { color: FIT.lime, fontSize: 11, fontWeight: '800', letterSpacing: 0.3 },
     row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.md },
     copy: { flex: 1 },
     title: { color: FIT.onHero, fontSize: 30, lineHeight: 34, fontWeight: '800', letterSpacing: -0.6 },

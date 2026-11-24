@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { FeedPlayIcon, FitTabIcon, HomeTabIcon, ProfileTabIcon } from '@components/icons';
+import { LayoutChangeEvent, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { FeedPlayIcon, FitTabIcon, HomeTabIcon, OrdersTabIcon, ProfileTabIcon } from '@components/icons';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -23,10 +23,13 @@ type TabIconComponent = React.FC<{ size?: number; color?: string; active?: boole
 const TABS: Record<string, { label: string; Icon: TabIconComponent }> = {
   Home: { label: 'Home', Icon: HomeTabIcon },
   Profile: { label: 'Profile', Icon: ProfileTabIcon },
-  Fit: { label: 'BhojFit', Icon: FitTabIcon },
+  Fit: { label: 'Bhoj Fit', Icon: FitTabIcon },
+  OrdersTab: { label: 'Orders', Icon: OrdersTabIcon },
 };
 
-const BAR_WIDTH = 368;
+/** Preferred width; shrinks on narrow phones so the bar never touches the screen edges. */
+const BAR_MAX_WIDTH = 368;
+const BAR_SIDE_MARGIN = 16;
 /** Extra slide distance so the raised Feed button clears the screen edge too. */
 const HIDE_OVERSHOOT = 40;
 const INDICATOR_INSET = 6;
@@ -35,10 +38,12 @@ const SLIDE = { duration: 260, easing: Easing.out(Easing.cubic) } as const;
 /**
  * Floating pill tab bar: detached from the screen edges, rounded, softly
  * lifted. A single tinted pill slides (no overshoot) behind the active tab
- * while the Food Feed button stays raised in the centre, notched into the bar.
+ * while the Bhoj Feed button stays raised in the centre, notched into the bar.
  */
 const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   const theme = useTheme();
+  const { width: windowWidth } = useWindowDimensions();
+  const barWidth = Math.min(BAR_MAX_WIDTH, windowWidth - BAR_SIDE_MARGIN * 2);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
   const ACTIVE_COLOR = theme.colors.text.brand;
@@ -93,7 +98,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
       pointerEvents={hidden ? 'none' : 'box-none'}
       style={[styles.container, { paddingBottom: bottomGap }, containerAnimStyle]}
     >
-      <View style={styles.bar}>
+      <View style={[styles.bar, { width: barWidth }]}>
         <View style={styles.tabRow} onLayout={onRowLayout}>
           {slotWidth > 0 ? (
             <Animated.View
@@ -127,7 +132,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
                   style={styles.tabItem}
                   onPress={onPress}
                   accessibilityRole="button"
-                  accessibilityLabel="Food Feed"
+                  accessibilityLabel="Bhoj Feed"
                   accessibilityState={{ selected: isFocused }}
                 >
                   <View style={styles.feedOuter}>
@@ -145,16 +150,6 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
                       <FeedPlayIcon size={34} color={theme.colors.palette.white} />
                     </AppGradient>
                   </View>
-                  <Text
-                    style={[
-                      styles.label,
-                      styles.feedLabel,
-                      isFocused ? styles.labelActive : null,
-                      { color: isFocused ? ACTIVE_COLOR : INACTIVE_COLOR },
-                    ]}
-                  >
-                    Reels
-                  </Text>
                 </Pressable>
               );
             }
@@ -175,11 +170,6 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
                 accessibilityState={{ selected: isFocused }}
               >
                 <Icon size={24} color={color} active={isFocused} />
-                {isFocused ? (
-                  <Text style={[styles.label, styles.labelActive, { color }]} numberOfLines={1}>
-                    {tab.label}
-                  </Text>
-                ) : null}
               </Pressable>
             );
           })}
@@ -200,7 +190,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
   },
   bar: {
-    width: BAR_WIDTH,
     height: TAB_BAR_HEIGHT,
     borderRadius: 32,
     backgroundColor: theme.colors.surface.raised,
@@ -226,16 +215,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-  },
-  label: {
-    ...theme.text.caption,
-    fontSize: 12,
-    letterSpacing: 0.1,
-  },
-  labelActive: {
-    fontWeight: '700',
-  },
+      },
   feedOuter: {
     position: 'absolute',
     top: -34,
@@ -269,10 +249,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     left: 0,
     right: 0,
     height: '52%',
-  },
-  feedLabel: {
-    position: 'absolute',
-    bottom: 7,
-    alignSelf: 'center',
   },
 });

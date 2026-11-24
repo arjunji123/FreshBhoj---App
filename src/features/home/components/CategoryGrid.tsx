@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
-import { ChevronRight } from 'lucide-react-native';
 import { Skeleton } from '@components/ui';
 import PressableScale from '@animations/PressableScale';
 import type { MealCategory } from '@api/types';
@@ -14,7 +13,7 @@ interface CategoryGridProps {
   isLoading?: boolean;
 }
 
-/** Breakfast / Lunch / Dinner / Healthy Snacks — a soft 2x2 grid of roomy tiles. */
+/** Breakfast / Lunch / Dinner / Healthy Snacks — four compact tiles in a single row (icon above label). */
 const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onSelect, isLoading }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -58,15 +57,16 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onS
             </View>
             <Text
               style={[
-                theme.text.h4,
+                theme.text.caption,
                 styles.label,
                 { color: isActive ? theme.colors.text.brand : theme.colors.text.primary },
               ]}
               numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
             >
               {category.name}
             </Text>
-            <ChevronRight size={16} color={theme.colors.text.tertiary} strokeWidth={2.4} />
           </PressableScale>
         );
       })}
@@ -80,25 +80,25 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     grid: {
       flexDirection: 'row',
-      flexWrap: 'wrap',
       paddingHorizontal: theme.layout.screenPadding,
-      gap: theme.spacing.md,
+      gap: theme.spacing.sm,
     },
     tile: {
-      width: '47.9%',
-      flexGrow: 1,
-      flexDirection: 'row',
+      flex: 1,
+      flexDirection: 'column',
       alignItems: 'center',
-      gap: theme.spacing.md,
-      padding: theme.spacing.md,
-      borderRadius: theme.radius.xxl,
+      justifyContent: 'flex-start',
+      gap: theme.spacing.sm,
+      paddingVertical: theme.spacing.md,
+      paddingHorizontal: theme.spacing.xs,
+      borderRadius: theme.radius.xl,
       backgroundColor: theme.colors.surface.raised,
       borderWidth: 1.5,
       borderColor: 'transparent',
       ...theme.elevation.sm,
     },
     skeletonTile: {
-      height: 72,
+      height: 104,
     },
     tileActive: {
       borderColor: theme.colors.borders.brand,
@@ -121,6 +121,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       fontSize: 24,
     },
     label: {
-      flex: 1,
+      textAlign: 'center',
+      fontWeight: '700',
+      minHeight: 32,
     },
   });

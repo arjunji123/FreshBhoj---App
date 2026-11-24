@@ -18,4 +18,4 @@ export {
   CoinIcon,
 } from './icons';
 
-export { HomeTabIcon, ProfileTabIcon, ReelTabIcon, FeedPlayIcon } from './tabIcons';
+export { HomeTabIcon, ProfileTabIcon, ReelTabIcon, FitTabIcon, FeedPlayIcon } from './tabIcons';

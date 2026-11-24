@@ -11,8 +11,9 @@ import { ApiError } from './client';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60_000,
-      gcTime: 10 * 60_000,
+      staleTime: 2 * 60_000,
+      // Must outlive the persisted cache's maxAge or restored entries get collected at once.
+      gcTime: 24 * 60 * 60_000,
       retry: (failureCount, error) => {
         if (error instanceof ApiError) {
           if (error.statusCode >= 400 && error.statusCode < 500) return false;

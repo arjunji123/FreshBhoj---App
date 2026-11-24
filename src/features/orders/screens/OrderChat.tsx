@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   KeyboardAvoidingView,
@@ -14,7 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MessageSquare, Send, ShieldAlert } from 'lucide-react-native';
 import { ApiError, qk } from '@api';
 import { useQueryClient } from '@tanstack/react-query';
-import { AppBar, EmptyState, Input, Screen, Text } from '@components/ui';
+import { AppBar, EmptyState, Input, Screen, Skeleton, Text } from '@components/ui';
 import type { OrderChatMessage } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useTheme } from '@app/theme/useTheme';
@@ -76,7 +75,11 @@ const OrderChat = () => {
     if (messagesQuery.isLoading) {
       return (
         <View style={styles.center}>
-          <ActivityIndicator color={theme.colors.text.brand} />
+          <View style={styles.skeletons}>
+            <Skeleton width="62%" height={44} radius={theme.radius.xl} />
+            <Skeleton width="48%" height={44} radius={theme.radius.xl} style={styles.skeletonRight} />
+            <Skeleton width="70%" height={44} radius={theme.radius.xl} />
+          </View>
         </View>
       );
     }
@@ -188,6 +191,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     flex: { flex: 1 },
     center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+    skeletons: { flex: 1, padding: theme.layout.screenPadding, gap: theme.spacing.md },
+    skeletonRight: { alignSelf: 'flex-end' },
     listContent: { padding: theme.layout.screenPadding, flexGrow: 1, gap: theme.spacing.sm },
     emptyWrap: {
       flex: 1,

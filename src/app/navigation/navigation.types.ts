@@ -18,6 +18,7 @@ export type MainTabParamList = {
   Home: undefined;
   FoodFeed: undefined;
   Profile: undefined;
+  Fit: undefined;
 };
 
 /** Everything reachable once signed in. */

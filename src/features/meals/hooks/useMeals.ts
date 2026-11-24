@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { mealsApi, qk } from '@api';
 import type { MealListParams, TrendingNearbyParams } from '@api/endpoints/meals.api';
 import type { MealCard, NearbyMealCard, Paginated } from '@api/types';
@@ -21,6 +21,8 @@ export function useMealFeed(filters: MealListParams = {}) {
       mealsApi.list({ ...filters, page: pageParam as number, limit: filters.limit ?? PAGE_SIZE }),
     getNextPageParam: (lastPage: Paginated<MealCard>) =>
       lastPage.meta.hasNextPage ? lastPage.meta.page + 1 : undefined,
+    // Changing a filter keeps the old list on screen until the new one lands: no skeleton flash.
+    placeholderData: keepPreviousData,
     staleTime: 60_000,
   });
 }

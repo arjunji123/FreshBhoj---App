@@ -11,6 +11,8 @@ import { GOAL_TAG_LABELS } from '@utils/labels';
 import { isHealthyMeal } from '@utils/health';
 import { useTheme } from "@app/theme/useTheme";
 import PressableScale from '@animations/PressableScale';
+import { useQueryClient } from '@tanstack/react-query';
+import { mealsApi, qk } from '@api';
 
 interface MealCardProps {
   meal: MealCardType;
@@ -44,12 +46,21 @@ const MealCard: React.FC<MealCardProps> = ({
 }) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+  const queryClient = useQueryClient();
+  // Start loading the detail page the moment a finger lands, so it is usually ready by the time the screen opens.
+  const prefetchDetail = () =>
+    queryClient.prefetchQuery({
+      queryKey: qk.meals.detail(meal.id),
+      queryFn: () => mealsApi.detail(meal.id),
+      staleTime: 60_000,
+    });
   const isCompact = layout === 'compact';
   const unavailable = !meal.isOrderable;
 
   return (
     <PressableScale
       onPress={onPress}
+      onPressIn={prefetchDetail}
       accessibilityRole="button"
       accessibilityLabel={meal.name}
       scaleTo={0.975}

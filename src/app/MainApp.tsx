@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar, StyleSheet } from 'react-native';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Animated, { Easing, runOnJS, useSharedValue, withTiming } from 'react-native-reanimated';
 import { queryClient } from '@api';
+import { persistOptions } from '@api/queryPersister';
 import SplashScreen from '@components/SplashScreen';
 import { useCaptureReferralLink } from '@features/referral/useCaptureReferralLink';
 import { useThemeStore } from '@app/theme/themeStore';
 import { AppNavigator } from './navigation/AppNavigator';
 
-const SPLASH_DURATION_MS = 2200;
+// Long enough for the brand moment, short enough to feel instant: the app
+// underneath is already mounted (and, after the first launch, already filled
+// from the persisted cache).
+const SPLASH_DURATION_MS = 1300;
 const SPLASH_FADE_MS = 320;
 
 const MainApp = () => {
@@ -38,7 +42,7 @@ const MainApp = () => {
   }, [splashOpacity]);
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider client={queryClient} persistOptions={persistOptions}>
       <SafeAreaProvider>
         <KeyboardProvider>
           <StatusBar
@@ -54,7 +58,7 @@ const MainApp = () => {
           ) : null}
         </KeyboardProvider>
       </SafeAreaProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 };
 

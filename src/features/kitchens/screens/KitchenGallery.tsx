@@ -1,6 +1,5 @@
 import React, { useRef, useState, useMemo } from 'react';
 import {
-  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -14,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Play, X } from 'lucide-react-native';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
 import { useKitchenMedia } from '../hooks/useKitchens';
+import { Skeleton } from '@components/ui';
 import { useTheme } from "@app/theme/useTheme";
 
 type Route = RouteProp<PrivateStackParamList, 'KitchenGallery'>;
@@ -37,7 +37,7 @@ const KitchenGallery = () => {
   if (isLoading) {
     return (
       <View style={[styles.screen, styles.loadingScreen]}>
-        <ActivityIndicator color={theme.colors.palette.white} size="large" />
+        <Skeleton width="86%" height={360} radius={theme.radius.xxl} />
         <Pressable
           onPress={navigation.goBack}
           hitSlop={theme.layout.hitSlop}

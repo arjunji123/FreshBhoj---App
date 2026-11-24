@@ -33,7 +33,7 @@ import KitchenStoriesRail from '../components/KitchenStoriesRail';
 import TrendingNearYou from '../components/TrendingNearYou';
 import FeaturedKitchens from '../components/FeaturedKitchens';
 import ReelsRail from '../components/ReelsRail';
-import HealthBanner from '../components/HealthBanner';
+import FitAdBanner from '../components/FitAdBanner';
 import HealthyPicks from '../components/HealthyPicks';
 import ActiveOrderStrip from '../components/ActiveOrderStrip';
 import { HOME_COPY } from '../home.constants';
@@ -229,7 +229,7 @@ const Home = () => {
         </Animated.View>
 
         <Animated.View entering={enterRise(2)}>
-          <HealthBanner />
+          <FitAdBanner onPress={() => navigation.navigate('MainTabs', { screen: 'Fit' })} />
         </Animated.View>
 
         <Animated.View entering={enterRise(3)}>

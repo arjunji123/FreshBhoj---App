@@ -76,3 +76,17 @@ export const FeedPlayIcon: React.FC<{ size?: number; color?: string }> = ({ size
     />
   </Svg>
 );
+
+/** Fit: a bowl topped with a leaf. Filled when active. */
+export const FitTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }) => {
+  const l = layers(color, tint);
+  return (
+    <IconFrame size={size}>
+      <Path d="M3.6 12.2h16.8a8.4 8.4 0 0 1-16.8 0z" {...l.fill} fillOpacity={active ? 0.32 : 0.1} />
+      <Path d="M3.6 12.2h16.8a8.4 8.4 0 0 1-16.8 0z" {...l.line} />
+      <Path d="M12 11.6C12 7.4 14.6 4.4 18.6 4c.2 4-2.2 7-6.6 7.6z" {...l.fill} fillOpacity={active ? 0.5 : 0.16} />
+      <Path d="M12 11.6C12 7.4 14.6 4.4 18.6 4c.2 4-2.2 7-6.6 7.6zM12 11.6c.7-2.2 2-3.8 3.8-5" {...l.line} />
+      <Path d="M8.6 8.4c-1.6.3-2.7 1.4-3 3" {...l.line} />
+    </IconFrame>
+  );
+};

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { LayoutChangeEvent, Pressable, StyleSheet, Text, View } from 'react-native';
-import { FeedPlayIcon, HomeTabIcon, ProfileTabIcon } from '@components/icons';
+import { FeedPlayIcon, FitTabIcon, HomeTabIcon, ProfileTabIcon } from '@components/icons';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -23,9 +23,10 @@ type TabIconComponent = React.FC<{ size?: number; color?: string; active?: boole
 const TABS: Record<string, { label: string; Icon: TabIconComponent }> = {
   Home: { label: 'Home', Icon: HomeTabIcon },
   Profile: { label: 'Profile', Icon: ProfileTabIcon },
+  Fit: { label: 'Fit', Icon: FitTabIcon },
 };
 
-const BAR_WIDTH = 264;
+const BAR_WIDTH = 344;
 /** Extra slide distance so the raised Feed button clears the screen edge too. */
 const HIDE_OVERSHOOT = 40;
 const INDICATOR_INSET = 6;

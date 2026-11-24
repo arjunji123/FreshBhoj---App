@@ -15,6 +15,7 @@ import { EmptyCart } from '@components/illustrations';
 import CartItemRow from '../components/CartItemRow';
 import CouponPanel from '../components/CouponPanel';
 import CoinsPanel from '../components/CoinsPanel';
+import CartNutritionCard from '@features/fit/components/CartNutritionCard';
 import BillSummary from '../components/BillSummary';
 import {
   useApplyCoins,
@@ -133,6 +134,8 @@ const Cart = () => {
           ))}
         </Card>
         </Animated.View>
+
+        <CartNutritionCard cart={cart} index={2} />
 
         <CouponPanel
           cart={cart}

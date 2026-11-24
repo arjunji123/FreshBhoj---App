@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Home from '@features/home/screens/Home';
 import FoodFeed from '@features/foodfeed/screens/FoodFeed';
 import Profile from '@features/profile/screens/Profile';
+import FitHub from '@features/fit/screens/FitHub';
 import type { MainTabParamList } from '../navigation.types';
 import BottomTabBar from './BottomTabBar';
 
@@ -17,6 +18,7 @@ export function BottomTabNavigator() {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="FoodFeed" component={FoodFeed} />
       <Tab.Screen name="Profile" component={Profile} />
+      <Tab.Screen name="Fit" component={FitHub} />
     </Tab.Navigator>
   );
 }

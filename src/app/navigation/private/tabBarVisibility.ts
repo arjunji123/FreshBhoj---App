@@ -7,8 +7,8 @@ import { create } from 'zustand';
 
 /** Visual height of the floating pill. */
 export const TAB_BAR_HEIGHT = 64;
-/** Minimum gap between the pill and the bottom screen edge. */
-export const TAB_BAR_MIN_BOTTOM_GAP = 16;
+/** Minimum gap between the bar and the bottom screen edge (the bar is edge-to-edge, so only the safe-area inset). */
+export const TAB_BAR_MIN_BOTTOM_GAP = 0;
 /** Breathing room kept between content / floating UI and the pill's top edge. */
 const TAB_BAR_TOP_GAP = 12;
 

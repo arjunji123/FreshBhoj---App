@@ -10,14 +10,14 @@ import { useThemeStore } from '@app/theme/themeStore';
 
 /** Android (Google Maps) ignores `userInterfaceStyle`, so dark mode needs an explicit style. */
 const DARK_MAP_STYLE = [
-  { elementType: 'geometry', stylers: [{ color: '#152A2D' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#9DB2B5' }] },
-  { elementType: 'labels.text.stroke', stylers: [{ color: '#091416' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2E4E52' }] },
-  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#C2D2D4' }] },
-  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1F3A3D' }] },
-  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0B2A33' }] },
-  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#1F3A3D' }] },
+  { elementType: 'geometry', stylers: [{ color: '#152D24' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#9DB5AC' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#091611' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#2E5244' }] },
+  { featureType: 'road', elementType: 'labels.text.fill', stylers: [{ color: '#C2D4CD' }] },
+  { featureType: 'poi', elementType: 'geometry', stylers: [{ color: '#1F3D31' }] },
+  { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0B3328' }] },
+  { featureType: 'transit', elementType: 'geometry', stylers: [{ color: '#1F3D31' }] },
 ];
 
 const DEFAULT_REGION: Region = {

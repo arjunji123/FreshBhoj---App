@@ -80,5 +80,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     art: { width: 96, height: 96, alignItems: 'center', justifyContent: 'center' },
     leafCircle: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', backgroundColor: FIT.glass, borderWidth: 1, borderColor: FIT.glassBorder },
     chip: { position: 'absolute', zIndex: 2, flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, paddingVertical: 4, borderRadius: theme.radius.pill, backgroundColor: '#FFFFFF' },
-    chipText: { color: '#0D1B1E', fontSize: 11, fontWeight: '800' },
+    chipText: { color: '#0D1E19', fontSize: 11, fontWeight: '800' },
   });

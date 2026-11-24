@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { LayoutChangeEvent, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { LayoutChangeEvent, Pressable, StyleSheet, View } from 'react-native';
 import { FeedPlayIcon, FitTabIcon, HomeTabIcon, OrdersTabIcon, ProfileTabIcon } from '@components/icons';
 import Animated, {
   Easing,
@@ -27,23 +27,19 @@ const TABS: Record<string, { label: string; Icon: TabIconComponent }> = {
   OrdersTab: { label: 'Orders', Icon: OrdersTabIcon },
 };
 
-/** Preferred width; shrinks on narrow phones so the bar never touches the screen edges. */
-const BAR_MAX_WIDTH = 368;
-const BAR_SIDE_MARGIN = 16;
+/** Width of the active-tab indicator line. */
+const INDICATOR_WIDTH = 28;
 /** Extra slide distance so the raised Feed button clears the screen edge too. */
 const HIDE_OVERSHOOT = 40;
-const INDICATOR_INSET = 6;
 const SLIDE = { duration: 260, easing: Easing.out(Easing.cubic) } as const;
 
 /**
- * Floating pill tab bar: detached from the screen edges, rounded, softly
- * lifted. A single tinted pill slides (no overshoot) behind the active tab
- * while the Bhoj Feed button stays raised in the centre, notched into the bar.
+ * Edge-to-edge tab bar: flat white surface with a hairline top border. A short
+ * green line slides (no overshoot) along the top edge to mark the active tab
+ * while the Bhoj Feed button stays raised in the centre.
  */
 const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   const theme = useTheme();
-  const { width: windowWidth } = useWindowDimensions();
-  const barWidth = Math.min(BAR_MAX_WIDTH, windowWidth - BAR_SIDE_MARGIN * 2);
   const styles = useMemo(() => createStyles(theme), [theme]);
   const isDark = useThemeStore((s) => s.resolvedScheme) === 'dark';
   const ACTIVE_COLOR = theme.colors.text.brand;
@@ -96,16 +92,16 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
   return (
     <Animated.View
       pointerEvents={hidden ? 'none' : 'box-none'}
-      style={[styles.container, { paddingBottom: bottomGap }, containerAnimStyle]}
+      style={[styles.container, containerAnimStyle]}
     >
-      <View style={[styles.bar, { width: barWidth }]}>
+      <View style={[styles.bar, { paddingBottom: bottomGap }]}>
         <View style={styles.tabRow} onLayout={onRowLayout}>
           {slotWidth > 0 ? (
             <Animated.View
               pointerEvents="none"
               style={[
                 styles.indicator,
-                { width: slotWidth - INDICATOR_INSET * 2, left: INDICATOR_INSET },
+                { width: INDICATOR_WIDTH, left: (slotWidth - INDICATOR_WIDTH) / 2 },
                 indicatorStyle,
               ]}
             />
@@ -190,24 +186,24 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     alignItems: 'center',
   },
   bar: {
-    height: TAB_BAR_HEIGHT,
-    borderRadius: 32,
+    width: '100%',
     backgroundColor: theme.colors.surface.raised,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: theme.colors.borders.subtle,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.colors.borders.subtle,
     ...theme.elevation.lg,
   },
   tabRow: {
-    flex: 1,
+    height: TAB_BAR_HEIGHT,
     flexDirection: 'row',
     alignItems: 'center',
   },
   indicator: {
     position: 'absolute',
-    top: 8,
-    bottom: 8,
-    borderRadius: 22,
-    backgroundColor: theme.colors.surface.brandWash,
+    top: 0,
+    height: 3,
+    borderBottomLeftRadius: 3,
+    borderBottomRightRadius: 3,
+    backgroundColor: theme.colors.primary[600],
   },
   tabItem: {
     flex: 1,
@@ -218,20 +214,20 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
       },
   feedOuter: {
     position: 'absolute',
-    top: -34,
+    top: -26,
     alignSelf: 'center',
-    width: 68,
-    height: 68,
-    borderRadius: 26,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: theme.colors.surface.raised,
     justifyContent: 'center',
     alignItems: 'center',
     ...theme.elevation.sm,
   },
   feedButton: {
-    width: 58,
-    height: 58,
-    borderRadius: 21,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.22)',

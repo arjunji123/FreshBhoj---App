@@ -25,16 +25,16 @@ export const primary = {
 
 /** Emerald — health, nutrition, "verified kitchen", success. Never a CTA colour. */
 export const accent = {
-  50: '#ECFDF5',
-  100: '#D1FAE5',
-  200: '#A7F3D0',
-  300: '#6EE7B7',
-  400: '#34D399',
-  500: '#10B981',
-  600: '#0F9D6B', // verified badge, healthy tags
-  700: '#047857',
-  800: '#065F46',
-  900: '#064E3B',
+  50: '#EEFBF4',
+  100: '#D5F5E4',
+  200: '#AAEACB',
+  300: '#72DAAA',
+  400: '#34C98A',
+  500: '#17A672',
+  600: '#12865F', // verified badge, healthy tags
+  700: '#0F6F50',
+  800: '#0D5C43',
+  900: '#0C4A38',
 } as const;
 
 /** Teal-tinted ink ramp for text, borders and surfaces. */
@@ -44,12 +44,12 @@ export const neutral = {
   100: '#E9F1F1',
   200: '#DCE6E7',
   300: '#C3D1D3',
-  400: '#8FA2A6',
-  500: '#5F7377',
-  600: '#47595D',
-  700: '#2F4146',
-  800: '#1C2D31',
-  900: '#0D1B1E',
+  400: '#8FA69F',
+  500: '#5F776F',
+  600: '#475D56',
+  700: '#2F4640',
+  800: '#1C312A',
+  900: '#0D1E19',
 } as const;
 
 /** Marigold for offers, ratings and "bestseller" flags. */
@@ -87,10 +87,10 @@ export const semantic = {
 
 /** Overlays and scrims, mostly for image treatments. */
 export const overlay = {
-  scrim: 'rgba(13, 27, 30, 0.55)',
-  scrimSoft: 'rgba(13, 27, 30, 0.28)',
+  scrim: 'rgba(13, 30, 25, 0.55)',
+  scrimSoft: 'rgba(13, 30, 25, 0.28)',
   /** Bottom-up fade that keeps text legible over a food photo. */
-  imageFade: ['rgba(13,27,30,0)', 'rgba(13,27,30,0.78)'] as [string, string],
+  imageFade: ['rgba(13, 30, 25,0)', 'rgba(13, 30, 25,0.78)'] as [string, string],
   glass: 'rgba(255, 255, 255, 0.2)',
   glassStrong: 'rgba(255, 255, 255, 0.35)',
   primaryWash: 'rgba(18, 134, 95, 0.07)',

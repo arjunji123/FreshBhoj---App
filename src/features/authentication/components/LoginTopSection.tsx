@@ -1,38 +1,41 @@
 import React, { useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Image } from 'react-native';
 import AppGradient from '@components/AppGradient';
 import { AUTH_COPY, AUTH_VALUES } from '../auth.constants';
 import { useTheme } from "@app/theme/useTheme";
-import { LoginHero } from '@components/illustrations';
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
+
+/** Real food photography behind the brand mark. */
+const HERO_PHOTO = require('../../../../assets/images/photos/login_cover.jpg');
 
 const LoginTopSection = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     return (
-        <AppGradient
-            colors={[theme.colors.gradient1, theme.colors.gradient2]}
-            direction="vertical"
-            style={styles.topSection}
-        >
-            <View style={styles.imageContainer}>
-                <View style={styles.plateImage}>
-                    <LoginHero size={width * AUTH_VALUES.loginPlateImageWidthRatio} tone="onBrand" />
-                </View>
+        <View style={styles.topSection}>
+            <Image source={HERO_PHOTO} style={styles.photo} resizeMode="cover" />
+            <AppGradient
+                colors={['rgba(6,18,12,0.35)', 'rgba(6,18,12,0.05)', 'rgba(6,18,12,0.78)']}
+                locations={[0, 0.45, 1]}
+                direction="vertical"
+                style={StyleSheet.absoluteFill}
+                pointerEvents="none"
+            />
+            {/* Fixed distance from the bottom so it always clears the sheet's overlap. */}
+            <View style={styles.brandBlock}>
+                <Text
+                    style={styles.brandTitle}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                    minimumFontScale={0.5}
+                    maxFontSizeMultiplier={1}
+                >
+                    {AUTH_COPY.brandTitle}
+                </Text>
+                <Text style={styles.tagline}>Real food from real kitchens</Text>
             </View>
-            {/* Positioned independent of the image's own flow/size so it always
-                clears the white sheet's overlap, regardless of device aspect ratio. */}
-            <Text
-                style={styles.brandTitle}
-                numberOfLines={1}
-                adjustsFontSizeToFit
-                minimumFontScale={0.5}
-                maxFontSizeMultiplier={1}
-            >
-                {AUTH_COPY.brandTitle}
-            </Text>
-        </AppGradient>
+        </View>
     );
 };
 
@@ -42,32 +45,37 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         width: '100%',
         position: 'relative',
         overflow: 'hidden',
+        backgroundColor: '#06120C',
     },
-    imageContainer: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        paddingHorizontal: theme.spacing.lg,
+    photo: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
     },
-    plateImage: {
-        width: width * AUTH_VALUES.loginPlateImageWidthRatio,
-        height: width * AUTH_VALUES.loginPlateImageWidthRatio,
-        marginTop: AUTH_VALUES.loginPlateImageTopOffset,
-        zIndex: 1,
-    },
-    brandTitle: {
+    brandBlock: {
         position: 'absolute',
         left: theme.spacing.lg,
         right: theme.spacing.lg,
-        // A fixed distance from the bottom of the red section — always clears
-        // the white sheet below (which overlaps it by only ~24dp), no matter
-        // how tall the plate image renders on a given device.
-        bottom: 40,
+        bottom: 44,
+        alignItems: 'center',
+        gap: 4,
+    },
+    brandTitle: {
         fontFamily: theme.typography.fontFamilies.medievalSharp,
         fontSize: theme.typography.fontSizes.display4,
         color: theme.colors.palette.white,
-        zIndex: 10,
         textAlign: 'center',
+        textShadowColor: 'rgba(0,0,0,0.4)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 10,
+    },
+    tagline: {
+        color: 'rgba(255,255,255,0.88)',
+        fontSize: 15,
+        fontWeight: '600',
+        letterSpacing: 0.2,
     },
 });
 

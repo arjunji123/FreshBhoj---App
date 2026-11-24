@@ -1,24 +1,19 @@
-import { View, Text, Dimensions, StyleSheet } from 'react-native'
-import React, { useEffect, useMemo } from 'react'
-import { colors, spacing, typography } from '@app/theme';
-import { useTheme } from '@app/theme/useTheme';
-import OnboardingPaginator from './OnboardingPaginator';
-import GradientButton from '@components/GradientButton';
+import { View, Text, StyleSheet, Image, ImageSourcePropType, Pressable, useWindowDimensions } from 'react-native';
+import React, { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import GradientText from '@components/GradientText';
-import type { IllustrationProps } from '@components/illustrations';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import AppGradient from '@components/AppGradient';
+import PressableScale from '@animations/PressableScale';
+import { useTheme } from '@app/theme/useTheme';
 
 export interface OnboardingItem {
     id: string;
-    heroTitle: string;
+    eyebrow: string;
     title: string;
-    subtitle?: string;
     description: string;
-    /** Animated vector hero for this slide (see src/components/illustrations). */
-    Illustration: React.ComponentType<IllustrationProps>;
-    variant: 'plate' | 'reel' | 'thali';
+    /** Real food photograph, shown full-bleed behind the copy. */
+    photo: ImageSourcePropType;
     ctaLabel: string;
 }
 
@@ -30,238 +25,132 @@ interface OnboardingSlideProps {
     isActive: boolean;
     onPrimaryPress: () => void;
     onBackPress: () => void;
+    onSkipPress?: () => void;
 }
 
-const { width, height } = Dimensions.get('window');
-
-/** Hero illustration edge; the old PNGs were 400dp, capped to the screen width here. */
-const HERO_SIZE = Math.min(400, width * 0.96);
-
-const OnboardingSlide = ({ item, itemIndex, currentIndex, totalSlides, isActive, onPrimaryPress, onBackPress }: OnboardingSlideProps) => {
+const OnboardingSlide = ({ item, itemIndex, totalSlides, onPrimaryPress, onBackPress, onSkipPress }: OnboardingSlideProps) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
-    const isMiddleSlide = item.variant === 'reel';
-    const showBack = itemIndex > 0;
-
-    const cardTranslateY = useSharedValue(isActive ? 0 : 28);
-    const cardOpacity = useSharedValue(isActive ? 1 : 0.75);
-
     const insets = useSafeAreaInsets();
-
-    useEffect(() => {
-        cardTranslateY.value = withTiming(isActive ? 0 : 28, { duration: 280 });
-        cardOpacity.value = withTiming(isActive ? 1 : 0.75, { duration: 220 });
-    }, [isActive, cardOpacity, cardTranslateY]);
-
-    const cardAnimatedStyle = useAnimatedStyle(() => ({
-        transform: [{ translateY: cardTranslateY.value }],
-        opacity: cardOpacity.value,
-    }));
-
-    const renderSubtitle = () => {
-        if (!item.subtitle) {
-            return null;
-        }
-        return (
-            <GradientText
-                style={styles.subtitle}
-                location={theme.colors.defaultLocations}>
-                {item.subtitle}
-            </GradientText>
-        );
-    };
-
-    const renderHeroVisual = () => {
-        const { Illustration } = item;
-        return (
-            <View style={styles.plateVisualWrap}>
-                <Illustration size={HERO_SIZE} tone="onBrand" />
-            </View>
-        );
-    };
+    const { width, height } = useWindowDimensions();
+    const isLast = itemIndex === totalSlides - 1;
 
     return (
-        <View style={[styles.container, { width: width }]}>
-            {
-                !isMiddleSlide ? (
-                    <Text style={styles.logo}>FreshBhoj</Text>
-                ) : null
-            }
-            {/* <Text style={styles.logo}>FreshBhoj</Text> */}
+        <View style={styles.container}>
+            <Animated.Image
+                key={item.id}
+                entering={FadeIn.duration(350)}
+                source={item.photo}
+                style={{ position: 'absolute', width, height }}
+                resizeMode="cover"
+            />
+            {/* Top scrim keeps the logo/Skip legible; bottom scrim carries the copy. */}
+            <AppGradient
+                colors={['rgba(6,18,12,0.55)', 'rgba(6,18,12,0)']}
+                direction="vertical"
+                style={[styles.scrimTop, { height: 160 + insets.top }]}
+                pointerEvents="none"
+            />
+            <AppGradient
+                colors={['rgba(6,18,12,0)', 'rgba(6,18,12,0.72)', 'rgba(6,18,12,0.96)']}
+                locations={[0, 0.5, 1]}
+                direction="vertical"
+                style={styles.scrimBottom}
+                pointerEvents="none"
+            />
 
-            <View style={styles.imageContainer}>
-                {renderHeroVisual()}
-                {/* {isMiddleSlide || !item.heroTitle ? null : <Text style={styles.heroTitle}>{item.heroTitle}</Text>} */}
+            <View style={[styles.topBar, { paddingTop: insets.top + 12 }]}>
+                <Text style={styles.logo}>FreshBhoj</Text>
+                {!isLast ? (
+                    <Pressable onPress={onSkipPress} hitSlop={12} accessibilityRole="button" accessibilityLabel="Skip">
+                        <Text style={styles.skip}>Skip</Text>
+                    </Pressable>
+                ) : null}
             </View>
 
-            <Animated.View
-                style={[
-                    styles.textContainer,
-                    { paddingBottom: spacing.paddings.lg + Math.max(insets.bottom, 24) },
-                    cardAnimatedStyle,
-                ]}
-            >
-                <View style={styles.copyBlock}>
+            <View style={[styles.bottom, { paddingBottom: Math.max(insets.bottom, 16) + 20 }]}>
+                <Animated.View key={`${item.id}-copy`} entering={FadeInDown.duration(380)}>
+                    <View style={styles.eyebrowPill}>
+                        <Text style={styles.eyebrowText}>{item.eyebrow}</Text>
+                    </View>
                     <Text style={styles.title}>{item.title}</Text>
-                    {renderSubtitle()}
                     <Text style={styles.description}>{item.description}</Text>
-                </View>
+                </Animated.View>
 
-                <View style={styles.controlsBlock}>
-                    <OnboardingPaginator
-                        data={Array.from({ length: totalSlides })}
-                        currentIndex={currentIndex}
-                    />
-                    <GradientButton
-                        title={item.ctaLabel}
-                        gradientColors={colors.defaultColor}
-                        direction="diagonal"
-                        locations={theme.colors.defaultLocations}
-                        onPress={onPrimaryPress}
-                        style={styles.ctaButton}
-                        textStyle={styles.ctaText}
-                        rightIcon={<ArrowRight size={18} color={colors.palette.white} />}
-                    />
-
-                    <View style={styles.backSlot}>
-                        {showBack ? (
-                            <Text onPress={onBackPress} style={styles.backText}>Back</Text>
-                        ) : null}
+                <View style={styles.footer}>
+                    <View style={styles.dots}>
+                        {Array.from({ length: totalSlides }).map((_, i) => (
+                            <View key={i} style={[styles.dot, i === itemIndex ? styles.dotActive : null]} />
+                        ))}
+                    </View>
+                    <View style={styles.actions}>
+                        {itemIndex > 0 ? (
+                            <Pressable onPress={onBackPress} hitSlop={10} accessibilityRole="button" accessibilityLabel="Back">
+                                <Text style={styles.back}>Back</Text>
+                            </Pressable>
+                        ) : (
+                            <View />
+                        )}
+                        <PressableScale onPress={onPrimaryPress} scaleTo={0.97} accessibilityRole="button" style={styles.cta}>
+                            <Text style={styles.ctaText}>{item.ctaLabel}</Text>
+                            <ArrowRight size={18} color="#FFFFFF" strokeWidth={2.6} />
+                        </PressableScale>
                     </View>
                 </View>
-            </Animated.View>
+            </View>
         </View>
-    )
-}
+    );
+};
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    container: {
-        flex: 1,
+    container: { flex: 1, backgroundColor: '#06120C' },
+    scrimTop: { position: 'absolute', top: 0, left: 0, right: 0 },
+    scrimBottom: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '62%' },
+    topBar: {
+        flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 24,
     },
     logo: {
-        marginTop: spacing.paddings.lg,
-        fontSize: typography.fontSizes.display3,
-        color: colors.palette.white,
-        fontFamily: typography.fontFamilies.medievalSharp,
-        textShadowColor: 'rgba(0,0,0,0.22)',
-        textShadowOffset: { width: 0, height: 6 },
-        textShadowRadius: 12,
-        zIndex: 1,
+        fontFamily: theme.typography.fontFamilies.medievalSharp,
+        fontSize: 30,
+        color: '#FFFFFF',
+        textShadowColor: 'rgba(0,0,0,0.35)',
+        textShadowOffset: { width: 0, height: 2 },
+        textShadowRadius: 8,
     },
-    imageContainer: {
-        flex: 1,
-        justifyContent: 'center',
+    skip: { color: 'rgba(255,255,255,0.9)', fontSize: 15, fontWeight: '700' },
+    bottom: { flex: 1, justifyContent: 'flex-end', paddingHorizontal: 24 },
+    eyebrowPill: {
+        alignSelf: 'flex-start',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 999,
+        backgroundColor: 'rgba(52,201,138,0.2)',
+        borderWidth: 1,
+        borderColor: 'rgba(52,201,138,0.55)',
+        marginBottom: 14,
+    },
+    eyebrowText: { color: '#7DE3B2', fontSize: 12, fontWeight: '800', letterSpacing: 0.4 },
+    title: { color: '#FFFFFF', fontSize: 34, lineHeight: 40, fontWeight: '800', letterSpacing: -0.6 },
+    description: { color: 'rgba(255,255,255,0.82)', fontSize: 16, lineHeight: 24, marginTop: 12 },
+    footer: { marginTop: 28, gap: 22 },
+    dots: { flexDirection: 'row', gap: 6 },
+    dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: 'rgba(255,255,255,0.35)' },
+    dotActive: { width: 26, backgroundColor: '#34C98A' },
+    actions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    back: { color: 'rgba(255,255,255,0.85)', fontSize: 15, fontWeight: '700', paddingVertical: 12 },
+    cta: {
+        flexDirection: 'row',
         alignItems: 'center',
-        width: '100%',
-        position: 'relative',
-        paddingHorizontal: spacing.paddings.lg,
+        gap: 10,
+        paddingHorizontal: 28,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: theme.colors.primary[600],
     },
-    plateVisualWrap: {
-        width: '100%',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    heroTitle: {
-        position: 'absolute',
-        right: 0,
-        left: 0,
+    ctaText: { color: '#FFFFFF', fontSize: 17, fontWeight: '800' },
+});
 
-        // marginTop: spacing.paddings.md,
-        color: colors.palette.white,
-        fontSize: typography.fontSizes.display1,
-        // lineHeight: typography.lineHeights.xxl,
-        fontFamily: typography.fontFamilies.aBeeZee.regular,
-        // textAlign: 'center',
-    },
-    floatChipRight: {
-        position: 'absolute',
-        right: 18,
-        top: 24,
-        width: 42,
-        height: 42,
-        borderRadius: spacing.borderRadius.xl,
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    floatChipLeft: {
-        position: 'absolute',
-        left: 20,
-        bottom: 40,
-        width: 34,
-        height: 34,
-        borderRadius: spacing.borderRadius.round,
-        backgroundColor: 'rgba(255,255,255,0.9)',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    textContainer: {
-        width: '100%',
-        height: height * 0.45,
-        alignItems: 'center',
-        backgroundColor: theme.colors.surface.base,
-        borderTopLeftRadius: spacing.borderRadius.xxxl,
-        borderTopRightRadius: spacing.borderRadius.xxxl,
-        paddingTop: spacing.paddings.xl,
-        paddingHorizontal: spacing.paddings.xl,
-        paddingBottom: spacing.paddings.lg,
-    },
-    copyBlock: {
-        width: '100%',
-        alignItems: 'center',
-        minHeight: 130,
-    },
-    title: {
-        fontSize: typography.fontSizes.display2,
-        lineHeight: typography.lineHeights.display1,
-        fontFamily: typography.fontFamilies.aBeeZee.regular,
-        color: theme.colors.text.primary,
-        textAlign: 'center',
-    },
-    subtitle: {
-        marginTop: spacing.paddings.xs,
-        fontSize: typography.fontSizes.display2,
-        lineHeight: typography.lineHeights.display1,
-        fontFamily: typography.fontFamilies.aBeeZee.regular,
-        textAlign: 'center',
-    },
-    description: {
-        marginTop: spacing.paddings.md,
-        fontSize: typography.fontSizes.xl,
-        // lineHeight: typography.lineHeights.,
-        fontFamily: typography.fontFamilies.plusJakartaSans.regular,
-        color: theme.colors.text.secondary,
-        textAlign: 'center',
-        paddingHorizontal: spacing.paddings.xs,
-    },
-    controlsBlock: {
-        width: '100%',
-        marginTop: 'auto',
-        alignItems: 'center',
-    },
-    ctaButton: {
-        width: '100%',
-        borderRadius: spacing.borderRadius.xl,
-        paddingVertical: spacing.paddings.md,
-        marginTop: spacing.paddings.sm,
-    },
-    ctaText: {
-        color: colors.palette.white,
-        fontFamily: typography.fontFamilies.plusJakartaSans.semibold,
-        fontSize: typography.fontSizes.xxl,
-        alignSelf: 'center',
-    },
-    backText: {
-        marginTop: spacing.paddings.sm,
-        color: theme.colors.text.tertiary,
-        fontFamily: typography.fontFamilies.plusJakartaSans.semibold,
-        fontSize: typography.fontSizes.lg,
-    },
-    backSlot: {
-        height: 32,
-        justifyContent: 'center',
-    },
-})
-
-export default OnboardingSlide
+export default OnboardingSlide;

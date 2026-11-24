@@ -14,9 +14,8 @@ import Svg from 'react-native-svg';
 import { SharedDefs } from './defs';
 
 /**
- * Idle loops (bobbing, swaying, drifting, pulsing) are off app-wide: the
- * artwork stays still and only `pop` entrances play, once. Flip to true to
- * bring the looping motion back.
+ * All illustration motion is off app-wide: the artwork renders still, with no
+ * bobbing, drifting or spring-in wobble. Flip to true to bring it back.
  */
 const IDLE_MOTION = false;
 
@@ -97,8 +96,8 @@ export const Layer = ({
 }: LayerProps) => {
   const size = useContext(SizeContext);
   const reducedMotion = useReducedMotion();
-  // Looping motions rest on a still frame; `pop` always plays (once).
-  const reduced = reducedMotion || (!IDLE_MOTION && motion !== 'pop');
+  // Every motion (including the `pop` spring-in) rests on its still frame.
+  const reduced = reducedMotion || !IDLE_MOTION;
   const k = size / CANVAS;
   const t = useSharedValue(reduced ? REST[motion] : 0);
   const px = (pivot[0] - CANVAS / 2) * k;

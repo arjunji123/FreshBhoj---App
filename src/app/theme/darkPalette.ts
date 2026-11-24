@@ -12,15 +12,15 @@ export { primary, accent, amber, foodType };
 
 /** Inverted cool-grey ramp — 900 is now the near-white "highest contrast" end, 0 is the page background. */
 export const neutral = {
-  0: '#091416', // page background (was white)
-  50: '#0F1E21',
-  100: '#152A2D',
-  200: '#1F3A3D',
-  300: '#2E4E52',
-  400: '#4F6E73',
-  500: '#7A9498',
-  600: '#9DB2B5',
-  700: '#C2D2D4',
+  0: '#091611', // page background (was white)
+  50: '#0F211B',
+  100: '#152D24',
+  200: '#1F3D31',
+  300: '#2E5244',
+  400: '#4F7366',
+  500: '#7A988D',
+  600: '#9DB5AC',
+  700: '#C2D4CD',
   800: '#E3EBEC',
   900: '#F4F9F9', // near-white text (was near-black)
 } as const;
@@ -40,7 +40,7 @@ export const semantic = {
 export const overlay = {
   scrim: 'rgba(0, 0, 0, 0.65)',
   scrimSoft: 'rgba(0, 0, 0, 0.35)',
-  imageFade: ['rgba(9,20,22,0)', 'rgba(9,20,22,0.88)'] as [string, string],
+  imageFade: ['rgba(9, 22, 17,0)', 'rgba(9, 22, 17,0.88)'] as [string, string],
   glass: 'rgba(255, 255, 255, 0.08)',
   glassStrong: 'rgba(255, 255, 255, 0.16)',
   primaryWash: 'rgba(52, 201, 138, 0.14)',

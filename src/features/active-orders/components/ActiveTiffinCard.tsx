@@ -11,17 +11,17 @@ interface ActiveTiffinCardProps {
 }
 
 const STATUS_COLORS: Record<string, { bg: string; text: string }> = {
-  delivering_today: { bg: '#D1FAE5', text: '#065F46' },
+  delivering_today: { bg: '#D5F5E4', text: '#0D5C43' },
   preparing: { bg: '#FEF3C7', text: '#92400E' },
   scheduled: { bg: '#DBEAFE', text: '#1E40AF' },
   paused: { bg: '#F3F4F6', text: '#6B7280' },
 };
 
 const STATUS_COLORS_DARK: Record<string, { bg: string; text: string }> = {
-  delivering_today: { bg: 'rgba(15, 157, 107, 0.18)', text: '#6EE7B7' },
+  delivering_today: { bg: 'rgba(15, 157, 107, 0.18)', text: '#72DAAA' },
   preparing: { bg: 'rgba(255, 194, 26, 0.16)', text: '#FFD866' },
   scheduled: { bg: 'rgba(30, 123, 216, 0.2)', text: '#6FB6FF' },
-  paused: { bg: 'rgba(255, 255, 255, 0.08)', text: '#9DB2B5' },
+  paused: { bg: 'rgba(255, 255, 255, 0.08)', text: '#9DB5AC' },
 };
 
 const ActiveTiffinCard: React.FC<ActiveTiffinCardProps> = ({

@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { StyleProp, StyleSheet, Text, View, ViewStyle } from 'react-native';
 import Animated from 'react-native-reanimated';
 import Button from './Button';
-import { enterRise, enterPop } from '@animations/motion';
+import { enterRise } from '@animations/motion';
 import { useTheme } from "@app/theme/useTheme";
 
 interface EmptyStateProps {
@@ -39,13 +39,9 @@ const EmptyState: React.FC<EmptyStateProps> = ({
     (
       <View style={[styles.container, style]}>
         {illustration ? (
-          <Animated.View entering={enterPop(0)} style={styles.illustration}>
-            {illustration}
-          </Animated.View>
+          <View style={styles.illustration}>{illustration}</View>
         ) : icon ? (
-          <Animated.View entering={enterPop(0)} style={styles.iconCircle}>
-            {icon}
-          </Animated.View>
+          <View style={styles.iconCircle}>{icon}</View>
         ) : null}
 
         <Animated.Text entering={enterRise(1)} style={[theme.text.h2, styles.title]} numberOfLines={2}>

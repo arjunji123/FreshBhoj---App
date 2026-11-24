@@ -13,7 +13,7 @@ export const palette = {
     gradient2: '#12865F',
     gradient3: '#0C4A38',
     gradient4: '#F3F8F8',
-    gradient5: '#8FA2A6',
+    gradient5: '#8FA69F',
     gradient6: '#FFFFFF',
     gradient7: '#2BBE82',
     gradient8: '#0D5C43',
@@ -25,14 +25,14 @@ export const palette = {
     textGradient2: "#0C4A38",
 
     // Grays
-    gray1: '#5F7377',
+    gray1: '#5F776F',
     gray2: '#DCE6E7',
     gray3: '#C3D1D3',
-    gray4: '#47595D',
+    gray4: '#475D56',
 
     // Semantic
-    inactive: '#B7CBCD',
-    success: '#0F9D6B',
+    inactive: '#B7CDC4',
+    success: '#12865F',
     warning: '#FFC21A',
     error: '#F44336',
     info: '#1E7BD8',
@@ -52,28 +52,28 @@ export const elevation = {
         elevation: 0,
     },
     xs: {
-        shadowColor: '#0D1B1E',
+        shadowColor: '#0D1E19',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.04,
         shadowRadius: 3,
         elevation: 1,
     },
     sm: {
-        shadowColor: '#0D1B1E',
+        shadowColor: '#0D1E19',
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.06,
         shadowRadius: 8,
         elevation: 3,
     },
     md: {
-        shadowColor: '#0D1B1E',
+        shadowColor: '#0D1E19',
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.08,
         shadowRadius: 16,
         elevation: 6,
     },
     lg: {
-        shadowColor: '#0D1B1E',
+        shadowColor: '#0D1E19',
         shadowOffset: { width: 0, height: 12 },
         shadowOpacity: 0.1,
         shadowRadius: 28,
@@ -81,7 +81,7 @@ export const elevation = {
     },
     /** For sticky bottom bars — the shadow points upward. */
     bar: {
-        shadowColor: '#0D1B1E',
+        shadowColor: '#0D1E19',
         shadowOffset: { width: 0, height: -4 },
         shadowOpacity: 0.06,
         shadowRadius: 16,

@@ -255,13 +255,13 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     ...theme.elevation.sm,
   },
   paperEyebrow: {
-    color: '#5F7377',
+    color: '#5F776F',
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.semibold,
     fontSize: theme.typography.fontSizes.xs,
     letterSpacing: 1.2,
   },
   paperCode: {
-    color: '#0D1B1E',
+    color: '#0D1E19',
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.extrabold,
     fontSize: theme.typography.fontSizes.display3,
     letterSpacing: 4,
@@ -275,7 +275,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginVertical: theme.spacing.sm,
   },
   paperFootnote: {
-    color: '#47595D',
+    color: '#475D56',
     fontFamily: theme.typography.fontFamilies.plusJakartaSans.medium,
     fontSize: theme.typography.fontSizes.xs,
     textAlign: 'center',

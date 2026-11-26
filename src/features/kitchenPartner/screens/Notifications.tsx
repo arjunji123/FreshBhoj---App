@@ -143,7 +143,7 @@ const Notifications = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="Notifications"
         onBack={() => navigation.goBack()}
@@ -194,7 +194,7 @@ const Notifications = () => {
           }
           renderSectionHeader={({ section }) => (
             <Text variant="overline" color="tertiary" style={styles.sectionHeader}>
-              {section.title.toUpperCase()}
+              {section.title}
             </Text>
           )}
           renderItem={({ item }) => {

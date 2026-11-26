@@ -102,7 +102,7 @@ const LoginGateSheet = () => {
   return (
     <Sheet
       ref={sheetRef}
-      eyebrow={step === 'phone' ? 'CONTINUE TO SAVE THIS' : 'VERIFY YOUR NUMBER'}
+      eyebrow={step === 'phone' ? 'Continue to save this' : 'Verify your number'}
       title={step === 'phone' ? AUTH_COPY.loginDivider : `Code sent to +91 ${phoneNumber}`}
       heightRatio={step === 'phone' ? 0.62 : 0.6}
       onClose={close}

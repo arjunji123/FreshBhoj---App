@@ -59,12 +59,12 @@ const SetupPlanDelivery = () => {
   const canContinue = Boolean(addressId);
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Delivery & Schedule" subtitle="Step 2 of 3" onBack={navigation.goBack} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERY ADDRESS</Text>
+          <Text style={[theme.text.overline, styles.sectionLabel]}>Delivery address</Text>
           <Text
             style={[theme.text.label, styles.link]}
             onPress={() => navigation.navigate('Addresses', { selectMode: true })}
@@ -109,7 +109,7 @@ const SetupPlanDelivery = () => {
         )}
 
         <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>START DATE</Text>
+          <Text style={[theme.text.overline, styles.sectionLabel]}>Start date</Text>
         </View>
         <ChipRow style={styles.dateRow}>
           {dateOptions.map((date) => {
@@ -126,7 +126,7 @@ const SetupPlanDelivery = () => {
         </ChipRow>
 
         <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>SPECIAL INSTRUCTIONS</Text>
+          <Text style={[theme.text.overline, styles.sectionLabel]}>Special instructions</Text>
         </View>
         <TextInput
           value={specialInstructions}

@@ -143,7 +143,7 @@ const BottomTabBar: React.FC<BottomTabBarProps> = ({ state, navigation }) => {
                         direction="vertical"
                         style={styles.feedGloss}
                       />
-                      <FeedPlayIcon size={34} color={theme.colors.palette.white} />
+                      <FeedPlayIcon size={28} color={theme.colors.palette.white} active={isFocused} />
                     </AppGradient>
                   </View>
                 </Pressable>

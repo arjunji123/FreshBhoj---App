@@ -93,7 +93,7 @@ const WriteReview = () => {
           )}
           <View style={styles.mealText}>
             <Text style={[theme.text.overline, styles.eyebrow]}>
-              {params.mealName ? 'RECENTLY DELIVERED' : 'RATING'}
+              {params.mealName ? 'Recently delivered' : 'Rating'}
             </Text>
             <Text style={theme.text.h3} numberOfLines={2}>
               {params.mealName ?? params.kitchenName ?? 'This kitchen'}
@@ -164,7 +164,7 @@ const WriteReview = () => {
           loading={createReview.isPending}
           disabled={rating === 0}
         />
-        <Text style={[theme.text.overline, styles.footerNote]}>POWERED BY FRESHBHOJ</Text>
+        <Text style={[theme.text.overline, styles.footerNote]}>Powered by FreshBhoj</Text>
       </StickyBar>
     </View>
   );

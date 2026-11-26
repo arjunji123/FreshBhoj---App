@@ -74,7 +74,7 @@ const KitchenCard: React.FC<KitchenCardProps> = ({
 
         {kitchen.signatureDish ? (
           <View style={styles.dishStrip}>
-            <Text style={[theme.text.caption, styles.dishLabel]}>SIGNATURE</Text>
+            <Text style={[theme.text.caption, styles.dishLabel]}>Signature</Text>
             <View style={styles.dishRow}>
               <Text style={[theme.text.label, styles.dishName]} numberOfLines={1}>
                 {kitchen.signatureDish.name}
@@ -126,7 +126,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     ...theme.elevation.md,
   },
   cardRail: {
-    width: 248,
+    width: 272,
   },
   cardFull: {
     width: '100%',
@@ -161,8 +161,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     width: '100%',
     backgroundColor: theme.colors.neutral[100],
   },
-  imageRail: { height: 150 },
-  imageFull: { height: 168 },
+  imageRail: { height: 180 },
+  imageFull: { height: 200 },
   image: {
     width: '100%',
     height: '100%',
@@ -172,13 +172,17 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   closedOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: theme.colors.overlay.scrim,
     alignItems: 'center',
     justifyContent: 'center',
   },
   closedText: {
     ...theme.text.label,
     color: ON_PHOTO,
+    backgroundColor: theme.colors.overlay.scrim,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.radius.pill,
+    overflow: 'hidden',
   },
   dishStrip: {
     position: 'absolute',

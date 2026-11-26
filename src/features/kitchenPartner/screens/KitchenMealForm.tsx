@@ -259,7 +259,7 @@ const KitchenMealForm = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title={mealId ? 'Edit dish' : 'Add a dish'} onBack={() => navigation.goBack()} />
 
       <ScrollView

@@ -103,7 +103,7 @@ const AdsInsights = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="AI Insights"
         onBack={() => navigation.goBack()}
@@ -116,7 +116,7 @@ const AdsInsights = () => {
 
       <View style={styles.header}>
         <Text variant="overline" color="tertiary" style={styles.headerEyebrow}>
-          AI POWERED ANALYSIS
+          AI powered analysis
         </Text>
         <Text variant="bodySmall" color="secondary" style={styles.headerSub}>
           Generate AI suggestions to improve the reach, ROI and cuisine targeting of your active campaigns.

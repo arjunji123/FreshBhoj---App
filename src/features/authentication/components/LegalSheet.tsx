@@ -14,7 +14,7 @@ const LegalSheet = forwardRef<SheetHandle, LegalSheetProps>(({ doc }, ref) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   return (
-    <Sheet ref={ref} eyebrow={doc?.eyebrow ?? 'LEGAL'} title={doc?.title ?? ''} heightRatio={0.8}>
+    <Sheet ref={ref} eyebrow={doc?.eyebrow ?? 'Legal'} title={doc?.title ?? ''} heightRatio={0.8}>
       <ScrollView
         style={styles.scrollFlex}
         contentContainerStyle={styles.scroll}

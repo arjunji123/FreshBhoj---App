@@ -65,7 +65,7 @@ const SetupPlanDetails = () => {
   const canContinue = Boolean(foodType) && deliveryDays.length > 0 && Boolean(deliveryTime) && Boolean(billingCycle);
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Plan details" subtitle="Step 1 of 3" onBack={navigation.goBack} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>

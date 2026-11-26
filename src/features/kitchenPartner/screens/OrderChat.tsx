@@ -96,7 +96,7 @@ const OrderChat = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title={orderNumber ?? order?.orderNumber ? `Order #${orderNumber ?? order?.orderNumber}` : 'Order Chat'} onBack={() => navigation.goBack()} />
 
       {order ? (

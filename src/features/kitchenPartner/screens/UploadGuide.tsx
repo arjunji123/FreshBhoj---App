@@ -44,7 +44,7 @@ const UploadGuide = () => {
   const navigation = useNavigation<KitchenPartnerNavigation>();
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Upload Guide" onBack={() => navigation.goBack()} />
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         <Section icon={<Camera size={18} color={theme.colors.brand.primary} />} title="Dish photos" tips={PHOTO_TIPS} />

@@ -1,40 +1,105 @@
 import React from 'react';
-import Svg, { Circle, Path } from 'react-native-svg';
-import { ICON_ACCENT } from './colors';
+import Svg, { Circle, Ellipse, Path } from 'react-native-svg';
+import { ICON_ACCENT, ICON_INK } from './colors';
 import { IconFrame, IconProps, layers } from './base';
 
+/*
+ * Tab icons from the Solar icon set by 480 Design (CC BY 4.0, credited in the
+ * Terms of Service). Every tab is an outline while idle and solid when selected.
+ */
+
 interface TabIconProps extends IconProps {
-  /** Active tabs get a filled body; idle tabs stay outline-only. */
+  /** Selected tabs are solid; idle tabs are outline-only. */
   active?: boolean;
 }
 
-/** House with an arched door. Filled body when active. */
-export const HomeTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }) => {
-  const l = layers(color, tint);
-  const body = 'M5.2 10.4V18.4a1.9 1.9 0 0 0 1.9 1.9h9.8a1.9 1.9 0 0 0 1.9-1.9V10.4L12 4.2z';
+const outline = (color: string) => ({
+  fill: 'none',
+  stroke: color,
+  strokeWidth: 1.7,
+  strokeLinecap: 'round' as const,
+  strokeLinejoin: 'round' as const,
+});
+
+/** Home. */
+export const HomeTabIcon: React.FC<TabIconProps> = ({ size, color = ICON_INK, active }) => {
+  const line = outline(color);
   return (
     <IconFrame size={size}>
-      <Path d={body} {...l.fill} fillOpacity={active ? 0.28 : 0.1} />
-      <Path d="M3.4 11.3L12 3.8l8.6 7.5" {...l.line} />
-      <Path d="M5.2 10.4V18.4a1.9 1.9 0 0 0 1.9 1.9h9.8a1.9 1.9 0 0 0 1.9-1.9V10.4" {...l.line} />
-      <Path d="M9.9 20.3v-4.1a2.1 2.1 0 0 1 4.2 0v4.1" {...(active ? { ...l.line, fill: color } : l.line)} />
+      {active ? (
+        <>
+        <Path d="M2.5192 7.82274C2 8.77128 2 9.91549 2 12.2039V13.725C2 17.6258 2 19.5763 3.17157 20.7881C4.34315 22 6.22876 22 10 22H14C17.7712 22 19.6569 22 20.8284 20.7881C22 19.5763 22 17.6258 22 13.725V12.2039C22 9.91549 22 8.77128 21.4808 7.82274C20.9616 6.87421 20.0131 6.28551 18.116 5.10812L16.116 3.86687C14.1106 2.62229 13.1079 2 12 2C10.8921 2 9.88939 2.62229 7.88403 3.86687L5.88403 5.10813C3.98695 6.28551 3.0384 6.87421 2.5192 7.82274ZM11.25 18C11.25 18.4142 11.5858 18.75 12 18.75C12.4142 18.75 12.75 18.4142 12.75 18V15C12.75 14.5858 12.4142 14.25 12 14.25C11.5858 14.25 11.25 14.5858 11.25 15V18Z" fill={color} fillRule="evenodd" clipRule="evenodd" />
+        </>
+      ) : (
+        <>
+        <Path d="M7.88403 3.86687L5.88403 5.10813C3.98695 6.28551 3.0384 6.87421 2.5192 7.82274C2 8.77128 2 9.91549 2 12.2039V13.725C2 17.6258 2 19.5763 3.17157 20.7881C4.34315 22 6.22876 22 10 22H14C17.7712 22 19.6569 22 20.8284 20.7881C22 19.5763 22 17.6258 22 13.725V12.2039C22 9.91549 22 8.77128 21.4808 7.82274C20.9616 6.87421 20.0131 6.28551 18.116 5.10812L16.116 3.86687C14.1106 2.62229 13.1079 2 12 2C10.8921 2 9.88939 2.62229 7.88403 3.86687Z" {...line} />
+        <Path d="M12 15L12 18" {...line} />
+        </>
+      )}
     </IconFrame>
   );
 };
 
-/** Head and shoulders. Filled when active. */
-export const ProfileTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }) => {
-  const l = layers(color, tint);
+/** Profile: head and shoulders. */
+export const ProfileTabIcon: React.FC<TabIconProps> = ({ size, color = ICON_INK, active }) => {
+  const line = outline(color);
   return (
     <IconFrame size={size}>
-      <Path
-        d="M4.6 20.2a7.4 7.4 0 0 1 14.8 0z"
-        {...l.fill}
-        fillOpacity={active ? 0.28 : 0.1}
-      />
-      <Path d="M4.6 20.2a7.4 7.4 0 0 1 14.8 0" {...l.line} />
-      <Circle cx={12} cy={8.2} r={3.9} {...l.fill} fillOpacity={active ? 0.28 : 0.1} />
-      <Circle cx={12} cy={8.2} r={3.9} {...l.line} />
+      {active ? (
+        <>
+        <Path d="M12 13C15.866 13 19 14.7909 19 17C19 19.2091 15.866 21 12 21C8.13401 21 5 19.2091 5 17C5 14.7909 8.13401 13 12 13Z" fill={color} />
+        <Path d="M12 2C14.2091 2 16 3.79086 16 6C16 8.20914 14.2091 10 12 10C9.79086 10 8 8.20914 8 6C8 3.79086 9.79086 2 12 2Z" fill={color} />
+        </>
+      ) : (
+        <>
+        <Circle cx="12" cy="6" r="4" {...line} />
+        <Ellipse cx="12" cy="17" rx="7" ry="4" {...line} />
+        </>
+      )}
+    </IconFrame>
+  );
+};
+
+/** Bhoj Fit: the flexed muscle. */
+export const FitTabIcon: React.FC<TabIconProps> = ({ size, color = ICON_INK, active }) => {
+  const line = outline(color);
+  return (
+    <IconFrame size={size}>
+      {active ? (
+        <>
+        <Path d="M9.60059 2.5C11.6005 2.50007 12.8008 3.60005 12.8008 5C12.8008 6.2 11.9002 7 10.7002 7C10.6679 7 10.636 6.99712 10.6045 6.99609C10.5968 7.03823 10.5866 7.08052 10.5713 7.12207C10.4278 7.51062 9.99597 7.70895 9.60742 7.56543C9.54018 7.54059 9.47556 7.51181 9.41211 7.48242C8.60817 8.99374 8.86774 11.5632 8.49707 13.833C7.85468 14.2877 7.27238 14.8673 6.78418 15.5723C6.54841 15.9128 6.6331 16.3804 6.97363 16.6162C7.31405 16.8518 7.78076 16.7669 8.0166 16.4268C9.5998 14.1404 12.3921 13.5335 14.665 14.6699C15.0355 14.8551 15.4856 14.7053 15.6709 14.335C15.8557 13.9647 15.706 13.5144 15.3359 13.3291C14.2266 12.7745 13.0192 12.5445 11.8379 12.6309C13.0431 10.4313 15.0214 9.73032 17 10C19.7999 10.4 21.6005 12.5999 21.6006 15.2998C21.6006 18.8997 18.1006 21.4999 12.8008 21.5C8.70078 21.5 5.1002 20.7998 3.2002 19.2998C2.60041 18.7998 2.40042 18 2.40039 17.2002C2.60039 12.2002 3.30059 2.5 9.60059 2.5Z" fill={color} />
+        </>
+      ) : (
+        <>
+        <Path d="M11.4634 13.4258C12.6004 10.6 14.8004 9.7 17.0004 10C19.8004 10.4 21.6004 12.6 21.6004 15.3C21.6004 18.9 18.1004 21.5 12.8004 21.5C8.70039 21.5 5.10039 20.8 3.20039 19.3C2.60039 18.8 2.40039 18 2.40039 17.2C2.60039 12.2 3.30039 2.5 9.60039 2.5C11.6004 2.5 12.8004 3.6 12.8004 5C12.8004 6.2 11.9004 7 10.7004 7C9.80039 7 9.20039 6.6 8.90039 6" {...line} />
+        <Path d="M7.40039 16C9.20039 13.4 12.4004 12.7 15.0004 14" {...line} />
+        <Path d="M9.78786 6.8307C8.30076 8.4 9.10076 12.2 8.22656 15.0268" {...line} />
+        </>
+      )}
+    </IconFrame>
+  );
+};
+
+/** Orders: a bill. */
+export const OrdersTabIcon: React.FC<TabIconProps> = ({ size, color = ICON_INK, active }) => {
+  const line = outline(color);
+  return (
+    <IconFrame size={size}>
+      {active ? (
+        <>
+        <Path d="M7.24502 2H16.755C17.9139 2 18.4933 2 18.9606 2.16261C19.8468 2.47096 20.5425 3.18719 20.842 4.09946C21 4.58055 21 5.17705 21 6.37006V20.3742C21 21.2324 20.015 21.6878 19.3919 21.1176C19.0258 20.7826 18.4742 20.7826 18.1081 21.1176L17.625 21.5597C16.9834 22.1468 16.0166 22.1468 15.375 21.5597C14.7334 20.9726 13.7666 20.9726 13.125 21.5597C12.4834 22.1468 11.5166 22.1468 10.875 21.5597C10.2334 20.9726 9.26659 20.9726 8.625 21.5597C7.98341 22.1468 7.01659 22.1468 6.375 21.5597L5.8919 21.1176C5.52583 20.7826 4.97417 20.7826 4.6081 21.1176C3.985 21.6878 3 21.2324 3 20.3742V6.37006C3 5.17705 3 4.58055 3.15795 4.09946C3.45748 3.18719 4.15322 2.47096 5.03939 2.16261C5.50671 2 6.08614 2 7.24502 2ZM7 6.75C6.58579 6.75 6.25 7.08579 6.25 7.5C6.25 7.91421 6.58579 8.25 7 8.25H7.5C7.91421 8.25 8.25 7.91421 8.25 7.5C8.25 7.08579 7.91421 6.75 7.5 6.75H7ZM10.5 6.75C10.0858 6.75 9.75 7.08579 9.75 7.5C9.75 7.91421 10.0858 8.25 10.5 8.25H17C17.4142 8.25 17.75 7.91421 17.75 7.5C17.75 7.08579 17.4142 6.75 17 6.75H10.5ZM7 10.25C6.58579 10.25 6.25 10.5858 6.25 11C6.25 11.4142 6.58579 11.75 7 11.75H7.5C7.91421 11.75 8.25 11.4142 8.25 11C8.25 10.5858 7.91421 10.25 7.5 10.25H7ZM10.5 10.25C10.0858 10.25 9.75 10.5858 9.75 11C9.75 11.4142 10.0858 11.75 10.5 11.75H17C17.4142 11.75 17.75 11.4142 17.75 11C17.75 10.5858 17.4142 10.25 17 10.25H10.5ZM7 13.75C6.58579 13.75 6.25 14.0858 6.25 14.5C6.25 14.9142 6.58579 15.25 7 15.25H7.5C7.91421 15.25 8.25 14.9142 8.25 14.5C8.25 14.0858 7.91421 13.75 7.5 13.75H7ZM10.5 13.75C10.0858 13.75 9.75 14.0858 9.75 14.5C9.75 14.9142 10.0858 15.25 10.5 15.25H17C17.4142 15.25 17.75 14.9142 17.75 14.5C17.75 14.0858 17.4142 13.75 17 13.75H10.5Z" fill={color} fillRule="evenodd" clipRule="evenodd" />
+        </>
+      ) : (
+        <>
+        <Path d="M7.24502 2H16.755C17.9139 2 18.4933 2 18.9606 2.16261C19.8468 2.47096 20.5425 3.18719 20.842 4.09946C21 4.58055 21 5.17705 21 6.37006V20.3742C21 21.2324 20.015 21.6878 19.3919 21.1176C19.0258 20.7826 18.4742 20.7826 18.1081 21.1176L17.625 21.5597C16.9834 22.1468 16.0166 22.1468 15.375 21.5597C14.7334 20.9726 13.7666 20.9726 13.125 21.5597C12.4834 22.1468 11.5166 22.1468 10.875 21.5597C10.2334 20.9726 9.26659 20.9726 8.625 21.5597C7.98341 22.1468 7.01659 22.1468 6.375 21.5597L5.8919 21.1176C5.52583 20.7826 4.97417 20.7826 4.6081 21.1176C3.985 21.6878 3 21.2324 3 20.3742V6.37006C3 5.17705 3 4.58055 3.15795 4.09946C3.45748 3.18719 4.15322 2.47096 5.03939 2.16261C5.50671 2 6.08614 2 7.24502 2Z" {...line} />
+        <Path d="M10.5 11L17 11" {...line} />
+        <Path d="M7 11H7.5" {...line} />
+        <Path d="M7 7.5H7.5" {...line} />
+        <Path d="M7 14.5H7.5" {...line} />
+        <Path d="M10.5 7.5H17" {...line} />
+        <Path d="M10.5 14.5H17" {...line} />
+        </>
+      )}
     </IconFrame>
   );
 };
@@ -61,45 +126,31 @@ export const ReelTabIcon: React.FC<IconProps> = ({ size, color }) => {
   );
 };
 
-/**
- * Feed tab artwork: a chunky, very rounded play triangle (soft "bubble"
- * geometry) meant to sit white on the glossy teal Feed button.
- */
-export const FeedPlayIcon: React.FC<{ size?: number; color?: string }> = ({ size = 34, color = '#FFFFFF' }) => (
-  <Svg width={size} height={size} viewBox="26 22 34 36">
-    <Path
-      d="M34 28.5v17c0 2.6 2.8 4.2 5 2.8l14-8.5c2.1-1.3 2.1-4.3 0-5.6L39 25.7c-2.2-1.4-5 .2-5 2.8z"
-      fill={color}
-      stroke={color}
-      strokeWidth={4}
-      strokeLinejoin="round"
-    />
-  </Svg>
-);
-
-/** Fit: a bowl topped with a leaf. Filled when active. */
-export const FitTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }) => {
-  const l = layers(color, tint);
+/** Bhoj Feed (centre button): a clapperboard, drawn in white on the green button. */
+export const FeedPlayIcon: React.FC<{ size?: number; color?: string; active?: boolean }> = ({
+  size = 30,
+  color = '#FFFFFF',
+  active,
+}) => {
+  const line = outline(color);
   return (
-    <IconFrame size={size}>
-      <Path d="M3.6 12.2h16.8a8.4 8.4 0 0 1-16.8 0z" {...l.fill} fillOpacity={active ? 0.32 : 0.1} />
-      <Path d="M3.6 12.2h16.8a8.4 8.4 0 0 1-16.8 0z" {...l.line} />
-      <Path d="M12 11.6C12 7.4 14.6 4.4 18.6 4c.2 4-2.2 7-6.6 7.6z" {...l.fill} fillOpacity={active ? 0.5 : 0.16} />
-      <Path d="M12 11.6C12 7.4 14.6 4.4 18.6 4c.2 4-2.2 7-6.6 7.6zM12 11.6c.7-2.2 2-3.8 3.8-5" {...l.line} />
-      <Path d="M8.6 8.4c-1.6.3-2.7 1.4-3 3" {...l.line} />
-    </IconFrame>
-  );
-};
-
-/** Orders: a receipt with a zig-zag edge and two text lines. Filled when active. */
-export const OrdersTabIcon: React.FC<TabIconProps> = ({ size, color, tint, active }) => {
-  const l = layers(color, tint);
-  const body = 'M6 3.6h12v16.8l-2-1.4-2 1.4-2-1.4-2 1.4-2-1.4-2 1.4z';
-  return (
-    <IconFrame size={size}>
-      <Path d={body} {...l.fill} fillOpacity={active ? 0.28 : 0.1} />
-      <Path d={body} {...l.line} />
-      <Path d="M9 8.6h6M9 12h6" {...l.line} />
-    </IconFrame>
+    <Svg width={size} height={size} viewBox="0 0 24 24">
+      {active ? (
+        <>
+        <Path d="M12 2C13.8452 2 15.3293 2 16.5401 2.08783L13.0986 7.25002H8.40139L11.9014 2H12Z" fill={color} />
+        <Path d="M3.46447 3.46447C4.71683 2.2121 6.62194 2.03072 10.0957 2.00445L6.59861 7.25002H2.10418C2.25143 5.48593 2.6068 4.32213 3.46447 3.46447Z" fill={color} />
+        <Path d="M2 12C2 10.7633 2 9.68875 2.02644 8.75002H21.9736C22 9.68875 22 10.7633 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12ZM13.014 12.5852C14.338 13.4395 15 13.8666 15 14.5C15 15.1334 14.338 15.5605 13.014 16.4148C11.6719 17.2807 11.0008 17.7137 10.5004 17.3958C10 17.0779 10 16.2186 10 14.5C10 12.7814 10 11.9221 10.5004 11.6042C11.0008 11.2863 11.6719 11.7193 13.014 12.5852Z" fill={color} fillRule="evenodd" clipRule="evenodd" />
+        <Path d="M21.8958 7.25002C21.7486 5.48593 21.3932 4.32213 20.5355 3.46447C19.9382 2.86714 19.1924 2.51345 18.1987 2.30403L14.9014 7.25002H21.8958Z" fill={color} />
+        </>
+      ) : (
+        <>
+        <Path d="M12 22C7.28595 22 4.92893 22 3.46447 20.5355C2 19.0711 2 16.714 2 12C2 7.28595 2 4.92893 3.46447 3.46447C4.92893 2 7.28595 2 12 2C16.714 2 19.0711 2 20.5355 3.46447C22 4.92893 22 7.28595 22 12C22 16.714 22 19.0711 20.5355 20.5355C19.0711 22 16.714 22 12 22Z" {...line} />
+        <Path d="M21.5 8H2.5" {...line} />
+        <Path d="M7 8L10.5 2.5" {...line} />
+        <Path d="M13.5 8L17 2.5" {...line} />
+        <Path d="M13.014 12.5852C14.338 13.4395 15 13.8666 15 14.5C15 15.1334 14.338 15.5605 13.014 16.4148C11.6719 17.2807 11.0008 17.7137 10.5004 17.3958C10 17.0779 10 16.2186 10 14.5C10 12.7814 10 11.9221 10.5004 11.6042C11.0008 11.2863 11.6719 11.7193 13.014 12.5852Z" {...line} />
+        </>
+      )}
+    </Svg>
   );
 };

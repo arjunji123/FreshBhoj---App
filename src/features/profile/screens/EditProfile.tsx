@@ -2,10 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { Camera, ChevronRight, MapPin } from 'lucide-react-native';
 import { ApiError } from '@api';
-import { AppBar, Avatar, Button, Input, StickyBar, Text } from '@components/ui';
+import { AppBar, Avatar, Button, Input, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAuthStore } from '@features/authentication/store/authStore';
 import { useDefaultAddress, useProfile, useUpdateProfile, useUpdateProfileImage } from '../hooks/useProfile';
@@ -15,6 +16,7 @@ const EditProfile = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
+  const { bottom } = useSafeAreaInsets();
   const storedUser = useAuthStore((s) => s.user);
   const { data: user } = useProfile();
   const profile = user ?? storedUser;
@@ -83,7 +85,7 @@ const EditProfile = () => {
       <AppBar title="Edit profile" onBack={navigation.goBack} />
 
       <KeyboardAwareScrollView
-        contentContainerStyle={styles.scroll}
+        contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.xxl + bottom }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         bottomOffset={24}
@@ -96,7 +98,9 @@ const EditProfile = () => {
             accessibilityLabel="Change profile photo"
             style={({ pressed }) => [styles.avatarPressable, pressed ? styles.avatarPressed : null]}
           >
-            <Avatar uri={profile?.profileImage} name={fullName || profile?.fullName} size={92} />
+            <View style={styles.avatarRing}>
+              <Avatar uri={profile?.profileImage} name={fullName || profile?.fullName} size={104} />
+            </View>
             {updateProfileImage.isPending ? (
               <View style={styles.avatarOverlay}>
                 <ActivityIndicator color={theme.colors.palette.white} />
@@ -106,6 +110,9 @@ const EditProfile = () => {
                 <Camera size={14} color={theme.colors.palette.white} strokeWidth={2.4} />
               </View>
             )}
+          </Pressable>
+          <Pressable onPress={handlePickPhoto} disabled={updateProfileImage.isPending} hitSlop={8}>
+            <Text style={[theme.text.label, styles.changePhoto]}>Change photo</Text>
           </Pressable>
         </View>
 
@@ -171,11 +178,14 @@ const EditProfile = () => {
             <ChevronRight size={18} color={theme.colors.text.tertiary} strokeWidth={2.2} />
           </Pressable>
         </View>
-      </KeyboardAwareScrollView>
 
-      <StickyBar>
-        <Button title="Save changes" onPress={handleSave} loading={updateProfile.isPending} />
-      </StickyBar>
+        <Button
+          title="Save changes"
+          onPress={handleSave}
+          loading={updateProfile.isPending}
+          style={styles.saveButton}
+        />
+      </KeyboardAwareScrollView>
     </View>
   );
 };
@@ -189,34 +199,52 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   scroll: {
     padding: theme.layout.screenPadding,
-    paddingBottom: theme.spacing.xxl,
+    flexGrow: 1,
   },
   avatarWrap: {
     alignItems: 'center',
-    marginVertical: theme.spacing.xl,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.sm,
+    gap: theme.spacing.md,
   },
   avatarPressable: {
-    width: 92,
-    height: 92,
-    borderRadius: 46,
+    width: 116,
+    height: 116,
+    borderRadius: 58,
+  },
+  avatarRing: {
+    width: 116,
+    height: 116,
+    borderRadius: 58,
+    padding: 4,
+    borderWidth: 2,
+    borderColor: theme.colors.primary[600],
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  changePhoto: {
+    color: theme.colors.text.brand,
+  },
+  saveButton: {
+    marginTop: theme.spacing.xxl,
   },
   avatarPressed: {
     opacity: 0.85,
   },
   avatarOverlay: {
     ...StyleSheet.absoluteFillObject,
-    borderRadius: 46,
+    borderRadius: 58,
     backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   cameraBadge: {
     position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    bottom: 4,
+    right: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     backgroundColor: theme.colors.primary[600],
     alignItems: 'center',
     justifyContent: 'center',

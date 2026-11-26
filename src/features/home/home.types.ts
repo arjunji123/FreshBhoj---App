@@ -11,13 +11,11 @@ export interface SearchOriginRect {
 
 export interface HomeHeaderProps {
   scrollY: SharedValue<number>;
-  cartCount?: number;
   /** Unread inbox items — drives the dot on the bell. */
   notificationCount?: number;
   onPressLocation?: () => void;
   onPressSearch?: (origin: SearchOriginRect) => void;
   onPressNotifications?: () => void;
-  onPressCart?: () => void;
   onPressReferral?: () => void;
 }
 

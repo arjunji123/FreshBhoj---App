@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Bell, ChevronDown, Gift, MapPin, Search, ShoppingBag } from 'lucide-react-native';
+import { Bell, ChevronDown, Gift, MapPin, Search } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Animated, {
   Extrapolation,
@@ -10,6 +10,7 @@ import Animated, {
   useAnimatedStyle,
 } from 'react-native-reanimated';
 import AppGradient from '@components/AppGradient';
+import Logo from '@components/Logo';
 import PressableScale from '@animations/PressableScale';
 import { theme as staticTheme } from '@app/theme/index';
 import { useAuthStore } from '@features/authentication/store/authStore';
@@ -33,19 +34,16 @@ const ON_BRAND = staticTheme.colors.palette.white;
  */
 const HomeHeader = ({
   scrollY,
-  cartCount = 0,
   notificationCount = 0,
   onPressLocation,
   onPressSearch,
   onPressNotifications,
-  onPressCart,
   onPressReferral,
 }: HomeHeaderProps) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const insets = useSafeAreaInsets();
   const location = useAuthStore((s) => s.location);
-  const fullName = useAuthStore((s) => s.fullName);
   const searchRef = useRef<View>(null);
   const [hintIndex, setHintIndex] = useState(0);
 
@@ -57,7 +55,6 @@ const HomeHeader = ({
     return () => clearInterval(id);
   }, []);
 
-  const firstName = fullName?.trim().split(' ')[0];
   const locationLabel = location.locality || location.address || 'Set your area';
 
   const handlePressSearch = useCallback(() => {
@@ -113,9 +110,7 @@ const HomeHeader = ({
             accessibilityRole="button"
             accessibilityLabel="Change delivery area"
           >
-            <Text style={[theme.text.h1, styles.greeting]} numberOfLines={1}>
-              {firstName ? `Hi, ${firstName}` : 'Welcome'}
-            </Text>
+            <Logo size="md" variant="inverse" style={styles.logo} />
             <View style={styles.addressRow}>
               <MapPin size={14} color={ON_BRAND} strokeWidth={2.4} />
               <Text style={[theme.text.label, styles.address]} numberOfLines={1}>
@@ -135,21 +130,6 @@ const HomeHeader = ({
             >
               <Gift size={18} color={ON_BRAND} strokeWidth={2.2} />
               <View style={styles.accentDot} />
-            </PressableScale>
-
-            <PressableScale
-              style={styles.iconButton}
-              hitSlop={theme.layout.hitSlop}
-              onPress={onPressCart}
-              accessibilityRole="button"
-              accessibilityLabel="Cart"
-            >
-              <ShoppingBag size={18} color={ON_BRAND} strokeWidth={2.2} />
-              {cartCount > 0 ? (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{cartCount > 9 ? '9+' : cartCount}</Text>
-                </View>
-              ) : null}
             </PressableScale>
 
             <PressableScale
@@ -181,9 +161,6 @@ const HomeHeader = ({
           style={styles.searchBar}
         >
           <View style={styles.searchInner}>
-            <View style={styles.searchIconWrap}>
-              <Search size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
-            </View>
             <View style={styles.hintWrap}>
               <Animated.Text
                 key={hintIndex}
@@ -194,6 +171,9 @@ const HomeHeader = ({
               >
                 {SEARCH_HINTS[hintIndex] ?? HOME_COPY.searchPlaceholder}
               </Animated.Text>
+            </View>
+            <View style={styles.searchIconWrap}>
+              <Search size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
             </View>
           </View>
         </PressableScale>
@@ -244,8 +224,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       flex: 1,
       gap: 2,
     },
-    greeting: {
-      color: ON_BRAND,
+    logo: {
+      alignSelf: 'flex-start',
     },
     addressRow: {
       flexDirection: 'row',
@@ -314,6 +294,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
       flexDirection: 'row',
       alignItems: 'center',
       gap: theme.spacing.md,
+      // the placeholder starts the bar now that the icon sits on the right
+      paddingLeft: theme.spacing.md,
     },
     searchIconWrap: {
       width: 38,

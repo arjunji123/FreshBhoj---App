@@ -104,11 +104,11 @@ const PaymentMethods = () => {
   const styles = React.useMemo(() => createStyles(theme), [theme]);
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Payment Methods" onBack={navigation.goBack} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[theme.text.overline, styles.sectionLabel]}>SAVED CARDS</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Saved cards</Text>
         {cards.isLoading ? (
           <Skeleton height={72} radius={theme.radius.card} />
         ) : (
@@ -198,7 +198,7 @@ const PaymentMethods = () => {
           </Card>
         )}
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>WALLET</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Wallet</Text>
         {walletSummary.isLoading ? (
           <Skeleton height={72} radius={theme.radius.card} />
         ) : (

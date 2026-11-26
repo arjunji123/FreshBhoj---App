@@ -1,16 +1,15 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import {
   AlertCircle,
   Bell,
   CalendarClock,
-  CheckCheck,
   Receipt,
   Settings,
   Wallet,
 } from 'lucide-react-native';
-import { AppBar, AppBarAction, Chip, ChipRow, EmptyState, Screen, Skeleton, Text } from '@components/ui';
+import { AppBar, AppBarAction, EmptyState, Screen, Skeleton, Text } from '@components/ui';
 import type { CustomerNotification, CustomerNotificationCategory } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useTheme } from '@app/theme/useTheme';
@@ -19,10 +18,19 @@ import { useMarkAllNotificationsRead, useNotificationInbox } from '../hooks/useN
 
 type Filter = CustomerNotificationCategory | 'ALL';
 
+/** Heading under which a notification is grouped. */
+const dayLabel = (iso: string) => {
+  const date = new Date(iso);
+  const now = new Date();
+  if (date.toDateString() === now.toDateString()) return 'Today';
+  const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+  return date.toDateString() === yesterday.toDateString() ? 'Yesterday' : 'Earlier';
+};
+
 const FILTERS: Array<{ key: Filter; label: string }> = [
   { key: 'ALL', label: 'All' },
   { key: 'ORDER', label: 'Orders' },
-  { key: 'SUBSCRIPTION', label: 'Subscriptions' },
+  { key: 'SUBSCRIPTION', label: 'Meal plans' },
   { key: 'WALLET', label: 'Wallet' },
 ];
 
@@ -43,6 +51,20 @@ const NotificationInbox = () => {
   const items = useMemo(() => query.data?.pages.flatMap((page) => page.items) ?? [], [query.data]);
   const unreadCount = query.data?.pages[0]?.unreadCount ?? 0;
 
+  // No "mark all read" button: whatever was on the page counts as read once the
+  // customer leaves it, so the unread dots stay visible while they are looking.
+  const unreadRef = useRef(unreadCount);
+  unreadRef.current = unreadCount;
+  const { mutate: markRead } = markAllRead;
+  useFocusEffect(
+    useCallback(
+      () => () => {
+        if (unreadRef.current > 0) markRead();
+      },
+      [markRead],
+    ),
+  );
+
   const handleOpen = useCallback(
     (item: CustomerNotification) => {
       const { orderId, subscriptionId } = item.data ?? {};
@@ -58,47 +80,53 @@ const NotificationInbox = () => {
   );
 
   const renderIcon = (category: CustomerNotificationCategory) => {
-    const props = { size: 18, color: theme.colors.primary[600], strokeWidth: 2.2 };
+    const props = { size: 16, color: theme.colors.primary[600], strokeWidth: 2.2 };
     if (category === 'WALLET') return <Wallet {...props} />;
     if (category === 'SUBSCRIPTION') return <CalendarClock {...props} />;
     return <Receipt {...props} />;
   };
 
-  const renderItem = ({ item }: { item: CustomerNotification }) => (
-    <Pressable
-      onPress={() => handleOpen(item)}
-      accessibilityRole="button"
-      accessibilityLabel={`${item.isRead ? '' : 'Unread. '}${item.title}. ${item.body}`}
-      style={({ pressed }) => [
-        styles.row,
-        !item.isRead ? styles.rowUnread : null,
-        pressed ? styles.rowPressed : null,
-      ]}
-    >
-      <View style={styles.iconWrap}>{renderIcon(item.category)}</View>
-      <View style={styles.rowText}>
-        <View style={styles.rowTop}>
-          <Text variant="h4" style={styles.rowTitle} numberOfLines={1}>
-            {item.title}
-          </Text>
-          <Text variant="caption" color="tertiary">
-            {formatRelativeTime(item.createdAt)}
-          </Text>
-        </View>
-        <Text variant="bodySmall" color="secondary" numberOfLines={3}>
-          {item.body}
-        </Text>
+  const renderItem = ({ item, index }: { item: CustomerNotification; index: number }) => {
+    const day = dayLabel(item.createdAt);
+    const showDay = index === 0 || dayLabel(items[index - 1].createdAt) !== day;
+    return (
+      <View>
+        {showDay ? <Text style={[theme.text.label, styles.day]}>{day}</Text> : null}
+        <Pressable
+          onPress={() => handleOpen(item)}
+          accessibilityRole="button"
+          accessibilityLabel={`${item.isRead ? '' : 'Unread. '}${item.title}. ${item.body}`}
+          style={({ pressed }) => [styles.row, pressed ? styles.rowPressed : null]}
+        >
+          <View style={styles.iconWrap}>
+            {renderIcon(item.category)}
+            {!item.isRead ? <View style={styles.unreadDot} /> : null}
+          </View>
+          <View style={styles.rowText}>
+            <View style={styles.rowTop}>
+              <Text
+                style={[theme.text.label, styles.rowTitle, item.isRead ? styles.titleRead : null]}
+                numberOfLines={1}
+              >
+                {item.title}
+              </Text>
+              <Text style={[theme.text.caption, styles.time]}>{formatRelativeTime(item.createdAt)}</Text>
+            </View>
+            <Text style={[theme.text.caption, styles.message]} numberOfLines={2}>
+              {item.body}
+            </Text>
+          </View>
+        </Pressable>
       </View>
-      {!item.isRead ? <View style={styles.unreadDot} /> : null}
-    </Pressable>
-  );
+    );
+  };
 
   const renderBody = () => {
     if (query.isLoading) {
       return (
         <View style={styles.skeletons}>
           {[0, 1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} height={76} radius={theme.radius.card} />
+            <Skeleton key={i} height={60} radius={theme.radius.lg} />
           ))}
         </View>
       );
@@ -151,36 +179,42 @@ const NotificationInbox = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="Notifications"
         subtitle={unreadCount > 0 ? `${unreadCount} unread` : undefined}
         onBack={navigation.goBack}
         right={
-          <View style={styles.barActions}>
-            {unreadCount > 0 ? (
-              <AppBarAction
-                onPress={() => markAllRead.mutate()}
-                accessibilityLabel="Mark all as read"
-              >
-                <CheckCheck size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />
-              </AppBarAction>
-            ) : null}
-            <AppBarAction
-              onPress={() => navigation.navigate('Notifications')}
-              accessibilityLabel="Notification settings"
-            >
-              <Settings size={18} color={theme.colors.text.primary} strokeWidth={2.2} />
-            </AppBarAction>
-          </View>
+          <AppBarAction
+            onPress={() => navigation.navigate('Notifications')}
+            accessibilityLabel="Notification settings"
+          >
+            <Settings size={18} color={theme.colors.text.primary} strokeWidth={2.2} />
+          </AppBarAction>
         }
       />
 
-      <ChipRow>
-        {FILTERS.map(({ key, label }) => (
-          <Chip key={key} label={label} selected={filter === key} onPress={() => setFilter(key)} />
-        ))}
-      </ChipRow>
+      <View style={styles.tabs} accessibilityRole="tablist">
+        {FILTERS.map(({ key, label }) => {
+          const selected = filter === key;
+          return (
+            <Pressable
+              key={key}
+              onPress={() => setFilter(key)}
+              accessibilityRole="tab"
+              accessibilityState={{ selected }}
+              style={[styles.tab, selected ? styles.tabActive : null]}
+            >
+              <Text
+                style={[theme.text.label, selected ? styles.tabTextActive : styles.tabText]}
+                numberOfLines={1}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
       {renderBody()}
     </Screen>
@@ -191,40 +225,64 @@ export default NotificationInbox;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
-    barActions: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.xs },
-    skeletons: { padding: theme.layout.screenPadding, gap: theme.spacing.md },
-    list: { padding: theme.layout.screenPadding, gap: theme.spacing.sm, paddingBottom: theme.spacing.xxxl },
-    listEmpty: { flexGrow: 1, justifyContent: 'center' },
-    footer: { paddingVertical: theme.spacing.lg },
-    row: {
+    // Segmented control, set apart from the header above and the list below.
+    tabs: {
       flexDirection: 'row',
-      alignItems: 'flex-start',
-      gap: theme.spacing.md,
-      padding: theme.spacing.md,
-      minHeight: 64,
-      borderRadius: theme.radius.card,
-      backgroundColor: theme.colors.surface.base,
-      borderWidth: 1,
-      borderColor: theme.colors.borders.subtle,
+      marginHorizontal: theme.layout.screenPadding,
+      marginTop: theme.spacing.lg,
+      marginBottom: theme.spacing.xs,
+      padding: 4,
+      borderRadius: theme.radius.pill,
+      backgroundColor: theme.colors.surface.raised,
     },
-    rowUnread: { backgroundColor: theme.colors.surface.brandWash, borderColor: theme.colors.borders.brand },
-    rowPressed: { opacity: 0.85 },
-    iconWrap: {
-      width: 36,
+    tab: {
+      flex: 1,
       height: 36,
-      borderRadius: 18,
       alignItems: 'center',
       justifyContent: 'center',
-      backgroundColor: theme.colors.brand.primarySubtle,
+      borderRadius: theme.radius.pill,
     },
-    rowText: { flex: 1, gap: 2 },
-    rowTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: theme.spacing.sm },
-    rowTitle: { flex: 1 },
+    tabActive: { backgroundColor: theme.colors.primary[600] },
+    tabText: { color: theme.colors.text.secondary },
+    tabTextActive: { color: theme.colors.palette.white },
+    skeletons: { padding: theme.layout.screenPadding, gap: theme.spacing.sm },
+    list: { paddingHorizontal: theme.layout.screenPadding, paddingBottom: theme.spacing.xxxl },
+    listEmpty: { flexGrow: 1, justifyContent: 'center' },
+    footer: { paddingVertical: theme.spacing.lg },
+    day: { color: theme.colors.text.secondary, marginTop: theme.spacing.md, marginBottom: theme.spacing.sm },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: theme.spacing.md,
+      padding: theme.spacing.md,
+      marginBottom: theme.spacing.sm,
+      borderRadius: theme.radius.lg,
+      backgroundColor: theme.colors.surface.raised,
+    },
+    rowPressed: { opacity: 0.85 },
+    iconWrap: {
+      width: 34,
+      height: 34,
+      borderRadius: 12,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface.brandWash,
+    },
     unreadDot: {
-      width: 8,
-      height: 8,
-      borderRadius: 4,
-      marginTop: 6,
+      position: 'absolute',
+      top: -2,
+      right: -2,
+      width: 10,
+      height: 10,
+      borderRadius: 5,
+      borderWidth: 2,
+      borderColor: theme.colors.surface.raised,
       backgroundColor: theme.colors.primary[600],
     },
+    rowText: { flex: 1 },
+    rowTop: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm },
+    rowTitle: { flex: 1, color: theme.colors.text.primary },
+    titleRead: { color: theme.colors.text.secondary },
+    time: { color: theme.colors.text.tertiary },
+    message: { color: theme.colors.text.secondary, marginTop: 1 },
   });

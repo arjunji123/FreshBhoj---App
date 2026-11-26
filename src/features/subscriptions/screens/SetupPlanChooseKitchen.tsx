@@ -49,7 +49,7 @@ const SetupPlanChooseKitchen = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Choose a kitchen" subtitle="Set up your own plan" onBack={navigation.goBack} />
 
       <View style={styles.searchWrap}>
@@ -118,7 +118,8 @@ export default SetupPlanChooseKitchen;
 const styles = StyleSheet.create({
   searchWrap: {
     paddingHorizontal: staticTheme.layout.screenPadding,
-    paddingBottom: staticTheme.spacing.md,
+    paddingTop: staticTheme.spacing.lg,
+    paddingBottom: staticTheme.spacing.xs,
   },
   loading: {
     padding: staticTheme.layout.screenPadding,

@@ -136,7 +136,7 @@ const PaymentProcessing = () => {
         >
           <X size={22} color={theme.colors.text.primary} strokeWidth={2.4} />
         </Pressable>
-        <Text style={[theme.text.overline, styles.headerTitle]}>PROCESSING</Text>
+        <Text style={[theme.text.overline, styles.headerTitle]}>Processing</Text>
         <View style={styles.headerSpacer} />
       </View>
 
@@ -170,7 +170,7 @@ const PaymentProcessing = () => {
 
       <View style={styles.footer}>
         <View style={styles.progressHeader}>
-          <Text style={[theme.text.overline, styles.progressLabel]}>PROGRESS</Text>
+          <Text style={[theme.text.overline, styles.progressLabel]}>Progress</Text>
         </View>
         <View style={styles.progressTrack}>
           <Animated.View style={[styles.progressFillWrap, progressStyle]}>

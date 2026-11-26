@@ -111,7 +111,7 @@ const Subscribers = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="Subscribers"
         onBack={() => navigation.goBack()}

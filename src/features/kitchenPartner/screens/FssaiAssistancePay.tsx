@@ -32,7 +32,7 @@ const FssaiAssistancePay: React.FC<Props> = ({ request }) => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}

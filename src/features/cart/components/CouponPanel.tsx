@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { ChevronDown, ChevronUp, Tag, X } from 'lucide-react-native';
+import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ChevronDown, ChevronUp, BadgePercent } from 'lucide-react-native';
+import AppGradient from '@components/AppGradient';
 import { formatCurrency } from '@utils/format';
-import { Button, Card, Input, Text } from '@components/ui';
+import { Text } from '@components/ui';
 import type { Cart, Coupon } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -36,152 +37,156 @@ const CouponPanel: React.FC<CouponPanelProps> = ({
 
   if (applied) {
     return (
-      <Card padding="md" elevation="xs" style={styles.appliedCard}>
-        <View style={styles.appliedRow}>
-          <View style={styles.appliedIcon}>
-            <Tag size={16} color={theme.colors.accent[600]} strokeWidth={2.4} />
-          </View>
-          <View style={styles.appliedText}>
-            <Text style={[theme.text.h4, styles.appliedCode]}>{applied} applied</Text>
-            <Text style={[theme.text.caption, styles.appliedSaving]}>
-              You saved {formatCurrency(cart.coupon.discount)}
-            </Text>
-          </View>
-          <Pressable onPress={onRemove} hitSlop={theme.layout.hitSlop} accessibilityLabel="Remove coupon">
-            <X size={18} color={theme.colors.text.tertiary} strokeWidth={2.4} />
-          </Pressable>
+      <View style={styles.appliedRow}>
+        <View style={styles.appliedIcon}>
+          <BadgePercent size={17} color={theme.colors.palette.white} strokeWidth={2.4} />
         </View>
-      </Card>
+        <View style={styles.appliedText}>
+          <Text style={theme.text.label} numberOfLines={1}>
+            {applied} applied
+          </Text>
+          <Text style={[theme.text.caption, styles.appliedSaving]}>
+            You saved {formatCurrency(cart.coupon.discount)}
+          </Text>
+        </View>
+        <Pressable
+          onPress={onRemove}
+          hitSlop={theme.layout.hitSlop}
+          accessibilityRole="button"
+          accessibilityLabel="Remove coupon"
+        >
+          <Text style={[theme.text.label, styles.removeText]}>Remove</Text>
+        </Pressable>
+      </View>
     );
   }
 
+  const available = coupons.filter((c) => c.isApplicable).length;
+
   return (
-    <Card padding="none" elevation="xs" style={styles.card}>
+    <View>
       <Pressable
         style={styles.header}
         onPress={() => setExpanded((value) => !value)}
         accessibilityRole="button"
         accessibilityState={{ expanded }}
       >
-        <View style={styles.headerIcon}>
-          <Tag size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
-        </View>
+        <AppGradient colors={theme.colors.gradients.brandSoft} style={styles.headerIcon}>
+          <BadgePercent size={17} color={theme.colors.palette.white} strokeWidth={2.2} />
+        </AppGradient>
         <View style={styles.headerText}>
-          <Text style={theme.text.h4}>Apply a coupon</Text>
+          <Text style={theme.text.label}>Apply coupon</Text>
           {cart.coupon.invalidReason ? (
             <Text style={[theme.text.caption, styles.invalid]}>{cart.coupon.invalidReason}</Text>
-          ) : coupons.length ? (
-            <Text style={[theme.text.caption, styles.hint]}>
-              {coupons.filter((c) => c.isApplicable).length} offer(s) available
+          ) : (
+            <Text style={[theme.text.caption, available ? styles.available : styles.hint]}>
+              {available
+                ? `${available} ${available === 1 ? 'offer' : 'offers'} you can use now`
+                : 'Have a code? Enter it here'}
             </Text>
-          ) : null}
+          )}
         </View>
         {expanded ? (
-          <ChevronUp size={18} color={theme.colors.text.tertiary} strokeWidth={2.4} />
+          <ChevronUp size={16} color={theme.colors.text.tertiary} strokeWidth={2.4} />
         ) : (
-          <ChevronDown size={18} color={theme.colors.text.tertiary} strokeWidth={2.4} />
+          <ChevronDown size={16} color={theme.colors.text.tertiary} strokeWidth={2.4} />
         )}
       </Pressable>
 
       {expanded ? (
         <View style={styles.body}>
           <View style={styles.inputRow}>
-            <Input
+            <TextInput
               value={code}
               onChangeText={(value) => setCode(value.toUpperCase())}
-              placeholder="Enter code"
+              placeholder="Enter coupon code"
+              placeholderTextColor={theme.colors.text.tertiary}
               autoCapitalize="characters"
               autoCorrect={false}
-              size="md"
-              error={errorMessage ?? undefined}
-              containerStyle={styles.input}
+              style={[theme.text.bodyMedium, styles.input]}
             />
-            <Button
-              title="Apply"
-              size="md"
-              variant="secondary"
+            <Pressable
               onPress={() => onApply(code.trim())}
-              disabled={code.trim().length < 3}
-              loading={isApplying}
-              fullWidth={false}
-              style={styles.applyButton}
-            />
+              disabled={code.trim().length < 3 || isApplying}
+              accessibilityRole="button"
+              hitSlop={8}
+            >
+              <Text style={[theme.text.label, code.trim().length < 3 ? styles.applyOff : styles.applyOn]}>
+                {isApplying ? 'Applying…' : 'Apply'}
+              </Text>
+            </Pressable>
           </View>
+          {errorMessage ? <Text style={[theme.text.caption, styles.invalid]}>{errorMessage}</Text> : null}
 
           {coupons.map((coupon) => (
-            <Pressable
-              key={coupon.code}
-              onPress={() => coupon.isApplicable && onApply(coupon.code)}
-              disabled={!coupon.isApplicable}
-              style={({ pressed }) => [
-                styles.offer,
-                !coupon.isApplicable ? styles.offerDisabled : null,
-                pressed ? styles.pressed : null,
-              ]}
-            >
-              <View style={styles.offerCode}>
-                <Text style={[theme.text.label, styles.offerCodeText]}>{coupon.code}</Text>
-              </View>
+            <View key={coupon.code} style={[styles.offer, !coupon.isApplicable ? styles.offerLocked : null]}>
               <View style={styles.offerText}>
-                <Text style={theme.text.bodyMedium}>{coupon.title}</Text>
-                <Text style={[theme.text.caption, styles.hint]}>
+                <View style={styles.offerCode}>
+                  <Text style={[theme.text.label, styles.offerCodeText]}>{coupon.code}</Text>
+                </View>
+                <Text style={theme.text.label}>{coupon.title}</Text>
+                <Text style={[theme.text.caption, styles.hint]} numberOfLines={2}>
                   {coupon.isApplicable
                     ? coupon.description
-                    : `Add ${formatCurrency(coupon.amountNeeded)} more to use this`}
+                    : `Add ${formatCurrency(coupon.amountNeeded)} more to unlock`}
                 </Text>
               </View>
-            </Pressable>
+              <Pressable
+                onPress={() => onApply(coupon.code)}
+                disabled={!coupon.isApplicable || isApplying}
+                accessibilityRole="button"
+                accessibilityLabel={`Apply ${coupon.code}`}
+                style={[styles.offerButton, !coupon.isApplicable ? styles.offerButtonOff : null]}
+              >
+                <Text style={[theme.text.label, coupon.isApplicable ? styles.applyOn : styles.applyOff]}>
+                  Apply
+                </Text>
+              </Pressable>
+            </View>
           ))}
         </View>
       ) : null}
-    </Card>
+    </View>
   );
 };
 
 export default CouponPanel;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  card: {
-    marginTop: theme.spacing.md,
-  },
-  appliedCard: {
-    marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.brand.accentSubtle,
-  },
   appliedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
+    padding: theme.spacing.md,
   },
   appliedIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: theme.colors.surface.base,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: theme.colors.primary[600],
     alignItems: 'center',
     justifyContent: 'center',
   },
   appliedText: {
     flex: 1,
   },
-  appliedCode: {
-    color: theme.colors.text.accent,
-  },
   appliedSaving: {
-    color: theme.colors.accent[600],
+    color: theme.colors.text.brand,
     marginTop: 2,
+  },
+  removeText: {
+    color: theme.colors.state.error,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
-    padding: theme.spacing.lg,
+    padding: theme.spacing.md,
   },
   headerIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: theme.colors.brand.primarySubtle,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -192,52 +197,80 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     color: theme.colors.text.tertiary,
     marginTop: 2,
   },
+  available: {
+    color: theme.colors.text.brand,
+    marginTop: 2,
+  },
   invalid: {
     color: theme.colors.state.error,
     marginTop: 2,
   },
   body: {
-    paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.lg,
-    gap: theme.spacing.md,
+    paddingHorizontal: theme.spacing.md,
+    paddingBottom: theme.spacing.md,
+    gap: theme.spacing.sm,
   },
   inputRow: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: theme.spacing.sm,
+    height: 40,
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.colors.borders.subtle,
+    backgroundColor: theme.colors.surface.page,
   },
   input: {
     flex: 1,
+    paddingVertical: 0,
+    color: theme.colors.text.primary,
   },
-  applyButton: {
-    paddingHorizontal: theme.spacing.lg,
+  applyOn: {
+    color: theme.colors.text.brand,
+  },
+  applyOff: {
+    color: theme.colors.text.disabled,
   },
   offer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-  },
-  offerDisabled: {
-    opacity: 0.5,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  offerCode: {
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: 5,
-    borderRadius: theme.radius.sm,
-    borderWidth: 1,
-    borderStyle: 'dashed',
+    padding: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: theme.colors.borders.brand,
     backgroundColor: theme.colors.surface.brandWash,
+  },
+  offerLocked: {
+    borderColor: theme.colors.borders.subtle,
+    backgroundColor: theme.colors.surface.page,
+  },
+  offerText: {
+    flex: 1,
+    gap: 2,
+  },
+  offerCode: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 2,
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.surface.raised,
   },
   offerCodeText: {
     color: theme.colors.text.brand,
     fontSize: 11,
   },
-  offerText: {
-    flex: 1,
+  offerButton: {
+    height: 32,
+    justifyContent: 'center',
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.colors.borders.brand,
+    backgroundColor: theme.colors.surface.raised,
+  },
+  offerButtonOff: {
+    borderColor: theme.colors.borders.subtle,
   },
 });

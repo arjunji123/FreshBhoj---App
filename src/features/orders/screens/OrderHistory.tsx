@@ -6,10 +6,11 @@ import { enterRise } from '@animations/motion';
 import { EmptyOrders } from '@components/illustrations';
 import { ApiError } from '@api';
 import type { OrderCard, OrderStatus } from '@api/types';
-import { Chip, ChipRow, EmptyState, Screen, Skeleton, Text } from '@components/ui';
+import { Chip, ChipRow, EmptyState, Screen, Skeleton } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import OrderHistoryCard from '../components/OrderHistoryCard';
 import { useOrderHistory, useReorder } from '../hooks/useOrders';
+import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import { useTheme } from "@app/theme/useTheme";
 
 type Filter = { label: string; statuses?: OrderStatus[] };
@@ -62,13 +63,6 @@ const OrderHistory = () => {
 
   return (
     <Screen background="page" edges={[]}>
-      <View style={styles.header}>
-        <Text style={theme.text.h1}>Your Orders</Text>
-        <Text style={[theme.text.bodySmall, styles.subtitle]}>
-          Track what is on the way, and reorder what you loved
-        </Text>
-      </View>
-
       <ChipRow style={styles.filters}>
         {FILTERS.map((option, index) => (
           <Chip
@@ -152,14 +146,6 @@ const OrderHistory = () => {
 export default OrderHistory;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  header: {
-    paddingHorizontal: theme.layout.screenPadding,
-    paddingTop: theme.spacing.md,
-  },
-  subtitle: {
-    color: theme.colors.text.secondary,
-    marginTop: 4,
-  },
   filters: {
     paddingTop: theme.spacing.sm,
     paddingBottom: theme.spacing.md,
@@ -170,7 +156,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   list: {
     paddingHorizontal: theme.layout.screenPadding,
-    paddingBottom: theme.spacing.xxxl,
+    // leave room so the floating cart bar never hides the last card
+    paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE,
   },
   listEmpty: {
     flexGrow: 1,

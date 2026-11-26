@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
 import { CalendarCheck, ChevronRight } from 'lucide-react-native';
@@ -7,7 +8,7 @@ import { enterRise } from '@animations/motion';
 import PressableScale from '@animations/PressableScale';
 import MealCard from '@components/MealCard';
 import { EmptyState, MealCardSkeleton, Skeleton } from '@components/ui';
-import { EmptySearch } from '@components/illustrations';
+import EmptyPhoto from '@components/EmptyPhoto';
 import type { MealCard as MealCardType } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useTabBarFootprint, useTabBarScrollHandler } from '@app/navigation/private/tabBarVisibility';
@@ -15,8 +16,11 @@ import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import { useTheme } from '@app/theme/useTheme';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useCart, useCartQuantityControls } from '@features/cart/hooks/useCart';
-import HomeSectionHeader from '@features/home/components/HomeSectionHeader';
-import FitHero from '../components/FitHero';
+import BestPick, { pickBestMeal } from '../components/BestPick';
+import TodayCard from '../components/TodayCard';
+import FitHeader from '../components/FitHeader';
+import FitSectionHeader from '../components/FitSectionHeader';
+import StreakCard from '../components/StreakCard';
 import FitKitchensRail from '../components/FitKitchensRail';
 import FitMealCard from '../components/FitMealCard';
 import GoalPicker from '../components/GoalPicker';
@@ -25,7 +29,7 @@ import MacroFilters, { NO_MACRO_FILTERS, type MacroFilterState } from '../compon
 import TargetSheet from '../components/TargetSheet';
 import { FIT, FIT_COPY } from '../fit.constants';
 import { cartNutrition } from '../fit.utils';
-import { useFitFeed, useFitPool } from '../hooks/useFitData';
+import { useFitFeed, useFitPool, useFitStreak } from '../hooks/useFitData';
 import { useFitStore } from '../store/fitStore';
 
 /**
@@ -38,6 +42,7 @@ const FitHub = () => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   const navigation = useNavigation<PrivateNavigation>();
+  const insets = useSafeAreaInsets();
   const tabBarFootprint = useTabBarFootprint();
   const onScroll = useTabBarScrollHandler();
 
@@ -54,9 +59,15 @@ const FitHub = () => {
   const inCart = useMemo(() => cartNutrition(cart), [cart]);
 
   const pool = useFitPool();
+  const { data: streak, refetch: refetchStreak } = useFitStreak();
   const { query: feedQuery, meals } = useFitFeed(goal, filters);
   const { addToCart, conflictDialog } = useAddToCartFlow();
   const { getQuantity, changeQuantity } = useCartQuantityControls();
+
+  const bestMeal = useMemo(
+    () => pickBestMeal([...pool.proteinChampions, ...meals], targets, inCart),
+    [pool.proteinChampions, meals, targets, inCart],
+  );
 
   const openMeal = useCallback(
     (meal: MealCardType) => navigation.navigate('MealDetail', { mealId: meal.id, mealName: meal.name }),
@@ -70,13 +81,14 @@ const FitHub = () => {
 
   const refresh = () => {
     pool.refetch();
+    refetchStreak();
     feedQuery.refetch();
   };
 
-  const rail = (list: MealCardType[], offset: number) => (
+  const rail = (list: MealCardType[]) => (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.rail}>
-      {list.map((meal, index) => (
-        <Animated.View key={meal.id} entering={enterRise(index + offset)}>
+      {list.map((meal) => (
+        <View key={meal.id}>
           <MealCard
             layout="compact"
             meal={meal}
@@ -85,7 +97,7 @@ const FitHub = () => {
             quantity={getQuantity(meal.id)}
             onChangeQuantity={(next) => changeQuantity(meal.id, next)}
           />
-        </Animated.View>
+        </View>
       ))}
     </ScrollView>
   );
@@ -104,7 +116,10 @@ const FitHub = () => {
         showsVerticalScrollIndicator={false}
         onScroll={onScroll}
         scrollEventThrottle={16}
-        contentContainerStyle={[styles.content, { paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE + tabBarFootprint }]}
+        contentContainerStyle={{
+          paddingTop: insets.top + theme.spacing.md,
+          paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE + tabBarFootprint,
+        }}
         refreshControl={
           <RefreshControl refreshing={false} onRefresh={refresh} tintColor={FIT.emerald} colors={[FIT.emerald]} />
         }
@@ -119,14 +134,31 @@ const FitHub = () => {
           }
         }}
       >
+        <FitHeader streak={streak?.current ?? 0} />
+
         <Animated.View entering={enterRise(0)}>
-          <FitHero targets={targets} inCart={inCart} onSetTarget={() => setSheetOpen(true)} />
+          <TodayCard targets={targets} inCart={inCart} onSetTarget={() => setSheetOpen(true)} />
         </Animated.View>
 
-        <Animated.View entering={enterRise(1)} style={styles.section}>
-          <HomeSectionHeader title={FIT_COPY.goalTitle} />
-          <GoalPicker value={goal} onChange={setGoal} />
-        </Animated.View>
+        {streak ? <StreakCard streak={streak} /> : null}
+
+        {bestMeal ? (
+          <Animated.View entering={enterRise(1)} style={styles.section}>
+            <FitSectionHeader
+              title="Best pick for you"
+              subtitle={targets ? 'Most protein within the calories you have left' : 'Highest protein near you'}
+            />
+            <BestPick
+              meal={bestMeal}
+              targets={targets}
+              inCart={inCart}
+              quantity={getQuantity(bestMeal.id)}
+              onPress={() => openMeal(bestMeal)}
+              onAdd={() => addToCart(bestMeal)}
+              onChangeQuantity={(next) => changeQuantity(bestMeal.id, next)}
+            />
+          </Animated.View>
+        ) : null}
 
         <Animated.View entering={enterRise(2)} style={styles.section}>
           <HydrationCard />
@@ -134,8 +166,8 @@ const FitHub = () => {
 
         {pool.isLoading || pool.proteinChampions.length ? (
           <View style={styles.section}>
-            <HomeSectionHeader title={FIT_COPY.proteinTitle} subtitle={FIT_COPY.proteinSubtitle} />
-            {pool.isLoading ? railSkeleton : rail(pool.proteinChampions, 0)}
+            <FitSectionHeader title={FIT_COPY.proteinTitle} subtitle={FIT_COPY.proteinSubtitle} />
+            {pool.isLoading ? railSkeleton : rail(pool.proteinChampions)}
           </View>
         ) : null}
 
@@ -161,7 +193,7 @@ const FitHub = () => {
 
         {pool.kitchens.length ? (
           <View style={styles.section}>
-            <HomeSectionHeader title={FIT_COPY.kitchensTitle} subtitle={FIT_COPY.kitchensSubtitle} />
+            <FitSectionHeader title={FIT_COPY.kitchensTitle} subtitle={FIT_COPY.kitchensSubtitle} />
             <FitKitchensRail
               kitchens={pool.kitchens}
               onPress={(k) => navigation.navigate('KitchenProfile', { kitchenId: k.id, kitchenName: k.name })}
@@ -171,20 +203,23 @@ const FitHub = () => {
 
         {pool.lightAndLean.length ? (
           <View style={styles.section}>
-            <HomeSectionHeader title={FIT_COPY.lightTitle} subtitle={FIT_COPY.lightSubtitle} />
-            {rail(pool.lightAndLean, 0)}
+            <FitSectionHeader title={FIT_COPY.lightTitle} subtitle={FIT_COPY.lightSubtitle} />
+            {rail(pool.lightAndLean)}
           </View>
         ) : null}
 
         <View style={styles.section}>
-          <HomeSectionHeader title={FIT_COPY.feedTitle} subtitle="Filter by what matters to you" />
-          <MacroFilters value={filters} onToggle={toggleFilter} />
+          <FitSectionHeader title={FIT_COPY.feedTitle} subtitle="Pick a goal, then filter" />
+          <View style={styles.filterBlock}>
+            <GoalPicker value={goal} onChange={setGoal} />
+            <MacroFilters value={filters} onToggle={toggleFilter} />
+          </View>
           <View style={styles.list}>
             {feedQuery.isLoading ? (
               Array.from({ length: 3 }).map((_, i) => <MealCardSkeleton key={i} />)
             ) : meals.length === 0 ? (
               <EmptyState
-                illustration={<EmptySearch size={150} />}
+                illustration={<EmptyPhoto kind="search" size={130} />}
                 title="No meals match yet"
                 description="Try another goal or clear a filter. New kitchens join every week."
                 actionLabel={hasFilters ? 'Clear filters' : undefined}
@@ -209,6 +244,9 @@ const FitHub = () => {
         </View>
       </ScrollView>
 
+      {/* Keeps scrolled content from showing behind the clock and battery. */}
+      <View pointerEvents="none" style={[styles.statusShield, { height: insets.top }]} />
+
       {sheetOpen ? (
         <TargetSheet
           visible
@@ -230,10 +268,19 @@ export default FitHub;
 const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: theme.colors.surface.page },
-    content: { paddingTop: theme.spacing.xxl + theme.spacing.lg },
-    section: { marginTop: theme.spacing.xl, gap: theme.spacing.sm },
-    rail: { paddingHorizontal: theme.layout.screenPadding, gap: theme.spacing.md },
-    list: { paddingHorizontal: theme.layout.screenPadding, gap: theme.spacing.md, marginTop: theme.spacing.sm },
+    statusShield: { position: 'absolute', top: 0, left: 0, right: 0, backgroundColor: theme.colors.surface.page },
+    section: { marginTop: theme.spacing.xl },
+    // Vertical padding keeps the card shadows and bottom edges inside the rail.
+    rail: {
+      paddingHorizontal: theme.layout.screenPadding,
+      paddingTop: theme.spacing.xs,
+      paddingBottom: theme.spacing.md,
+      gap: theme.spacing.md,
+      alignItems: 'flex-start',
+    },
+    // Breathing room between the heading, the goal tiles, the filter chips and the first dish.
+    filterBlock: { gap: theme.spacing.md, marginTop: theme.spacing.xs },
+    list: { paddingHorizontal: theme.layout.screenPadding, gap: theme.spacing.md, marginTop: theme.spacing.lg },
     plan: {
       marginHorizontal: theme.layout.screenPadding,
       flexDirection: 'row',

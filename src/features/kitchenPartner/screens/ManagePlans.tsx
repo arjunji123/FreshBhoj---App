@@ -96,7 +96,7 @@ const ManagePlans = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="Manage Plans"
         onBack={() => navigation.goBack()}
@@ -166,7 +166,7 @@ function PlanCard({
     <Card style={styles.planCard} onPress={onPress}>
       <View style={styles.planTopRow}>
         <View style={styles.planNameWrap}>
-          {plan.isPopular ? <Badge label="POPULAR" tone="brand" variant="solid" size="sm" style={styles.popularBadge} /> : null}
+          {plan.isPopular ? <Badge label="Popular" tone="brand" variant="solid" size="sm" style={styles.popularBadge} /> : null}
           <Text variant="h4" numberOfLines={1}>
             {plan.name}
           </Text>
@@ -268,7 +268,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
       <Input label="Plan name" value={name} onChangeText={setName} placeholder="e.g. Weekday Lunch Combo" maxLength={60} containerStyle={styles.field} />
 
       <Text variant="overline" color="tertiary" style={styles.sheetLabel}>
-        BILLING CYCLE
+        Billing cycle
       </Text>
       <ChipRow>
         {(['WEEKLY', 'MONTHLY'] as BillingCycle[]).map((cycle) => (
@@ -277,7 +277,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
       </ChipRow>
 
       <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-        DELIVERY DAYS
+        Delivery days
       </Text>
       <ChipRow>
         {DAY_OPTIONS.map((day) => (
@@ -291,7 +291,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
       </ChipRow>
 
       <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-        MEALS PER DAY
+        Meals per day
       </Text>
       <ChipRow>
         {MEALS_PER_DAY_OPTIONS.map((n) => (
@@ -319,7 +319,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
       </View>
 
       <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-        DIET OPTIONS
+        Diet options
       </Text>
       <ChipRow>
         {DIET_OPTIONS.map((diet) => (
@@ -333,7 +333,7 @@ function PlanForm({ plan, onDone }: { plan: SubscriptionPlan | null; onDone: () 
       </ChipRow>
 
       <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-        DELIVERY SLOTS
+        Delivery slots
       </Text>
       <ChipRow>
         {SLOT_OPTIONS.map((slot) => (

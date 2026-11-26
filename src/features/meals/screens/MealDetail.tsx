@@ -22,7 +22,6 @@ import {
   Badge,
   Button,
   Card,
-  Divider,
   FoodTypeDot,
   Sheet,
   Skeleton,
@@ -43,7 +42,7 @@ import {
   useToggleFavorite,
 } from '../hooks/useMeals';
 import { useMarkReviewHelpful } from '@features/reviews/hooks/useReviews';
-import MealHero from '../components/MealHero';
+import MealHero, { useMealHeroHeight } from '../components/MealHero';
 import NutritionPanel from '../components/NutritionPanel';
 import CustomizationSheet from '../components/CustomizationSheet';
 import ReviewCard from '../components/ReviewCard';
@@ -59,6 +58,7 @@ type MealDetailRoute = RouteProp<PrivateStackParamList, 'MealDetail'>;
 const MealDetailScreen = () => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
+    const heroHeight = useMealHeroHeight();
   const navigation = useNavigation<PrivateNavigation>();
   const { params } = useRoute<MealDetailRoute>();
   const sheetRef = useRef<SheetHandle>(null);
@@ -96,7 +96,7 @@ const MealDetailScreen = () => {
   if (isLoading) {
     return (
       <View style={styles.screen}>
-        <Skeleton height={300} radius={0} />
+        <Skeleton height={heroHeight} radius={0} />
         <View style={styles.loadingBody}>
           <Skeleton width="70%" height={26} />
           <Skeleton width="45%" height={16} />
@@ -179,7 +179,7 @@ const MealDetailScreen = () => {
             >
               <IconBadge icon={KitchenIcon} size={36} />
               <View style={styles.kitchenInfo}>
-                <Text style={[theme.text.overline, styles.kitchenLabel]}>SOLD BY</Text>
+                <Text style={[theme.text.overline, styles.kitchenLabel]}>Sold by</Text>
                 <View style={styles.kitchenNameRow}>
                   <Text style={[theme.text.bodyMedium, styles.kitchenName]} numberOfLines={1}>
                     {meal.kitchen.name}
@@ -191,7 +191,11 @@ const MealDetailScreen = () => {
             </PressableScale>
 
             <View style={styles.metaRow}>
-              <RatingPill value={meal.rating} count={meal.ratingCount} size="md" />
+              {meal.ratingCount > 0 ? (
+                <RatingPill value={meal.rating} count={meal.ratingCount} size="md" />
+              ) : (
+                <Badge label="New dish" tone="accent" size="md" />
+              )}
               <View style={styles.metaItem}>
                 <Clock size={14} color={theme.colors.text.tertiary} strokeWidth={2.2} />
                 <Text style={[theme.text.caption, styles.metaText]}>
@@ -228,17 +232,13 @@ const MealDetailScreen = () => {
           {meal.ingredients.length ? (
             <View style={styles.section}>
               <Text style={[{ color: theme.colors.text.primary }, theme.text.h3]}>Ingredients</Text>
-              <Card padding="md" elevation="sm" style={styles.ingredientCard}>
-                {meal.ingredients.map((ingredient, index) => (
-                  <View key={ingredient}>
-                    {index > 0 ? <Divider spacing={theme.spacing.sm} /> : null}
-                    <View style={styles.ingredientRow}>
-                      <View style={styles.ingredientDot} />
-                      <Text style={[{ color: theme.colors.text.primary }, theme.text.body]}>{ingredient}</Text>
-                    </View>
+              <View style={styles.ingredientWrap}>
+                {meal.ingredients.map((ingredient) => (
+                  <View key={ingredient} style={styles.ingredientChip}>
+                    <Text style={[theme.text.bodyMedium, styles.ingredientText]}>{ingredient}</Text>
                   </View>
                 ))}
-              </Card>
+              </View>
             </View>
           ) : null}
 
@@ -329,7 +329,7 @@ const MealDetailScreen = () => {
         <View style={styles.stickyRow}>
           <View>
             <Text style={[theme.text.caption, styles.stickyLabel]}>
-              {meal.mrp && meal.mrp > meal.price ? `${meal.discountPercent}% OFF` : 'PRICE'}
+              {meal.mrp && meal.mrp > meal.price ? `${meal.discountPercent}% off` : 'Price'}
             </Text>
             <View style={styles.stickyPriceRow}>
               <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>{formatCurrency(meal.price)}</Text>
@@ -362,7 +362,7 @@ const MealDetailScreen = () => {
         ) : null}
       </StickyBar>
 
-      <Sheet ref={sheetRef} eyebrow="ADD TO PLATE" title={meal.name} heightRatio={0.82}>
+      <Sheet ref={sheetRef} eyebrow="Add to plate" title={meal.name} heightRatio={0.82}>
         <CustomizationSheet
           meal={meal}
           isSubmitting={isAdding}
@@ -487,20 +487,22 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   seeAll: {
     color: theme.colors.primary[600],
   },
-  ingredientCard: {
+  ingredientWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: theme.spacing.sm,
     marginTop: theme.spacing.md,
   },
-  ingredientRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.md,
-    paddingVertical: 4,
+  ingredientChip: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface.raised,
+    borderWidth: 1,
+    borderColor: theme.colors.borders.subtle,
   },
-  ingredientDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
-    backgroundColor: theme.colors.accent[500],
+  ingredientText: {
+    color: theme.colors.text.primary,
   },
   allergenCard: {
     flexDirection: 'row',

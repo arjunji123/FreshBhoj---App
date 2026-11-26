@@ -46,7 +46,7 @@ const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onTogg
       <View style={styles.container}>
         <View style={styles.row}>
           {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} width={112} height={48} radius={staticTheme.radius.pill} />
+            <Skeleton key={index} width={96} height={32} radius={staticTheme.radius.pill} />
           ))}
         </View>
       </View>
@@ -76,16 +76,15 @@ const GoalFilterRow: React.FC<GoalFilterRowProps> = ({ options, selected, onTogg
                 accessibilityState={{ selected: isSelected }}
                 style={[styles.chip, isSelected ? styles.chipSelected : styles.chipIdle]}
               >
-                <View style={[styles.iconWrap, isSelected ? styles.iconWrapSelected : null]}>
-                  <Icon
-                    size={16}
-                    color={isSelected ? theme.colors.primary[600] : theme.colors.accent[600]}
-                    strokeWidth={2.4}
-                  />
-                </View>
+                <Icon
+                  size={14}
+                  color={isSelected ? staticTheme.colors.palette.white : theme.colors.primary[600]}
+                  strokeWidth={2.4}
+                />
                 <Text
                   style={[
-                    theme.text.label,
+                    theme.text.caption,
+                    styles.label,
                     { color: isSelected ? staticTheme.colors.palette.white : theme.colors.text.primary },
                   ]}
                   numberOfLines={1}
@@ -116,32 +115,21 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.sm,
-    paddingVertical: 8,
-    paddingLeft: 7,
-    paddingRight: theme.spacing.md,
+    gap: 6,
+    height: 32,
+    paddingHorizontal: theme.spacing.md,
     borderRadius: theme.radius.pill,
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
   },
   chipIdle: {
     backgroundColor: theme.colors.surface.raised,
     borderColor: theme.colors.overlay.primaryBorder,
-    ...theme.elevation.sm,
   },
   chipSelected: {
     backgroundColor: theme.colors.primary[600],
     borderColor: theme.colors.primary[600],
-    ...theme.elevation.primary,
   },
-  iconWrap: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.overlay.accentWash,
-  },
-  iconWrapSelected: {
-    backgroundColor: staticTheme.colors.palette.white,
+  label: {
+    fontSize: 12,
   },
 });

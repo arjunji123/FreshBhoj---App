@@ -54,7 +54,7 @@ const Wallet = () => {
   const data = summary.data;
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Wallet" onBack={() => navigation.goBack()} />
 
       <ScrollView
@@ -137,7 +137,7 @@ const Wallet = () => {
         )}
 
         <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-          RECENT TRANSACTIONS
+          Recent transactions
         </Text>
 
         {transactions.isError ? (
@@ -238,7 +238,7 @@ function AddMoneySheet({ sheetRef }: { sheetRef: React.RefObject<SheetHandle | n
         ) : (
           <>
             <Text variant="overline" color="tertiary" style={styles.sheetLabel}>
-              AMOUNT
+              Amount
             </Text>
             <Input value={amountInput} onChangeText={(value) => setAmountInput(value.replace(/\D/g, '').slice(0, 7))} placeholder="e.g. 500" keyboardType="number-pad" prefix="₹" autoFocus />
             <View style={styles.presetRow}>

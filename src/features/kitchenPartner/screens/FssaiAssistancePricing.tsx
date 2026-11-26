@@ -27,7 +27,7 @@ const FssaiAssistancePricing: React.FC<Props> = ({ onBack }) => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar onBack={onBack} />
       <ScrollView
         contentContainerStyle={[styles.scroll, { paddingBottom: theme.spacing.paddings.xxl + Math.max(insets.bottom, 24) }]}

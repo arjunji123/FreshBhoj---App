@@ -147,7 +147,7 @@ const SetupPlanReview = () => {
     Boolean(quote.data) && Boolean(addressId) && !insufficientWalletBalance && !createSubscription.isPending;
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Review & Pay" subtitle="Step 3 of 3" onBack={navigation.goBack} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -263,7 +263,7 @@ const SetupPlanReview = () => {
       <StickyBar>
         <View style={styles.stickyRow}>
           <View>
-            <Text style={[theme.text.caption, styles.stickyLabel]}>DUE NOW</Text>
+            <Text style={[theme.text.caption, styles.stickyLabel]}>Due now</Text>
             <Text style={theme.text.h2}>{quote.data ? formatCurrency(quote.data.firstCycleAmount) : '—'}</Text>
           </View>
           <Button

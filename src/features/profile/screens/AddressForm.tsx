@@ -141,7 +141,7 @@ const AddressForm = () => {
           height={220}
         />
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>SAVE AS</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Save as</Text>
         <View style={styles.labelRow}>
           {LABELS.map(({ key, label: text, Icon }) => (
             <Chip
@@ -200,7 +200,7 @@ const AddressForm = () => {
           containerStyle={styles.field}
         />
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>RECEIVER (OPTIONAL)</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Receiver (optional)</Text>
         <Input
           label="Name"
           value={receiverName}

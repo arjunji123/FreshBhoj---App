@@ -149,7 +149,7 @@ const OrderTracking = () => {
         </Card>
 
         {/* ── Stepper ────────────────────────────────────────────────── */}
-        <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERY PROGRESS</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Delivery progress</Text>
         <Card padding="lg" elevation="xs">
           <OrderStatusStepper steps={tracking.tracking.steps} isCancelled={isCancelled} />
         </Card>
@@ -207,7 +207,7 @@ const OrderTracking = () => {
           ) : order ? (
             <>
               <Divider spacing={theme.spacing.md} />
-              <Text style={[theme.text.overline, styles.summaryLabel]}>ORDER SUMMARY</Text>
+              <Text style={[theme.text.overline, styles.summaryLabel]}>Order summary</Text>
               {order.items.map((item) => (
                 <SummaryRow
                   key={item.id}
@@ -228,7 +228,7 @@ const OrderTracking = () => {
             <View style={styles.kitchenRow}>
               <View style={[styles.kitchenLogo, styles.kitchenLogoFallback]} />
               <View style={styles.kitchenText}>
-                <Text style={[theme.text.overline, styles.kitchenMeta]}>DELIVERY PARTNER</Text>
+                <Text style={[theme.text.overline, styles.kitchenMeta]}>Delivery partner</Text>
                 <Text style={theme.text.h4}>{tracking.deliveryPartner.name}</Text>
                 {tracking.deliveryPartner.vehicleNumber ? (
                   <Text style={[theme.text.caption, styles.kitchenMeta]}>

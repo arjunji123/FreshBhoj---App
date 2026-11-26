@@ -58,7 +58,7 @@ const KitchenTimings = () => {
   const hours = useOperatingHours();
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Operating Hours" onBack={() => navigation.goBack()} />
       <ScrollView
         contentContainerStyle={styles.scroll}
@@ -99,7 +99,7 @@ const KitchenTimings = () => {
         </Card>
 
         <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-          WEEKLY HOURS
+          Weekly hours
         </Text>
         {hours.isError ? (
           <EmptyState title="Couldn't load hours" description="Check your connection and try again." actionLabel="Retry" onAction={() => hours.refetch()} />
@@ -116,7 +116,7 @@ const KitchenTimings = () => {
         )}
 
         <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-          HOLIDAYS
+          Holidays
         </Text>
         {hours.data ? <HolidaysSection holidays={hours.data.holidays} /> : null}
       </ScrollView>

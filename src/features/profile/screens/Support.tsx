@@ -53,7 +53,7 @@ const Support = () => {
       <AppBar title="Help & Support" onBack={navigation.goBack} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        <Text style={[theme.text.overline, styles.sectionLabel]}>QUICK SUPPORT</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Quick support</Text>
         <View style={styles.quickRow}>
           <QuickTile
             icon={<Receipt size={20} color={theme.colors.primary[600]} strokeWidth={2.2} />}
@@ -98,7 +98,7 @@ const Support = () => {
                 <MessageCircle size={22} color={theme.colors.palette.white} strokeWidth={2.2} />
               </View>
               <View style={styles.aiBadge}>
-                <Text style={styles.aiBadgeText}>INSTANT</Text>
+                <Text style={styles.aiBadgeText}>Instant</Text>
               </View>
             </View>
 
@@ -145,7 +145,7 @@ const Support = () => {
           </View>
         </Card>
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>FREQUENTLY ASKED</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Frequently asked</Text>
 
         {isLoading ? (
           <View style={styles.loading}>

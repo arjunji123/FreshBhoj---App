@@ -166,7 +166,7 @@ const ManageSubscription = () => {
             <Card style={styles.card}>
               <View style={styles.sectionHeaderRow}>
                 <CalendarDays size={15} color={theme.colors.text.secondary} strokeWidth={2.2} />
-                <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERY SCHEDULE</Text>
+                <Text style={[theme.text.overline, styles.sectionLabel]}>Delivery schedule</Text>
               </View>
               <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scheduleStrip}>
                 {subscription.deliverySchedule.map((entry) => (
@@ -187,7 +187,7 @@ const ManageSubscription = () => {
 
           <Card style={styles.card}>
             <Text style={[theme.text.overline, styles.sectionLabel]}>
-              {nextDelivery ? 'NEXT DELIVERY' : 'DELIVERY'}
+              {nextDelivery ? 'Next delivery' : 'Delivery'}
             </Text>
             <View style={styles.mealRow}>
               {nextDelivery?.meal?.images?.[0] ? (
@@ -221,7 +221,7 @@ const ManageSubscription = () => {
             <Card style={styles.card}>
               <View style={styles.sectionHeaderRow}>
                 <Heart size={14} color={theme.colors.text.secondary} strokeWidth={2.2} />
-                <Text style={[theme.text.overline, styles.sectionLabel]}>SWAP WITH A FAVOURITE</Text>
+                <Text style={[theme.text.overline, styles.sectionLabel]}>Swap with a favourite</Text>
               </View>
               {kitchenFavorites.map((meal) => (
                 <View key={meal.id} style={styles.favoriteRow}>

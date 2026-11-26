@@ -68,7 +68,7 @@ const SuggestionHistory = () => {
   }, [pagesMap]);
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Suggestion History" onBack={() => navigation.goBack()} />
 
       <View style={styles.header}>

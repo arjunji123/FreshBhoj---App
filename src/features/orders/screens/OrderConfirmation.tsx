@@ -91,7 +91,7 @@ const OrderConfirmation = () => {
           ) : (
             <>
               <Card padding="lg" elevation="sm" style={styles.etaCard}>
-                <Text style={[theme.text.overline, styles.etaLabel]}>ESTIMATED ARRIVAL</Text>
+                <Text style={[theme.text.overline, styles.etaLabel]}>Estimated arrival</Text>
                 <View style={styles.etaRow}>
                   <Clock size={26} color={theme.colors.text.brand} strokeWidth={2.4} />
                   <Text style={theme.text.displayMedium}>{order.eta.etaMinutes} Mins</Text>
@@ -124,7 +124,7 @@ const OrderConfirmation = () => {
           onPress={() => navigation.replace('OrderTracking', { orderId: params.orderId })}
           disabled={!order}
         />
-        <Text style={[theme.text.overline, styles.guarantee]}>PREMIUM QUALITY GUARANTEED</Text>
+        <Text style={[theme.text.overline, styles.guarantee]}>Premium quality guaranteed</Text>
       </View>
     </View>
   );

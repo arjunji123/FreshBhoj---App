@@ -74,7 +74,7 @@ const Payouts = () => {
   const canRequest = !!data && data.availableForPayout > 0;
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Payouts" onBack={() => navigation.goBack()} />
 
       <ScrollView
@@ -162,7 +162,7 @@ const Payouts = () => {
               <View style={styles.bankHeaderRow}>
                 <Landmark size={16} color={theme.colors.text.secondary} />
                 <Text variant="overline" color="tertiary">
-                  BANK ACCOUNT
+                  Bank account
                 </Text>
               </View>
               {data.bankAccount ? (
@@ -195,7 +195,7 @@ const Payouts = () => {
             {chartData.length >= 2 ? (
               <Card style={styles.chartCard}>
                 <Text variant="overline" color="tertiary" style={styles.chartLabel}>
-                  RECENT ORDER EARNINGS
+                  Recent order earnings
                 </Text>
                 <LineChart
                   data={chartData}
@@ -224,7 +224,7 @@ const Payouts = () => {
         )}
 
         <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-          RECENT TRANSACTIONS
+          Recent transactions
         </Text>
 
         {transactions.isError ? (

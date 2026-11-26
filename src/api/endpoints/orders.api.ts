@@ -9,6 +9,14 @@ export interface PlaceOrderInput {
   orderNotes?: string;
 }
 
+export interface FitStreak {
+  current: number;
+  best: number;
+  todayDone: boolean;
+  /** Oldest first, ending today (IST, YYYY-MM-DD). */
+  week: Array<{ date: string; done: boolean }>;
+}
+
 export const ordersApi = {
   place: (input: PlaceOrderInput) => apiClient.post<OrderDetail>('/customer/orders', input),
 
@@ -16,6 +24,8 @@ export const ordersApi = {
     apiClient.get<Paginated<OrderCard>>('/customer/orders', { query: params as Record<string, unknown> }),
 
   active: () => apiClient.get<OrderDetail[]>('/customer/orders/active'),
+
+  fitStreak: () => apiClient.get<FitStreak>('/customer/orders/fit-streak'),
 
   detail: (id: string) => apiClient.get<OrderDetail>(`/customer/orders/${id}`),
 

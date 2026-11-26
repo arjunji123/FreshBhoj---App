@@ -76,14 +76,14 @@ const MealCard: React.FC<MealCardProps> = ({
 
         {meal.isBestseller ? (
           <View style={styles.bestsellerTag}>
-            <Text style={styles.bestsellerText}>BESTSELLER</Text>
+            <Text style={styles.bestsellerText}>Bestseller</Text>
           </View>
         ) : null}
 
         {isHealthyMeal(meal) && !meal.isBestseller ? (
           <View style={styles.healthyTag}>
             <Leaf size={9} color={theme.colors.text.inverse} strokeWidth={2.6} />
-            <Text style={styles.bestsellerText}>HEALTHY</Text>
+            <Text style={styles.bestsellerText}>Healthy</Text>
           </View>
         ) : null}
 
@@ -97,7 +97,7 @@ const MealCard: React.FC<MealCardProps> = ({
             style={styles.favoriteButton}
           >
             <Heart
-              size={15}
+              size={18}
               color={meal.isFavorite ? theme.colors.primary[600] : theme.colors.neutral[400]}
               fill={meal.isFavorite ? theme.colors.primary[600] : 'transparent'}
               strokeWidth={2.2}
@@ -175,33 +175,29 @@ const MealCard: React.FC<MealCardProps> = ({
 export default MealCard;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+  // Photo-first: the picture runs edge to edge and leads the card.
   card: {
-    flexDirection: 'row',
     backgroundColor: theme.colors.surface.raised,
-    borderRadius: theme.radius.card,
-    padding: theme.spacing.md,
-    gap: theme.spacing.md,
+    borderRadius: theme.radius.xxl,
     ...theme.elevation.sm,
   },
   cardCompact: {
-    flexDirection: 'column',
-    width: 168,
-    gap: theme.spacing.sm,
+    width: 220,
   },
   pressed: {
     opacity: 0.94,
     transform: [{ scale: 0.99 }],
   },
   imageWrap: {
-    width: 112,
-    height: 112,
-    borderRadius: theme.radius.lg,
+    width: '100%',
+    aspectRatio: 16 / 10,
+    borderTopLeftRadius: theme.radius.xxl,
+    borderTopRightRadius: theme.radius.xxl,
     overflow: 'hidden',
     backgroundColor: theme.colors.neutral[100],
   },
   imageWrapCompact: {
-    width: '100%',
-    height: 110,
+    aspectRatio: 4 / 3,
   },
   image: {
     width: '100%',
@@ -212,8 +208,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   bestsellerTag: {
     position: 'absolute',
-    top: 6,
-    left: 6,
+    top: 10,
+    left: 10,
     backgroundColor: theme.colors.amber[500],
     paddingHorizontal: 6,
     paddingVertical: 2,
@@ -221,15 +217,15 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   bestsellerText: {
     ...theme.text.caption,
-    fontSize: 8,
-    lineHeight: 11,
+    fontSize: 10,
+    lineHeight: 14,
     letterSpacing: 0.4,
     color: theme.colors.text.inverse,
   },
   healthyTag: {
     position: 'absolute',
-    top: 6,
-    left: 6,
+    top: 10,
+    left: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3,
@@ -240,11 +236,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   favoriteButton: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    top: 10,
+    right: 10,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: theme.colors.surface.base,
     alignItems: 'center',
     justifyContent: 'center',
@@ -262,10 +258,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     textAlign: 'center',
   },
   body: {
-    flex: 1,
-    justifyContent: 'space-between',
+    padding: theme.spacing.lg,
   },
   bodyCompact: {
+    padding: theme.spacing.md,
     gap: 6,
   },
   titleRow: {

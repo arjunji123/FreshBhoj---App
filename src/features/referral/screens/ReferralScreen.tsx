@@ -28,7 +28,7 @@ const ReferralScreen = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Refer & Earn" onBack={navigation.goBack} />
 
       <ScrollView style={styles.flex} contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -75,7 +75,7 @@ const ReferralScreen = () => {
         )}
 
         <Card padding="md" elevation="xs" style={styles.howCard}>
-          <Text style={[theme.text.label, styles.howTitle]}>HOW IT WORKS</Text>
+          <Text style={[theme.text.label, styles.howTitle]}>How it works</Text>
           <HowStep index={1} text="Share your code with a friend who hasn't tried FreshBhoj yet" />
           <HowStep index={2} text="They enter it right after signing up (or skip it — no pressure)" />
           <HowStep index={3} text="You both get FreshBhoj Coins toward your next healthy order" />

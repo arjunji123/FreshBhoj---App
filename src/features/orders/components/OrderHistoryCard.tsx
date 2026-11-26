@@ -38,19 +38,17 @@ const OrderHistoryCard: React.FC<OrderHistoryCardProps> = ({
     (
       <Card padding="md" elevation="sm" onPress={onPress} style={styles.card}>
         <View style={styles.header}>
-          <View style={styles.thumbnails}>
+          <View>
             {order.thumbnails.length ? (
-              order.thumbnails.slice(0, 2).map((uri, index) => (
-                <Image
-                  key={`${uri}-${index}`}
-                  source={{ uri }}
-                  style={[styles.thumbnail, index > 0 ? styles.thumbnailStacked : null]}
-                  resizeMode="cover"
-                />
-              ))
+              <Image source={{ uri: order.thumbnails[0] }} style={styles.thumbnail} resizeMode="cover" />
             ) : (
               <View style={[styles.thumbnail, styles.thumbnailFallback]} />
             )}
+            {order.thumbnails.length > 1 ? (
+              <View style={styles.moreBadge}>
+                <Text style={[theme.text.caption, styles.moreText]}>+{order.thumbnails.length - 1}</Text>
+              </View>
+            ) : null}
           </View>
 
           <View style={styles.headerText}>
@@ -120,21 +118,21 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flexDirection: 'row',
     gap: theme.spacing.md,
   },
-  thumbnails: {
-    flexDirection: 'row',
-    width: 56,
-  },
   thumbnail: {
-    width: 48,
-    height: 48,
-    borderRadius: theme.radius.md,
+    width: 80,
+    height: 80,
+    borderRadius: theme.radius.lg,
     backgroundColor: theme.colors.neutral[100],
   },
-  thumbnailStacked: {
-    marginLeft: -22,
-    borderWidth: 2,
-    borderColor: theme.colors.surface.base,
+  moreBadge: {
+    position: 'absolute',
+    right: 4,
+    bottom: 4,
+    paddingHorizontal: 6,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.overlay.scrim,
   },
+  moreText: { color: theme.colors.text.inverse },
   thumbnailFallback: {
     backgroundColor: theme.colors.brand.primarySubtle,
   },

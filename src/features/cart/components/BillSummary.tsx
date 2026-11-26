@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Coins, Info, Sparkles } from 'lucide-react-native';
+import { Bike, Coins, Landmark, ReceiptText, ShoppingBag, TicketPercent } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
-import { Card, Divider, SummaryRow, Text } from '@components/ui';
+import { Text } from '@components/ui';
 import type { PriceBreakdown } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -12,101 +12,150 @@ interface BillSummaryProps {
   title?: string;
 }
 
-/** The bill. Identical on the cart, checkout and order-detail screens. */
-const BillSummary: React.FC<BillSummaryProps> = ({
-  pricing,
-  couponCode,
-  title = 'Bill details',
-}) => {
-    const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
-      return (
-    (
-      <View style={styles.container}>
-        <Text style={[theme.text.h3, styles.title]}>{title}</Text>
+type RowIcon = React.FC<{ size: number; color: string; strokeWidth: number }>;
 
-        <Card padding="md" elevation="xs">
-          <SummaryRow label="Item total" value={pricing.itemsTotal} />
+/** The bill, shared by the cart and checkout screens. */
+const BillSummary: React.FC<BillSummaryProps> = ({ pricing, couponCode, title = 'Bill details' }) => {
+  const theme = useTheme();
+  const styles = useMemo(() => createStyles(theme), [theme]);
 
-          <SummaryRow
-            label="Delivery fee"
-            value={pricing.freeDeliveryApplied ? 'FREE' : pricing.deliveryFee}
-            tone={pricing.freeDeliveryApplied ? 'free' : 'default'}
-            icon={<Info size={13} color={theme.colors.text.tertiary} strokeWidth={2.2} />}
-          />
+  const row = (label: string, value: string, Icon: RowIcon, saving = false) => (
+    <View style={styles.row}>
+      <Icon size={15} color={saving ? theme.colors.text.brand : theme.colors.text.tertiary} strokeWidth={2.2} />
+      <Text
+        style={[theme.text.bodySmall, styles.rowLabel, saving ? styles.saving : styles.label]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
+      <Text style={[theme.text.label, saving ? styles.saving : styles.value]}>{value}</Text>
+    </View>
+  );
 
-          <SummaryRow label="Taxes & charges" value={pricing.taxes} tone="muted" />
+  const toFreeDelivery = pricing.freeDeliveryApplied ? 0 : pricing.amountToFreeDelivery;
+  const freeProgress = pricing.itemsTotal / Math.max(1, pricing.itemsTotal + toFreeDelivery);
 
-          {pricing.couponDiscount > 0 ? (
-            <SummaryRow
-              label={couponCode ? `Coupon ${couponCode}` : 'Discount'}
-              value={pricing.couponDiscount}
-              tone="discount"
-              icon={<Sparkles size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
-            />
-          ) : null}
-
-          {pricing.coinDiscount > 0 ? (
-            <SummaryRow
-              label="FreshBhoj Coins"
-              value={pricing.coinDiscount}
-              tone="discount"
-              icon={<Coins size={13} color={theme.colors.accent[600]} strokeWidth={2.2} />}
-            />
-          ) : null}
-
-          <Divider dashed spacing={theme.spacing.sm} />
-
-          <SummaryRow label="Total amount" value={pricing.totalAmount} tone="total" />
-
-          {pricing.discount > 0 ? (
-            <View style={styles.savingsBanner}>
-              <Text style={[theme.text.caption, styles.savingsText]}>
-                You saved {formatCurrency(pricing.discount)} on this order
-              </Text>
-            </View>
-          ) : null}
-        </Card>
-
-        {!pricing.freeDeliveryApplied && pricing.amountToFreeDelivery > 0 ? (
-          <View style={styles.freeDeliveryHint}>
-            <Text style={[theme.text.caption, styles.freeDeliveryText]}>
-              Add {formatCurrency(pricing.amountToFreeDelivery)} more for free delivery
-            </Text>
-          </View>
-        ) : null}
+  return (
+    <View style={styles.card}>
+      <View style={styles.head}>
+        <ReceiptText size={15} color={theme.colors.text.brand} strokeWidth={2.2} />
+        <Text style={theme.text.label}>{title}</Text>
       </View>
-    )
-      );
-    };
+
+      <View style={styles.rows}>
+        {row('Item total', formatCurrency(pricing.itemsTotal), ShoppingBag)}
+        {row(
+          'Delivery fee',
+          pricing.freeDeliveryApplied ? 'Free' : formatCurrency(pricing.deliveryFee),
+          Bike,
+          pricing.freeDeliveryApplied,
+        )}
+        {row('Taxes & charges', formatCurrency(pricing.taxes), Landmark)}
+        {pricing.couponDiscount > 0
+          ? row(
+              couponCode ? `Coupon ${couponCode}` : 'Discount',
+              `− ${formatCurrency(pricing.couponDiscount)}`,
+              TicketPercent,
+              true,
+            )
+          : null}
+        {pricing.coinDiscount > 0
+          ? row('FreshBhoj Coins', `− ${formatCurrency(pricing.coinDiscount)}`, Coins, true)
+          : null}
+      </View>
+
+      <View style={styles.totalRow}>
+        <Text style={theme.text.label}>To pay</Text>
+        <Text style={theme.text.h4}>{formatCurrency(pricing.totalAmount)}</Text>
+      </View>
+
+      {pricing.discount > 0 ? (
+        <View style={styles.banner}>
+          <Text style={[theme.text.label, styles.saving]}>
+            You saved {formatCurrency(pricing.discount)} on this order
+          </Text>
+        </View>
+      ) : null}
+
+      {toFreeDelivery > 0 ? (
+        <View style={styles.banner}>
+          <Text style={[theme.text.caption, styles.bannerText]}>
+            Add {formatCurrency(toFreeDelivery)} more for free delivery
+          </Text>
+          <View style={styles.track}>
+            <View style={[styles.fill, { width: `${Math.round(freeProgress * 100)}%` }]} />
+          </View>
+        </View>
+      ) : null}
+    </View>
+  );
+};
 
 export default BillSummary;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  container: {
-    marginTop: theme.spacing.xl,
-  },
-  title: {
-    marginBottom: theme.spacing.md,
-  },
-  savingsBanner: {
+  card: {
     marginTop: theme.spacing.md,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.surface.raised,
+    overflow: 'hidden',
+  },
+  head: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+  },
+  rows: {
+    paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.brand.accentSubtle,
+  },
+  row: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: theme.spacing.sm,
+    paddingVertical: 4,
   },
-  savingsText: {
-    color: theme.colors.text.accent,
+  rowLabel: {
+    flex: 1,
   },
-  freeDeliveryHint: {
-    marginTop: theme.spacing.sm,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.state.warningBg,
+  label: {
+    color: theme.colors.text.secondary,
+  },
+  value: {
+    color: theme.colors.text.primary,
+  },
+  saving: {
+    color: theme.colors.text.brand,
+  },
+  totalRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.colors.borders.default,
   },
-  freeDeliveryText: {
-    color: theme.colors.state.warningBg === theme.colors.amber[50] ? theme.colors.amber[700] : theme.colors.amber[300], // light : dark
+  banner: {
+    gap: 6,
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: theme.colors.surface.brandWash,
+  },
+  bannerText: {
+    color: theme.colors.text.brand,
+  },
+  track: {
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: theme.colors.surface.raised,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: '100%',
+    borderRadius: 2,
+    backgroundColor: theme.colors.primary[600],
   },
 });

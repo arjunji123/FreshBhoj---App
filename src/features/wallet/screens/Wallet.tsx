@@ -1,15 +1,15 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { ArrowDownToLine, CircleAlert, CircleCheckBig, Clock, Plus } from 'lucide-react-native';
+import { ArrowDownLeft, ArrowDownToLine, ArrowUpRight, CircleAlert, CircleCheckBig, Clock, Plus } from 'lucide-react-native';
 import Animated from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
 import { WalletIcon } from '@components/icons';
 import { IconBadge } from '@features/profile/components/ProfileBlocks';
 import { formatCurrency, formatDateTime } from '@utils/format';
 import { ApiError } from '@api';
-import { AppBar, Badge, Button, Card, Chip, ChipRow, Divider, EmptyState, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
-import type { BadgeTone, SheetHandle } from '@components/ui';
+import { AppBar, Badge, Button, Card, Chip, EmptyState, Input, Screen, Sheet, Skeleton, Text } from '@components/ui';
+import type { SheetHandle } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages } from '@features/meals/hooks/useMeals';
 import type { WalletTransactionReason } from '@api/types';
@@ -32,14 +32,6 @@ const REASON_LABEL: Record<WalletTransactionReason, string> = {
   SUBSCRIPTION_PAYMENT: 'Subscription payment',
   WITHDRAWAL: 'Withdrawal',
   REFUND: 'Refund',
-};
-
-const REASON_TONE: Record<WalletTransactionReason, BadgeTone> = {
-  TOPUP: 'accent',
-  ORDER_PAYMENT: 'brand',
-  SUBSCRIPTION_PAYMENT: 'brand',
-  WITHDRAWAL: 'neutral',
-  REFUND: 'warning',
 };
 
 function matchesTab(tab: FilterTab, reason: WalletTransactionReason): boolean {
@@ -77,7 +69,7 @@ const Wallet = () => {
   );
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Wallet" onBack={navigation.goBack} />
 
       <ScrollView
@@ -110,7 +102,7 @@ const Wallet = () => {
             <View style={styles.balanceIcon}>
               <IconBadge icon={WalletIcon} size={48} />
             </View>
-            <Text style={[theme.text.caption, styles.balanceLabel]}>FRESHBHOJ BALANCE</Text>
+            <Text style={[theme.text.caption, styles.balanceLabel]}>FreshBhoj balance</Text>
             <Text style={theme.text.h1}>{formatCurrency(summary.data.balanceRs)}</Text>
 
             <View style={styles.balanceActions}>
@@ -162,13 +154,26 @@ const Wallet = () => {
           </Card>
         ) : null}
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>TRANSACTIONS</Text>
+        <Text style={[theme.text.h3, styles.sectionLabel]}>Transactions</Text>
 
-        <ChipRow style={styles.tabRow}>
-          {TABS.map(({ key, label }) => (
-            <Chip key={key} label={label} selected={tab === key} onPress={() => setTab(key)} />
-          ))}
-        </ChipRow>
+        <View style={styles.segment} accessibilityRole="tablist">
+          {TABS.map(({ key, label }) => {
+            const selected = tab === key;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => setTab(key)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected }}
+                style={[styles.segmentItem, selected ? styles.segmentItemActive : null]}
+              >
+                <Text style={[theme.text.label, selected ? styles.segmentTextActive : styles.segmentText]}>
+                  {label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
 
         {transactions.isError ? (
           <EmptyState title="Couldn't load transactions" actionLabel="Retry" onAction={() => transactions.refetch()} />
@@ -185,28 +190,35 @@ const Wallet = () => {
           />
         ) : (
           <>
-            {filteredItems.map((item, index) => (
-              <View key={item.id}>
-                {index > 0 ? <Divider spacing={theme.spacing.sm} /> : null}
-                <View style={styles.txRow}>
-                  <View style={styles.txText}>
-                    <Text style={theme.text.bodyMedium} numberOfLines={1}>
-                      {item.description || REASON_LABEL[item.reason]}
-                    </Text>
-                    <View style={styles.txMetaRow}>
-                      <Badge label={REASON_LABEL[item.reason]} tone={REASON_TONE[item.reason]} size="sm" />
-                      <Text style={[theme.text.caption, styles.txDate]}>{formatDateTime(item.createdAt)}</Text>
+            <Card padding="none" elevation="xs" style={styles.txCard}>
+              {filteredItems.map((item, index) => {
+                const isCredit = item.type === 'CREDIT';
+                const DirectionIcon = isCredit ? ArrowDownLeft : ArrowUpRight;
+                return (
+                  <View key={item.id} style={[styles.txRow, index > 0 ? styles.txRowDivider : null]}>
+                    <View style={[styles.txIcon, isCredit ? styles.txIconCredit : styles.txIconDebit]}>
+                      <DirectionIcon
+                        size={18}
+                        color={isCredit ? theme.colors.primary[600] : theme.colors.state.error}
+                        strokeWidth={2.4}
+                      />
                     </View>
+                    <View style={styles.txText}>
+                      <Text style={theme.text.bodyMedium} numberOfLines={1}>
+                        {item.description || REASON_LABEL[item.reason]}
+                      </Text>
+                      <Text style={[theme.text.caption, styles.txDate]} numberOfLines={1}>
+                        {formatDateTime(item.createdAt)}
+                      </Text>
+                    </View>
+                    <Text style={[theme.text.numeric, isCredit ? styles.txPositive : styles.txNegative]}>
+                      {isCredit ? '+' : '−'}
+                      {formatCurrency(item.amountRs)}
+                    </Text>
                   </View>
-                  <Text
-                    style={[theme.text.bodyMedium, item.type === 'CREDIT' ? styles.txPositive : styles.txNegative]}
-                  >
-                    {item.type === 'CREDIT' ? '+' : '−'}
-                    {formatCurrency(item.amountRs)}
-                  </Text>
-                </View>
-              </View>
-            ))}
+                );
+              })}
+            </Card>
 
             {transactions.hasNextPage ? (
               <View style={styles.loadMoreWrap}>
@@ -280,7 +292,7 @@ function AddMoneySheet({ sheetRef }: { sheetRef: React.RefObject<SheetHandle | n
           </View>
         ) : (
           <>
-            <Text style={[theme.text.label, styles.sheetLabel]}>AMOUNT</Text>
+            <Text style={[theme.text.label, styles.sheetLabel]}>Amount</Text>
             <Input value={amountInput} onChangeText={setAmountInput} placeholder="e.g. 500" keyboardType="number-pad" prefix="₹" autoFocus />
             <View style={styles.presetRow}>
               {PRESET_AMOUNTS.map((amt) => (
@@ -365,7 +377,7 @@ function WithdrawSheet({
           </View>
         ) : (
           <>
-            <Text style={[theme.text.label, styles.sheetLabel]}>AMOUNT</Text>
+            <Text style={[theme.text.label, styles.sheetLabel]}>Amount</Text>
             <Input
               value={amountInput}
               onChangeText={setAmountInput}
@@ -459,34 +471,69 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     marginTop: theme.spacing.xl,
     marginBottom: theme.spacing.sm,
   },
-  tabRow: {
-    paddingHorizontal: 0,
+  segment: {
+    flexDirection: 'row',
+    padding: 4,
     marginBottom: theme.spacing.md,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.surface.raised,
+    borderWidth: 1,
+    borderColor: theme.colors.borders.subtle,
+  },
+  segmentItem: {
+    flex: 1,
+    height: 40,
+    borderRadius: theme.radius.pill,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  segmentItemActive: {
+    backgroundColor: theme.colors.primary[600],
+  },
+  segmentText: {
+    color: theme.colors.text.secondary,
+  },
+  segmentTextActive: {
+    color: theme.colors.palette.white,
   },
   txSkeletonWrap: {
     gap: theme.spacing.sm,
   },
+  txCard: {
+    paddingHorizontal: theme.spacing.lg,
+  },
   txRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     gap: theme.spacing.md,
-    paddingVertical: theme.spacing.xs,
+    paddingVertical: theme.spacing.md,
+  },
+  txRowDivider: {
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.borders.subtle,
+  },
+  txIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  txIconCredit: {
+    backgroundColor: theme.colors.surface.brandWash,
+  },
+  txIconDebit: {
+    backgroundColor: theme.colors.state.errorBg,
   },
   txText: {
     flex: 1,
   },
-  txMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: theme.spacing.sm,
-    marginTop: 4,
-  },
   txDate: {
     color: theme.colors.text.tertiary,
+    marginTop: 2,
   },
   txPositive: {
-    color: theme.colors.accent[600],
+    color: theme.colors.text.brand,
   },
   txNegative: {
     color: theme.colors.state.error,

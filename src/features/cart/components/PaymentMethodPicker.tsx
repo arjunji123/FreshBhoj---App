@@ -41,7 +41,7 @@ const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChan
 
   return (
     <View style={styles.container}>
-      {METHODS.map(({ key, label, hint, Icon }) => {
+      {METHODS.map(({ key, label, hint, Icon }, index) => {
         const isSelected = value === key;
         const displayHint = key === 'WALLET' ? walletHint : hint;
 
@@ -52,27 +52,27 @@ const PaymentMethodPicker: React.FC<PaymentMethodPickerProps> = ({ value, onChan
             accessibilityRole="radio"
             accessibilityState={{ selected: isSelected }}
             style={({ pressed }) => [
-              styles.card,
-              isSelected ? styles.cardSelected : null,
+              styles.row,
+              index > 0 ? styles.rowDivider : null,
               pressed ? styles.pressed : null,
             ]}
           >
             <View style={[styles.iconWrap, isSelected ? styles.iconWrapSelected : null]}>
               <Icon
-                size={19}
+                size={16}
                 color={isSelected ? theme.colors.primary[600] : theme.colors.text.secondary}
                 strokeWidth={2.2}
               />
             </View>
 
             <View style={styles.text}>
-              <Text style={theme.text.h4}>{label}</Text>
+              <Text style={theme.text.label}>{label}</Text>
               <Text style={[theme.text.caption, styles.hint]}>{displayHint}</Text>
             </View>
 
             {isSelected ? (
               <CheckCircle2
-                size={20}
+                size={19}
                 color={theme.colors.text.brand}
                 strokeWidth={2.4}
               />
@@ -90,49 +90,43 @@ export default PaymentMethodPicker;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.md,
+    marginTop: theme.spacing.xs,
   },
-  card: {
+  row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
-    padding: theme.spacing.lg,
-    borderRadius: theme.radius.card,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borders.subtle,
-    backgroundColor: theme.colors.surface.raised,
+    paddingVertical: theme.spacing.md,
   },
-  cardSelected: {
-    borderColor: theme.colors.primary[600],
-    backgroundColor: theme.colors.surface.brandWash,
+  rowDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.colors.borders.subtle,
   },
   pressed: {
-    opacity: 0.9,
+    opacity: 0.8,
   },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.radius.md,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.neutral[100],
+    backgroundColor: theme.colors.surface.page,
   },
   iconWrapSelected: {
-    backgroundColor: theme.colors.surface.base,
+    backgroundColor: theme.colors.surface.brandWash,
   },
   text: {
     flex: 1,
   },
   hint: {
     color: theme.colors.text.tertiary,
-    marginTop: 2,
   },
   radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    borderWidth: 1.5,
     borderColor: theme.colors.borders.default,
   },
 });

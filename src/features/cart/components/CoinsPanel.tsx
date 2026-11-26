@@ -1,8 +1,8 @@
 import React, { useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
-import { Coins, X } from 'lucide-react-native';
+import { Coins } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
-import { Button, Card, Text } from '@components/ui';
+import { Button, Text } from '@components/ui';
 import type { Cart } from '@api/types';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -31,109 +31,97 @@ const CoinsPanel: React.FC<CoinsPanelProps> = ({ cart, onApply, onRemove, isAppl
 
   if (isApplied) {
     return (
-      <Card padding="md" elevation="xs" style={styles.appliedCard}>
-        <View style={styles.appliedRow}>
-          <View style={styles.appliedIcon}>
-            <Coins size={16} color={theme.colors.accent[600]} strokeWidth={2.4} />
-          </View>
-          <View style={styles.appliedText}>
-            <Text style={[theme.text.h4, styles.appliedTitle]}>
-              {coins.applied} FreshBhoj Coins applied
-            </Text>
-            <Text style={[theme.text.caption, styles.appliedSaving]}>
-              You saved {formatCurrency(coins.discount)}
-            </Text>
-          </View>
-          <Pressable
-            onPress={onRemove}
-            disabled={isRemoving}
-            hitSlop={theme.layout.hitSlop}
-            accessibilityLabel="Remove coins"
-          >
-            <X size={18} color={theme.colors.text.tertiary} strokeWidth={2.4} />
-          </Pressable>
+      <View style={styles.appliedRow}>
+        <View style={styles.appliedIcon}>
+          <Coins size={17} color={theme.colors.palette.white} strokeWidth={2.4} />
         </View>
-      </Card>
+        <View style={styles.appliedText}>
+          <Text style={theme.text.label} numberOfLines={1}>
+            {coins.applied} FreshBhoj Coins applied
+          </Text>
+          <Text style={[theme.text.caption, styles.appliedSaving]}>
+            You saved {formatCurrency(coins.discount)}
+          </Text>
+        </View>
+        <Pressable
+          onPress={onRemove}
+          disabled={isRemoving}
+          hitSlop={theme.layout.hitSlop}
+          accessibilityRole="button"
+          accessibilityLabel="Remove coins"
+        >
+          <Text style={[theme.text.label, styles.removeText]}>Remove</Text>
+        </Pressable>
+      </View>
     );
   }
 
-  return (
-    <Card padding="lg" elevation="xs" style={styles.card}>
-      <View style={styles.row}>
-        <View style={styles.headerIcon}>
-          <Coins size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
-        </View>
-        <View style={styles.headerText}>
-          <Text style={theme.text.h4}>FreshBhoj Coins</Text>
-          <Text style={[theme.text.caption, styles.balance]}>
-            You have {coins.balance} coins
-          </Text>
-        </View>
-        {isEligible && coins.maxRedeemable > 0 ? (
-          <Button
-            title={`Apply ${coins.maxRedeemable}`}
-            size="sm"
-            variant="secondary"
-            onPress={onApply}
-            loading={isApplying}
-            fullWidth={false}
-          />
-        ) : null}
-      </View>
+  const note = !isEligible
+    ? `Add ${formatCurrency(amountNeeded)} more to use your coins`
+    : coins.maxRedeemable <= 0
+    ? 'Refer a friend to earn coins'
+    : ruleText;
 
-      <Text style={[theme.text.caption, styles.rule]}>
-        {!isEligible
-          ? `Add ${formatCurrency(amountNeeded)} more to use your coins`
-          : coins.maxRedeemable <= 0
-          ? "You don't have any coins yet — refer a friend to earn some"
-          : ruleText}
-      </Text>
-    </Card>
+  return (
+    <View style={styles.row}>
+      <View style={styles.headerIcon}>
+        <Coins size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
+      </View>
+      <View style={styles.headerText}>
+        <Text style={theme.text.label}>FreshBhoj Coins ({coins.balance})</Text>
+        <Text style={[theme.text.caption, styles.balance]}>{note}</Text>
+      </View>
+      {isEligible && coins.maxRedeemable > 0 ? (
+        <Button
+          title={`Apply ${coins.maxRedeemable}`}
+          size="sm"
+          variant="secondary"
+          onPress={onApply}
+          loading={isApplying}
+          fullWidth={false}
+        />
+      ) : null}
+    </View>
   );
 };
 
 export default CoinsPanel;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-  card: {
-    marginTop: theme.spacing.md,
-  },
-  appliedCard: {
-    marginTop: theme.spacing.md,
-    backgroundColor: theme.colors.brand.accentSubtle,
-  },
   appliedRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
+    padding: theme.spacing.md,
   },
   appliedIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: theme.colors.surface.base,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: theme.colors.primary[600],
     alignItems: 'center',
     justifyContent: 'center',
   },
   appliedText: {
     flex: 1,
   },
-  appliedTitle: {
-    color: theme.colors.text.accent,
-  },
   appliedSaving: {
-    color: theme.colors.accent[600],
+    color: theme.colors.text.brand,
     marginTop: 2,
+  },
+  removeText: {
+    color: theme.colors.state.error,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
+    padding: theme.spacing.md,
   },
   headerIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+    width: 32,
+    height: 32,
+    borderRadius: 10,
     backgroundColor: theme.colors.brand.primarySubtle,
     alignItems: 'center',
     justifyContent: 'center',
@@ -144,9 +132,5 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   balance: {
     color: theme.colors.text.tertiary,
     marginTop: 2,
-  },
-  rule: {
-    color: theme.colors.text.tertiary,
-    marginTop: theme.spacing.md,
   },
 });

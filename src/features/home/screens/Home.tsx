@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import Animated, { runOnJS, useAnimatedScrollHandler, useSharedValue } from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
 import MealCard from '@components/MealCard';
-import { EmptySearch } from '@components/illustrations';
+import EmptyPhoto from '@components/EmptyPhoto';
 import { EmptyState, MealCardSkeleton } from '@components/ui';
 import type {
   Cuisine,
@@ -16,7 +16,7 @@ import type {
 } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages, useMealFeed, useToggleFavorite, useTrendingNearby } from '@features/meals/hooks/useMeals';
-import { useCartCount, useCartQuantityControls } from '@features/cart/hooks/useCart';
+import { useCartQuantityControls } from '@features/cart/hooks/useCart';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
 import { useKitchens } from '@features/kitchens/hooks/useKitchens';
 import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
@@ -69,7 +69,6 @@ const Home = () => {
   const recentKitchens = flattenPages(recentKitchensQuery.data?.pages).slice(0, 6);
   const cuisinesQuery = useCuisines();
   const storiesQuery = useKitchenStories(location.city);
-  const { data: cartCount } = useCartCount();
   const { data: unreadNotifications } = useUnreadNotificationCount();
   const toggleFavorite = useToggleFavorite();
   const { addToCart, conflictDialog } = useAddToCartFlow();
@@ -122,7 +121,7 @@ const Home = () => {
       // Categories open their own filtered results page rather than filtering
       // the Home feed in place — Breakfast/Lunch/Dinner/Healthy Snacks are
       // meant to feel like distinct destinations, not a toggle.
-      navigation.navigate('Search', { category: selected.slug, categoryName: selected.name });
+      navigation.navigate('CategoryMeals', { slug: selected.slug, name: selected.name });
     },
     [navigation],
   );
@@ -167,10 +166,8 @@ const Home = () => {
     <View style={styles.screen}>
       <HomeHeader
         scrollY={scrollY}
-        cartCount={cartCount?.itemCount ?? 0}
         notificationCount={unreadNotifications ?? 0}
         onPressSearch={(origin) => navigation.navigate('Search', { origin })}
-        onPressCart={() => navigation.navigate('Cart')}
         onPressNotifications={() => requireAuth(() => navigation.navigate('NotificationInbox'))}
         onPressReferral={() => requireAuth(() => navigation.navigate('Referral'))}
         onPressLocation={() => navigation.navigate('Addresses')}
@@ -214,7 +211,20 @@ const Home = () => {
           />
         ) : null}
 
-        <Animated.View entering={enterRise(1)}>
+        <Animated.View entering={enterRise(1)} style={styles.categorySection}>
+          <HomeSectionHeader title={HOME_COPY.categories} />
+          <CategoryGrid
+            categories={home?.categories ?? []}
+            onSelect={handleSelectCategory}
+            isLoading={homeQuery.isLoading}
+          />
+        </Animated.View>
+
+        <Animated.View entering={enterRise(2)}>
+          <FitAdBanner onPress={() => navigation.navigate('MainTabs', { screen: 'Fit' })} />
+        </Animated.View>
+
+        <Animated.View entering={enterRise(3)}>
         <ReelsRail
           reels={home?.trendingReels ?? []}
           isLoading={homeQuery.isLoading}
@@ -228,11 +238,7 @@ const Home = () => {
         />
         </Animated.View>
 
-        <Animated.View entering={enterRise(2)}>
-          <FitAdBanner onPress={() => navigation.navigate('MainTabs', { screen: 'Fit' })} />
-        </Animated.View>
-
-        <Animated.View entering={enterRise(3)}>
+        <Animated.View entering={enterRise(4)}>
         <GoalFilterRow
           options={home?.goalTags ?? []}
           selected={goalTags}
@@ -241,7 +247,7 @@ const Home = () => {
         />
         </Animated.View>
 
-        <Animated.View entering={enterRise(4)}>
+        <Animated.View entering={enterRise(5)}>
           <HealthyPicks
             meals={healthyPicks.meals}
             isLoading={healthyPicks.isLoading}
@@ -253,22 +259,13 @@ const Home = () => {
           />
         </Animated.View>
 
-        <Animated.View entering={enterRise(5)}>
+        <Animated.View entering={enterRise(6)}>
         <CuisineCarousel
           cuisines={cuisinesQuery.data ?? []}
           selectedSlug={cuisine}
           onSelect={handleSelectCuisine}
           isLoading={cuisinesQuery.isLoading}
         />
-        </Animated.View>
-
-        <Animated.View entering={enterRise(6)} style={styles.categorySection}>
-          <HomeSectionHeader title={HOME_COPY.categories} />
-          <CategoryGrid
-            categories={home?.categories ?? []}
-            onSelect={handleSelectCategory}
-            isLoading={homeQuery.isLoading}
-          />
         </Animated.View>
 
         <Animated.View entering={enterRise(7)}>
@@ -312,7 +309,7 @@ const Home = () => {
             </View>
           ) : meals.length === 0 ? (
             <EmptyState
-              illustration={<EmptySearch size={160} />}
+              illustration={<EmptyPhoto kind="search" size={140} />}
               title={HOME_COPY.emptyFeedTitle}
               description={HOME_COPY.emptyFeedBody}
               actionLabel={isFiltered ? 'Clear filters' : undefined}

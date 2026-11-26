@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { ChevronRight, ShieldCheck } from 'lucide-react-native';
 import PressableScale from '@animations/PressableScale';
 import { useTheme } from '@app/theme/useTheme';
-import { FIT, MACRO_COLORS } from '../fit.constants';
+import { FIT } from '../fit.constants';
 import type { FitKitchen } from '../hooks/useFitData';
 
 interface FitKitchensRailProps {
@@ -11,49 +11,45 @@ interface FitKitchensRailProps {
   onPress: (kitchen: FitKitchen) => void;
 }
 
-/** Kitchens ranked by how much protein their fit meals carry. */
+const MAX_ROWS = 5;
+
+/** Kitchens ranked by how much protein their fit meals carry, as a compact leaderboard. */
 const FitKitchensRail: React.FC<FitKitchensRailProps> = ({ kitchens, onPress }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
   if (!kitchens.length) return null;
   return (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
-      {kitchens.map((k, i) => (
+    <View style={styles.card}>
+      {kitchens.slice(0, MAX_ROWS).map((k, i) => (
         <PressableScale
           key={k.id}
           onPress={() => onPress(k)}
           haptic={false}
-          scaleTo={0.97}
+          scaleTo={0.98}
           accessibilityRole="button"
           accessibilityLabel={k.name}
-          style={styles.card}
+          style={[styles.row, i > 0 ? styles.divider : null]}
         >
-          <View style={styles.rank}>
-            <Text style={styles.rankText}>#{i + 1}</Text>
+          <View style={[styles.rank, i === 0 ? styles.rankTop : null]}>
+            <Text style={[styles.rankText, i === 0 ? styles.rankTextTop : null]}>{i + 1}</Text>
           </View>
-          <View style={styles.nameRow}>
-            <Text style={styles.name} numberOfLines={1}>
-              {k.name}
+          <View style={styles.body}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>{k.name}</Text>
+              {k.isVerified ? <ShieldCheck size={14} color={theme.colors.text.brand} strokeWidth={2.4} /> : null}
+            </View>
+            <Text style={styles.sub} numberOfLines={1}>
+              {k.locality ?? 'Near you'} · {k.mealCount} fit {k.mealCount === 1 ? 'meal' : 'meals'}
             </Text>
-            {k.isVerified ? <ShieldCheck size={14} color={theme.colors.state.info} strokeWidth={2.4} /> : null}
           </View>
-          <Text style={styles.sub} numberOfLines={1}>
-            {k.locality ?? 'Near you'}
-          </Text>
-          <View style={styles.stats}>
-            <View>
-              <Text style={[styles.statValue, { color: MACRO_COLORS.protein }]}>{k.avgProteinG}g</Text>
-              <Text style={styles.statLabel}>avg protein</Text>
-            </View>
-            <View>
-              <Text style={styles.statValue}>{k.mealCount}</Text>
-              <Text style={styles.statLabel}>fit meals</Text>
-            </View>
-            <ChevronRight size={18} color={theme.colors.text.tertiary} />
+          <View style={styles.protein}>
+            <Text style={styles.proteinValue}>{k.avgProteinG}g</Text>
+            <Text style={styles.proteinLabel}>protein</Text>
           </View>
+          <ChevronRight size={16} color={theme.colors.text.tertiary} />
         </PressableScale>
       ))}
-    </ScrollView>
+    </View>
   );
 };
 
@@ -61,30 +57,31 @@ export default FitKitchensRail;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) =>
   StyleSheet.create({
-    row: { paddingHorizontal: theme.layout.screenPadding, gap: theme.spacing.md },
     card: {
-      width: 200,
-      padding: theme.spacing.md,
-      gap: 4,
+      marginHorizontal: theme.layout.screenPadding,
+      paddingHorizontal: theme.spacing.md,
       borderRadius: theme.radius.xl,
       backgroundColor: theme.colors.surface.raised,
-      borderWidth: 1,
-      borderColor: theme.colors.borders.subtle,
       ...theme.elevation.sm,
     },
+    row: { flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md, paddingVertical: theme.spacing.md },
+    divider: { borderTopWidth: 1, borderTopColor: theme.colors.borders.subtle },
     rank: {
-      alignSelf: 'flex-start',
-      paddingHorizontal: 8,
-      paddingVertical: 2,
-      borderRadius: theme.radius.pill,
-      backgroundColor: FIT.deep,
-      marginBottom: 4,
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: theme.colors.surface.brandWash,
     },
-    rankText: { color: FIT.lime, fontSize: 11, fontWeight: '800' },
+    rankTop: { backgroundColor: FIT.lime },
+    rankText: { ...theme.text.label, color: theme.colors.text.brand },
+    rankTextTop: { color: FIT.forest },
+    body: { flex: 1 },
     nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
     name: { ...theme.text.h4, flexShrink: 1, color: theme.colors.text.primary },
     sub: { ...theme.text.caption, color: theme.colors.text.secondary },
-    stats: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: theme.spacing.sm },
-    statValue: { fontSize: 17, fontWeight: '800', color: theme.colors.text.primary },
-    statLabel: { fontSize: 10, fontWeight: '600', color: theme.colors.text.tertiary },
+    protein: { alignItems: 'flex-end' },
+    proteinValue: { ...theme.text.h4, color: theme.colors.text.brand },
+    proteinLabel: { ...theme.text.caption, color: theme.colors.text.tertiary },
   });

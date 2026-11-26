@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, ImageSourcePropType, Pressable, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, ImageSourcePropType, Pressable, useWindowDimensions } from 'react-native';
 import React, { useMemo } from 'react';
 import { ArrowRight } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

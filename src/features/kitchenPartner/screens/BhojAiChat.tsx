@@ -111,7 +111,7 @@ const BhojAiChat = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="BhojAI Assistant"
         onBack={() => navigation.goBack()}
@@ -249,7 +249,7 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
       <Card style={styles.card} padding="md">
         <View style={styles.cardHeaderRow}>
           <Text variant="overline" color="secondary">
-            FSSAI APPLICATION STATUS
+            FSSAI application status
           </Text>
           <Badge label={card.status.replace(/_/g, ' ')} tone="info" size="sm" />
         </View>
@@ -302,7 +302,7 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
       <Card style={styles.card} padding="md">
         <View style={styles.cardHeaderRow}>
           <Text variant="overline" color="danger">
-            DOCUMENT REJECTED
+            Document rejected
           </Text>
         </View>
         {card.rejectionReason ? (
@@ -323,7 +323,7 @@ function BhojAiCardView({ card, navigation }: { card: BhojAiCard; navigation: Ki
         {card.nextSteps.length ? (
           <View style={styles.cardSpacing}>
             <Text variant="overline" color="secondary" style={styles.cardSpacing}>
-              NEXT STEPS
+              Next steps
             </Text>
             {card.nextSteps.map((step, i) => (
               <View key={i} style={styles.nextStepRow}>

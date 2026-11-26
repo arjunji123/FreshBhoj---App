@@ -76,19 +76,18 @@ const Profile = () => {
                   </Text>
                 ) : null}
               </View>
+              <PressableScale
+                onPress={() => navigation.navigate('EditProfile')}
+                haptic={false}
+                scaleTo={0.9}
+                hitSlop={theme.layout.hitSlop}
+                accessibilityRole="button"
+                accessibilityLabel="Edit profile"
+                style={styles.editButton}
+              >
+                <PencilIcon size={18} color={theme.colors.palette.white} tint="rgba(255,255,255,0.28)" />
+              </PressableScale>
             </View>
-
-            <PressableScale
-              onPress={() => navigation.navigate('EditProfile')}
-              haptic={false}
-              scaleTo={0.97}
-              accessibilityRole="button"
-              accessibilityLabel="Edit profile"
-              style={styles.editPill}
-            >
-              <PencilIcon size={16} color={theme.colors.palette.white} tint="rgba(255,255,255,0.28)" />
-              <Text style={[theme.text.label, styles.editLabel]}>Edit profile</Text>
-            </PressableScale>
 
             {stats ? (
               <View style={styles.statsRow}>
@@ -258,20 +257,17 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   heroText: { flex: 1 },
   heroName: { color: theme.colors.palette.white },
   heroMeta: { color: 'rgba(255,255,255,0.85)', marginTop: 2 },
-  editPill: {
+  editButton: {
     alignSelf: 'flex-start',
-    flexDirection: 'row',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
-    gap: theme.spacing.sm,
-    marginTop: theme.spacing.lg,
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radius.round,
+    justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.18)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.3)',
   },
-  editLabel: { color: theme.colors.palette.white },
   statsRow: {
     flexDirection: 'row',
     gap: theme.spacing.sm,

@@ -21,7 +21,7 @@ export interface LegalDoc {
 export const LEGAL_DOCS: Record<LegalDocKey, LegalDoc> = {
   terms: {
     key: 'terms',
-    eyebrow: 'LEGAL',
+    eyebrow: 'Legal',
     title: 'Terms of Service',
     sections: [
       {
@@ -40,11 +40,15 @@ export const LEGAL_DOCS: Record<LegalDocKey, LegalDoc> = {
         heading: 'Fair use',
         body: 'Abuse towards delivery partners or kitchens, fraudulent payments, or misuse of the app can lead to your account being suspended.',
       },
+      {
+        heading: 'Credits',
+        body: 'Tab bar and Bhoj Fit icons: Solar icon set by 480 Design, used under the Creative Commons Attribution 4.0 (CC BY 4.0) licence.',
+      },
     ],
   },
   privacy: {
     key: 'privacy',
-    eyebrow: 'LEGAL',
+    eyebrow: 'Legal',
     title: 'Privacy Policy',
     sections: [
       {
@@ -67,7 +71,7 @@ export const LEGAL_DOCS: Record<LegalDocKey, LegalDoc> = {
   },
   content: {
     key: 'content',
-    eyebrow: 'LEGAL',
+    eyebrow: 'Legal',
     title: 'Content Policy',
     sections: [
       {

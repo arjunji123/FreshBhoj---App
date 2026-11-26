@@ -22,7 +22,11 @@ const Avatar: React.FC<AvatarProps> = ({ uri, name, size = 44, style }) => {
 
   return (
     <View style={[dimension, styles.fallback, style as StyleProp<ViewStyle>]}>
-      <Text style={[theme.text.label, styles.initials, { fontSize: size * 0.36 }]}>
+      <Text
+        style={[theme.text.label, styles.initials, { fontSize: size * 0.36, lineHeight: size * 0.48 }]}
+        numberOfLines={1}
+        maxFontSizeMultiplier={1}
+      >
         {getInitials(name)}
       </Text>
     </View>
@@ -42,5 +46,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   initials: {
     color: theme.colors.text.brand,
+    textAlign: 'center',
+    includeFontPadding: false,
   },
 });

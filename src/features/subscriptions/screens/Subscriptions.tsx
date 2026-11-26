@@ -1,14 +1,15 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { Alert, FlatList, Image, RefreshControl, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { CalendarClock, CalendarOff, Plus } from 'lucide-react-native';
+import { CalendarClock, CalendarOff } from 'lucide-react-native';
 import { ApiError } from '@api';
 import type { CustomerSubscriptionStatus, CustomerSubscriptionSummary } from '@api/types';
 import { formatCurrency, humanizeEnum } from '@utils/format';
-import { AppBarAction, Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton, Text } from '@components/ui';
+import { Badge, Button, Card, Chip, EmptyState, Sheet, Skeleton, Text } from '@components/ui';
 import type { BadgeTone, SheetHandle } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useBulkPauseSubscriptions, useCustomerSubscriptions } from '../hooks/useSubscriptions';
+import { MINI_CART_BAR_CLEARANCE } from '@components/MiniCartBar';
 import { useTheme } from "@app/theme/useTheme";
 
 const STATUS_TONE: Record<CustomerSubscriptionStatus, BadgeTone> = {
@@ -75,19 +76,6 @@ const Subscriptions = () => {
 
   return (
     <View style={styles.screen}>
-      <View style={styles.header}>
-        <View style={styles.headerTextWrap}>
-          <Text style={theme.text.h1}>Subscriptions</Text>
-          <Text style={[theme.text.bodySmall, styles.subtitle]}>Your recurring meal plans, in one place</Text>
-        </View>
-        <AppBarAction
-          accessibilityLabel="Set up a new subscription"
-          onPress={() => navigation.navigate('SetupPlanChooseKitchen')}
-        >
-          <Plus size={20} color={theme.colors.primary[600]} strokeWidth={2.4} />
-        </AppBarAction>
-      </View>
-
       {isLoading ? (
         <View style={styles.loading}>
           <Skeleton height={124} radius={theme.radius.card} />
@@ -117,7 +105,7 @@ const Subscriptions = () => {
                   <View style={styles.vacationTextWrap}>
                     <Text style={theme.text.h4}>Going away?</Text>
                     <Text style={[theme.text.bodySmall, styles.vacationSubtitle]}>
-                      Pause all your active subscriptions for a vacation
+                      Pause all your active meal plans for a vacation
                     </Text>
                   </View>
                 </View>
@@ -134,9 +122,9 @@ const Subscriptions = () => {
           ListEmptyComponent={
             <EmptyState
               icon={<CalendarClock size={36} color={theme.colors.primary[600]} strokeWidth={1.8} />}
-              title="No subscriptions yet"
+              title="No meal plans yet"
               description="Set up a recurring plan with a kitchen you love and never think about today's meal again."
-              actionLabel="Set Up a Subscription"
+              actionLabel="Set Up a Meal Plan"
               onAction={() => navigation.navigate('SetupPlanChooseKitchen')}
             />
           }
@@ -203,21 +191,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.surface.page,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.layout.screenPadding,
-    paddingTop: theme.spacing.md,
-    gap: theme.spacing.md,
-  },
-  headerTextWrap: {
-    flex: 1,
-  },
-  subtitle: {
-    color: theme.colors.text.secondary,
-    marginTop: 4,
-  },
   loading: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.lg,
@@ -226,7 +199,8 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   list: {
     paddingHorizontal: theme.layout.screenPadding,
     paddingTop: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxxl,
+    // leave room so the floating cart bar never hides the last card
+    paddingBottom: theme.spacing.xxxl + MINI_CART_BAR_CLEARANCE,
   },
   listEmpty: {
     flexGrow: 1,

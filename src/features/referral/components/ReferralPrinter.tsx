@@ -7,12 +7,9 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withRepeat,
   withSequence,
   withTiming,
-  ZoomIn,
 } from 'react-native-reanimated';
-import { Sparkles } from 'lucide-react-native';
 import AppGradient from '@components/AppGradient';
 import { useTheme } from "@app/theme/useTheme";
 
@@ -22,6 +19,9 @@ interface ReferralPrinterProps {
 
 const PAPER_HEIGHT = 176;
 const PRINT_DURATION = 900;
+const NOTCH_SIZE = 22;
+const SCALLOP_COUNT = 13;
+const TICKET_EDGE = '#D3E2DC';
 
 /** Fun, festive stops — deliberately not the everyday brand red, so this one
  * screen reads as a special reward moment rather than another CTA. */
@@ -38,29 +38,15 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
   const [isPrinting, setIsPrinting] = useState(false);
-  const [printKey, setPrintKey] = useState(0);
   const [hasPrinted, setHasPrinted] = useState(false);
 
   const buttonScale = useSharedValue(1);
-  const glowScale = useSharedValue(1);
   const bodyShake = useSharedValue(0);
   const paperY = useSharedValue(-PAPER_HEIGHT);
-
-  React.useEffect(() => {
-    glowScale.value = withRepeat(
-      withSequence(
-        withTiming(1.18, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.ease) }),
-      ),
-      -1,
-      false,
-    );
-  }, [glowScale]);
 
   const finishPrint = useCallback(() => {
     setIsPrinting(false);
     setHasPrinted(true);
-    setPrintKey((key) => key + 1);
   }, []);
 
   const runPrint = useCallback(() => {
@@ -105,10 +91,6 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
   const buttonStyle = useAnimatedStyle(() => ({
     transform: [{ scale: buttonScale.value }],
   }));
-  const glowStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: glowScale.value }],
-    opacity: 0.55 - (glowScale.value - 1) * 1.2,
-  }));
   const bodyStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: bodyShake.value }],
   }));
@@ -124,7 +106,7 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
             <View style={[styles.light, styles.lightAmber]} />
             <View style={[styles.light, styles.lightGreen]} />
           </View>
-          <Text style={styles.printerLabel}>FRESHBHOJ PRINTER</Text>
+          <Text style={styles.printerLabel}>FreshBhoj printer</Text>
         </AppGradient>
       </Animated.View>
 
@@ -132,29 +114,25 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
 
       <View style={styles.paperClip} pointerEvents="box-none">
         <Animated.View style={[styles.paper, paperStyle]}>
-          <Text style={styles.paperEyebrow}>YOUR REFERRAL CODE</Text>
+          <Text style={styles.paperEyebrow}>Your referral code</Text>
           <Text style={styles.paperCode}>{code}</Text>
-          <View style={styles.paperDivider} />
+          {/* Ticket tear line: a notch bitten out of each side, joined by dashes. */}
+          <View style={styles.tearRow}>
+            <View style={[styles.notch, styles.notchLeft]} />
+            <View style={styles.paperDivider} />
+            <View style={[styles.notch, styles.notchRight]} />
+          </View>
           <Text style={styles.paperFootnote}>Share it — you both earn FreshBhoj Coins</Text>
+          {/* Scalloped bottom edge, like a torn-off ticket. */}
+          <View style={styles.scallopRow}>
+            {Array.from({ length: SCALLOP_COUNT }).map((_, index) => (
+              <View key={index} style={styles.scallop} />
+            ))}
+          </View>
         </Animated.View>
       </View>
 
-      {hasPrinted ? (
-        <View style={styles.sparkleRow} pointerEvents="none" key={printKey}>
-          <Animated.View entering={ZoomIn.delay(60).springify()}>
-            <Sparkles size={16} color={theme.colors.accent[500]} strokeWidth={2.2} />
-          </Animated.View>
-          <Animated.View entering={ZoomIn.delay(160).springify()}>
-            <Sparkles size={22} color="#12865F" strokeWidth={2.2} />
-          </Animated.View>
-          <Animated.View entering={ZoomIn.delay(260).springify()}>
-            <Sparkles size={14} color={theme.colors.primary[500]} strokeWidth={2.2} />
-          </Animated.View>
-        </View>
-      ) : null}
-
       <View style={styles.buttonWrap}>
-        <Animated.View style={[styles.buttonGlow, glowStyle]} />
         <Pressable
           onPress={handlePress}
           disabled={isPrinting}
@@ -167,7 +145,7 @@ const ReferralPrinter: React.FC<ReferralPrinterProps> = ({ code }) => {
               direction="diagonal"
               style={[styles.printButton, isPrinting ? styles.printButtonDisabled : null]}
             >
-              <Text style={styles.printButtonText}>{isPrinting ? '···' : hasPrinted ? 'PRINT AGAIN' : 'PRINT CODE'}</Text>
+              <Text style={styles.printButtonText}>{isPrinting ? '···' : hasPrinted ? 'Print again' : 'Print code'}</Text>
             </AppGradient>
           </Animated.View>
         </Pressable>
@@ -241,18 +219,14 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   paper: {
     width: '100%',
-    minHeight: PAPER_HEIGHT,
+    height: PAPER_HEIGHT,
     backgroundColor: '#FFFDF6',
-    borderBottomLeftRadius: theme.radius.control,
-    borderBottomRightRadius: theme.radius.control,
-    borderWidth: 1,
-    borderColor: '#DCE6E7',
-    borderTopWidth: 0,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: TICKET_EDGE,
     alignItems: 'center',
     paddingTop: theme.spacing.lg,
     paddingHorizontal: theme.spacing.md,
-    paddingBottom: theme.spacing.md,
-    ...theme.elevation.sm,
   },
   paperEyebrow: {
     color: '#5F776F',
@@ -267,12 +241,45 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     letterSpacing: 4,
     marginTop: theme.spacing.xs,
   },
-  paperDivider: {
-    width: '70%',
-    borderBottomWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: '#DCE6E7',
+  tearRow: {
+    alignSelf: 'stretch',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: -(theme.spacing.md + 1),
     marginVertical: theme.spacing.sm,
+  },
+  paperDivider: {
+    flex: 1,
+    borderTopWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: TICKET_EDGE,
+  },
+  // Page-coloured circles centred on the edges read as holes punched out of the paper.
+  notch: {
+    width: NOTCH_SIZE,
+    height: NOTCH_SIZE,
+    borderRadius: NOTCH_SIZE / 2,
+    backgroundColor: theme.colors.surface.page,
+    borderWidth: 1,
+    borderColor: TICKET_EDGE,
+  },
+  notchLeft: { marginLeft: -NOTCH_SIZE / 2 },
+  notchRight: { marginRight: -NOTCH_SIZE / 2 },
+  scallopRow: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: -8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  scallop: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: theme.colors.surface.page,
+    borderWidth: 1,
+    borderColor: TICKET_EDGE,
   },
   paperFootnote: {
     color: '#475D56',
@@ -280,23 +287,10 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     fontSize: theme.typography.fontSizes.xs,
     textAlign: 'center',
   },
-  sparkleRow: {
-    flexDirection: 'row',
-    gap: theme.spacing.lg,
-    marginTop: theme.spacing.sm,
-    zIndex: 4,
-  },
   buttonWrap: {
     marginTop: theme.spacing.xl,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonGlow: {
-    position: 'absolute',
-    width: 108,
-    height: 108,
-    borderRadius: 54,
-    backgroundColor: '#12865F',
   },
   printButton: {
     width: 92,

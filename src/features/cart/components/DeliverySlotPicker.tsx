@@ -39,35 +39,57 @@ const DeliverySlotPicker: React.FC<DeliverySlotPickerProps> = ({
     const styles = useMemo(() => createStyles(theme), [theme]);
   const slots = buildSlots(prepTimeMins);
 
+  const isNow = value.type === 'NOW';
+  const options = [
+    {
+      key: 'NOW' as const,
+      title: 'Now',
+      hint: `About ${prepTimeMins + 15} min`,
+      Icon: Zap,
+      selected: isNow,
+      onPress: () => onChange({ type: 'NOW' }),
+    },
+    {
+      key: 'SCHEDULED' as const,
+      title: 'Schedule',
+      hint: value.type === 'SCHEDULED' ? `At ${value.label}` : 'Pick a time',
+      Icon: CalendarClock,
+      selected: !isNow,
+      onPress: () => {
+        if (isNow && slots[0]) onChange({ type: 'SCHEDULED', ...slots[0] });
+      },
+    },
+  ];
+
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={() => onChange({ type: 'NOW' })}
-        accessibilityRole="radio"
-        accessibilityState={{ selected: value.type === 'NOW' }}
-        style={[styles.card, value.type === 'NOW' ? styles.cardSelected : null]}
-      >
-        <View style={[styles.iconWrap, value.type === 'NOW' ? styles.iconWrapSelected : null]}>
-          <Zap
-            size={18}
-            color={value.type === 'NOW' ? theme.colors.primary[600] : theme.colors.text.secondary}
-            strokeWidth={2.2}
-          />
-        </View>
-        <View style={styles.text}>
-          <Text style={theme.text.h4}>Deliver now</Text>
-          <Text style={[theme.text.caption, styles.hint]}>
-            Arriving in about {prepTimeMins + 15} mins
-          </Text>
-        </View>
-      </Pressable>
+      <View style={styles.options}>
+        {options.map(({ key, title, hint, Icon, selected, onPress }) => (
+          <Pressable
+            key={key}
+            onPress={onPress}
+            accessibilityRole="radio"
+            accessibilityState={{ selected }}
+            style={[styles.option, selected ? styles.optionSelected : null]}
+          >
+            <Icon
+              size={17}
+              color={selected ? theme.colors.primary[600] : theme.colors.text.tertiary}
+              strokeWidth={2.4}
+            />
+            <View style={styles.optionText}>
+              <Text style={[theme.text.label, selected ? styles.optionTitleOn : styles.optionTitle]}>
+                {title}
+              </Text>
+              <Text style={[theme.text.caption, styles.hint]} numberOfLines={1}>
+                {hint}
+              </Text>
+            </View>
+          </Pressable>
+        ))}
+      </View>
 
-      <View style={styles.scheduleBlock}>
-        <View style={styles.scheduleHeader}>
-          <CalendarClock size={15} color={theme.colors.text.secondary} strokeWidth={2.2} />
-          <Text style={[theme.text.label, styles.scheduleLabel]}>Or schedule for later</Text>
-        </View>
-
+      {!isNow ? (
         <View style={styles.slotRow}>
           {slots.map((slot) => {
             const isSelected = value.type === 'SCHEDULED' && value.isoTime === slot.isoTime;
@@ -91,7 +113,7 @@ const DeliverySlotPicker: React.FC<DeliverySlotPickerProps> = ({
             );
           })}
         </View>
-      </View>
+      ) : null}
     </View>
   );
 };
@@ -100,51 +122,39 @@ export default DeliverySlotPicker;
 
 const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
-    marginTop: theme.spacing.md,
-    gap: theme.spacing.md,
+    gap: theme.spacing.sm,
   },
-  card: {
+  options: {
+    flexDirection: 'row',
+    gap: theme.spacing.sm,
+  },
+  option: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.md,
-    padding: theme.spacing.lg,
-    borderRadius: theme.radius.card,
-    borderWidth: 1.5,
+    gap: theme.spacing.sm,
+    padding: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: theme.colors.borders.subtle,
-    backgroundColor: theme.colors.surface.raised,
+    backgroundColor: theme.colors.surface.page,
   },
-  cardSelected: {
+  optionSelected: {
+    borderWidth: 1,
     borderColor: theme.colors.primary[600],
     backgroundColor: theme.colors.surface.brandWash,
   },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: theme.radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.neutral[100],
-  },
-  iconWrapSelected: {
-    backgroundColor: theme.colors.surface.base,
-  },
-  text: {
+  optionText: {
     flex: 1,
+  },
+  optionTitle: {
+    color: theme.colors.text.primary,
+  },
+  optionTitleOn: {
+    color: theme.colors.text.brand,
   },
   hint: {
     color: theme.colors.text.tertiary,
-    marginTop: 2,
-  },
-  scheduleBlock: {
-    gap: theme.spacing.sm,
-  },
-  scheduleHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  scheduleLabel: {
-    color: theme.colors.text.secondary,
   },
   slotRow: {
     flexDirection: 'row',
@@ -153,11 +163,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   slot: {
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
+    paddingVertical: 6,
     borderRadius: theme.radius.pill,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borders.subtle,
-    backgroundColor: theme.colors.surface.base,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: theme.colors.borders.default,
+    backgroundColor: theme.colors.surface.raised,
   },
   slotSelected: {
     backgroundColor: theme.colors.primary[600],

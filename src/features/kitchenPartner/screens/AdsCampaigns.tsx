@@ -132,7 +132,7 @@ const AdsCampaigns = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title="Promote Reels"
         onBack={() => navigation.goBack()}
@@ -493,7 +493,7 @@ function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHand
     <Sheet ref={sheetRef} title="Promote a Reel" heightRatio={0.92} onClose={reset}>
       <ScrollView contentContainerStyle={styles.sheetContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         <Text variant="overline" color="tertiary" style={styles.sheetLabel}>
-          CHOOSE A REEL
+          Choose a reel
         </Text>
         {reels.isLoading ? (
           <Skeleton height={72} radius={theme.radius.card} />
@@ -510,7 +510,7 @@ function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHand
         )}
 
         <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-          DAILY BUDGET
+          Daily budget
         </Text>
         <View style={styles.sliderCard}>
           <Slider
@@ -537,7 +537,7 @@ function CreateCampaignSheet({ sheetRef }: { sheetRef: React.RefObject<SheetHand
         </Text>
 
         <Text variant="overline" color="tertiary" style={[styles.sheetLabel, styles.sheetSectionGap]}>
-          DURATION
+          Duration
         </Text>
         <View style={styles.sliderCard}>
           <Slider

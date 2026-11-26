@@ -134,7 +134,7 @@ const CustomizationSheet: React.FC<CustomizationSheetProps> = ({
 
         <Divider spacing={theme.spacing.lg} />
 
-        <Text style={[theme.text.overline, styles.groupTitle]}>SPECIAL INSTRUCTIONS</Text>
+        <Text style={[theme.text.overline, styles.groupTitle]}>Special instructions</Text>
         <TextInput
           value={instructions}
           onChangeText={setInstructions}
@@ -148,7 +148,7 @@ const CustomizationSheet: React.FC<CustomizationSheetProps> = ({
 
       <View style={styles.footer}>
         <View style={styles.totalWrap}>
-          <Text style={[theme.text.overline, styles.totalLabel]}>TOTAL PRICE</Text>
+          <Text style={[theme.text.overline, styles.totalLabel]}>Total price</Text>
           <Text style={[{ color: theme.colors.text.primary }, theme.text.h2]}>{formatCurrency(lineTotal)}</Text>
         </View>
 

@@ -153,7 +153,7 @@ const SubscriberDetail = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title={subscription?.customer.fullName || 'Subscriber'} onBack={() => navigation.goBack()} />
 
       {query.isLoading ? (
@@ -268,7 +268,7 @@ const SubscriberDetail = () => {
             <View style={styles.sectionHeaderRow}>
               <CalendarDays size={14} color={theme.colors.text.secondary} />
               <Text variant="overline" color="tertiary">
-                DELIVERY SCHEDULE
+                Delivery schedule
               </Text>
             </View>
             <View style={styles.scheduleStrip}>
@@ -318,7 +318,7 @@ const SubscriberDetail = () => {
 
           <Card style={styles.chartCard}>
             <Text variant="overline" color="tertiary" style={styles.chartLabel}>
-              TIMELINE
+              Timeline
             </Text>
             <Text variant="bodySmall" color="secondary">
               Started {formatLongDate(subscription.startDate)}
@@ -346,7 +346,7 @@ const SubscriberDetail = () => {
           {subscription.billingHistory.length > 0 ? (
             <Card style={styles.chartCard}>
               <Text variant="overline" color="tertiary" style={styles.chartLabel}>
-                BILLING HISTORY
+                Billing history
               </Text>
               <BarChart
                 data={subscription.billingHistory.map((entry) => ({
@@ -372,7 +372,7 @@ const SubscriberDetail = () => {
 
           <Card style={styles.chartCard}>
             <Text variant="overline" color="tertiary" style={styles.chartLabel}>
-              BILLING HISTORY
+              Billing history
             </Text>
             {subscription.billingHistory.length === 0 ? (
               <Text variant="bodySmall" color="secondary">

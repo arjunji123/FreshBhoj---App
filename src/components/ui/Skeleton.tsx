@@ -60,7 +60,7 @@ export const MealCardSkeleton: React.FC<{ style?: StyleProp<ViewStyle> }> = ({ s
   return (
 (
   <View style={[styles.card, style]}>
-    <Skeleton height={140} radius={theme.radius.lg} />
+    <Skeleton height={200} radius={theme.radius.xxl} />
     <View style={styles.cardBody}>
       <Skeleton width="75%" height={16} />
       <Skeleton width="50%" height={12} />
@@ -115,12 +115,11 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   card: {
     backgroundColor: theme.colors.surface.raised,
-    borderRadius: theme.radius.card,
-    padding: theme.spacing.md,
+    borderRadius: theme.radius.xxl,
     ...theme.elevation.xs,
   },
   cardBody: {
-    marginTop: theme.spacing.md,
+    padding: theme.spacing.lg,
     gap: theme.spacing.sm,
   },
   cardRow: {

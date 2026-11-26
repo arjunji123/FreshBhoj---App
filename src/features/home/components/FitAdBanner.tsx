@@ -1,11 +1,12 @@
-import React, { useEffect, useMemo } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useMemo } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withSequence, withTiming } from 'react-native-reanimated';
-import { ArrowRight, Beef, Flame, Leaf } from 'lucide-react-native';
+import { ArrowRight, Beef, Flame } from 'lucide-react-native';
 import PressableScale from '@animations/PressableScale';
 import { useTheme } from '@app/theme/useTheme';
 import { FIT, MACRO_COLORS } from '@features/fit/fit.constants';
+
+const FIT_PHOTO = require('../../../../assets/images/photos/bowl.jpg');
 
 interface FitAdBannerProps {
   onPress: () => void;
@@ -15,25 +16,12 @@ interface FitAdBannerProps {
 const FitAdBanner: React.FC<FitAdBannerProps> = ({ onPress }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
-  const float = useSharedValue(0);
-
-  useEffect(() => {
-    float.value = withRepeat(
-      withSequence(withTiming(1, { duration: 1800, easing: Easing.inOut(Easing.sin) }), withTiming(0, { duration: 1800, easing: Easing.inOut(Easing.sin) })),
-      -1,
-    );
-  }, [float]);
-  const chipA = useAnimatedStyle(() => ({ transform: [{ translateY: -4 * float.value }] }));
-  const chipB = useAnimatedStyle(() => ({ transform: [{ translateY: 4 * float.value }] }));
 
   return (
     <PressableScale onPress={onPress} scaleTo={0.97} accessibilityRole="button" accessibilityLabel="Open Bhoj Fit: healthy macro-counted meals" style={styles.wrap}>
       <LinearGradient colors={[FIT.forest, FIT.deep, FIT.emerald]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.banner}>
         <View pointerEvents="none" style={styles.orb} />
         <View style={styles.copy}>
-          <View style={styles.newTag}>
-            <Text style={styles.newText}>New · Bhoj Fit</Text>
-          </View>
           <Text style={styles.title}>
             Eat clean.{'\n'}
             <Text style={styles.accent}>Train{'\u00A0'}smart.</Text>
@@ -45,17 +33,15 @@ const FitAdBanner: React.FC<FitAdBannerProps> = ({ onPress }) => {
           </View>
         </View>
         <View style={styles.art}>
-          <Animated.View style={[styles.chip, { top: 0, right: 6 }, chipA]}>
+          <View style={[styles.chip, styles.chipTop]}>
             <Beef size={13} color={MACRO_COLORS.protein} strokeWidth={2.6} />
             <Text style={styles.chipText}>32g</Text>
-          </Animated.View>
-          <Animated.View style={[styles.chip, { bottom: 0, left: 0 }, chipB]}>
+          </View>
+          <View style={[styles.chip, styles.chipBottom]}>
             <Flame size={13} color={MACRO_COLORS.kcal} strokeWidth={2.6} />
             <Text style={styles.chipText}>420</Text>
-          </Animated.View>
-          <View style={styles.leafCircle}>
-            <Leaf size={44} color={FIT.lime} strokeWidth={2} />
           </View>
+          <Image source={FIT_PHOTO} style={styles.photo} resizeMode="cover" />
         </View>
       </LinearGradient>
     </PressableScale>
@@ -70,15 +56,15 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     banner: { flexDirection: 'row', alignItems: 'center', padding: theme.spacing.lg, borderRadius: theme.radius.xxl, overflow: 'hidden', gap: theme.spacing.sm, ...theme.elevation.primary },
     orb: { position: 'absolute', width: 190, height: 190, borderRadius: 95, right: -50, top: -80, backgroundColor: FIT.lime, opacity: 0.15 },
     copy: { flex: 1, gap: 6 },
-    newTag: { alignSelf: 'flex-start', paddingHorizontal: 8, paddingVertical: 2, borderRadius: theme.radius.pill, backgroundColor: FIT.lime },
-    newText: { color: FIT.forest, fontSize: 11, fontWeight: '800', letterSpacing: 0.2 },
     title: { color: FIT.onHero, fontSize: 22, lineHeight: 26, fontWeight: '800', letterSpacing: -0.4 },
     accent: { color: FIT.lime },
     sub: { color: FIT.heroMuted, fontSize: 12, lineHeight: 17 },
     cta: { alignSelf: 'flex-start', flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 4, paddingHorizontal: 14, paddingVertical: 8, borderRadius: theme.radius.pill, backgroundColor: FIT.lime },
     ctaText: { color: FIT.forest, fontSize: 13, fontWeight: '800' },
-    art: { width: 96, height: 96, alignItems: 'center', justifyContent: 'center' },
-    leafCircle: { width: 76, height: 76, borderRadius: 38, alignItems: 'center', justifyContent: 'center', backgroundColor: FIT.glass, borderWidth: 1, borderColor: FIT.glassBorder },
+    art: { width: 112, height: 120, alignItems: 'center', justifyContent: 'center' },
+    photo: { width: 108, height: 108, borderRadius: 54, borderWidth: 3, borderColor: FIT.lime },
+    chipTop: { top: 0, right: 0 },
+    chipBottom: { bottom: 0, left: -6 },
     chip: { position: 'absolute', zIndex: 2, flexDirection: 'row', alignItems: 'center', gap: 3, paddingHorizontal: 7, paddingVertical: 4, borderRadius: theme.radius.pill, backgroundColor: '#FFFFFF' },
     chipText: { color: '#0D1E19', fontSize: 11, fontWeight: '800' },
   });

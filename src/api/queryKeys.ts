@@ -55,6 +55,7 @@ export const qk = {
     all: ['orders'] as const,
     history: (status?: string[]) => ['orders', 'history', status ?? []] as const,
     active: ['orders', 'active'] as const,
+    fitStreak: ['orders', 'fitStreak'] as const,
     detail: (id: string) => ['orders', 'detail', id] as const,
     tracking: (id: string) => ['orders', 'tracking', id] as const,
   },

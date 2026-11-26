@@ -64,7 +64,7 @@ const PremiumSubscriptionDetail = () => {
   const data = subscription.data;
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="My Premium Plan" onBack={() => navigation.goBack()} />
 
       {subscription.isLoading ? (
@@ -129,7 +129,7 @@ const PremiumSubscriptionDetail = () => {
           ) : null}
 
           <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-            FEATURES
+            Features
           </Text>
           <Card style={styles.featureCard}>
             {FEATURE_ROWS.map(({ key, label }, index) => {

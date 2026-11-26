@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react';
 import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import Animated from 'react-native-reanimated';
-import { enterRise } from '@animations/motion';
 
 import {
   AlertCircle,
@@ -15,7 +13,7 @@ import {
   Tag,
   WandSparkles,
 } from 'lucide-react-native';
-import { AppBar, Card, Divider, EmptyState, ListItem, Skeleton, Text } from '@components/ui';
+import { AppBar, EmptyState, Skeleton, Text } from '@components/ui';
 import type { NotificationPreferences } from '@api/types';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useNotificationPreferences, useUpdateNotificationPreferences } from '../hooks/useProfile';
@@ -35,50 +33,50 @@ type ToggleConfig = {
 // follow yet, so it stays alongside it as its own toggle.
 const SECTIONS: Array<{ title: string; toggles: ToggleConfig[] }> = [
   {
-    title: 'DELIVERY & ACTIVITY',
+    title: 'Delivery & activity',
     toggles: [
       {
         key: 'orderUpdates',
-        title: 'Order Status Updates',
+        title: 'Order status',
         subtitle: 'Accepted, preparing, out for delivery',
         Icon: Bell,
       },
       {
         key: 'subscriptionReminders',
-        title: 'Subscription Reminders',
-        subtitle: 'Renewal, pause & upcoming delivery alerts',
+        title: 'Meal plan reminders',
+        subtitle: 'Renewals, pauses and upcoming deliveries',
         Icon: CalendarClock,
       },
       {
         key: 'reelActivity',
-        title: 'Kitchen Activity',
-        subtitle: 'Behind-the-scenes alerts when your favorite chef starts cooking',
+        title: 'Kitchen activity',
+        subtitle: 'When a kitchen you follow starts cooking',
         Icon: Sparkles,
       },
       {
         key: 'newKitchens',
-        title: 'New Kitchens Nearby',
+        title: 'New kitchens nearby',
         subtitle: 'When we verify a kitchen in your area',
         Icon: ChefHat,
       },
       {
         key: 'whatsappUpdates',
-        title: 'WhatsApp Updates',
+        title: 'WhatsApp updates',
         subtitle: 'Order status on WhatsApp',
         Icon: MessageCircle,
       },
     ],
   },
   {
-    title: 'PERSONALIZATION',
+    title: 'Personalization',
     toggles: [
       {
         key: 'dailyAiRecommendations',
-        title: 'Daily AI Recommendations',
-        subtitle: 'Personalized meal picks based on your goals',
+        title: 'Daily AI picks',
+        subtitle: 'Meals matched to your goals',
         Icon: WandSparkles,
       },
-      { key: 'promotions', title: 'Promotional Offers', subtitle: 'Coupons and deals', Icon: Tag },
+      { key: 'promotions', title: 'Offers and coupons', subtitle: 'Deals from FreshBhoj', Icon: Tag },
     ],
   },
 ];
@@ -92,7 +90,7 @@ const Notifications = () => {
 
   return (
     <View style={styles.screen}>
-      <AppBar title="Notifications" onBack={navigation.goBack} />
+      <AppBar title="Notification settings" onBack={navigation.goBack} />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
         {isLoading ? (
@@ -107,34 +105,32 @@ const Notifications = () => {
           />
         ) : (
           <>
-            {SECTIONS.map((section, sectionIndex) => (
-              <Animated.View key={section.title} entering={enterRise(sectionIndex)} style={styles.section}>
-                <Text style={[theme.text.overline, styles.sectionLabel]}>{section.title}</Text>
-                <Card padding="none" elevation="sm">
+            {SECTIONS.map((section) => (
+              <View key={section.title} style={styles.section}>
+                <Text style={[theme.text.label, styles.sectionLabel]}>{section.title}</Text>
+                <View style={styles.card}>
                   {section.toggles.map(({ key, title, subtitle, Icon }, index) => (
-                    <View key={key}>
-                      {index > 0 ? <Divider spacing={0} /> : null}
-                      <ListItem
-                        title={title}
-                        subtitle={subtitle}
-                        icon={<Icon size={18} color={theme.colors.primary[600]} strokeWidth={2.2} />}
-                        showChevron={false}
-                        right={
-                          <Switch
-                            value={preferences[key]}
-                            onValueChange={(value) => updatePreferences.mutate({ [key]: value })}
-                            trackColor={{
-                              false: theme.colors.neutral[200],
-                              true: theme.colors.accent[400],
-                            }}
-                            thumbColor={theme.colors.palette.white}
-                          />
-                        }
+                    <View key={key} style={[styles.row, index > 0 ? styles.rowDivider : null]}>
+                      <View style={styles.iconWrap}>
+                        <Icon size={16} color={theme.colors.primary[600]} strokeWidth={2.2} />
+                      </View>
+                      <View style={styles.rowText}>
+                        <Text style={theme.text.label}>{title}</Text>
+                        <Text style={[theme.text.caption, styles.rowSub]} numberOfLines={2}>
+                          {subtitle}
+                        </Text>
+                      </View>
+                      <Switch
+                        value={preferences[key]}
+                        onValueChange={(value) => updatePreferences.mutate({ [key]: value })}
+                        accessibilityLabel={title}
+                        trackColor={{ false: theme.colors.neutral[300], true: theme.colors.primary[400] }}
+                        thumbColor={theme.colors.palette.white}
                       />
                     </View>
                   ))}
-                </Card>
-              </Animated.View>
+                </View>
+              </View>
             ))}
 
             <View style={styles.infoNote}>
@@ -162,19 +158,46 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingBottom: theme.spacing.xxxl,
   },
   section: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.lg,
   },
   sectionLabel: {
+    color: theme.colors.text.secondary,
+    marginBottom: theme.spacing.sm,
+  },
+  card: {
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.surface.raised,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    paddingVertical: theme.spacing.md,
+  },
+  rowDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: theme.colors.borders.subtle,
+  },
+  iconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.surface.brandWash,
+  },
+  rowText: {
+    flex: 1,
+  },
+  rowSub: {
     color: theme.colors.text.tertiary,
-    marginBottom: theme.spacing.md,
   },
   infoNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: theme.spacing.sm,
-    padding: theme.spacing.md,
-    borderRadius: theme.radius.control,
-    backgroundColor: theme.colors.neutral[50],
+    paddingHorizontal: theme.spacing.xs,
   },
   infoNoteText: {
     flex: 1,

@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { PrivateStackParamList } from '../navigation.types';
 import { BottomTabNavigator } from './BottomTabNavigator';
 import Search from '@features/search/screens/Search';
+import CategoryMeals from '@features/meals/screens/CategoryMeals';
 import OrdersAndSubscriptions from '@features/orders/screens/OrdersAndSubscriptions';
 
 // Discovery
@@ -83,6 +84,7 @@ export function PrivateTabs() {
       <Stack.Screen name="Orders" component={OrdersAndSubscriptions} options={{ animation: 'slide_from_right' }} />
 
       <Stack.Screen name="MealDetail" component={MealDetail} />
+      <Stack.Screen name="CategoryMeals" component={CategoryMeals} />
       <Stack.Screen name="KitchenProfile" component={KitchenProfile} />
       <Stack.Screen
         name="KitchenGallery"

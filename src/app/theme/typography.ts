@@ -166,13 +166,12 @@ export const textStyles = {
         fontSize: 12,
         lineHeight: 16,
     },
-    /** ALL-CAPS micro-label above a value ("DELIVERY ADDRESS", "TOTAL"). */
+    /** Small bold label above a value ("Delivery address", "Total"). Never upper-cased. */
     overline: {
         fontFamily: fontFamilies.plusJakartaSans.bold,
-        fontSize: 11,
-        lineHeight: 14,
-        letterSpacing: 1,
-        textTransform: 'uppercase' as const,
+        fontSize: 12,
+        lineHeight: 16,
+        letterSpacing: 0.2,
     },
     button: {
         fontFamily: fontFamilies.plusJakartaSans.bold,

@@ -19,6 +19,8 @@ import { useTheme } from "@app/theme/useTheme";
 
 const GAP_ABOVE_BAR = staticTheme.spacing.md;
 const BAR_HEIGHT = 52;
+/** Height of the My Orders / Meal Plans tab bar pinned to the bottom of the Orders screen. */
+const ORDERS_TAB_HEIGHT = 64;
 // Clears the raised Feed button that overhangs the top of the tab pill.
 const TAB_BAR_ABOVE_GAP = 40;
 
@@ -36,6 +38,8 @@ const HIDDEN_ROUTES = new Set([
   'MealDetail',
   'ReelViewer',
   'WriteReview',
+  'Notifications',
+  'NotificationInbox',
 ]);
 
 /**
@@ -58,14 +62,17 @@ const MiniCartBar = () => {
 
   // Bottom tabs are only on screen when the focused route sits inside them.
   const isOnTabScreen = routeNames[0] === 'MainTabs';
-  // Distance the cart bar drops when the tab bar slides away: the pill's
-  // height plus the gap that separates the two.
-  const dropDistance = TAB_BAR_HEIGHT + TAB_BAR_ABOVE_GAP;
   const collapsed = isOnTabScreen && tabBarHidden;
 
   useEffect(() => {
     follow.value = withTiming(collapsed ? 1 : 0, TAB_BAR_TOGGLE);
   }, [collapsed, follow]);
+
+  // Resting place when there is no tab bar underneath: clear of the screen edge
+  // and the system gesture area.
+  const floorBottom = Math.max(insets.bottom, 24) + GAP_ABOVE_BAR;
+  // How far the cart bar glides down when the tab bar slides away.
+  const dropDistance = tabBarGap + TAB_BAR_HEIGHT + TAB_BAR_ABOVE_GAP - floorBottom;
 
   const followStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: follow.value * dropDistance }],
@@ -85,10 +92,13 @@ const MiniCartBar = () => {
 
   // On tab screens the floating pill sits at `tabBarGap` from the bottom; the
   // cart bar rests above it and glides down to the pill's slot when it hides.
-  const safeBottom = Math.max(insets.bottom, 24);
+  // The Orders screen has its own bottom tabs, so the cart bar sits just above them.
+  const isOnOrders = routeNames[routeNames.length - 1] === 'Orders';
   const bottom = isOnTabScreen
     ? tabBarGap + TAB_BAR_HEIGHT + TAB_BAR_ABOVE_GAP
-    : safeBottom + GAP_ABOVE_BAR;
+    : isOnOrders
+    ? insets.bottom + ORDERS_TAB_HEIGHT + GAP_ABOVE_BAR
+    : floorBottom;
 
   return (
     <Animated.View style={[styles.wrap, { bottom }, isOnTabScreen ? followStyle : null]}>

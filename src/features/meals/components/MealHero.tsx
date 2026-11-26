@@ -1,10 +1,10 @@
 import React, { useRef, useState, useMemo } from 'react';
-import { Dimensions, FlatList, Image, StyleSheet, View } from 'react-native';
+import { FlatList, Image, StyleSheet, View, useWindowDimensions } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useTheme } from "@app/theme/useTheme";
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const HERO_HEIGHT = 300;
+/** The photo leads the dish page: a little under half the screen on any phone. */
+export const useMealHeroHeight = () => Math.round(useWindowDimensions().height * 0.46);
 
 interface MealHeroProps {
   images: string[];
@@ -13,7 +13,9 @@ interface MealHeroProps {
 /** Swipeable hero gallery with page dots and a scrim for the floating app bar. */
 const MealHero: React.FC<MealHeroProps> = ({ images }) => {
     const theme = useTheme();
-    const styles = useMemo(() => createStyles(theme), [theme]);
+    const { width } = useWindowDimensions();
+    const height = useMealHeroHeight();
+    const styles = useMemo(() => createStyles(theme, width, height), [theme, width, height]);
   const [activeIndex, setActiveIndex] = useState(0);
   const listRef = useRef<FlatList<string>>(null);
   const photos = images.length ? images : [''];
@@ -28,7 +30,7 @@ const MealHero: React.FC<MealHeroProps> = ({ images }) => {
         showsHorizontalScrollIndicator={false}
         keyExtractor={(uri, index) => `${uri}-${index}`}
         onMomentumScrollEnd={({ nativeEvent }) =>
-          setActiveIndex(Math.round(nativeEvent.contentOffset.x / SCREEN_WIDTH))
+          setActiveIndex(Math.round(nativeEvent.contentOffset.x / width))
         }
         renderItem={({ item }) =>
           item ? (
@@ -62,14 +64,14 @@ const MealHero: React.FC<MealHeroProps> = ({ images }) => {
 
 export default MealHero;
 
-const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useTheme>, width: number, height: number) => StyleSheet.create({
   container: {
-    height: HERO_HEIGHT,
+    height,
     backgroundColor: theme.colors.neutral[100],
   },
   image: {
-    width: SCREEN_WIDTH,
-    height: HERO_HEIGHT,
+    width,
+    height,
   },
   fallback: {
     backgroundColor: theme.colors.neutral[200],
@@ -83,7 +85,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   dots: {
     position: 'absolute',
-    bottom: theme.spacing.xl,
+    bottom: theme.spacing.xxxl,
     alignSelf: 'center',
     flexDirection: 'row',
     gap: 6,

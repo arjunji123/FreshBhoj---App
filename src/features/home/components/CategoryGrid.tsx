@@ -13,7 +13,7 @@ interface CategoryGridProps {
   isLoading?: boolean;
 }
 
-/** Breakfast / Lunch / Dinner / Healthy Snacks — four compact tiles in a single row (icon above label). */
+/** Breakfast / Lunch / Dinner / Healthy Snacks — four real-photo tiles in a single row. */
 const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onSelect, isLoading }) => {
   const theme = useTheme();
   const styles = useMemo(() => createStyles(theme), [theme]);
@@ -23,7 +23,7 @@ const CategoryGrid: React.FC<CategoryGridProps> = ({ categories, activeSlug, onS
       <View style={styles.grid}>
         {Array.from({ length: 4 }).map((_, index) => (
           <View key={index} style={[styles.tile, styles.skeletonTile]}>
-            <Skeleton width={48} height={48} radius={24} />
+            <Skeleton height={72} radius={theme.radius.xl} style={styles.skeletonPhoto} />
             <Skeleton width="50%" height={12} />
           </View>
         ))}
@@ -85,29 +85,22 @@ const createStyles = (theme: ReturnType<typeof useTheme>) =>
     },
     tile: {
       flex: 1,
-      flexDirection: 'column',
       alignItems: 'center',
-      justifyContent: 'flex-start',
       gap: theme.spacing.sm,
-      paddingVertical: theme.spacing.md,
-      paddingHorizontal: theme.spacing.xs,
-      borderRadius: theme.radius.xl,
-      backgroundColor: theme.colors.surface.raised,
-      borderWidth: 1.5,
-      borderColor: 'transparent',
-      ...theme.elevation.sm,
     },
     skeletonTile: {
-      height: 104,
+      minHeight: 104,
+    },
+    skeletonPhoto: {
+      alignSelf: 'stretch',
     },
     tileActive: {
-      borderColor: theme.colors.borders.brand,
-      backgroundColor: theme.colors.surface.brandWash,
+      opacity: 0.75,
     },
     iconWrap: {
-      width: 48,
-      height: 48,
-      borderRadius: 24,
+      width: '100%',
+      aspectRatio: 1,
+      borderRadius: theme.radius.xl,
       overflow: 'hidden',
       backgroundColor: theme.colors.surface.brandWash,
       alignItems: 'center',

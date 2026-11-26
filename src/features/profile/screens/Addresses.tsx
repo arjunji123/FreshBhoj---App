@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation, useRoute, type RouteProp } from '@react-navigation/native';
-import { AlertCircle, Briefcase, Check, Home, MapPin, Plus } from 'lucide-react-native';
+import { AlertCircle, Briefcase, CircleCheck, Home, MapPin, Plus } from 'lucide-react-native';
+import PressableScale from '@animations/PressableScale';
+import AppGradient from '@components/AppGradient';
 import Animated from 'react-native-reanimated';
 import { enterRise } from '@animations/motion';
 import { AddressIcon, PencilIcon, TrashIcon } from '@components/icons';
-import { AppBar, Badge, Button, Card, EmptyState, Skeleton, Text } from '@components/ui';
+import { AppBar, EmptyState, Skeleton, Text } from '@components/ui';
 import { ApiError } from '@api';
 import type { Address } from '@api/types';
 import type { PrivateNavigation, PrivateStackParamList } from '@app/navigation/navigation.types';
@@ -102,82 +104,88 @@ const Addresses = () => {
             const Icon = LABEL_ICONS[address.label] ?? MapPin;
             return (
               <Animated.View key={address.id} entering={enterRise(index)}>
-              <Card
-                padding="md"
-                elevation="sm"
+              <PressableScale
                 onPress={() => handleSelect(address)}
+                scaleTo={0.98}
+                haptic={false}
+                accessibilityRole="radio"
+                accessibilityState={{ selected: address.isDefault }}
                 style={[styles.card, address.isDefault ? styles.cardDefault : null]}
               >
-                <View style={styles.row}>
-                  <View style={styles.iconWrap}>
-                    <Icon size={17} color={theme.colors.primary[600]} strokeWidth={2.2} />
+                {address.isDefault ? (
+                  <AppGradient colors={theme.colors.gradients.brandSoft} style={styles.iconWrap}>
+                    <Icon size={20} color={theme.colors.palette.white} strokeWidth={2.2} />
+                  </AppGradient>
+                ) : (
+                  <View style={[styles.iconWrap, styles.iconWrapIdle]}>
+                    <Icon size={20} color={theme.colors.primary[600]} strokeWidth={2.2} />
                   </View>
+                )}
 
-                  <View style={styles.text}>
-                    <View style={styles.labelRow}>
-                      <Text style={theme.text.h4}>
-                        {address.customLabel ?? titleCase(address.label)}
-                      </Text>
-                      {address.isDefault ? <Badge label="Default" tone="accent" /> : null}
-                    </View>
-                    <Text style={[theme.text.bodySmall, styles.line]}>
-                      {[address.line1, address.line2, address.locality]
-                        .filter(Boolean)
-                        .join(', ')}
+                <View style={styles.text}>
+                  <View style={styles.titleRow}>
+                    <Text style={[theme.text.h4, styles.title]} numberOfLines={1}>
+                      {address.customLabel ?? titleCase(address.label)}
                     </Text>
-                    <Text style={[theme.text.caption, styles.line]}>
-                      {address.city} - {address.pincode}
-                    </Text>
-                    {address.receiverName ? (
-                      <Text style={[theme.text.caption, styles.line]}>
-                        {address.receiverName}
-                        {address.receiverPhone ? ` · ${address.receiverPhone}` : ''}
-                      </Text>
+                    {address.isDefault ? (
+                      <CircleCheck
+                        size={18}
+                        color={theme.colors.palette.white}
+                        fill={theme.colors.primary[600]}
+                        strokeWidth={2.4}
+                      />
                     ) : null}
                   </View>
-
-                  <View style={styles.actions}>
-                    <Pressable
-                      onPress={() => navigation.navigate('AddressForm', { addressId: address.id })}
-                      accessibilityRole="button"
-                      accessibilityLabel="Edit address"
-                      hitSlop={theme.layout.hitSlop}
-                      style={styles.actionButton}
-                    >
-                      <PencilIcon size={18} color={theme.colors.text.secondary} />
-                    </Pressable>
-                    <Pressable
-                      onPress={() => handleDelete(address)}
-                      accessibilityRole="button"
-                      accessibilityLabel="Delete address"
-                      hitSlop={theme.layout.hitSlop}
-                      style={styles.actionButton}
-                    >
-                      <TrashIcon size={18} color={theme.colors.state.error} />
-                    </Pressable>
-                  </View>
+                  <Text style={[theme.text.bodySmall, styles.line]} numberOfLines={2}>
+                    {[address.line1, address.line2, address.locality, address.city]
+                      .filter(Boolean)
+                      .join(', ')}{' '}
+                    - {address.pincode}
+                  </Text>
+                  {address.receiverName ? (
+                    <Text style={[theme.text.caption, styles.receiver]} numberOfLines={1}>
+                      {address.receiverName}
+                      {address.receiverPhone ? ` · ${address.receiverPhone}` : ''}
+                    </Text>
+                  ) : null}
                 </View>
 
-                {params?.selectMode && address.isDefault ? (
-                  <View style={styles.selectedRow}>
-                    <Check size={14} color={theme.colors.accent[600]} strokeWidth={2.6} />
-                    <Text style={[theme.text.caption, styles.selectedText]}>
-                      Delivering here
-                    </Text>
-                  </View>
-                ) : null}
-              </Card>
+                <View style={styles.actions}>
+                  <Pressable
+                    onPress={() => navigation.navigate('AddressForm', { addressId: address.id })}
+                    accessibilityRole="button"
+                    accessibilityLabel="Edit address"
+                    hitSlop={6}
+                    style={styles.actionButton}
+                  >
+                    <PencilIcon size={16} color={theme.colors.text.secondary} />
+                  </Pressable>
+                  <Pressable
+                    onPress={() => handleDelete(address)}
+                    accessibilityRole="button"
+                    accessibilityLabel="Delete address"
+                    hitSlop={6}
+                    style={styles.actionButton}
+                  >
+                    <TrashIcon size={16} color={theme.colors.state.error} />
+                  </Pressable>
+                </View>
+              </PressableScale>
               </Animated.View>
             );
           })}
 
-          <Button
-            title="Add new address"
-            variant="outline"
+          <PressableScale
             onPress={() => navigation.navigate('AddressForm')}
-            leftIcon={<Plus size={17} color={theme.colors.primary[600]} strokeWidth={2.6} />}
-            style={styles.addButton}
-          />
+            scaleTo={0.98}
+            haptic={false}
+            accessibilityRole="button"
+            accessibilityLabel="Add new address"
+            style={styles.addTile}
+          >
+            <Plus size={18} color={theme.colors.primary[600]} strokeWidth={2.6} />
+            <Text style={[theme.text.label, styles.addText]}>Add new address</Text>
+          </PressableScale>
         </ScrollView>
       )}
     </View>
@@ -204,59 +212,74 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingBottom: theme.spacing.xxxl,
   },
   card: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+    padding: theme.spacing.lg,
     marginBottom: theme.spacing.md,
+    borderRadius: theme.radius.xxl,
+    backgroundColor: theme.colors.surface.raised,
     borderWidth: 1.5,
     borderColor: 'transparent',
+    ...theme.elevation.sm,
   },
   cardDefault: {
-    borderColor: theme.colors.borders.brand,
-  },
-  row: {
-    flexDirection: 'row',
-    gap: theme.spacing.md,
+    borderColor: theme.colors.primary[600],
   },
   iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 13,
-    backgroundColor: theme.colors.brand.primarySubtle,
+    width: 46,
+    height: 46,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconWrapIdle: {
+    backgroundColor: theme.colors.surface.brandWash,
   },
   text: {
     flex: 1,
   },
-  labelRow: {
+  titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.sm,
+    gap: 6,
+  },
+  title: {
+    flexShrink: 1,
   },
   line: {
     color: theme.colors.text.secondary,
-    marginTop: 3,
+    marginTop: 2,
+  },
+  receiver: {
+    color: theme.colors.text.tertiary,
+    marginTop: 2,
   },
   actions: {
-    gap: theme.spacing.xs,
-    alignItems: 'center',
+    gap: theme.spacing.sm,
   },
   actionButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: theme.colors.surface.subtle,
+    backgroundColor: theme.colors.surface.page,
   },
-  selectedRow: {
+  addTile: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginTop: theme.spacing.md,
+    justifyContent: 'center',
+    gap: theme.spacing.sm,
+    height: 56,
+    marginTop: theme.spacing.xs,
+    borderRadius: theme.radius.xxl,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: theme.colors.primary[600],
+    backgroundColor: theme.colors.surface.brandWash,
   },
-  selectedText: {
-    color: theme.colors.accent[600],
-  },
-  addButton: {
-    marginTop: theme.spacing.sm,
+  addText: {
+    color: theme.colors.text.brand,
   },
 });

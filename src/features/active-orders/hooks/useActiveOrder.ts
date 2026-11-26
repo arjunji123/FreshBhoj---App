@@ -5,10 +5,10 @@ import type { OrderStatus as ApiOrderStatus } from '@api/types';
 import type { ActiveOrder, OrderStatus } from '../active-orders.types';
 
 const STATUS_MAP: Partial<Record<ApiOrderStatus, { status: OrderStatus; label: string }>> = {
-  PLACED: { status: 'scheduled', label: 'PLACED' },
-  ACCEPTED: { status: 'scheduled', label: 'ACCEPTED' },
-  PREPARING: { status: 'preparing', label: 'PREPARING' },
-  OUT_FOR_DELIVERY: { status: 'delivering_today', label: 'ON THE WAY' },
+  PLACED: { status: 'scheduled', label: 'Placed' },
+  ACCEPTED: { status: 'scheduled', label: 'Accepted' },
+  PREPARING: { status: 'preparing', label: 'Preparing' },
+  OUT_FOR_DELIVERY: { status: 'delivering_today', label: 'On the way' },
 };
 
 /**
@@ -21,7 +21,7 @@ export const useActiveOrder = (): ActiveOrder | null => {
 
   return useMemo(() => {
     if (!order) return null;
-    const mapped = STATUS_MAP[order.status] ?? { status: 'scheduled' as const, label: order.statusLabel.toUpperCase() };
+    const mapped = STATUS_MAP[order.status] ?? { status: 'scheduled' as const, label: order.statusLabel };
     return {
       id: order.id,
       title: order.itemSummary,

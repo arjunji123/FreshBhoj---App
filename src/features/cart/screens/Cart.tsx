@@ -1,14 +1,13 @@
 import React, { useState, useMemo } from 'react';
-import { Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Animated from 'react-native-reanimated';
-import { AlertCircle } from 'lucide-react-native';
+import { AlertCircle, BadgeCheck, Plus } from 'lucide-react-native';
 import { enterRise } from '@animations/motion';
-import { KitchenIcon, TrashIcon } from '@components/icons';
-import { IconBadge } from '@features/profile/components/ProfileBlocks';
+import { TrashIcon } from '@components/icons';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
-import { AppBar, AppBarAction, Button, Card, Divider, EmptyState, Skeleton, StickyBar, VerifiedBadge, Text } from '@components/ui';
+import { AppBar, AppBarAction, Button, EmptyState, Skeleton, StickyBar, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
 import { EmptyCart } from '@components/illustrations';
@@ -83,7 +82,7 @@ const Cart = () => {
   return (
     <View style={styles.screen}>
       <AppBar
-        title="Your Cart"
+        title="Your cart"
         subtitle={`${cart.itemCount} ${cart.itemCount === 1 ? 'item' : 'items'}`}
         onBack={navigation.goBack}
         right={
@@ -94,76 +93,83 @@ const Cart = () => {
       />
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {cart.kitchen ? (
-          <Animated.View entering={enterRise(0)}>
-          <Card padding="md" elevation="sm" style={styles.kitchenCard}>
+        <Animated.View entering={enterRise(0)} style={styles.block}>
+          {cart.kitchen ? (
             <View style={styles.kitchenRow}>
-              <IconBadge icon={KitchenIcon} />
               <View style={styles.kitchenText}>
-                <Text style={[theme.text.overline, styles.kitchenLabel]}>ORDERING FROM</Text>
                 <View style={styles.kitchenNameRow}>
-                  <Text style={theme.text.h4} numberOfLines={1}>
+                  <Text style={[theme.text.label, styles.kitchenName]} numberOfLines={1}>
                     {cart.kitchen.name}
                   </Text>
-                  {cart.kitchen.isVerified ? <VerifiedBadge /> : null}
+                  {cart.kitchen.isVerified ? (
+                    <BadgeCheck size={16} color={theme.colors.primary[600]} strokeWidth={2.4} />
+                  ) : null}
                 </View>
-              </View>
-              <View style={styles.prepPill}>
-                <Text style={[theme.text.caption, styles.prepTime]}>
-                  {cart.kitchen.prepTimeMins} min
+                <Text style={[theme.text.caption, styles.kitchenMeta]}>
+                  Delivery in about {cart.kitchen.prepTimeMins} min
                 </Text>
               </View>
             </View>
-          </Card>
-          </Animated.View>
-        ) : null}
+          ) : null}
 
-        <Animated.View entering={enterRise(1)}>
-        <Card padding="md" elevation="sm" style={styles.itemsCard}>
-          {cart.items.map((line, index) => (
-            <View key={line.id}>
-              {index > 0 ? <Divider spacing={theme.spacing.xs} /> : null}
+          {cart.items.map((line) => (
+            <View key={line.id} style={styles.itemLine}>
               <CartItemRow
                 line={line}
                 isUpdating={updateItem.isPending}
-                onChangeQuantity={(quantity) =>
-                  updateItem.mutate({ itemId: line.id, quantity })
-                }
+                onChangeQuantity={(quantity) => updateItem.mutate({ itemId: line.id, quantity })}
               />
             </View>
           ))}
-        </Card>
+
+          {cart.kitchen ? (
+            <Pressable
+              onPress={() =>
+                navigation.navigate('KitchenProfile', {
+                  kitchenId: cart.kitchen!.id,
+                  kitchenName: cart.kitchen!.name,
+                })
+              }
+              accessibilityRole="button"
+              style={styles.addMore}
+            >
+              <Plus size={15} color={theme.colors.text.brand} strokeWidth={2.8} />
+              <Text style={[theme.text.label, styles.addMoreText]}>Add more items</Text>
+            </Pressable>
+          ) : null}
         </Animated.View>
 
         <CartNutritionCard cart={cart} index={2} />
 
-        <CouponPanel
-          cart={cart}
-          coupons={coupons ?? []}
-          isApplying={applyCoupon.isPending}
-          errorMessage={couponError}
-          onApply={(code) => {
-            setCouponError(null);
-            applyCoupon.mutate(code, {
-              onError: (error) =>
-                setCouponError(
-                  error instanceof ApiError ? error.message : 'That coupon could not be applied',
-                ),
-            });
-          }}
-          onRemove={() => {
-            setCouponError(null);
-            removeCoupon.mutate();
-          }}
-        />
-
-        <CoinsPanel
-          cart={cart}
-          isApplying={applyCoins.isPending}
-          isRemoving={removeCoins.isPending}
-          onApply={() => applyCoins.mutate()}
-          onRemove={() => removeCoins.mutate()}
-        />
+        <View style={styles.block}>
+          <CouponPanel
+            cart={cart}
+            coupons={coupons ?? []}
+            isApplying={applyCoupon.isPending}
+            errorMessage={couponError}
+            onApply={(code) => {
+              setCouponError(null);
+              applyCoupon.mutate(code, {
+                onError: (error) =>
+                  setCouponError(
+                    error instanceof ApiError ? error.message : 'That coupon could not be applied',
+                  ),
+              });
+            }}
+            onRemove={() => {
+              setCouponError(null);
+              removeCoupon.mutate();
+            }}
+          />
+          <View style={styles.blockDivider} />
+          <CoinsPanel
+            cart={cart}
+            isApplying={applyCoins.isPending}
+            isRemoving={removeCoins.isPending}
+            onApply={() => applyCoins.mutate()}
+            onRemove={() => removeCoins.mutate()}
+          />
+        </View>
 
         <BillSummary pricing={cart.pricing} couponCode={cart.coupon.code} />
 
@@ -182,11 +188,12 @@ const Cart = () => {
       <StickyBar>
         <View style={styles.stickyRow}>
           <View>
-            <Text style={[theme.text.caption, styles.stickyLabel]}>TOTAL</Text>
-            <Text style={theme.text.h2}>{formatCurrency(cart.pricing.totalAmount)}</Text>
+            <Text style={theme.text.h4}>{formatCurrency(cart.pricing.totalAmount)}</Text>
+            <Text style={[theme.text.caption, styles.stickyLabel]}>Total to pay</Text>
           </View>
           <Button
-            title="Proceed to Checkout"
+            title="Checkout"
+            size="sm"
             onPress={() => requireAuth(() => navigation.navigate('Checkout'))}
             disabled={!cart.checkout.canCheckout}
             fullWidth={false}
@@ -213,37 +220,53 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingHorizontal: theme.layout.screenPadding,
     paddingBottom: theme.spacing.xxl,
   },
-  kitchenCard: {
+  // One surface style for every group on the page.
+  block: {
     marginTop: theme.spacing.md,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.surface.raised,
+    overflow: 'hidden',
+  },
+  blockDivider: {
+    height: 1,
+    marginHorizontal: theme.spacing.md,
+    backgroundColor: theme.colors.borders.subtle,
   },
   kitchenRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.md,
+    padding: theme.spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.borders.subtle,
   },
   kitchenText: {
     flex: 1,
   },
-  kitchenLabel: {
-    color: theme.colors.text.tertiary,
-    marginBottom: 3,
-  },
   kitchenNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.sm,
+    gap: 6,
   },
-  prepTime: {
-    color: theme.colors.text.brand,
+  kitchenName: {
+    flexShrink: 1,
   },
-  prepPill: {
+  kitchenMeta: {
+    color: theme.colors.text.secondary,
+    marginTop: 1,
+  },
+  itemLine: {
     paddingHorizontal: theme.spacing.md,
-    paddingVertical: 4,
-    borderRadius: theme.radius.pill,
-    backgroundColor: theme.colors.surface.brandWash,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.borders.subtle,
   },
-  itemsCard: {
-    marginTop: theme.spacing.md,
+  addMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    padding: theme.spacing.md,
+  },
+  addMoreText: {
+    color: theme.colors.text.brand,
   },
   blockers: {
     marginTop: theme.spacing.md,
@@ -269,6 +292,6 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   checkoutButton: {
     flex: 1,
-    maxWidth: 230,
+    maxWidth: 180,
   },
 });

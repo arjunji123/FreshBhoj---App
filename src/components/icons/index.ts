@@ -1,4 +1,5 @@
 export type { IconProps } from './base';
+export { BICEP_PATH } from './bicep';
 export {
   OrdersIcon,
   AddressIcon,

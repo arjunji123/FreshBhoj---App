@@ -67,7 +67,7 @@ const SuggestionDetail = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title={suggestion ? TYPE_LABEL[suggestion.type] ?? 'Suggestion' : 'Suggestion'} onBack={() => navigation.goBack()} />
 
       {query.isLoading ? (
@@ -101,7 +101,7 @@ const SuggestionDetail = () => {
             </Card>
 
             <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-              IMPACT BREAKDOWN
+              Impact breakdown
             </Text>
             <View style={styles.statsGrid}>
               {suggestion.impact.reachDeltaPct != null ? (
@@ -133,7 +133,7 @@ const SuggestionDetail = () => {
               <View style={styles.reasoningHeader}>
                 <Sparkles size={14} color={theme.colors.brand.primary} />
                 <Text variant="overline" color="tertiary">
-                  AI REASONING
+                  AI reasoning
                 </Text>
               </View>
               <Text variant="bodySmall" color="secondary">
@@ -144,7 +144,7 @@ const SuggestionDetail = () => {
             {suggestion.appliedChanges ? (
               <Card style={styles.appliedCard}>
                 <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-                  APPLIED CHANGE
+                  Applied change
                 </Text>
                 <View style={styles.appliedRow}>
                   <Text variant="bodySmall" color="secondary">
@@ -164,7 +164,7 @@ const SuggestionDetail = () => {
 
             <Card style={styles.appliedCard}>
               <Text variant="overline" color="tertiary" style={styles.sectionLabel}>
-                TIMELINE
+                Timeline
               </Text>
               <Text variant="bodySmall" color="secondary">
                 Generated {formatLongDate(suggestion.createdAt)}

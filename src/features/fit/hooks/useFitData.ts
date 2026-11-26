@@ -1,6 +1,8 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { mealsApi, qk } from '@api';
+import { ordersApi } from '@api/endpoints/orders.api';
+import { useAuthStore } from '@features/authentication/store/authStore';
 import type { FitOverview } from '@api/endpoints/meals.api';
 import type { MealCard } from '@api/types';
 import { flattenPages, useMealFeed } from '@features/meals/hooks/useMeals';
@@ -11,6 +13,17 @@ import type { FitGoal } from '../fit.constants';
 export type FitKitchen = FitOverview['kitchens'][number];
 
 const goalTags = (goal: FitGoal) => FIT_GOALS.find((g) => g.key === goal)?.tags ?? FIT_GOALS[0].tags;
+
+/** The signed-in customer's daily Fit streak. Order changes invalidate it via the `orders` key. */
+export function useFitStreak() {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  return useQuery({
+    queryKey: qk.orders.fitStreak,
+    queryFn: ordersApi.fitStreak,
+    enabled: Boolean(isAuthenticated),
+    staleTime: 30_000,
+  });
+}
 
 /**
  * The three curated rails (protein champions, light & lean, fit kitchens) come

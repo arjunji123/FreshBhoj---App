@@ -42,6 +42,8 @@ export type PrivateStackParamList = {
 
   // Discovery
   MealDetail: { mealId: string; mealName?: string };
+  /** Dishes of one meal category (Breakfast, Lunch…), opened from the Home tiles. */
+  CategoryMeals: { slug: string; name: string };
   KitchenProfile: { kitchenId: string; kitchenName?: string };
   KitchenGallery: { kitchenId: string; initialIndex?: number };
   KitchenReviews: { kitchenId: string; kitchenName?: string };

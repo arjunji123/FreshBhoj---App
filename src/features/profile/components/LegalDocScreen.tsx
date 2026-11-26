@@ -37,7 +37,7 @@ const LegalDocScreen: React.FC<{ docKey: LegalDocKey }> = ({ docKey }) => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title={doc.title}
         onBack={navigation.goBack}
@@ -50,7 +50,7 @@ const LegalDocScreen: React.FC<{ docKey: LegalDocKey }> = ({ docKey }) => {
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {lastUpdated ? (
-          <Text style={[theme.text.caption, styles.lastUpdated]}>LAST UPDATED · {lastUpdated.toUpperCase()}</Text>
+          <Text style={[theme.text.caption, styles.lastUpdated]}>Last updated · {lastUpdated}</Text>
         ) : null}
 
         {doc.sections.map((section, index) => (

@@ -1,12 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
-import { Lock, MapPin, Plus } from 'lucide-react-native';
+import { Lock, MapPin, NotebookPen, Plus } from 'lucide-react-native';
 import { formatCurrency } from '@utils/format';
 import { ApiError } from '@api';
 import type { PaymentMethod } from '@api/types';
-import { AppBar, Button, Card, Divider, Skeleton, StickyBar, Text } from '@components/ui';
+import { AppBar, Button, Skeleton, StickyBar, Text } from '@components/ui';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { useAddresses, useDefaultAddress } from '@features/profile/hooks/useProfile';
 import { useRequireAuth } from '@features/authentication/hooks/useRequireAuth';
@@ -124,101 +124,90 @@ const Checkout = () => {
         bottomOffset={24}
       >
         {/* ── Address ─────────────────────────────────────────────────── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERY ADDRESS</Text>
-          <Text
-            style={[theme.text.label, styles.link]}
-            onPress={() => navigation.navigate('Addresses', { selectMode: true })}
-          >
-            {selectedAddress ? 'Change' : 'Add'}
-          </Text>
-        </View>
-
         {selectedAddress ? (
-          <Card padding="md" elevation="xs">
-            <View style={styles.addressRow}>
-              <View style={styles.addressIcon}>
-                <MapPin size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
-              </View>
-              <View style={styles.addressText}>
-                <Text style={theme.text.h4}>
-                  {selectedAddress.customLabel ?? titleCase(selectedAddress.label)}
-                </Text>
-                <Text style={[theme.text.bodySmall, styles.addressLine]}>
-                  {[
-                    selectedAddress.line1,
-                    selectedAddress.line2,
-                    selectedAddress.locality,
-                    `${selectedAddress.city} - ${selectedAddress.pincode}`,
-                  ]
-                    .filter(Boolean)
-                    .join(', ')}
-                </Text>
-              </View>
+          <View style={[styles.block, styles.addressRow]}>
+            <View style={styles.iconWrap}>
+              <MapPin size={16} color={theme.colors.text.brand} strokeWidth={2.4} />
             </View>
-          </Card>
+            <View style={styles.addressText}>
+              <Text style={theme.text.label} numberOfLines={1}>
+                Deliver to {selectedAddress.customLabel ?? titleCase(selectedAddress.label)}
+              </Text>
+              <Text style={[theme.text.caption, styles.addressLine]} numberOfLines={2}>
+                {[
+                  selectedAddress.line1,
+                  selectedAddress.line2,
+                  selectedAddress.locality,
+                  `${selectedAddress.city} - ${selectedAddress.pincode}`,
+                ]
+                  .filter(Boolean)
+                  .join(', ')}
+              </Text>
+            </View>
+            <Text
+              style={[theme.text.label, styles.link]}
+              onPress={() => navigation.navigate('Addresses', { selectMode: true })}
+              suppressHighlighting
+            >
+              Change
+            </Text>
+          </View>
         ) : (
-          <Card
-            padding="md"
-            elevation="xs"
+          <Pressable
             onPress={() => navigation.navigate('AddressForm')}
-            style={styles.addAddressCard}
+            accessibilityRole="button"
+            style={[styles.block, styles.addAddress]}
           >
-            <Plus size={18} color={theme.colors.text.brand} strokeWidth={2.4} />
-            <Text style={[theme.text.h4, styles.link]}>Add a delivery address</Text>
-          </Card>
+            <Plus size={16} color={theme.colors.text.brand} strokeWidth={2.6} />
+            <Text style={[theme.text.label, styles.link]}>Add a delivery address</Text>
+          </Pressable>
         )}
 
         {/* ── Delivery time ───────────────────────────────────────────── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERY TIME</Text>
+        <View style={[styles.block, styles.padded]}>
+          <Text style={[theme.text.label, styles.blockTitle]}>Delivery time</Text>
+          <DeliverySlotPicker
+            value={slot}
+            onChange={setSlot}
+            prepTimeMins={cart.kitchen?.prepTimeMins ?? 25}
+          />
         </View>
-        <DeliverySlotPicker
-          value={slot}
-          onChange={setSlot}
-          prepTimeMins={cart.kitchen?.prepTimeMins ?? 25}
-        />
 
-        {/* ── Notes ───────────────────────────────────────────────────── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>ORDER NOTES</Text>
-        </View>
-        <TextInput
-          value={notes}
-          onChangeText={setNotes}
-          placeholder="Any instructions for the chef? (e.g. less spicy, no onions)"
-          placeholderTextColor={theme.colors.text.tertiary}
-          multiline
-          maxLength={300}
-          style={[theme.text.body, styles.notes]}
-        />
-
-        {/* ── Order summary ───────────────────────────────────────────── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>ORDER SUMMARY</Text>
-        </View>
-        <Card padding="md" elevation="xs">
-          {cart.items.map((line, index) => (
-            <View key={line.id}>
-              {index > 0 ? <Divider spacing={theme.spacing.sm} /> : null}
-              <View style={styles.summaryRow}>
-                <View style={styles.quantityChip}>
-                  <Text style={[theme.text.caption, styles.quantityText]}>{line.quantity}x</Text>
-                </View>
-                <Text style={[theme.text.body, styles.summaryName]} numberOfLines={2}>
-                  {line.meal.name}
-                </Text>
-                <Text style={theme.text.bodyMedium}>{formatCurrency(line.lineTotal)}</Text>
+        {/* ── Items and instructions ──────────────────────────────────── */}
+        <View style={[styles.block, styles.padded]}>
+          <Text style={[theme.text.label, styles.blockTitle]} numberOfLines={1}>
+            Your order{cart.kitchen ? ` from ${cart.kitchen.name}` : ''}
+          </Text>
+          {cart.items.map((line) => (
+            <View key={line.id} style={styles.summaryRow}>
+              <View style={styles.quantityChip}>
+                <Text style={[theme.text.caption, styles.quantityText]}>{line.quantity}x</Text>
               </View>
+              <Text style={[theme.text.bodySmall, styles.summaryName]} numberOfLines={1}>
+                {line.meal.name}
+              </Text>
+              <Text style={theme.text.label}>{formatCurrency(line.lineTotal)}</Text>
             </View>
           ))}
-        </Card>
+          <View style={styles.notesRow}>
+            <NotebookPen size={15} color={theme.colors.text.tertiary} strokeWidth={2.2} />
+            <TextInput
+              value={notes}
+              onChangeText={setNotes}
+              placeholder="Cooking instructions, e.g. less spicy"
+              placeholderTextColor={theme.colors.text.tertiary}
+              multiline
+              maxLength={300}
+              style={[theme.text.bodySmall, styles.notes]}
+            />
+          </View>
+        </View>
 
         {/* ── Payment ─────────────────────────────────────────────────── */}
-        <View style={styles.sectionHeader}>
-          <Text style={[theme.text.overline, styles.sectionLabel]}>PAYMENT METHOD</Text>
+        <View style={[styles.block, styles.padded]}>
+          <Text style={theme.text.label}>Payment method</Text>
+          <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
         </View>
-        <PaymentMethodPicker value={paymentMethod} onChange={setPaymentMethod} />
 
         <BillSummary pricing={cart.pricing} couponCode={cart.coupon.code} title="Bill details" />
       </KeyboardAwareScrollView>
@@ -226,24 +215,21 @@ const Checkout = () => {
       <StickyBar>
         <View style={styles.stickyRow}>
           <View>
-            <Text style={[theme.text.caption, styles.stickyLabel]}>TOTAL TO PAY</Text>
-            <Text style={theme.text.h2}>{formatCurrency(cart.pricing.totalAmount)}</Text>
+            <Text style={theme.text.h4}>{formatCurrency(cart.pricing.totalAmount)}</Text>
+            <View style={styles.secureRow}>
+              <Lock size={10} color={theme.colors.text.tertiary} strokeWidth={2.4} />
+              <Text style={[theme.text.caption, styles.secureText]}>Secure payment</Text>
+            </View>
           </View>
           <Button
-            title="Place Order"
+            title="Place order"
+            size="sm"
             onPress={handlePlaceOrder}
             loading={placeOrder.isPending}
             disabled={!selectedAddress || !cart.checkout.canCheckout}
             fullWidth={false}
             style={styles.placeButton}
           />
-        </View>
-
-        <View style={styles.secureRow}>
-          <Lock size={11} color={theme.colors.text.tertiary} strokeWidth={2.4} />
-          <Text style={[theme.text.caption, styles.secureText]}>
-            Secure payments by FreshBhoj
-          </Text>
         </View>
       </StickyBar>
     </View>
@@ -274,28 +260,32 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   loadingBlock: {
     marginTop: theme.spacing.lg,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginTop: theme.spacing.xl,
-    marginBottom: theme.spacing.md,
+  // One surface style for every group, matching the cart.
+  block: {
+    marginTop: theme.spacing.md,
+    borderRadius: theme.radius.lg,
+    backgroundColor: theme.colors.surface.raised,
   },
-  sectionLabel: {
-    color: theme.colors.text.tertiary,
+  padded: {
+    padding: theme.spacing.md,
+  },
+  blockTitle: {
+    marginBottom: theme.spacing.sm,
   },
   link: {
     color: theme.colors.text.brand,
   },
   addressRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: theme.spacing.md,
+    padding: theme.spacing.md,
   },
-  addressIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    backgroundColor: theme.colors.brand.primarySubtle,
+  iconWrap: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: theme.colors.surface.brandWash,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -304,39 +294,27 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   addressLine: {
     color: theme.colors.text.secondary,
-    marginTop: 3,
+    marginTop: 1,
   },
-  addAddressCard: {
+  addAddress: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: theme.spacing.sm,
-    borderWidth: 1.5,
-    borderStyle: 'dashed',
+    padding: theme.spacing.lg,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: theme.colors.borders.brand,
-  },
-  notes: {
-    minHeight: 84,
-    borderRadius: theme.radius.control,
-    borderWidth: 1.5,
-    borderColor: theme.colors.borders.subtle,
-    backgroundColor: theme.colors.neutral[50],
-    padding: theme.spacing.md,
-    textAlignVertical: 'top',
-    color: theme.colors.text.primary,
   },
   summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.md,
+    gap: theme.spacing.sm,
     paddingVertical: theme.spacing.xs,
   },
   quantityChip: {
-    paddingHorizontal: 7,
-    paddingVertical: 2,
-    borderRadius: theme.radius.pill,
-    borderWidth: 1,
-    borderColor: theme.colors.borders.brand,
+    paddingHorizontal: 6,
+    borderRadius: theme.radius.sm,
+    backgroundColor: theme.colors.surface.brandWash,
   },
   quantityText: {
     color: theme.colors.text.brand,
@@ -345,14 +323,27 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     flex: 1,
     color: theme.colors.text.primary,
   },
+  notesRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
+    marginTop: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.md,
+    borderRadius: theme.radius.md,
+    backgroundColor: theme.colors.surface.page,
+  },
+  notes: {
+    flex: 1,
+    minHeight: 40,
+    maxHeight: 90,
+    paddingVertical: theme.spacing.sm,
+    color: theme.colors.text.primary,
+  },
   stickyRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: theme.spacing.lg,
-  },
-  stickyLabel: {
-    color: theme.colors.text.tertiary,
   },
   placeButton: {
     flex: 1,
@@ -361,9 +352,7 @@ const createStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   secureRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 5,
-    marginTop: theme.spacing.sm,
+    gap: 4,
   },
   secureText: {
     color: theme.colors.text.tertiary,

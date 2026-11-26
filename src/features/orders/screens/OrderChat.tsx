@@ -120,7 +120,7 @@ const OrderChat = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar
         title={kitchenName ?? 'Chat with kitchen'}
         subtitle={orderNumber ? `Order #${orderNumber}` : undefined}

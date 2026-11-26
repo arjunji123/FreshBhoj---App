@@ -71,7 +71,7 @@ const AdsCampaignDetail = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Campaign" onBack={() => navigation.goBack()} />
 
       {query.isLoading ? (
@@ -180,7 +180,7 @@ const AdsCampaignDetail = () => {
 
           <Card style={styles.chartCard}>
             <Text variant="overline" color="tertiary" style={styles.chartLabel}>
-              TIMELINE
+              Timeline
             </Text>
             <View style={styles.timelineRow}>
               <CalendarCheck size={13} color={theme.colors.text.tertiary} />

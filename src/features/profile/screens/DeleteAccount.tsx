@@ -68,7 +68,7 @@ const DeleteAccount = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Delete Account" onBack={navigation.goBack} />
       <ScrollView
         showsVerticalScrollIndicator={false}

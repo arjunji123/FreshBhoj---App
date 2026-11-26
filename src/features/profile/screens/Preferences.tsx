@@ -43,11 +43,11 @@ const Preferences = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="App Preferences" onBack={navigation.goBack} />
 
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        <Text style={[theme.text.overline, styles.sectionLabel]}>APPEARANCE</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Appearance</Text>
         <Card padding="none" elevation="xs">
           {APPEARANCE_OPTIONS.map(({ key, title, subtitle, Icon }, index) => {
             const selected = mode === key;
@@ -75,7 +75,7 @@ const Preferences = () => {
           })}
         </Card>
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>NOTIFICATIONS</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Notifications</Text>
         <Card padding="none" elevation="xs">
           <ListItem
             title="Manage Notifications"

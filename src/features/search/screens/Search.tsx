@@ -32,7 +32,7 @@ import {
   type SheetHandle,
 } from '@components/ui';
 import MealCard from '@components/MealCard';
-import { EmptySearch } from '@components/illustrations';
+import EmptyPhoto from '@components/EmptyPhoto';
 import type { PrivateNavigation } from '@app/navigation/navigation.types';
 import { flattenPages, useMealFeed, useToggleFavorite } from '@features/meals/hooks/useMeals';
 import { useAddToCartFlow } from '@features/cart/hooks/useAddToCartFlow';
@@ -418,7 +418,7 @@ const Search = () => {
                   />
                 ) : showKitchens ? null : (
                   <EmptyState
-                    illustration={<EmptySearch size={190} />}
+                    illustration={<EmptyPhoto kind="search" size={170} />}
                     title={debounced ? `No results for "${debounced}"` : 'No meals match these filters'}
                     description="Try a different dish or kitchen, or drop one of the filters."
                     actionLabel={hasActiveFilters ? 'Clear filters' : undefined}

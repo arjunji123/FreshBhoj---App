@@ -52,10 +52,6 @@ export const ACTIVITY_OPTIONS: Array<{ key: Activity; label: string; hint: strin
 ];
 
 export const FIT_COPY = {
-  heroTitle: 'Eat clean.',
-  heroAccent: 'Train smart.',
-  heroSub: 'Macro-counted meals from kitchens near you.',
-  goalTitle: 'What are you aiming for?',
   proteinTitle: 'Protein champions',
   proteinSubtitle: 'The most protein per plate near you',
   lightTitle: 'Light & lean',

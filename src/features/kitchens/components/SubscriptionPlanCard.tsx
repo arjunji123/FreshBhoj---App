@@ -81,7 +81,7 @@ const SubscriptionPlanCard: React.FC<SubscriptionPlanCardProps> = ({ plan, kitch
 
   return (
     <Card style={styles.card}>
-      {plan.isPopular ? <Badge label="POPULAR" tone="brand" variant="solid" size="sm" style={styles.popularBadge} /> : null}
+      {plan.isPopular ? <Badge label="Popular" tone="brand" variant="solid" size="sm" style={styles.popularBadge} /> : null}
 
       <Text style={[{ color: theme.colors.text.primary }, theme.text.h3, styles.name]} numberOfLines={2}>
         {plan.name}

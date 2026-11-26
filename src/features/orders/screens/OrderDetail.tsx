@@ -112,7 +112,7 @@ const OrderDetail = () => {
           />
         </Card>
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>ITEMS</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Items</Text>
         <Card padding="md" elevation="xs">
           {order.items.map((item, index) => (
             <View key={item.id}>
@@ -144,7 +144,7 @@ const OrderDetail = () => {
           ))}
         </Card>
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>BILL</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Bill</Text>
         <Card padding="md" elevation="xs">
           <SummaryRow label="Item total" value={order.pricing.itemsTotal} />
           <SummaryRow
@@ -174,7 +174,7 @@ const OrderDetail = () => {
           </Text>
         </Card>
 
-        <Text style={[theme.text.overline, styles.sectionLabel]}>DELIVERED TO</Text>
+        <Text style={[theme.text.overline, styles.sectionLabel]}>Delivered to</Text>
         <Card padding="md" elevation="xs">
           <View style={styles.addressRow}>
             <MapPin size={16} color={theme.colors.text.brand} strokeWidth={2.4} />

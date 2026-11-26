@@ -125,7 +125,7 @@ const KitchenDashboard = () => {
 
           {summary ? (
             <View style={styles.statusBadgeRow}>
-              {isLive ? <Badge label="LIVE" tone="accent" variant="solid" size="sm" /> : null}
+              {isLive ? <Badge label="Live" tone="accent" variant="solid" size="sm" /> : null}
               <Badge
                 label={`Status: ${KITCHEN_STATUS_LABEL[profile.data?.status ?? 'ACTIVE'] ?? profile.data?.status ?? 'Active'}`}
                 tone={(profile.data?.status ?? 'ACTIVE') === 'ACTIVE' ? 'accent' : 'warning'}
@@ -251,7 +251,7 @@ const KitchenDashboard = () => {
 
         {summary ? (
           <Card style={styles.allTimeCard}>
-            <Text style={styles.sectionLabel}>ALL-TIME</Text>
+            <Text style={styles.sectionLabel}>All-time</Text>
             <View style={styles.allTimeGrid}>
               <View style={styles.allTimeItem}>
                 <Text style={styles.allTimeValue}>{summary.allTime.orderCount}</Text>
@@ -278,7 +278,7 @@ const KitchenDashboard = () => {
 
         <Card style={styles.liveOrdersCard}>
           <View style={styles.cardHeaderRow}>
-            <Text style={styles.sectionLabelInline}>LIVE ORDERS</Text>
+            <Text style={styles.sectionLabelInline}>Live orders</Text>
             <Pressable
               onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenOrders' })}
               hitSlop={theme.layout.hitSlop}
@@ -329,7 +329,7 @@ const KitchenDashboard = () => {
 
         <Card style={styles.liveOrdersCard}>
           <View style={styles.cardHeaderRow}>
-            <Text style={styles.sectionLabelInline}>YOUR STORIES</Text>
+            <Text style={styles.sectionLabelInline}>Your stories</Text>
             <Pressable
               onPress={() => navigation.navigate('KitchenTabs', { screen: 'KitchenStories' })}
               hitSlop={theme.layout.hitSlop}
@@ -417,7 +417,7 @@ function WeeklyRevenueChart({ data }: { data: { date: string; revenue: number }[
   return (
     <Card style={styles.chartCard}>
       <View style={styles.chartHeaderRow}>
-        <Text style={styles.sectionLabel}>WEEKLY REVENUE</Text>
+        <Text style={styles.sectionLabel}>Weekly revenue</Text>
         <Text style={styles.chartTotal}>{`₹${totalRevenue.toLocaleString('en-IN')}`}</Text>
       </View>
       {totalRevenue === 0 ? (

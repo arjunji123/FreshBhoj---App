@@ -93,7 +93,7 @@ const PremiumPlans = () => {
   };
 
   return (
-    <Screen background="page">
+    <Screen background="page" edges={[]}>
       <AppBar title="Kitchen Premium" onBack={() => navigation.goBack()} />
 
       {tiers.isLoading ? (
@@ -118,7 +118,7 @@ const PremiumPlans = () => {
                 style={[styles.planCard, tierCatalog.isMostPopular ? styles.planCardPopular : null]}
                 padding="lg"
               >
-                {tierCatalog.isMostPopular ? <Badge label="MOST POPULAR" tone="brand" variant="solid" size="sm" style={styles.popularBadge} /> : null}
+                {tierCatalog.isMostPopular ? <Badge label="Most popular" tone="brand" variant="solid" size="sm" style={styles.popularBadge} /> : null}
 
                 <View style={styles.planHeaderRow}>
                   <Crown size={20} color={theme.colors.brand.primary} />

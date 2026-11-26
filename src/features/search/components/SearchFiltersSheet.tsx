@@ -88,7 +88,7 @@ const SearchFiltersSheet = forwardRef<SheetHandle, SearchFiltersSheetProps>(
     const theme = useTheme();
     const styles = useMemo(() => createStyles(theme), [theme]);
     return (
-    <Sheet ref={ref} eyebrow="FILTER & SORT" title="Find your meal" heightRatio={0.88}>
+    <Sheet ref={ref} eyebrow="Filter & sort" title="Find your meal" heightRatio={0.88}>
       <ScrollView
         style={styles.scrollFlex}
         contentContainerStyle={styles.scroll}

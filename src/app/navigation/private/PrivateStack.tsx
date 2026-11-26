@@ -149,8 +149,10 @@ export function PrivateTabs() {
 
       <Stack.Screen name="Wallet" component={Wallet} />
 
-      <Stack.Screen name="Login" component={Login} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-      <Stack.Screen name="OTP" component={OTPScreen} options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      {/* Same names as the signed-out stack's screens: the separate key stops React
+          Navigation from keeping an old OTP screen open after sign-in finishes. */}
+      <Stack.Screen name="Login" component={Login} navigationKey="private" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+      <Stack.Screen name="OTP" component={OTPScreen} navigationKey="private" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
     </Stack.Navigator>
   );
 }

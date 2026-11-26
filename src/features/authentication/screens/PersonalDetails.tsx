@@ -43,10 +43,10 @@ const PersonalDetails = () => {
     setStep(2);
   };
 
-  const setIsAuthenticated = useAuthStore((s) => s.setisAuthenticated);
-
   const handleLocationSave = () => {
-    setIsAuthenticated(true);
+    // Setup is finished: sign the customer in and clear the pending flag together,
+    // which swaps the app to the signed-in stack and opens Home.
+    useAuthStore.setState({ isAuthenticated: true, isProfilePending: false });
   };
 
   const handleBack = () => {

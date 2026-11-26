@@ -33,8 +33,10 @@ export function PublicStack() {
     >
       <Stack.Screen name="Onboarding" component={OnboardingScreen} />
       {/* Instant — no slide-in, so the hero image is just there immediately. */}
-      <Stack.Screen name="Login" component={Login} options={{ animation: 'none' }} />
-      <Stack.Screen name="OTP" component={OTPScreen} />
+      {/* `navigationKey` differs from the signed-in stack's Login/OTP, so these routes
+          are dropped (not carried over) when the app switches stacks. */}
+      <Stack.Screen name="Login" component={Login} options={{ animation: 'none' }} navigationKey="public" />
+      <Stack.Screen name="OTP" component={OTPScreen} navigationKey="public" />
       <Stack.Screen name="OTPSuccess" component={OTPSuccess} options={{ animation: 'fade' }} />
       <Stack.Screen name="PersonalDetails" component={PersonalDetails} />
     </Stack.Navigator>
